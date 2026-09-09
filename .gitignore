@@ -1,0 +1,27 @@
+# Backend (Spring Boot / Maven)
+backend/target/
+backend/**/*.class
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# Frontend (Angular / Node) — para cuando el equipo de frontend suba su codigo
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Config local con secretos — nunca al repo
+**/application-local.yml
+**/application-local.properties
+.env
+.env.*
+
+# IDE / SO
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Entregables intermedios de IA — el contenido ya vive versionado en backend/ y docs/
+Claude outputs/
