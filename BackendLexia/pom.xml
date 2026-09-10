@@ -65,6 +65,16 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Genera getters/setters en tiempo de compilacion. No cambia el
+		     bytecode resultante ni el consumo de memoria: solo evita escribir
+		     a mano metodos triviales. Es <optional> porque no hace falta en
+		     tiempo de ejecucion. -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
@@ -82,6 +92,14 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<excludes>
+						<exclude>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+						</exclude>
+					</excludes>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
