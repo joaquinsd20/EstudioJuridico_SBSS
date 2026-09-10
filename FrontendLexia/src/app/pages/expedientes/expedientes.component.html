@@ -1,0 +1,1812 @@
+<div class="layout-wrapper">
+
+  <!-- ===================================================== -->
+  <!-- PANEL REUTILIZABLE -->
+  <!-- ===================================================== -->
+
+  <app-panel></app-panel>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- =================================================== -->
+    <!-- CABECERA -->
+    <!-- =================================================== -->
+
+    <header class="expedientes-header">
+
+      <div>
+
+        <h1>
+          Gestión de Expedientes Jurídicos
+        </h1>
+
+        <p>
+          Consulta y administra los expedientes jurídicos
+          registrados en el estudio.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="btn-primary"
+      >
+        <span class="plus">
+          +
+        </span>
+
+        Nuevo Expediente
+      </button>
+
+    </header>
+
+
+    <!-- =================================================== -->
+    <!-- TARJETAS RESUMEN -->
+    <!-- =================================================== -->
+
+    <section class="stats-grid">
+
+
+      <!-- TOTAL -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon purple">
+          ▤
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Total expedientes
+          </span>
+
+          <strong>
+            28
+          </strong>
+
+          <small>
+            Registrados en el sistema
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- ACTIVOS -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon green">
+          ✓
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Expedientes activos
+          </span>
+
+          <strong>
+            18
+          </strong>
+
+          <small>
+            64% del total
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- TRÁMITE -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon blue">
+          ◷
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            En trámite
+          </span>
+
+          <strong>
+            6
+          </strong>
+
+          <small>
+            Procesos en seguimiento
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- CRÍTICOS -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon red">
+          !
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Atención prioritaria
+          </span>
+
+          <strong>
+            3
+          </strong>
+
+          <small>
+            Requieren revisión
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS VISUALES -->
+    <!-- =================================================== -->
+
+    <section class="filters-card">
+
+
+      <!-- NÚMERO -->
+
+      <div class="search-control">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          placeholder="N.º de expediente"
+        >
+
+      </div>
+
+
+      <!-- CLIENTE -->
+
+      <div class="filter-control">
+
+        <input
+          type="text"
+          placeholder="Cliente"
+        >
+
+      </div>
+
+
+      <!-- ESTADO -->
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Todos los estados
+          </option>
+
+          <option>
+            Activo
+          </option>
+
+          <option>
+            En trámite
+          </option>
+
+          <option>
+            Suspendido
+          </option>
+
+          <option>
+            Archivado
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- MATERIA -->
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Todas las materias
+          </option>
+
+          <option>
+            Civil
+          </option>
+
+          <option>
+            Familia
+          </option>
+
+          <option>
+            Laboral
+          </option>
+
+          <option>
+            Penal
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- JUZGADO -->
+
+      <div class="filter-control">
+
+        <input
+          type="text"
+          placeholder="Juzgado"
+        >
+
+      </div>
+
+
+      <!-- LIMPIAR -->
+
+      <button
+        type="button"
+        class="clear-button"
+      >
+        ×
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LAYOUT -->
+    <!-- =================================================== -->
+
+    <div class="expedientes-layout">
+
+
+      <!-- ================================================= -->
+      <!-- COLUMNA IZQUIERDA -->
+      <!-- ================================================= -->
+
+      <div class="expedientes-left">
+
+
+        <!-- =============================================== -->
+        <!-- TABLA -->
+        <!-- =============================================== -->
+
+        <section class="card table-card">
+
+
+          <div class="table-header">
+
+            <div>
+
+              <h2>
+                Expedientes Activos
+              </h2>
+
+              <span>
+                6 expedientes mostrados
+              </span>
+
+            </div>
+
+
+            <div class="table-tools">
+
+              <button type="button">
+                ↕ Ordenar
+              </button>
+
+              <button type="button">
+                ⌁ Filtrar
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="expedientes-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Expediente
+                  </th>
+
+                  <th>
+                    Cliente
+                  </th>
+
+                  <th>
+                    Materia
+                  </th>
+
+                  <th>
+                    Juzgado
+                  </th>
+
+                  <th>
+                    Responsable
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                  <th>
+                    Acciones
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 1 -->
+                <!-- ======================================= -->
+
+                <tr class="selected-row">
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 01452-2026
+                        </strong>
+
+                        <span>
+                          01452-2026-0-1801-JR-FT-02
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        MF
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          María Fernández López
+                        </strong>
+
+                        <span>
+                          DNI 45876231
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge family">
+                      Alimentos
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        2.º Juzgado de Familia
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        CM
+                      </span>
+
+                      <strong>
+                        Carlos Mendoza
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 2 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 02388-2025
+                        </strong>
+
+                        <span>
+                          02388-2025-0-1801-JR-CI-05
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        JL
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          Juan López Ramírez
+                        </strong>
+
+                        <span>
+                          DNI 70214569
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge civil">
+                      Civil
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        5.º Juzgado Civil
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        AM
+                      </span>
+
+                      <strong>
+                        Ana Morales
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status process">
+                      En trámite
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 3 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 00521-2026
+                        </strong>
+
+                        <span>
+                          00521-2026-0-1801-JR-FA-01
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        SF
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          Sofía Fernández
+                        </strong>
+
+                        <span>
+                          DNI 43125698
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge family">
+                      Tenencia
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        1.º Juzgado de Familia
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        LT
+                      </span>
+
+                      <strong>
+                        Luis Torres
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 4 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 03321-2025
+                        </strong>
+
+                        <span>
+                          03321-2025-0-1801-JR-LA-03
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        CR
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          Carlos Ramírez Torres
+                        </strong>
+
+                        <span>
+                          DNI 70214569
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge labor">
+                      Laboral
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        3.º Juzgado Laboral
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        CM
+                      </span>
+
+                      <strong>
+                        Carlos Mendoza
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status process">
+                      En trámite
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 5 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 07745-2026
+                        </strong>
+
+                        <span>
+                          07745-2026-0-1801-JR-PE-04
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        LM
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          Lucía Mendoza Ruiz
+                        </strong>
+
+                        <span>
+                          DNI 48362174
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge criminal">
+                      Penal
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        4.º Juzgado Penal
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        AM
+                      </span>
+
+                      <strong>
+                        Ana Morales
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status suspended">
+                      Suspendido
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- EXPEDIENTE 6 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="expediente-cell">
+
+                      <div class="exp-icon">
+                        ▤
+                      </div>
+
+                      <div>
+
+                        <strong>
+                          EXP. 08124-2024
+                        </strong>
+
+                        <span>
+                          08124-2024-0-1801-JR-CI-06
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar company">
+                        CA
+                      </span>
+
+                      <div>
+
+                        <strong>
+                          Constructora Andina S.A.C.
+                        </strong>
+
+                        <span>
+                          RUC 10458963217
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="matter-badge civil">
+                      Civil
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="court-cell">
+
+                      <strong>
+                        6.º Juzgado Civil
+                      </strong>
+
+                      <span>
+                        Lima
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="responsible-cell">
+
+                      <span class="responsible-avatar">
+                        LT
+                      </span>
+
+                      <strong>
+                        Luis Torres
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status archived">
+                      Archivado
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- =============================================== -->
+        <!-- INFORMACIÓN INFERIOR -->
+        <!-- =============================================== -->
+
+        <section class="bottom-grid">
+
+
+          <!-- ============================================= -->
+          <!-- RESUMEN -->
+          <!-- ============================================= -->
+
+          <article class="card chart-card">
+
+
+            <div class="chart-header">
+
+              <span class="chart-icon">
+                ◷
+              </span>
+
+              <h3>
+                Estado General de Expedientes
+              </h3>
+
+            </div>
+
+
+            <div class="summary-content">
+
+
+              <div class="donut-chart">
+
+                <div class="donut-center">
+
+                  <strong>
+                    28
+                  </strong>
+
+                  <span>
+                    Total
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="chart-legend">
+
+
+                <div>
+
+                  <span>
+
+                    <i class="legend-dot purple-dot"></i>
+
+                    Activos
+
+                  </span>
+
+                  <strong>
+                    18
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+
+                    <i class="legend-dot blue-dot"></i>
+
+                    En trámite
+
+                  </span>
+
+                  <strong>
+                    6
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+
+                    <i class="legend-dot orange-dot"></i>
+
+                    Suspendidos
+
+                  </span>
+
+                  <strong>
+                    1
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+
+                    <i class="legend-dot green-dot"></i>
+
+                    Archivados
+
+                  </span>
+
+                  <strong>
+                    3
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </article>
+
+
+          <!-- ============================================= -->
+          <!-- MATERIA -->
+          <!-- ============================================= -->
+
+          <article class="card chart-card">
+
+
+            <div class="chart-header">
+
+              <span class="chart-icon">
+                ▥
+              </span>
+
+              <h3>
+                Expedientes por Materia
+              </h3>
+
+            </div>
+
+
+            <div class="bar-chart">
+
+
+              <div class="bar-item">
+
+                <strong>
+                  10
+                </strong>
+
+                <div class="bar civil-bar"></div>
+
+                <span>
+                  Civil
+                </span>
+
+              </div>
+
+
+              <div class="bar-item">
+
+                <strong>
+                  7
+                </strong>
+
+                <div class="bar family-bar"></div>
+
+                <span>
+                  Familia
+                </span>
+
+              </div>
+
+
+              <div class="bar-item">
+
+                <strong>
+                  5
+                </strong>
+
+                <div class="bar labor-bar"></div>
+
+                <span>
+                  Laboral
+                </span>
+
+              </div>
+
+
+              <div class="bar-item">
+
+                <strong>
+                  4
+                </strong>
+
+                <div class="bar criminal-bar"></div>
+
+                <span>
+                  Penal
+                </span>
+
+              </div>
+
+
+              <div class="bar-item">
+
+                <strong>
+                  2
+                </strong>
+
+                <div class="bar other-bar"></div>
+
+                <span>
+                  Otros
+                </span>
+
+              </div>
+
+
+            </div>
+
+          </article>
+
+        </section>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PANEL DERECHO -->
+      <!-- ================================================= -->
+
+      <aside class="detail-panel">
+
+
+        <!-- HEADER -->
+
+        <div class="detail-header">
+
+          <h2>
+            Detalle del Expediente Seleccionado
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="detail-content">
+
+
+          <!-- ============================================= -->
+          <!-- TÍTULO -->
+          <!-- ============================================= -->
+
+          <div class="detail-title">
+
+            <div class="detail-exp-icon">
+              ▤
+            </div>
+
+            <div>
+
+              <h3>
+                EXP. 01452-2026
+              </h3>
+
+              <span>
+                01452-2026-0-1801-JR-FT-02
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- ESTADO -->
+          <!-- ============================================= -->
+
+          <div class="detail-status-row">
+
+            <span>
+              Estado
+            </span>
+
+            <strong class="detail-status">
+              Activo
+            </strong>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- CLIENTE -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Cliente
+            </h4>
+
+
+            <div class="detail-client">
+
+              <span class="detail-client-avatar">
+                MF
+              </span>
+
+              <div>
+
+                <strong>
+                  María Fernández López
+                </strong>
+
+                <span>
+                  DNI 45876231
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- INFORMACIÓN -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Información del Expediente
+            </h4>
+
+
+            <div class="information-row">
+
+              <span>
+                Materia
+              </span>
+
+              <strong>
+                Alimentos
+              </strong>
+
+            </div>
+
+
+            <div class="information-row">
+
+              <span>
+                Juzgado
+              </span>
+
+              <strong>
+                2.º Juzgado de Familia
+              </strong>
+
+            </div>
+
+
+            <div class="information-row">
+
+              <span>
+                Distrito Judicial
+              </span>
+
+              <strong>
+                Lima
+              </strong>
+
+            </div>
+
+
+            <div class="information-row">
+
+              <span>
+                Fecha de inicio
+              </span>
+
+              <strong>
+                15/02/2026
+              </strong>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- RESPONSABLE -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Abogado Responsable
+            </h4>
+
+
+            <div class="lawyer-detail">
+
+              <span class="lawyer-avatar">
+                CM
+              </span>
+
+              <div>
+
+                <strong>
+                  Carlos Mendoza Rojas
+                </strong>
+
+                <span>
+                  Abogado responsable
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- PRÓXIMAS ACTUACIONES -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <div class="section-title-row">
+
+              <h4>
+                Próximas Actuaciones
+              </h4>
+
+              <span class="counter">
+                3
+              </span>
+
+            </div>
+
+
+            <div class="event-item">
+
+              <div class="event-icon purple-event">
+                ▦
+              </div>
+
+              <div>
+
+                <strong>
+                  Audiencia
+                </strong>
+
+                <span>
+                  10/06/2026 · 09:00 AM
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="event-item">
+
+              <div class="event-icon orange-event">
+                ◷
+              </div>
+
+              <div>
+
+                <strong>
+                  Presentación de escrito
+                </strong>
+
+                <span>
+                  12/06/2026
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="event-item">
+
+              <div class="event-icon red-event">
+                !
+              </div>
+
+              <div>
+
+                <strong>
+                  Vencimiento de plazo
+                </strong>
+
+                <span>
+                  15/06/2026
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- DOCUMENTOS -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <div class="section-title-row">
+
+              <h4>
+                Documentos Recientes
+              </h4>
+
+              <span class="counter">
+                3
+              </span>
+
+            </div>
+
+
+            <div class="document-item">
+
+              <span class="document-icon">
+                PDF
+              </span>
+
+              <div>
+
+                <strong>
+                  Demanda de Alimentos
+                </strong>
+
+                <span>
+                  28/05/2026
+                </span>
+
+              </div>
+
+              <span class="download-icon">
+                ↓
+              </span>
+
+            </div>
+
+
+            <div class="document-item">
+
+              <span class="document-icon">
+                PDF
+              </span>
+
+              <div>
+
+                <strong>
+                  Resolución N.° 006
+                </strong>
+
+                <span>
+                  28/05/2026
+                </span>
+
+              </div>
+
+              <span class="download-icon">
+                ↓
+              </span>
+
+            </div>
+
+
+            <div class="document-item">
+
+              <span class="document-icon word">
+                DOC
+              </span>
+
+              <div>
+
+                <strong>
+                  Escrito Complementario
+                </strong>
+
+                <span>
+                  25/05/2026
+                </span>
+
+              </div>
+
+              <span class="download-icon">
+                ↓
+              </span>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- BOTÓN VISUAL -->
+          <!-- ============================================= -->
+
+          <button
+            type="button"
+            class="detail-main-button"
+          >
+            Ver expediente completo
+          </button>
+
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

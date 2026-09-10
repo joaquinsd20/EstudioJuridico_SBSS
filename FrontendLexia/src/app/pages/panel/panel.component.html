@@ -1,0 +1,90 @@
+<aside class="sidebar">
+
+  <div class="sidebar-top">
+
+    <div class="brand">
+      <img
+        src="/Image/Logo/Logo.jpeg"
+        alt="LEXIA Logo"
+        class="brand-logo"
+      >
+      <span>LEXIA</span>
+    </div>
+
+    <ul class="menu">
+
+      <li
+        class="menu-item"
+        routerLink="/dashboard"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        Dashboard
+      </li>
+
+      <li
+        class="menu-item"
+        routerLink="/expedientes"
+        routerLinkActive="active"
+      >
+        Expedientes
+      </li>
+
+      <li
+        class="menu-item"
+        routerLink="/clientes"
+        routerLinkActive="active"
+      >
+        Clientes
+      </li>
+
+      <li class="menu-item">Agenda</li>
+      <li class="menu-item">Actuaciones</li>
+      <li class="menu-item">Plazos</li>
+      <li class="menu-item">Tareas</li>
+
+      <li
+        class="menu-item"
+        routerLink="/documentos"
+        routerLinkActive="active"
+      >
+        Documentos
+      </li>
+
+      <li class="menu-item">Escritos con IA</li>
+      <li class="menu-item">Biblioteca Jurídica</li>
+      <li class="menu-item">Reportes</li>
+      <li class="menu-item">Facturación</li>
+      <li class="menu-item">Usuarios</li>
+      <li class="menu-item">Configuración</li>
+
+    </ul>
+
+  </div>
+
+  <div class="sidebar-bottom">
+
+    <div class="user-profile">
+
+      <div class="avatar">
+        CM
+      </div>
+
+      <div class="user-info">
+        <strong>Carlos Mendoza Rojas</strong>
+        <span>Administrador</span>
+      </div>
+
+    </div>
+
+    <button
+      class="logout-button"
+      type="button"
+      routerLink="/login"
+    >
+      Cerrar sesión
+    </button>
+
+  </div>
+
+</aside>
