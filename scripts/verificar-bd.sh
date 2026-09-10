@@ -40,7 +40,7 @@ MIN=$(q "SELECT IF(VERSION() >= '8.0.16', 'SI', 'NO');")
 check "Version >= 8.0.16 (los CHECK se aplican)" "$MIN" "SI"
 
 titulo "2. Inventario del esquema"
-check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE';")" "35"
+check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "35"
 check "Funciones de plazos"   "$(q "SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema='${BASE}';")" "4"
 check "Motor InnoDB en todas" "$(q "SELECT COUNT(DISTINCT engine) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE';")" "1"
 check "Una sola collation"    "$(q "SELECT COUNT(DISTINCT table_collation) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE';")" "1"

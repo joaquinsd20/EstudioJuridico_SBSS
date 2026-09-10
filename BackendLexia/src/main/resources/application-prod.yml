@@ -1,0 +1,33 @@
+# =============================================================================
+# LEXIA — Perfil de PRODUCCION
+# =============================================================================
+# Aqui NO hay valores por defecto: si falta una variable de entorno, la
+# aplicacion no arranca. Es deliberado. Es preferible que falle al inicio, de
+# forma ruidosa, a que se conecte en silencio a la base equivocada.
+#
+# Variables requeridas:
+#   DB_URL       jdbc:mysql://servidor:3306/lexia_db?useUnicode=true&characterEncoding=UTF-8&connectionTimeZone=America/Lima
+#   DB_USERNAME  usuario de aplicacion (NO root)
+#   DB_PASSWORD  su contrasena
+# =============================================================================
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  flyway:
+    # SOLO el esquema. 'db/seed' no aparece en esta lista, asi que la semilla de
+    # desarrollo es estructuralmente incapaz de ejecutarse contra produccion:
+    # no depende de recordar una bandera de configuracion.
+    locations: classpath:db/migration
+
+    # La base de produccion la crea el DBA vacia y Flyway la versiona desde V1.
+    # Si algun dia hay que adoptar una base preexistente, se hace con un
+    # baseline explicito y documentado, nunca activando esto por descarte.
+    baseline-on-migrate: false
+
+logging:
+  level:
+    root: WARN
+    com.sbss.lexia: INFO
