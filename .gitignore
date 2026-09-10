@@ -1,0 +1,50 @@
+# =========================
+# ANGULAR / NODE
+# =========================
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# SPRING BOOT / MAVEN
+# =========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# =========================
+# INTELLIJ
+# =========================
+.idea/
+*.iml
+
+# =========================
+# VISUAL STUDIO CODE
+# =========================
+.vscode/
+
+# =========================
+# WINDOWS
+# =========================
+Thumbs.db
+Desktop.ini
+
+# =========================
+# ENVIRONMENT / SECRETS
+# =========================
+.env
+.env.*
+application-local.properties
+application-local.yml
+
+# =========================
+# LOGS
+# =========================
+*.log
+logs/
