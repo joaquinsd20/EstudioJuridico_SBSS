@@ -1,0 +1,1579 @@
+<div class="layout-wrapper">
+
+  <!-- ===================================================== -->
+  <!-- PANEL REUTILIZABLE -->
+  <!-- ===================================================== -->
+
+  <app-panel></app-panel>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- =================================================== -->
+    <!-- CABECERA -->
+    <!-- =================================================== -->
+
+    <header class="documentos-header">
+
+      <div>
+
+        <h1>
+          Gestión Documental Jurídica
+        </h1>
+
+        <p>
+          Organiza y consulta los documentos vinculados
+          a los expedientes del estudio jurídico.
+        </p>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="btn-primary"
+      >
+        <span class="plus">
+          +
+        </span>
+
+        Nuevo Documento
+      </button>
+
+    </header>
+
+
+    <!-- =================================================== -->
+    <!-- TARJETAS SUPERIORES -->
+    <!-- =================================================== -->
+
+    <section class="stats-grid">
+
+
+      <!-- TOTAL -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon purple">
+          ▤
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Total documentos
+          </span>
+
+          <strong>
+            128
+          </strong>
+
+          <small>
+            Registrados en el sistema
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- RECIENTES -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon blue">
+          ◷
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Documentos recientes
+          </span>
+
+          <strong>
+            12
+          </strong>
+
+          <small>
+            En los últimos 7 días
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- BORRADORES -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon orange">
+          ✎
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Borradores
+          </span>
+
+          <strong>
+            6
+          </strong>
+
+          <small>
+            Pendientes de revisión
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <!-- ARCHIVADOS -->
+
+      <article class="stat-card">
+
+        <div class="stat-icon gray">
+          ▣
+        </div>
+
+        <div class="stat-information">
+
+          <span>
+            Archivados
+          </span>
+
+          <strong>
+            24
+          </strong>
+
+          <small>
+            Documentación histórica
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS SOLO VISUALES -->
+    <!-- =================================================== -->
+
+    <section class="filters-card">
+
+
+      <div class="search-control">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          placeholder="Buscar documento, expediente o cliente..."
+        >
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Todas las categorías
+          </option>
+
+          <option>
+            Demandas
+          </option>
+
+          <option>
+            Escritos
+          </option>
+
+          <option>
+            Resoluciones
+          </option>
+
+          <option>
+            Contratos
+          </option>
+
+          <option>
+            Evidencias
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Todos los estados
+          </option>
+
+          <option>
+            Vigente
+          </option>
+
+          <option>
+            Borrador
+          </option>
+
+          <option>
+            Archivado
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="clear-button"
+      >
+        ×
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LAYOUT DOCUMENTOS -->
+    <!-- =================================================== -->
+
+    <div class="documentos-layout">
+
+
+      <!-- ================================================= -->
+      <!-- PARTE IZQUIERDA -->
+      <!-- ================================================= -->
+
+      <div class="documentos-left">
+
+
+        <!-- =============================================== -->
+        <!-- TABLA -->
+        <!-- =============================================== -->
+
+        <section class="card table-card">
+
+
+          <div class="table-header">
+
+            <div>
+
+              <h2>
+                Biblioteca de Documentos
+              </h2>
+
+              <span>
+                7 documentos encontrados
+              </span>
+
+            </div>
+
+
+            <div class="table-tools">
+
+              <button type="button">
+                ↕ Ordenar
+              </button>
+
+              <button type="button">
+                ⌁ Filtrar
+              </button>
+
+            </div>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="documents-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Documento
+                  </th>
+
+                  <th>
+                    Expediente
+                  </th>
+
+                  <th>
+                    Cliente
+                  </th>
+
+                  <th>
+                    Categoría
+                  </th>
+
+                  <th>
+                    Fecha
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                  <th>
+                    Acciones
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 1 -->
+                <!-- ======================================= -->
+
+                <tr class="selected-row">
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon pdf">
+                        PDF
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Demanda de Alimentos
+                        </strong>
+
+                        <span>
+                          Demanda_Alimentos_01452.pdf
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 01452-2026
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        MF
+                      </span>
+
+                      <span>
+                        María Fernández
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category demand">
+                      Demanda
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    28/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Vigente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 2 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon pdf">
+                        PDF
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Resolución N.° 006
+                        </strong>
+
+                        <span>
+                          Resolucion_006.pdf
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 01452-2026
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        MF
+                      </span>
+
+                      <span>
+                        María Fernández
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category resolution">
+                      Resolución
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    28/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Vigente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 3 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon pdf">
+                        PDF
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Contrato de Servicios Jurídicos
+                        </strong>
+
+                        <span>
+                          Contrato_Servicios.pdf
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 02388-2025
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        JL
+                      </span>
+
+                      <span>
+                        Juan López
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category contract">
+                      Contrato
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    25/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Vigente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 4 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon word">
+                        DOC
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Escrito de Contestación
+                        </strong>
+
+                        <span>
+                          Contestacion_Demanda.docx
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 03321-2025
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        AR
+                      </span>
+
+                      <span>
+                        Ana Ramírez
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category writing">
+                      Escrito
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    23/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status draft">
+                      Borrador
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 5 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon zip">
+                        ZIP
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Evidencia Fotográfica
+                        </strong>
+
+                        <span>
+                          Evidencias_Caso_Torres.zip
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 07745-2026
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        LT
+                      </span>
+
+                      <span>
+                        Luis Torres
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category evidence">
+                      Evidencia
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    20/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Vigente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 6 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon pdf">
+                        PDF
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Acta de Conciliación
+                        </strong>
+
+                        <span>
+                          Acta_Conciliacion.pdf
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 00521-2026
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        SF
+                      </span>
+
+                      <span>
+                        Sofía Fernández
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category other">
+                      Otro
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    18/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status archived">
+                      Archivado
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ======================================= -->
+                <!-- DOCUMENTO 7 -->
+                <!-- ======================================= -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="document-cell">
+
+                      <div class="file-icon pdf">
+                        PDF
+                      </div>
+
+                      <div class="document-information">
+
+                        <strong>
+                          Resolución de Audiencia
+                        </strong>
+
+                        <span>
+                          Resolucion_Audiencia.pdf
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="exp-link">
+                      EXP. 02382-2025
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <span class="client-avatar">
+                        JL
+                      </span>
+
+                      <span>
+                        Juan López
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="category resolution">
+                      Resolución
+                    </span>
+
+                  </td>
+
+
+                  <td>
+                    17/05/2026
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active">
+                      Vigente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ↓
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- =============================================== -->
+        <!-- PARTE INFERIOR -->
+        <!-- =============================================== -->
+
+        <section class="bottom-grid">
+
+
+          <!-- ============================================= -->
+          <!-- ACTIVIDAD RECIENTE -->
+          <!-- ============================================= -->
+
+          <article class="card activity-card">
+
+
+            <div class="section-header">
+
+              <span class="section-icon">
+                ◷
+              </span>
+
+              <h3>
+                Actividad Documental Reciente
+              </h3>
+
+            </div>
+
+
+            <div class="activity-list">
+
+
+              <div class="activity-item">
+
+                <span class="activity-avatar">
+                  CM
+                </span>
+
+                <div>
+
+                  <strong>
+                    Carlos Mendoza actualizó una demanda
+                  </strong>
+
+                  <span>
+                    EXP. 01452-2026 · Hace 25 minutos
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="activity-item">
+
+                <span class="activity-avatar">
+                  AM
+                </span>
+
+                <div>
+
+                  <strong>
+                    Ana Morales agregó una resolución
+                  </strong>
+
+                  <span>
+                    EXP. 03321-2025 · Hace 1 hora
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="activity-item">
+
+                <span class="activity-avatar">
+                  LT
+                </span>
+
+                <div>
+
+                  <strong>
+                    Luis Torres creó un nuevo escrito
+                  </strong>
+
+                  <span>
+                    EXP. 02388-2025 · Hace 3 horas
+                  </span>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </article>
+
+
+          <!-- ============================================= -->
+          <!-- ALMACENAMIENTO -->
+          <!-- ============================================= -->
+
+          <article class="card storage-card">
+
+
+            <div class="section-header">
+
+              <span class="section-icon">
+                ▣
+              </span>
+
+              <h3>
+                Almacenamiento Documental
+              </h3>
+
+            </div>
+
+
+            <div class="storage-content">
+
+
+              <div class="storage-number">
+
+                <strong>
+                  6.8 GB
+                </strong>
+
+                <span>
+                  de 10 GB utilizados
+                </span>
+
+              </div>
+
+
+              <div class="storage-progress">
+
+                <span></span>
+
+              </div>
+
+
+              <div class="storage-summary">
+
+                <span>
+                  68% utilizado
+                </span>
+
+                <span>
+                  3.2 GB disponibles
+                </span>
+
+              </div>
+
+
+              <div class="storage-types">
+
+
+                <div>
+
+                  <i class="storage-dot pdf-dot"></i>
+
+                  <span>
+                    PDF
+                  </span>
+
+                  <strong>
+                    4.1 GB
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <i class="storage-dot word-dot"></i>
+
+                  <span>
+                    Word
+                  </span>
+
+                  <strong>
+                    1.6 GB
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <i class="storage-dot other-dot"></i>
+
+                  <span>
+                    Otros
+                  </span>
+
+                  <strong>
+                    1.1 GB
+                  </strong>
+
+                </div>
+
+              </div>
+
+
+            </div>
+
+          </article>
+
+        </section>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PANEL DERECHO -->
+      <!-- SOLO VISUAL -->
+      <!-- ================================================= -->
+
+      <aside class="detail-panel">
+
+
+        <div class="detail-header">
+
+          <h2>
+            Detalles del Documento
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="detail-content">
+
+
+          <!-- ============================================= -->
+          <!-- ARCHIVO -->
+          <!-- ============================================= -->
+
+          <div class="document-preview">
+
+            <div class="preview-file">
+              PDF
+            </div>
+
+            <h3>
+              Demanda de Alimentos
+            </h3>
+
+            <span>
+              Demanda_Alimentos_01452.pdf
+            </span>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- BOTONES -->
+          <!-- ============================================= -->
+
+          <div class="detail-buttons">
+
+            <button
+              type="button"
+              class="open-button"
+            >
+              ◉ Abrir
+            </button>
+
+            <button
+              type="button"
+            >
+              ↓ Descargar
+            </button>
+
+          </div>
+
+
+          <!-- ============================================= -->
+          <!-- INFORMACIÓN -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Información del Archivo
+            </h4>
+
+
+            <div class="detail-row">
+
+              <span>
+                Tipo
+              </span>
+
+              <strong>
+                PDF
+              </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+              <span>
+                Tamaño
+              </span>
+
+              <strong>
+                2.4 MB
+              </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+              <span>
+                Versión
+              </span>
+
+              <strong>
+                v1.2
+              </strong>
+
+            </div>
+
+
+            <div class="detail-row">
+
+              <span>
+                Fecha
+              </span>
+
+              <strong>
+                28/05/2026
+              </strong>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- VINCULACIÓN -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Vinculación
+            </h4>
+
+
+            <div class="relation-card">
+
+              <span>
+                Expediente
+              </span>
+
+              <strong>
+                EXP. 01452-2026
+              </strong>
+
+            </div>
+
+
+            <div class="relation-card">
+
+              <span>
+                Cliente
+              </span>
+
+              <strong>
+                María Fernández López
+              </strong>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- RESPONSABLE -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Responsable
+            </h4>
+
+
+            <div class="responsible-card">
+
+              <div class="responsible-avatar">
+                CM
+              </div>
+
+              <div>
+
+                <strong>
+                  Carlos Mendoza Rojas
+                </strong>
+
+                <span>
+                  Responsable del documento
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- DESCRIPCIÓN -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Descripción
+            </h4>
+
+            <p class="description">
+              Demanda principal presentada dentro del proceso
+              de alimentos correspondiente al expediente
+              EXP. 01452-2026.
+            </p>
+
+          </section>
+
+
+          <!-- ============================================= -->
+          <!-- HISTORIAL -->
+          <!-- ============================================= -->
+
+          <section class="detail-section">
+
+            <h4>
+              Historial Reciente
+            </h4>
+
+
+            <div class="history-item">
+
+              <span class="history-dot"></span>
+
+              <div>
+
+                <strong>
+                  Documento actualizado
+                </strong>
+
+                <span>
+                  Hoy, 10:45 AM
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="history-item">
+
+              <span class="history-dot"></span>
+
+              <div>
+
+                <strong>
+                  Documento registrado
+                </strong>
+
+                <span>
+                  28/05/2026
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

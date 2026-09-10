@@ -1,0 +1,1409 @@
+<div class="layout-wrapper">
+
+  <!-- ================================================ -->
+  <!-- PANEL REUTILIZABLE -->
+  <!-- ================================================ -->
+
+  <app-panel></app-panel>
+
+
+  <!-- ================================================ -->
+  <!-- CONTENIDO CLIENTES -->
+  <!-- ================================================ -->
+
+  <main class="main-content">
+
+
+    <!-- ============================================== -->
+    <!-- ENCABEZADO -->
+    <!-- ============================================== -->
+
+    <header class="clientes-header">
+
+      <div>
+
+        <h1>
+          Gestión Integral de Clientes
+        </h1>
+
+        <p>
+          Consulta y administra la información general de tus clientes.
+        </p>
+
+      </div>
+
+
+      <button
+        class="btn-primary"
+        type="button"
+      >
+        <span class="plus">
+          +
+        </span>
+
+        Nuevo Cliente
+      </button>
+
+    </header>
+
+
+    <!-- ============================================== -->
+    <!-- INDICADORES -->
+    <!-- ============================================== -->
+
+    <section class="stats-grid">
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon purple">
+          👥
+        </div>
+
+        <div class="stat-info">
+
+          <span>
+            Total de clientes
+          </span>
+
+          <strong>
+            128
+          </strong>
+
+          <small>
+            Registrados en el sistema
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon green">
+          ✓
+        </div>
+
+        <div class="stat-info">
+
+          <span>
+            Clientes activos
+          </span>
+
+          <strong>
+            96
+          </strong>
+
+          <small>
+            75% del total
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon blue">
+          ▤
+        </div>
+
+        <div class="stat-info">
+
+          <span>
+            Con expedientes
+          </span>
+
+          <strong>
+            72
+          </strong>
+
+          <small>
+            Clientes con casos activos
+          </small>
+
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <div class="stat-icon orange">
+          ◷
+        </div>
+
+        <div class="stat-info">
+
+          <span>
+            Nuevos este mes
+          </span>
+
+          <strong>
+            12
+          </strong>
+
+          <small>
+            +8% respecto al mes anterior
+          </small>
+
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- FILTROS VISUALES -->
+    <!-- ============================================== -->
+
+    <section class="filters-card">
+
+
+      <div class="filter-input search-input">
+
+        <span class="search-icon">
+          ⌕
+        </span>
+
+        <input
+          type="text"
+          placeholder="DNI / RUC"
+        >
+
+      </div>
+
+
+      <div class="filter-input">
+
+        <input
+          type="text"
+          placeholder="Nombre / Razón Social"
+        >
+
+      </div>
+
+
+      <div class="filter-block">
+
+        <span class="filter-title">
+          Tipo de Cliente
+        </span>
+
+        <div class="toggle-group">
+
+          <button
+            type="button"
+            class="toggle-button active"
+          >
+            Todos
+          </button>
+
+          <button
+            type="button"
+            class="toggle-button"
+          >
+            Natural
+          </button>
+
+          <button
+            type="button"
+            class="toggle-button"
+          >
+            Jurídica
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="filter-block">
+
+        <span class="filter-title">
+          Estado
+        </span>
+
+        <select>
+          <option>
+            Todos
+          </option>
+
+          <option>
+            Activo
+          </option>
+
+          <option>
+            Inactivo
+          </option>
+        </select>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="clear-button"
+      >
+        ×
+      </button>
+
+    </section>
+
+
+    <!-- ============================================== -->
+    <!-- CONTENIDO PRINCIPAL -->
+    <!-- ============================================== -->
+
+    <div class="clientes-layout">
+
+
+      <!-- ============================================ -->
+      <!-- ZONA IZQUIERDA -->
+      <!-- ============================================ -->
+
+      <div class="clientes-left">
+
+
+        <!-- ========================================== -->
+        <!-- TABLA -->
+        <!-- ========================================== -->
+
+        <section class="card clientes-table-card">
+
+
+          <div class="card-header">
+
+            <div>
+
+              <h2>
+                Lista de Clientes
+              </h2>
+
+              <span>
+                6 registros encontrados
+              </span>
+
+            </div>
+
+
+            <button
+              type="button"
+              class="secondary-button"
+            >
+              + Nuevo Cliente
+            </button>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="clientes-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    DNI / RUC
+                  </th>
+
+                  <th>
+                    Cliente
+                  </th>
+
+                  <th>
+                    Tipo
+                  </th>
+
+                  <th>
+                    Expedientes
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                  <th>
+                    Acciones
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+
+                <!-- CLIENTE 1 -->
+
+                <tr class="selected-row">
+
+                  <td>
+                    <strong>
+                      45876231
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar">
+                        MF
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          María Fernández López
+                        </strong>
+
+                        <span>
+                          maria.fernandez@email.com
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge natural">
+                      P. Natural
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        3
+                      </strong>
+
+                      <span>
+                        casos
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active-status">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- CLIENTE 2 -->
+
+                <tr>
+
+                  <td>
+                    <strong>
+                      10458963217
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar company">
+                        CA
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          Constructora Andina S.A.C.
+                        </strong>
+
+                        <span>
+                          legal@andina.com.pe
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge juridica">
+                      P. Jurídica
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        2
+                      </strong>
+
+                      <span>
+                        casos
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active-status">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- CLIENTE 3 -->
+
+                <tr>
+
+                  <td>
+                    <strong>
+                      70214569
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar">
+                        CR
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          Carlos Ramírez Torres
+                        </strong>
+
+                        <span>
+                          carlos.ramirez@email.com
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge natural">
+                      P. Natural
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        1
+                      </strong>
+
+                      <span>
+                        caso
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active-status">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- CLIENTE 4 -->
+
+                <tr>
+
+                  <td>
+                    <strong>
+                      20608741258
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar company">
+                        IN
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          Inversiones del Norte E.I.R.L.
+                        </strong>
+
+                        <span>
+                          administracion@inversionesnorte.pe
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge juridica">
+                      P. Jurídica
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        4
+                      </strong>
+
+                      <span>
+                        casos
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active-status">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- CLIENTE 5 -->
+
+                <tr>
+
+                  <td>
+                    <strong>
+                      43125698
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar">
+                        LM
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          Lucía Mendoza Ruiz
+                        </strong>
+
+                        <span>
+                          lucia.mendoza@email.com
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge natural">
+                      P. Natural
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        0
+                      </strong>
+
+                      <span>
+                        casos
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status inactive-status">
+                      Inactivo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- CLIENTE 6 -->
+
+                <tr>
+
+                  <td>
+                    <strong>
+                      20145698732
+                    </strong>
+                  </td>
+
+
+                  <td>
+
+                    <div class="client-cell">
+
+                      <div class="client-avatar company">
+                        SJ
+                      </div>
+
+                      <div class="client-information">
+
+                        <strong>
+                          Servicios Jurídicos Norte S.A.C.
+                        </strong>
+
+                        <span>
+                          contacto@serviciosnorte.pe
+                        </span>
+
+                      </div>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="type-badge juridica">
+                      P. Jurídica
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-number">
+
+                      <strong>
+                        2
+                      </strong>
+
+                      <span>
+                        casos
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status active-status">
+                      Activo
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="actions">
+
+                      <button type="button">
+                        ◉
+                      </button>
+
+                      <button type="button">
+                        ✎
+                      </button>
+
+                      <button type="button">
+                        •••
+                      </button>
+
+                    </div>
+
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- ========================================== -->
+        <!-- GRÁFICOS -->
+        <!-- ========================================== -->
+
+        <section class="charts-grid">
+
+
+          <!-- DONUT -->
+
+          <article class="card chart-card">
+
+            <div class="chart-header">
+
+              <span class="chart-icon">
+                ◷
+              </span>
+
+              <h3>
+                Resumen de Clientes por Estado
+              </h3>
+
+            </div>
+
+
+            <div class="donut-container">
+
+              <div class="donut-chart">
+
+                <div class="donut-hole">
+
+                  <strong>
+                    128
+                  </strong>
+
+                  <span>
+                    Total
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="chart-legend">
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-dot green-dot"></i>
+                    Activos
+                  </span>
+
+                  <strong>
+                    96
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-dot purple-dot"></i>
+                    Persona Natural
+                  </span>
+
+                  <strong>
+                    78
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-dot blue-dot"></i>
+                    Persona Jurídica
+                  </span>
+
+                  <strong>
+                    38
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-dot red-dot"></i>
+                    Inactivos
+                  </span>
+
+                  <strong>
+                    12
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- EVOLUCIÓN -->
+
+          <article class="card chart-card">
+
+            <div class="chart-header">
+
+              <span class="chart-icon">
+                ↗
+              </span>
+
+              <h3>
+                Evolución de Nuevos Clientes
+              </h3>
+
+            </div>
+
+
+            <div class="line-chart">
+
+              <div class="chart-y">
+
+                <span>20</span>
+                <span>15</span>
+                <span>10</span>
+                <span>5</span>
+                <span>0</span>
+
+              </div>
+
+
+              <div class="line-area">
+
+                <svg
+                  viewBox="0 0 500 170"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+
+                    <linearGradient
+                      id="clientesGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+
+                      <stop
+                        offset="0%"
+                        stop-color="#6366f1"
+                        stop-opacity=".25"
+                      />
+
+                      <stop
+                        offset="100%"
+                        stop-color="#6366f1"
+                        stop-opacity="0"
+                      />
+
+                    </linearGradient>
+
+                  </defs>
+
+
+                  <path
+                    d="
+                      M0 135
+                      C40 120, 65 90, 100 97
+                      C145 108, 165 70, 210 77
+                      C255 85, 280 42, 325 55
+                      C370 70, 410 43, 500 17
+                      L500 170
+                      L0 170 Z
+                    "
+                    fill="url(#clientesGradient)"
+                  />
+
+
+                  <path
+                    d="
+                      M0 135
+                      C40 120, 65 90, 100 97
+                      C145 108, 165 70, 210 77
+                      C255 85, 280 42, 325 55
+                      C370 70, 410 43, 500 17
+                    "
+                    fill="none"
+                    stroke="#5b3bc4"
+                    stroke-width="3"
+                  />
+
+                </svg>
+
+
+                <div class="months">
+
+                  <span>Ene</span>
+                  <span>Mar</span>
+                  <span>May</span>
+                  <span>Jul</span>
+                  <span>Sep</span>
+                  <span>Nov</span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </article>
+
+        </section>
+
+      </div>
+
+
+      <!-- ============================================ -->
+      <!-- PANEL DERECHO -->
+      <!-- ============================================ -->
+
+      <aside class="detail-panel">
+
+
+        <div class="detail-header">
+
+          <h2>
+            Detalles del Cliente Seleccionado
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="detail-content">
+
+
+          <!-- PERFIL -->
+
+          <div class="profile">
+
+            <div class="profile-avatar">
+              MF
+            </div>
+
+            <div>
+
+              <h3>
+                María Fernández López
+              </h3>
+
+              <span>
+                Persona Natural
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- DATOS -->
+
+          <div class="detail-row">
+
+            <span>
+              DNI
+            </span>
+
+            <strong>
+              45876231
+            </strong>
+
+          </div>
+
+
+          <div class="detail-row">
+
+            <span>
+              Estado
+            </span>
+
+            <strong class="client-active">
+              Activo
+            </strong>
+
+          </div>
+
+
+          <!-- CONTACTO -->
+
+          <section class="detail-section">
+
+            <h4>
+              Información de Contacto
+            </h4>
+
+
+            <div class="contact-item">
+
+              <div class="contact-icon">
+                ☎
+              </div>
+
+              <div>
+
+                <small>
+                  Teléfono
+                </small>
+
+                <strong>
+                  +51 987 654 321
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <div class="contact-item">
+
+              <div class="contact-icon">
+                ✉
+              </div>
+
+              <div>
+
+                <small>
+                  Correo electrónico
+                </small>
+
+                <strong>
+                  maria.fernandez@email.com
+                </strong>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- EXPEDIENTES -->
+
+          <section class="detail-section">
+
+            <div class="section-title">
+
+              <h4>
+                Expedientes Activos
+              </h4>
+
+              <span class="counter">
+                2
+              </span>
+
+            </div>
+
+
+            <div class="expediente-card">
+
+              <div>
+
+                <strong>
+                  EXP. 01452-2026
+                </strong>
+
+                <span>
+                  Expediente vinculado
+                </span>
+
+              </div>
+
+              <span class="matter-badge">
+                Alimentos
+              </span>
+
+            </div>
+
+
+            <div class="expediente-card">
+
+              <div>
+
+                <strong>
+                  EXP. 00521-2026
+                </strong>
+
+                <span>
+                  Expediente vinculado
+                </span>
+
+              </div>
+
+              <span class="matter-badge">
+                Tenencia
+              </span>
+
+            </div>
+
+          </section>
+
+
+          <!-- ACTIVIDAD -->
+
+          <section class="detail-section">
+
+            <h4>
+              Actividad Reciente
+            </h4>
+
+
+            <div class="activity-item">
+
+              <div class="activity-icon">
+                ▤
+              </div>
+
+              <div>
+
+                <strong>
+                  Ficha del cliente actualizada
+                </strong>
+
+                <span>
+                  Hace 2 días
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+              <div class="activity-icon">
+                ◇
+              </div>
+
+              <div>
+
+                <strong>
+                  Documento de vinculación
+                </strong>
+
+                <span>
+                  Hace 5 días
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="activity-item">
+
+              <div class="activity-icon">
+                ☎
+              </div>
+
+              <div>
+
+                <strong>
+                  Contacto telefónico registrado
+                </strong>
+
+                <span>
+                  Hace 1 semana
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>
