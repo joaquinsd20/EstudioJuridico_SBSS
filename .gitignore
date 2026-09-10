@@ -1,27 +1,58 @@
-# Backend (Spring Boot / Maven)
-backend/target/
-backend/**/*.class
-backend/.mvn/
-backend/mvnw
-backend/mvnw.cmd
+# =========================
+# ANGULAR / NODE
+# =========================
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Frontend (Angular / Node) — para cuando el equipo de frontend suba su codigo
-frontend/node_modules/
-frontend/dist/
-frontend/.angular/
+# =========================
+# SPRING BOOT / MAVEN
+# =========================
+target/
+*.class
+*.jar
+*.war
+*.ear
 
-# Config local con secretos — nunca al repo
-**/application-local.yml
-**/application-local.properties
-.env
-.env.*
-
-# IDE / SO
+# =========================
+# INTELLIJ
+# =========================
 .idea/
 *.iml
-.vscode/
-.DS_Store
-Thumbs.db
 
-# Entregables intermedios de IA — el contenido ya vive versionado en backend/ y docs/
+# =========================
+# VISUAL STUDIO CODE
+# =========================
+.vscode/
+
+# =========================
+# WINDOWS / MACOS
+# =========================
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# =========================
+# ENVIRONMENT / SECRETS
+# =========================
+.env
+.env.*
+application-local.properties
+application-local.yml
+
+# =========================
+# LOGS
+# =========================
+*.log
+logs/
+
+# =========================
+# Local, fuera del repo compartido
+# =========================
 Claude outputs/
+docs/
+CLAUDE.md
