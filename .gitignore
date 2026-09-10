@@ -30,10 +30,11 @@ target/
 .vscode/
 
 # =========================
-# WINDOWS
+# WINDOWS / MACOS
 # =========================
 Thumbs.db
 Desktop.ini
+.DS_Store
 
 # =========================
 # ENVIRONMENT / SECRETS
@@ -48,3 +49,10 @@ application-local.yml
 # =========================
 *.log
 logs/
+
+# =========================
+# Local, fuera del repo compartido
+# =========================
+Claude outputs/
+docs/
+CLAUDE.md
