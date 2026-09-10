@@ -1,0 +1,35 @@
+# =============================================================================
+# LEXIA — Perfil de DESARROLLO
+# =============================================================================
+# Base local con la semilla de datos ficticios cargada.
+#
+# Las credenciales salen de variables de entorno. DB_PASSWORD es la contrasena
+# del usuario de MySQL (por defecto 'root'), la misma que pide 'mysql -u root -p'.
+# El valor por defecto vacio solo sirve para un MySQL sin contrasena.
+#
+#   export DB_PASSWORD=tu_contrasena       # Git Bash / Linux / macOS
+#   $env:DB_PASSWORD = "tu_contrasena"     # PowerShell
+#
+# Para no repetirlo en cada terminal, agregalo a ~/.bashrc (Git Bash).
+#
+# Si prefieres un archivo en vez de variables, crea application-local.yml en
+# esta misma carpeta y arranca con SPRING_PROFILES_ACTIVE=dev,local — el
+# sufijo -local NO se carga solo, necesita que el perfil 'local' este activo.
+# El .gitignore ya excluye ese archivo del repositorio.
+# =============================================================================
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:lexia_db}?useUnicode=true&characterEncoding=UTF-8&connectionTimeZone=America/Lima&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
+
+  flyway:
+    # Esquema + semilla. 'db/seed' SOLO se lista en este perfil.
+    locations: classpath:db/migration,classpath:db/seed
+
+logging:
+  level:
+    org.flywaydb: INFO
+    # Muestra el SQL que genera Hibernate. Util para aprender que hace el ORM
+    # por debajo; si molesta en la consola, subelo a INFO.
+    org.hibernate.SQL: DEBUG

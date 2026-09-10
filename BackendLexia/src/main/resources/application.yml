@@ -1,0 +1,44 @@
+# =============================================================================
+# LEXIA — Configuracion comun a todos los perfiles
+# =============================================================================
+# El perfil se elige con la variable de entorno SPRING_PROFILES_ACTIVE.
+# Si no se indica ninguno, arranca en 'dev'.
+#
+#   Desarrollo:  mvnw spring-boot:run
+#   Produccion:  SPRING_PROFILES_ACTIVE=prod java -jar BackendLexia.jar
+# =============================================================================
+spring:
+  application:
+    name: lexia
+
+  profiles:
+    default: dev
+
+  jpa:
+    hibernate:
+      # NUNCA 'update'. El esquema lo manda Flyway; Hibernate solo comprueba que
+      # las entidades cuadren con las tablas y falla al arrancar si no.
+      ddl-auto: validate
+
+    # Cierra la sesion de Hibernate al salir de la capa de servicio. Si una
+    # entidad intenta cargar una relacion perezosa fuera de la transaccion,
+    # falla de forma visible en vez de disparar consultas extra en silencio.
+    open-in-view: false
+
+    properties:
+      hibernate:
+        jdbc:
+          # El esquema usa DATETIME(3), que no almacena zona horaria. Fijarla
+          # aqui evita que cada maquina interprete las fechas a su manera, lo
+          # que en un sistema de plazos judiciales seria un error grave.
+          time_zone: America/Lima
+
+  flyway:
+    enabled: true
+
+  jackson:
+    # Las fechas salen a Angular en ISO-8601, hora de Lima.
+    time-zone: America/Lima
+
+server:
+  port: ${SERVER_PORT:8080}
