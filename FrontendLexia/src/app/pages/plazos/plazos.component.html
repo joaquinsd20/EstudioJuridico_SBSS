@@ -1,0 +1,1243 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <main class="main-content">
+
+
+    <!-- =================================================== -->
+    <!-- CABECERA -->
+    <!-- =================================================== -->
+
+    <header class="plazos-header">
+
+      <div>
+
+        <span class="current-date">
+          Fecha: 09/09/2026
+        </span>
+
+        <h1>
+          Control Integral de Plazos y Términos Legales
+        </h1>
+
+        <p>
+          Control y seguimiento de vencimientos,
+          términos procesales y alertas críticas.
+        </p>
+
+      </div>
+
+    </header>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS -->
+    <!-- =================================================== -->
+
+    <section class="filters-card">
+
+
+      <div class="filter-control">
+
+        <select>
+
+          <option value="">
+            Tipo de Plazo
+          </option>
+
+          <option value="Contestación">
+            Contestación
+          </option>
+
+          <option value="Probatorio">
+            Probatorio
+          </option>
+
+          <option value="Recurso">
+            Recurso
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <input
+          type="text"
+          placeholder="Juzgado / Fiscalía"
+        >
+
+      </div>
+
+
+      <div class="date-filter">
+
+        <label>
+          Fecha de Notificación
+        </label>
+
+        <input type="date">
+
+      </div>
+
+
+      <div class="date-filter">
+
+        <label>
+          Plazo Vencimiento
+        </label>
+
+        <input type="date">
+
+      </div>
+
+
+      <button
+        class="clear-filter"
+        type="button"
+        title="Limpiar filtros"
+      >
+        ×
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LAYOUT -->
+    <!-- =================================================== -->
+
+    <div class="plazos-layout">
+
+
+      <!-- ================================================= -->
+      <!-- CONTENIDO IZQUIERDO -->
+      <!-- ================================================= -->
+
+      <div class="plazos-left">
+
+
+        <!-- =============================================== -->
+        <!-- PLAZOS CRÍTICOS -->
+        <!-- =============================================== -->
+
+        <section class="plazos-card critical-chart-card">
+
+
+          <div class="critical-header">
+
+            <h2>
+              Plazos Críticos Próximos
+            </h2>
+
+
+            <div class="critical-legend">
+
+              <span>
+                <i class="legend-box red"></i>
+                Vence en &lt;48h
+              </span>
+
+              <span>
+                <i class="legend-box orange"></i>
+                Vence en 3-5 días
+              </span>
+
+              <span>
+                <i class="legend-box yellow"></i>
+                Vence en 1-2 semanas
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="bar-chart-wrapper">
+
+
+            <div class="chart-y-axis">
+
+              <span>25</span>
+              <span>20</span>
+              <span>15</span>
+              <span>10</span>
+              <span>5</span>
+              <span>0</span>
+
+            </div>
+
+
+            <div class="critical-bars">
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 16px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 16px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 8px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 1</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 18px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 18px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 10px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 3</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 50px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 25px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 25px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 5</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 58px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 28px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 15px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 7</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 48px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 50px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 17px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 9</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 40px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 65px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 25px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 11</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 35px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 32px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 25px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 13</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 27px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 30px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 22px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 15</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 19px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 26px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 28px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 17</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 14px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 18px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 18px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 18</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 13px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 23px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 22px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 19</small>
+
+              </div>
+
+
+              <div class="week-bar">
+
+                <div class="stack">
+
+                  <span
+                    class="bar-segment red-segment"
+                    style="height: 10px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment orange-segment"
+                    style="height: 16px;"
+                  ></span>
+
+                  <span
+                    class="bar-segment yellow-segment"
+                    style="height: 12px;"
+                  ></span>
+
+                </div>
+
+                <small>Sem. 20</small>
+
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- =============================================== -->
+        <!-- TABLA -->
+        <!-- =============================================== -->
+
+        <section class="plazos-card table-card">
+
+
+          <div class="table-header">
+
+            <div>
+
+              <h2>
+                Lista de Plazos Activos y Pendientes
+              </h2>
+
+              <span>
+                6 plazos encontrados
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="plazos-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Fecha de Vencimiento
+                  </th>
+
+                  <th>
+                    Días Restantes
+                  </th>
+
+                  <th>
+                    Descripción del Plazo
+                  </th>
+
+                  <th>
+                    Asociado a Caso
+                  </th>
+
+                  <th>
+                    Materia/Juzgado
+                  </th>
+
+                  <th>
+                    Responsable
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+                <tr class="selected-row">
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon warning">!</span>
+                      <strong>09/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left warning">
+                      3 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Contestación de Demanda
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso Fernández</strong>
+                      <span>EXP. 01452</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Alimentos</strong>
+                      <span>Dr. García</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">L</span>
+                      <strong>Leirinan</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge process">
+                      En Proceso
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon warning">!</span>
+                      <strong>03/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left warning">
+                      3 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Contestación de Demanda
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso Fernández</strong>
+                      <span>EXP. 01521</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Civil</strong>
+                      <span>Dr. García</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">F</span>
+                      <strong>Fernanda</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge process">
+                      En Proceso
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon warning">!</span>
+                      <strong>13/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left warning">
+                      3 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Presentación de Demanda
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso Torres</strong>
+                      <span>EXP. 00332</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Daños</strong>
+                      <span>Luis Torres</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">L</span>
+                      <strong>Luicolca</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge process">
+                      En Proceso
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon warning">!</span>
+                      <strong>15/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left warning">
+                      5 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Presentación de Escrito
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso Morales</strong>
+                      <span>EXP. 03321</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Familia</strong>
+                      <span>Juzgado de Familia</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">AM</span>
+                      <strong>Ana Morales</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge critical">
+                      Crítico
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon normal">!</span>
+                      <strong>18/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left normal">
+                      8 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Audiencia de Conciliación
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso López</strong>
+                      <span>EXP. 02388</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Daños</strong>
+                      <span>Juzgado Civil</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">LT</span>
+                      <strong>Luis Torres</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge process">
+                      En Proceso
+                    </span>
+                  </td>
+                </tr>
+
+                <tr>
+                  <td>
+                    <div class="deadline-date">
+                      <span class="deadline-icon normal">!</span>
+                      <strong>22/06/2026</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="days-left normal">
+                      12 días
+                    </span>
+                  </td>
+
+                  <td>
+                    <strong class="description-text">
+                      Apelación
+                    </strong>
+                  </td>
+
+                  <td>
+                    <div class="case-info">
+                      <strong>Caso Ramírez</strong>
+                      <span>EXP. 00521</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="court-info">
+                      <strong>Tenencia</strong>
+                      <span>Juzgado de Familia</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    <div class="responsible">
+                      <span class="responsible-avatar">AM</span>
+                      <strong>Ana Morales</strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="status-badge completed">
+                      Cumplido
+                    </span>
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- =============================================== -->
+        <!-- ZONA INFERIOR -->
+        <!-- =============================================== -->
+
+        <div class="bottom-grid">
+
+
+          <!-- EVOLUCIÓN -->
+
+          <section class="plazos-card evolution-card">
+
+            <div class="chart-title">
+
+              <span>↗</span>
+
+              <h3>
+                Evolución de Plazos Vencidos vs. Cumplidos
+                (Semanal)
+              </h3>
+
+            </div>
+
+
+            <div class="evolution-chart">
+
+
+              <div class="evolution-y">
+
+                <span>20</span>
+                <span>15</span>
+                <span>10</span>
+                <span>5</span>
+                <span>0</span>
+
+              </div>
+
+
+              <div class="evolution-area">
+
+                <svg
+                  viewBox="0 0 600 150"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+
+                    <linearGradient
+                      id="redArea"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+
+                      <stop
+                        offset="0%"
+                        stop-color="#ba3f3f"
+                        stop-opacity=".18"
+                      ></stop>
+
+                      <stop
+                        offset="100%"
+                        stop-color="#ba3f3f"
+                        stop-opacity="0"
+                      ></stop>
+
+                    </linearGradient>
+
+                  </defs>
+
+
+                  <path
+                    d="
+                      M0 130
+                      C45 100, 80 82, 130 94
+                      C175 106, 220 108, 270 90
+                      C315 75, 330 30, 390 35
+                      C445 42, 470 86, 520 81
+                      C555 78, 575 62, 600 30
+                      L600 150
+                      L0 150 Z
+                    "
+                    fill="url(#redArea)"
+                  ></path>
+
+
+                  <path
+                    d="
+                      M0 130
+                      C45 100, 80 82, 130 94
+                      C175 106, 220 108, 270 90
+                      C315 75, 330 30, 390 35
+                      C445 42, 470 86, 520 81
+                      C555 78, 575 62, 600 30
+                    "
+                    fill="none"
+                    stroke="#9d3a3a"
+                    stroke-width="2.5"
+                  ></path>
+
+
+                  <path
+                    d="
+                      M0 130
+                      C45 105, 85 92, 130 105
+                      C180 118, 225 101, 270 89
+                      C325 71, 360 72, 405 53
+                      C450 34, 490 84, 530 75
+                      C565 68, 585 61, 600 56
+                    "
+                    fill="none"
+                    stroke="#c59c59"
+                    stroke-width="2.5"
+                  ></path>
+
+                </svg>
+
+
+                <div class="month-labels">
+
+                  <span>Jan</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                  <span>Jul</span>
+                  <span>Ago</span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- RESUMEN -->
+
+          <section class="plazos-card kpi-card">
+
+            <h3>
+              Plazos Vencidos del Mes
+            </h3>
+
+            <strong class="kpi-value">
+              10
+            </strong>
+
+            <span class="kpi-growth">
+              ↗ 2,028 (+45%)
+            </span>
+
+            <small>
+              Comparado con el mes anterior
+            </small>
+
+          </section>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- PANEL DERECHO -->
+      <!-- ================================================= -->
+
+      <aside class="detail-panel">
+
+        <div class="detail-header">
+
+          <h2>
+            Detalles del Plazo Seleccionado
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="detail-content">
+
+          <div class="detail-title">
+
+            <h3>
+              Contestación de Demanda
+            </h3>
+
+            <span>
+              EXP. 01452
+            </span>
+
+          </div>
+
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◷
+            </span>
+
+            <div>
+              <small>
+                Fecha de vencimiento
+              </small>
+
+              <strong>
+                09/06/2026
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              !
+            </span>
+
+            <div>
+              <small>
+                Tiempo restante
+              </small>
+
+              <strong>
+                3 días
+              </strong>
+            </div>
+
+          </div>
+
+
+          <section class="detail-section">
+
+            <h4>
+              Responsable
+            </h4>
+
+            <div class="participant">
+
+              <span class="participant-avatar">
+                L
+              </span>
+
+              <div>
+                <strong>
+                  Leirinan
+                </strong>
+
+                <span>
+                  Abogado responsable
+                </span>
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◇
+            </span>
+
+            <div>
+              <small>
+                Expediente
+              </small>
+
+              <strong>
+                EXP. 01452
+              </strong>
+            </div>
+
+          </div>
+
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ▤
+            </span>
+
+            <div>
+              <small>
+                Caso
+              </small>
+
+              <strong>
+                Caso Fernández
+              </strong>
+            </div>
+
+          </div>
+
+
+          <section class="detail-section">
+
+            <h4>
+              Eventos Próximos de la Semana
+            </h4>
+
+            <div class="upcoming-item">
+              <strong>EXP. 01452-2026</strong>
+              <span class="upcoming-tag green">Alimentos</span>
+              <span>•••</span>
+            </div>
+
+            <div class="upcoming-item">
+              <strong>EXP. 02388-2025</strong>
+              <span class="upcoming-tag green">Daños</span>
+              <span>•••</span>
+            </div>
+
+            <div class="upcoming-item">
+              <strong>EXP. 03321-2024</strong>
+              <span class="upcoming-tag orange">En Trámite</span>
+              <span>•••</span>
+            </div>
+
+          </section>
+
+
+          <section class="detail-section">
+
+            <h4>
+              Alertas de Plazos Críticos
+            </h4>
+
+            <div class="deadline-alert">
+              <strong>
+                EXP. 00521-2024
+              </strong>
+
+              <span>
+                Archivado
+              </span>
+            </div>
+
+          </section>
+
+
+          <section class="detail-section">
+
+            <h4>
+              Notas y Contactos Recientes
+            </h4>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Documento de descarga...</strong>
+              <span>↓</span>
+            </div>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Documento del expediente...</strong>
+              <span>↓</span>
+            </div>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Documento reciente 1</strong>
+              <span>↓</span>
+            </div>
+
+          </section>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

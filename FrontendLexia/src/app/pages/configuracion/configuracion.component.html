@@ -1,0 +1,740 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- ENCABEZADO -->
+    <header class="config-header">
+
+      <div>
+        <span class="eyebrow">
+          Administración
+        </span>
+
+        <h1>
+          Configuración del Sistema
+        </h1>
+
+        <p>
+          Parametrización general del estudio jurídico, seguridad,
+          roles y automatizaciones.
+        </p>
+      </div>
+
+      <button
+        class="btn-primary-action"
+        type="button"
+      >
+        Guardar Cambios
+      </button>
+
+    </header>
+
+
+    <!-- NAVEGACIÓN VISUAL -->
+    <nav class="tabs-navigation">
+
+      <button
+        class="tab-item active"
+        type="button"
+      >
+        Estudio Jurídico
+      </button>
+
+      <button
+        class="tab-item"
+        type="button"
+      >
+        Roles y Permisos
+      </button>
+
+      <button
+        class="tab-item"
+        type="button"
+      >
+        Seguridad y Backups
+      </button>
+
+      <button
+        class="tab-item"
+        type="button"
+      >
+        IA y Alertas
+      </button>
+
+    </nav>
+
+
+    <!-- RESUMEN SUPERIOR -->
+    <section class="config-stats-grid">
+
+      <article class="config-stat-card">
+        <span class="stat-label">
+          Firma
+        </span>
+
+        <strong>
+          LEXIA
+        </strong>
+
+        <small>
+          Configuración general
+        </small>
+      </article>
+
+      <article class="config-stat-card">
+        <span class="stat-label">
+          Roles
+        </span>
+
+        <strong>
+          5
+        </strong>
+
+        <small>
+          Perfiles registrados
+        </small>
+      </article>
+
+      <article class="config-stat-card">
+        <span class="stat-label">
+          Seguridad
+        </span>
+
+        <strong>
+          2FA
+        </strong>
+
+        <small>
+          Protección de acceso
+        </small>
+      </article>
+
+      <article class="config-stat-card">
+        <span class="stat-label">
+          Moneda
+        </span>
+
+        <strong class="stat-accent">
+          PEN
+        </strong>
+
+        <small>
+          Soles peruanos
+        </small>
+      </article>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ESTUDIO JURÍDICO -->
+    <!-- =================================================== -->
+
+    <section class="card-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <span class="panel-kicker">
+            Datos generales
+          </span>
+
+          <h2>
+            Información del Estudio Jurídico
+          </h2>
+
+          <p>
+            Datos institucionales y parámetros principales de LEXIA.
+          </p>
+        </div>
+
+        <span class="panel-number">
+          01
+        </span>
+
+      </div>
+
+
+      <div class="form-grid">
+
+        <div class="form-group col-span-2">
+          <label>
+            Razón Social / Nombre del Estudio
+          </label>
+
+          <input
+            type="text"
+            class="custom-input"
+            value="LEXIA - Estudio Jurídico"
+            placeholder="Ingrese la razón social o nombre comercial"
+          >
+        </div>
+
+
+        <div class="form-group">
+          <label>
+            RUC
+          </label>
+
+          <input
+            type="text"
+            class="custom-input"
+            value="20601234567"
+            placeholder="Número de RUC (11 dígitos)"
+          >
+        </div>
+
+
+        <div class="form-group">
+          <label>
+            Teléfono Principal
+          </label>
+
+          <input
+            type="text"
+            class="custom-input"
+            value="+51 900 000 000"
+            placeholder="+51 900 000 000"
+          >
+        </div>
+
+
+        <div class="form-group col-span-2">
+          <label>
+            Dirección Fiscal
+          </label>
+
+          <input
+            type="text"
+            class="custom-input"
+            value="Av. España 1450, Of. 402, Trujillo"
+            placeholder="Ej. Av. España 1450, Of. 402, Trujillo"
+          >
+        </div>
+
+
+        <div class="form-group">
+          <label>
+            Correo Institucional
+          </label>
+
+          <input
+            type="email"
+            class="custom-input"
+            value="contacto@lexia.com"
+            placeholder="contacto@estudio.pe"
+          >
+        </div>
+
+
+        <div class="form-group">
+          <label>
+            Moneda por Defecto
+          </label>
+
+          <select class="custom-select">
+            <option selected>
+              Soles (PEN S/.)
+            </option>
+
+            <option>
+              Dólares (USD $)
+            </option>
+          </select>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- ROLES Y PERMISOS -->
+    <!-- =================================================== -->
+
+    <section class="card-panel">
+
+      <div class="panel-heading panel-heading-row">
+
+        <div>
+          <span class="panel-kicker">
+            Control de acceso
+          </span>
+
+          <h2>
+            Roles y Permisos
+          </h2>
+
+          <p>
+            Perfiles definidos para la administración interna del sistema.
+          </p>
+        </div>
+
+        <div class="panel-actions">
+
+          <span class="panel-number">
+            02
+          </span>
+
+          <button
+            class="btn-secondary-action"
+            type="button"
+          >
+            + Nuevo Rol
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <div class="table-container">
+
+        <table class="custom-table">
+
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Rol</th>
+              <th>Descripción</th>
+              <th>Estado</th>
+              <th class="text-right">Acciones</th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            <tr>
+              <td>01</td>
+
+              <td>
+                <span class="role-pill admin">
+                  Administrador
+                </span>
+              </td>
+
+              <td>
+                Acceso total y configuración del sistema
+              </td>
+
+              <td>
+                <span class="status active">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button class="btn-icon" type="button">
+                  Permisos
+                </button>
+
+                <button class="btn-icon" type="button">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>02</td>
+
+              <td>
+                <span class="role-pill director">
+                  Socio / Director
+                </span>
+              </td>
+
+              <td>
+                Supervisión general, expedientes y finanzas
+              </td>
+
+              <td>
+                <span class="status active">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button class="btn-icon" type="button">
+                  Permisos
+                </button>
+
+                <button class="btn-icon" type="button">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>03</td>
+
+              <td>
+                <span class="role-pill lawyer">
+                  Abogado
+                </span>
+              </td>
+
+              <td>
+                Gestión de expedientes asignados, actuaciones y tareas
+              </td>
+
+              <td>
+                <span class="status active">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button class="btn-icon" type="button">
+                  Permisos
+                </button>
+
+                <button class="btn-icon" type="button">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>04</td>
+
+              <td>
+                <span class="role-pill assistant">
+                  Asistente Legal
+                </span>
+              </td>
+
+              <td>
+                Soporte en documentos, notificaciones y agenda
+              </td>
+
+              <td>
+                <span class="status active">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button class="btn-icon" type="button">
+                  Permisos
+                </button>
+
+                <button class="btn-icon" type="button">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>05</td>
+
+              <td>
+                <span class="role-pill accounting">
+                  Contabilidad
+                </span>
+              </td>
+
+              <td>
+                Gestión de honorarios y facturación
+              </td>
+
+              <td>
+                <span class="status active">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+              <td class="text-right">
+                <button class="btn-icon" type="button">
+                  Permisos
+                </button>
+
+                <button class="btn-icon" type="button">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- SEGURIDAD Y BACKUPS -->
+    <!-- =================================================== -->
+
+    <section class="card-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <span class="panel-kicker">
+            Protección del sistema
+          </span>
+
+          <h2>
+            Seguridad y Copias de Seguridad
+          </h2>
+
+          <p>
+            Parámetros visuales de autenticación, sesiones y respaldos.
+          </p>
+        </div>
+
+        <span class="panel-number">
+          03
+        </span>
+
+      </div>
+
+
+      <div class="security-grid">
+
+        <article class="setting-card">
+
+          <div class="setting-icon">
+            2FA
+          </div>
+
+          <div class="setting-copy">
+
+            <strong>
+              Autenticación en Dos Pasos
+            </strong>
+
+            <span>
+              Solicita un segundo factor al iniciar sesión.
+            </span>
+
+          </div>
+
+          <label class="switch-control">
+
+            <input
+              type="checkbox"
+              checked
+            >
+
+            <span class="switch-slider"></span>
+
+          </label>
+
+        </article>
+
+
+        <article class="setting-card">
+
+          <div class="setting-icon">
+            ◷
+          </div>
+
+          <div class="setting-copy">
+
+            <strong>
+              Tiempo de Inactividad
+            </strong>
+
+            <span>
+              Cierre preventivo de sesión.
+            </span>
+
+          </div>
+
+          <div class="setting-value">
+            30 min
+          </div>
+
+        </article>
+
+
+        <article class="setting-card">
+
+          <div class="setting-icon">
+            ↻
+          </div>
+
+          <div class="setting-copy">
+
+            <strong>
+              Respaldos Automáticos
+            </strong>
+
+            <span>
+              Frecuencia programada del sistema.
+            </span>
+
+          </div>
+
+          <div class="setting-value">
+            Diaria
+          </div>
+
+        </article>
+
+      </div>
+
+
+      <div class="backup-box">
+
+        <div>
+          <strong>
+            Copia de seguridad manual
+          </strong>
+
+          <span>
+            Genera un respaldo completo de la información registrada.
+          </span>
+        </div>
+
+        <button
+          class="btn-secondary-action"
+          type="button"
+        >
+          Generar Copia Ahora
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- IA Y ALERTAS -->
+    <!-- =================================================== -->
+
+    <section class="card-panel">
+
+      <div class="panel-heading">
+
+        <div>
+          <span class="panel-kicker">
+            Automatización
+          </span>
+
+          <h2>
+            IA y Alertas Preventivas
+          </h2>
+
+          <p>
+            Preferencias visuales para asistencia inteligente y notificaciones.
+          </p>
+        </div>
+
+        <span class="panel-number">
+          04
+        </span>
+
+      </div>
+
+
+      <div class="automation-list">
+
+        <article class="automation-item">
+
+          <div class="automation-icon">
+            IA
+          </div>
+
+          <div class="automation-content">
+
+            <strong>
+              Resumen automático de resoluciones judiciales
+            </strong>
+
+            <p>
+              Extrae partes clave, fechas y plazos sugeridos mediante el módulo
+              de Inteligencia Artificial.
+            </p>
+
+          </div>
+
+          <label class="switch-control">
+
+            <input
+              type="checkbox"
+              checked
+            >
+
+            <span class="switch-slider"></span>
+
+          </label>
+
+        </article>
+
+
+        <article class="automation-item">
+
+          <div class="automation-icon alert-icon">
+            !
+          </div>
+
+          <div class="automation-content">
+
+            <strong>
+              Cálculo de alertas preventivas de vencimiento
+            </strong>
+
+            <p>
+              Presenta avisos visuales a los 15, 10, 5 y 1 día antes del
+              vencimiento procesal.
+            </p>
+
+          </div>
+
+          <label class="switch-control">
+
+            <input
+              type="checkbox"
+              checked
+            >
+
+            <span class="switch-slider"></span>
+
+          </label>
+
+        </article>
+
+      </div>
+
+
+      <div class="alert-preview">
+
+        <div class="alert-preview-icon">
+          !
+        </div>
+
+        <div>
+          <strong>
+            Alertas críticas configuradas
+          </strong>
+
+          <span>
+            15 días · 10 días · 5 días · 1 día antes del vencimiento
+          </span>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

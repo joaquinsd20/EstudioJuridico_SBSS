@@ -1,0 +1,1048 @@
+:host {
+  display: block;
+  min-height: 100vh;
+
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  color: #172033;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+
+/* =========================================================
+   ESTRUCTURA GENERAL
+========================================================= */
+
+.layout-wrapper {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  background: #f5f7fb;
+}
+
+.main-content {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 100vh;
+
+  padding:
+    28px
+    32px
+    40px;
+
+  background: #f5f7fb;
+}
+
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.page-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 24px;
+
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #6366f1;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: .09em;
+
+  text-transform: uppercase;
+}
+
+.page-header h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 25px;
+
+  line-height: 1.15;
+
+  font-weight: 750;
+
+  letter-spacing: -.5px;
+}
+
+.page-header p {
+  max-width: 720px;
+
+  margin:
+    7px
+    0
+    0;
+
+  color: #88909f;
+
+  font-size: 11px;
+
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BOTONES
+========================================================= */
+
+.btn-primary,
+.btn-secondary {
+  border: 0;
+
+  border-radius: 8px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition: .18s ease;
+}
+
+.btn-primary {
+  min-height: 38px;
+
+  padding:
+    0
+    16px;
+
+  background: #6366f1;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  box-shadow:
+    0 7px 16px
+    rgba(99, 102, 241, .16);
+}
+
+.btn-primary:hover {
+  background: #5558e8;
+
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  min-height: 32px;
+
+  padding:
+    0
+    12px;
+
+  border:
+    1px solid #dbe1ea;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  font-size: 8px;
+}
+
+.btn-secondary:hover {
+  background: #f8fafc;
+}
+
+.plus {
+  margin-right: 4px;
+
+  font-size: 16px;
+}
+
+
+/* =========================================================
+   ESTADÍSTICAS
+========================================================= */
+
+.stats-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 14px;
+}
+
+.stat-card {
+  padding:
+    14px
+    15px;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.stat-label {
+  display: block;
+
+  color: #64748b;
+
+  font-size: 8px;
+
+  font-weight: 700;
+}
+
+.stat-card strong {
+  display: block;
+
+  margin:
+    6px
+    0
+    3px;
+
+  color: #111827;
+
+  font-size: 19px;
+}
+
+.stat-card small {
+  color: #94a3b8;
+
+  font-size: 7px;
+}
+
+.stat-accent {
+  color: #4f46e5 !important;
+}
+
+
+/* =========================================================
+   PANEL PRINCIPAL
+========================================================= */
+
+.panel,
+.featured-section {
+  overflow: hidden;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.panel {
+  margin-bottom: 14px;
+}
+
+.panel-header,
+.section-heading {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding:
+    16px
+    18px
+    13px;
+
+  border-bottom:
+    1px solid #eef1f5;
+}
+
+.panel-kicker {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6366f1;
+
+  font-size: 7px;
+
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  text-transform: uppercase;
+}
+
+.panel-header h2,
+.section-heading h2 {
+  margin: 0;
+
+  color: #202733;
+
+  font-size: 14px;
+
+  font-weight: 750;
+}
+
+.panel-header p,
+.section-heading p {
+  margin:
+    5px
+    0
+    0;
+
+  color: #8b929f;
+
+  font-size: 8px;
+}
+
+.panel-number {
+  min-width: 30px;
+  height: 30px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 8px;
+
+  background: #f1f2f6;
+
+  color: #6b7280;
+
+  font-size: 8px;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.filters {
+  display: grid;
+
+  grid-template-columns:
+    minmax(220px, 1fr)
+    145px
+    160px
+    125px
+    145px;
+
+  gap: 9px;
+
+  padding:
+    14px
+    18px
+    12px;
+}
+
+.search-box {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  height: 37px;
+
+  padding:
+    0
+    10px;
+
+  border:
+    1px solid #d9dee6;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+}
+
+.search-box span {
+  color: #94a3b8;
+
+  font-size: 16px;
+}
+
+.search-box input {
+  width: 100%;
+  height: 100%;
+
+  border: 0;
+
+  outline: 0;
+
+  background: transparent;
+
+  color: #4c5462;
+
+  font-size: 8px;
+}
+
+.search-box input::placeholder {
+  color: #9aa1ad;
+}
+
+.filters select {
+  height: 37px;
+
+  padding:
+    0
+    9px;
+
+  border:
+    1px solid #d9dee6;
+
+  border-radius: 7px;
+
+  outline: 0;
+
+  background: #ffffff;
+
+  color: #4c5462;
+
+  font-size: 8px;
+}
+
+.search-box:focus-within,
+.filters select:focus {
+  border-color: #7461d7;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(99, 102, 241, .07);
+}
+
+
+/* =========================================================
+   VISTA Y RESUMEN
+========================================================= */
+
+.vista-tabs {
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  padding:
+    0
+    18px
+    11px;
+}
+
+.vista-tabs button {
+  min-height: 31px;
+
+  padding:
+    0
+    11px;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 7px;
+
+  background: #ffffff;
+
+  color: #64748b;
+
+  font-size: 7.5px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+}
+
+.vista-tabs button.active {
+  border-color: #c7d2fe;
+
+  background: #eef2ff;
+
+  color: #4338ca;
+}
+
+.vista-tabs .export-btn {
+  margin-left: auto;
+}
+
+.stats-mini {
+  display: flex;
+
+  gap: 18px;
+
+  flex-wrap: wrap;
+
+  padding:
+    0
+    18px
+    13px;
+
+  color: #64748b;
+
+  font-size: 7px;
+}
+
+.stats-mini strong {
+  margin-right: 3px;
+
+  color: #0f172a;
+
+  font-size: 8px;
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.table-wrap {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border-top:
+    1px solid #eef1f5;
+}
+
+table {
+  width: 100%;
+
+  min-width: 1080px;
+
+  border-collapse: collapse;
+}
+
+th {
+  height: 38px;
+
+  padding:
+    0
+    10px;
+
+  background: #f8f9fb;
+
+  color: #64748b;
+
+  font-size: 7.2px;
+
+  font-weight: 800;
+
+  text-align: left;
+
+  white-space: nowrap;
+}
+
+td {
+  padding:
+    10px;
+
+  border-top:
+    1px solid #eef1f5;
+
+  color: #3d4450;
+
+  font-size: 7.7px;
+
+  vertical-align: middle;
+}
+
+tbody tr:hover {
+  background: #faf9ff;
+}
+
+
+/* =========================================================
+   RECURSO / TIPO
+========================================================= */
+
+.person-cell {
+  min-width: 230px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.person-cell strong {
+  display: block;
+
+  color: #2f3743;
+
+  font-size: 8px;
+
+  line-height: 1.3;
+}
+
+.sub-line {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #94a3b8;
+
+  font-size: 6.5px;
+}
+
+.resource-icon,
+.card-icon {
+  width: 32px;
+  height: 32px;
+
+  flex:
+    0
+    0
+    32px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 8px;
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+.resource-icon.jurisprudencia,
+.card-icon.jurisprudencia {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.resource-icon.legislacion,
+.card-icon.legislacion {
+  background: #e8f7f4;
+  color: #0d9488;
+}
+
+.resource-icon.doctrina,
+.card-icon.doctrina {
+  background: #fff2df;
+  color: #b45309;
+}
+
+.resource-icon.contrato,
+.card-icon.contrato {
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.resource-icon.plantilla,
+.card-icon.plantilla {
+  background: #fce9f4;
+  color: #be2773;
+}
+
+.resource-icon.libro,
+.card-icon.libro {
+  background: #fff4dc;
+  color: #b46d0c;
+}
+
+.role-pill {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 24px;
+
+  padding:
+    0
+    7px;
+
+  border-radius: 6px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 6.5px;
+
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+.jurisprudencia-pill {
+  background: #eef2ff;
+  color: #4f46e5;
+}
+
+.legislacion-pill {
+  background: #e8f7f4;
+  color: #0d7f75;
+}
+
+.doctrina-pill {
+  background: #fff3df;
+  color: #9f6417;
+}
+
+.contrato-pill {
+  background: #eaf2ff;
+  color: #2563eb;
+}
+
+.plantilla-pill {
+  background: #fce9f4;
+  color: #ad286d;
+}
+
+.libro-pill {
+  background: #fff4dc;
+  color: #a56412;
+}
+
+.exp-link,
+.card-exp {
+  color: #4f46e5;
+
+  font-weight: 750;
+}
+
+
+/* =========================================================
+   ESTADO
+========================================================= */
+
+.status {
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  padding:
+    4px
+    7px;
+
+  border-radius: 999px;
+
+  background: #ecfdf5;
+
+  color: #15803d;
+
+  font-size: 6.5px;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.status i {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: currentColor;
+}
+
+.status.off {
+  background: #fef2f2;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.row-actions,
+.card-acciones {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  flex-wrap: wrap;
+}
+
+.row-actions {
+  min-width: 185px;
+}
+
+.icon-action {
+  padding:
+    5px
+    7px;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #475569;
+
+  font-size: 6.7px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition: .18s ease;
+}
+
+.icon-action:hover {
+  background: #f8fafc;
+
+  border-color: #cbd5e1;
+}
+
+.icon-action.view {
+  color: #0369a1;
+}
+
+.icon-action.edit {
+  color: #4f46e5;
+}
+
+.icon-action.download {
+  color: #15803d;
+}
+
+
+/* =========================================================
+   RECURSOS DESTACADOS
+========================================================= */
+
+.cards-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+
+  padding:
+    16px
+    18px
+    18px;
+}
+
+.recurso-card {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+
+  padding: 13px;
+
+  border:
+    1px solid #e7eaf0;
+
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  transition: .18s ease;
+}
+
+.recurso-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 18px
+    rgba(15, 23, 42, .07);
+}
+
+.card-top {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 8px;
+}
+
+.card-titulo {
+  color: #27303c;
+
+  font-size: 9px;
+
+  line-height: 1.35;
+}
+
+.card-autor {
+  color: #9299a6;
+
+  font-size: 7px;
+}
+
+.card-tags {
+  display: flex;
+
+  gap: 5px;
+
+  flex-wrap: wrap;
+}
+
+.card-exp {
+  font-size: 7px;
+}
+
+.card-acciones {
+  margin-top: 2px;
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+.table-wrap::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.table-wrap::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+
+  background: #cbd5e1;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1250px) {
+
+  .filters {
+    grid-template-columns:
+      minmax(220px, 1fr)
+      repeat(2, minmax(130px, 1fr));
+  }
+
+  .filters .search-box {
+    grid-column:
+      span 3;
+  }
+
+  .cards-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+}
+
+
+@media (max-width: 950px) {
+
+  .stats-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .filters {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
+
+  .filters .search-box {
+    grid-column:
+      span 2;
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .main-content {
+    padding:
+      24px
+      18px
+      35px;
+  }
+
+  .page-header {
+    flex-direction: column;
+  }
+
+  .page-header .btn-primary {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .filters .search-box {
+    grid-column:
+      span 1;
+  }
+
+  .vista-tabs {
+    flex-wrap: wrap;
+  }
+
+  .vista-tabs .export-btn {
+    width: 100%;
+
+    margin-left: 0;
+  }
+
+  .cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+}

@@ -1,0 +1,811 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- CABECERA -->
+    <header class="page-header">
+
+      <div>
+        <span class="eyebrow">
+          Seguimiento procesal
+        </span>
+
+        <h1>
+          Monitor Judicial
+        </h1>
+
+        <p>
+          Alertas y actualizaciones de expedientes judiciales en tiempo real.
+        </p>
+      </div>
+
+      <button
+        class="btn-primary"
+        type="button"
+      >
+        + Añadir expediente al monitor
+      </button>
+
+    </header>
+
+
+    <!-- RESUMEN -->
+    <section class="stats-grid">
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          Expedientes Monitoreados
+        </span>
+
+        <strong>
+          12
+        </strong>
+
+        <small>
+          Casos en seguimiento
+        </small>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          Nuevos Movimientos
+        </span>
+
+        <strong>
+          8
+        </strong>
+
+        <small>
+          Detectados hoy
+        </small>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          Alertas Críticas
+        </span>
+
+        <strong class="stat-danger">
+          3
+        </strong>
+
+        <small>
+          Requieren atención
+        </small>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-label">
+          Audiencias Próximas
+        </span>
+
+        <strong class="stat-accent">
+          5
+        </strong>
+
+        <small>
+          Programadas esta semana
+        </small>
+
+      </article>
+
+    </section>
+
+
+    <!-- DISTRIBUCIÓN PRINCIPAL -->
+    <section class="monitor-layout">
+
+      <!-- COLUMNA PRINCIPAL -->
+      <div class="monitor-main">
+
+        <!-- TABLA -->
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Expedientes en seguimiento
+              </span>
+
+              <h2>
+                Listado de Expedientes en Seguimiento
+              </h2>
+
+              <p>
+                Últimas notificaciones y movimientos registrados.
+              </p>
+            </div>
+
+            <span class="panel-number">
+              01
+            </span>
+
+          </div>
+
+
+          <!-- FILTROS SOLO VISUALES -->
+          <div class="filters">
+
+            <select>
+              <option>Juzgado / Sala</option>
+              <option>2° Juzgado Civil</option>
+              <option>1° Sala Penal</option>
+              <option>Sala Constitucional</option>
+            </select>
+
+
+            <div class="date-field">
+              <span>Rango de fecha</span>
+              <span class="calendar-icon">▣</span>
+            </div>
+
+
+            <select>
+              <option>Tipo de Notificación</option>
+              <option>Resolución</option>
+              <option>Auto</option>
+              <option>Sentencia</option>
+              <option>Providencia</option>
+            </select>
+
+
+            <select>
+              <option>Estado Procesal</option>
+              <option>Notificado</option>
+              <option>En trámite</option>
+              <option>Archivado</option>
+            </select>
+
+          </div>
+
+
+          <div class="table-wrap">
+
+            <table class="monitor-table">
+
+              <thead>
+                <tr>
+                  <th>Número de Expediente</th>
+                  <th>Cliente</th>
+                  <th>Juzgado / Sala</th>
+                  <th>Tipo de Movimiento / Notificación</th>
+                  <th>Fecha Movimiento</th>
+                  <th>Estado Procesal</th>
+                  <th>Abogado Asignado</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>01452-2026</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Fernández
+                  </td>
+
+                  <td>
+                    2° Juzgado Civil
+                  </td>
+
+                  <td>
+                    Resolución N° 0021
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>01452-2026</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Fernández
+                  </td>
+
+                  <td>
+                    2° Juzgado Civil
+                  </td>
+
+                  <td>
+                    Resolución N° 0021
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>02388-2025</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Torres
+                  </td>
+
+                  <td>
+                    1° Sala Penal
+                  </td>
+
+                  <td>
+                    Auto
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>02388-2025</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Torres
+                  </td>
+
+                  <td>
+                    1° Sala Penal
+                  </td>
+
+                  <td>
+                    Sentencia
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>03321-2024</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Morales
+                  </td>
+
+                  <td>
+                    Sala Constitucional
+                  </td>
+
+                  <td>
+                    Providencia
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>03321-2024</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Morales
+                  </td>
+
+                  <td>
+                    Sala Constitucional
+                  </td>
+
+                  <td>
+                    Providencia
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge notified">
+                      Notificado
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">JP</span>
+                      <strong>Dr. Juan Pérez</strong>
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>00521-2024</strong>
+                      <span>Vinculado</span>
+                    </div>
+                  </td>
+
+                  <td>
+                    Caso Ramírez
+                  </td>
+
+                  <td>
+                    1° Sala Penal
+                  </td>
+
+                  <td>
+                    Providencia
+                  </td>
+
+                  <td>
+                    01/10/2026
+                  </td>
+
+                  <td>
+                    <span class="status-badge pending">
+                      En Trámite
+                    </span>
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar purple">AM</span>
+                      <strong>Ana Morales</strong>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- RESUMEN INFERIOR -->
+        <section class="analytics-grid">
+
+          <!-- ALERTAS -->
+          <article class="panel analytics-card">
+
+            <div class="analytics-header">
+              <h3>Resumen de Alertas Próximas</h3>
+              <span>Plazos y audiencias vinculadas</span>
+            </div>
+
+
+            <div class="alerts-list">
+
+              <div class="alert-row">
+                <span class="alert-color critical"></span>
+
+                <div>
+                  <strong>Crítico: Caso Fernández</strong>
+                  <span>Plazo procesal por vencer</span>
+                </div>
+
+                <b>25</b>
+              </div>
+
+
+              <div class="alert-row">
+                <span class="alert-color warning"></span>
+
+                <div>
+                  <strong>Audición: Caso Fernández</strong>
+                  <span>Audiencia programada</span>
+                </div>
+
+                <b>20</b>
+              </div>
+
+
+              <div class="alert-row">
+                <span class="alert-color warning"></span>
+
+                <div>
+                  <strong>Audición: Caso Torres</strong>
+                  <span>Audiencia programada</span>
+                </div>
+
+                <b>17</b>
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- EVOLUCIÓN -->
+          <article class="panel analytics-card">
+
+            <div class="analytics-header">
+              <h3>Evolución de Movimientos del Mes</h3>
+              <span>Total de nuevos movimientos detectados por día.</span>
+            </div>
+
+
+            <div class="line-chart">
+
+              <div class="chart-y-axis">
+                <span>20</span>
+                <span>15</span>
+                <span>10</span>
+                <span>5</span>
+                <span>0</span>
+              </div>
+
+
+              <div class="line-chart-area">
+
+                <svg
+                  viewBox="0 0 500 170"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+                    <linearGradient
+                      id="monitorGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stop-color="#5b2c83"
+                        stop-opacity=".20"
+                      ></stop>
+
+                      <stop
+                        offset="100%"
+                        stop-color="#5b2c83"
+                        stop-opacity="0"
+                      ></stop>
+                    </linearGradient>
+                  </defs>
+
+                  <path
+                    d="
+                      M0 140
+                      C35 125, 65 120, 90 137
+                      C120 153, 145 71, 175 90
+                      C205 108, 230 140, 265 65
+                      C300 -5, 320 128, 365 100
+                      C405 77, 430 121, 500 42
+                      L500 170
+                      L0 170
+                      Z
+                    "
+                    fill="url(#monitorGradient)"
+                  ></path>
+
+                  <path
+                    d="
+                      M0 140
+                      C35 125, 65 120, 90 137
+                      C120 153, 145 71, 175 90
+                      C205 108, 230 140, 265 65
+                      C300 -5, 320 128, 365 100
+                      C405 77, 430 121, 500 42
+                    "
+                    fill="none"
+                    stroke="#5b2c83"
+                    stroke-width="4"
+                  ></path>
+
+                </svg>
+
+
+                <div class="chart-x-axis">
+                  <span>J</span>
+                  <span>M</span>
+                  <span>M</span>
+                  <span>J</span>
+                  <span>J</span>
+                  <span>V</span>
+                  <span>M</span>
+                  <span>D</span>
+                  <span>M</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </article>
+
+
+          <!-- JUZGADOS -->
+          <article class="panel analytics-card">
+
+            <div class="analytics-header">
+              <h3>Juzgados con Mayor Actividad</h3>
+              <span>Órganos con más movimientos de expedientes.</span>
+            </div>
+
+
+            <div class="bar-chart">
+
+              <div class="activity-bar-item">
+                <div class="activity-bar h-85"></div>
+                <span>2° Juz.</span>
+              </div>
+
+              <div class="activity-bar-item">
+                <div class="activity-bar h-55"></div>
+                <span>2° Sala</span>
+              </div>
+
+              <div class="activity-bar-item">
+                <div class="activity-bar h-35"></div>
+                <span>1° Sala</span>
+              </div>
+
+              <div class="activity-bar-item">
+                <div class="activity-bar h-18"></div>
+                <span>Juzgado</span>
+              </div>
+
+            </div>
+
+          </article>
+
+        </section>
+
+      </div>
+
+
+      <!-- PANEL DERECHO -->
+      <aside class="details-column">
+
+        <section class="panel detail-panel">
+
+          <div class="detail-header">
+
+            <div>
+              <span class="panel-kicker">
+                Documento seleccionado
+              </span>
+
+              <h2>
+                Detalles del Último Movimiento en Seguimiento
+              </h2>
+            </div>
+
+            <button
+              class="close-button"
+              type="button"
+            >
+              ×
+            </button>
+
+          </div>
+
+
+          <div class="detail-content">
+
+            <div class="detail-item">
+
+              <span class="detail-icon">▤</span>
+
+              <div>
+                <small>Expediente</small>
+
+                <strong>
+                  01452-2026
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="detail-icon">✎</span>
+
+              <div>
+                <small>Movimiento</small>
+
+                <strong>
+                  Resolución N° 0021
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="detail-icon">▣</span>
+
+              <div>
+                <small>Juzgado</small>
+
+                <strong>
+                  2° Juzgado Civil
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="detail-item">
+
+              <span class="detail-icon">♢</span>
+
+              <div>
+                <small>Notificado a la Parte</small>
+
+                <strong>
+                  Caso Fernández - Exp. 01452
+                </strong>
+              </div>
+
+            </div>
+
+
+            <div class="summary-box">
+
+              <h3>
+                Resumen del Auto
+              </h3>
+
+              <p>
+                Se declara fundada la solicitud presentada dentro del
+                expediente y se dispone continuar con el trámite procesal
+                correspondiente, quedando las partes debidamente notificadas.
+              </p>
+
+            </div>
+
+
+            <div class="quick-actions">
+
+              <h3>
+                Acciones Rápidas
+              </h3>
+
+
+              <button type="button">
+                <span>▤</span>
+                Ver Texto Completo
+              </button>
+
+
+              <button type="button">
+                <span>✎</span>
+                Registrar Tarea
+              </button>
+
+
+              <button type="button">
+                <span>↓</span>
+                Descargar Notificación
+              </button>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </aside>
+
+    </section>
+
+  </main>
+
+</div>

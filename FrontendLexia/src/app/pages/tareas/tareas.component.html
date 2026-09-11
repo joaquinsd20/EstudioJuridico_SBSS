@@ -1,0 +1,1351 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- CABECERA -->
+    <header class="page-header">
+
+      <div>
+        <span class="eyebrow">
+          Panel de trabajo
+        </span>
+
+        <h1>
+          Panel de tareas
+        </h1>
+
+        <p class="fecha-hoy">
+          Viernes, 11 de septiembre de 2026
+        </p>
+      </div>
+
+
+      <div class="header-actions">
+
+        <div class="notif-wrap">
+          <button
+            class="notif-button"
+            type="button"
+            aria-label="Notificaciones"
+          >
+            🔔
+
+            <span class="notif-badge">
+              3
+            </span>
+          </button>
+        </div>
+
+
+        <button
+          class="btn-primary"
+          type="button"
+        >
+          <span class="plus">+</span>
+          Nueva tarea
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- ESTADÍSTICAS -->
+    <section class="stats-row">
+
+      <article class="stat-card">
+
+        <span class="stat-icon warning">
+          ⏳
+        </span>
+
+        <div>
+          <strong>12</strong>
+
+          <span>
+            Tareas por vencer (6 sem.)
+          </span>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-icon danger">
+          ⚠
+        </span>
+
+        <div>
+          <strong>3</strong>
+
+          <span>
+            Plazos vencidos
+          </span>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-icon primary">
+          📅
+        </span>
+
+        <div>
+          <strong>5</strong>
+
+          <span>
+            Plazos por vencer
+          </span>
+        </div>
+
+      </article>
+
+
+      <article class="stat-card">
+
+        <span class="stat-icon info">
+          🗓
+        </span>
+
+        <div>
+          <strong>4</strong>
+
+          <span>
+            Eventos de la semana
+          </span>
+        </div>
+
+      </article>
+
+    </section>
+
+
+    <!-- CONTENIDO -->
+    <section class="dashboard-grid">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <div class="left-col">
+
+        <!-- GRÁFICO -->
+        <section class="panel chart-panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Proyección
+              </span>
+
+              <h2>
+                Tareas por vencer por semana
+              </h2>
+
+              <p>
+                Número de tareas con vencimiento en las próximas 6 semanas.
+              </p>
+            </div>
+
+            <span class="panel-number">
+              01
+            </span>
+
+          </div>
+
+
+          <div class="chart-body">
+
+            <div class="bar-track">
+
+              <div class="bar-col">
+                <span class="bar-value">2</span>
+                <div class="bar-fill h-35"></div>
+                <span class="bar-label">Sem. 1</span>
+              </div>
+
+              <div class="bar-col">
+                <span class="bar-value">4</span>
+                <div class="bar-fill h-65"></div>
+                <span class="bar-label">Sem. 2</span>
+              </div>
+
+              <div class="bar-col">
+                <span class="bar-value">3</span>
+                <div class="bar-fill h-50"></div>
+                <span class="bar-label">Sem. 3</span>
+              </div>
+
+              <div class="bar-col">
+                <span class="bar-value">1</span>
+                <div class="bar-fill h-22"></div>
+                <span class="bar-label">Sem. 4</span>
+              </div>
+
+              <div class="bar-col">
+                <span class="bar-value">2</span>
+                <div class="bar-fill h-35"></div>
+                <span class="bar-label">Sem. 5</span>
+              </div>
+
+              <div class="bar-col">
+                <span class="bar-value">0</span>
+                <div class="bar-fill h-8"></div>
+                <span class="bar-label">Sem. 6</span>
+              </div>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- TAREAS -->
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Organización
+              </span>
+
+              <h2>
+                Tareas y asignaciones
+              </h2>
+
+              <p>
+                8 tareas registradas
+              </p>
+            </div>
+
+            <span class="panel-number">
+              02
+            </span>
+
+          </div>
+
+
+          <!-- FILTROS SOLO VISUALES -->
+          <div class="filters">
+
+            <div class="search-box">
+              <span>⌕</span>
+
+              <input
+                type="search"
+                placeholder="Buscar por título, expediente o responsable"
+              >
+            </div>
+
+
+            <select class="estado-select">
+              <option>Todos los estados</option>
+              <option>Pendiente</option>
+              <option>En progreso</option>
+              <option>En revisión</option>
+              <option>Completada</option>
+            </select>
+
+
+            <select class="estado-select">
+              <option>Todos los responsables</option>
+              <option>Sofía Ramírez</option>
+              <option>Ana María Fernández</option>
+              <option>Luis Torres</option>
+              <option>Ana Morales</option>
+            </select>
+
+
+            <label class="date-filtro">
+              <span>Vence desde</span>
+              <input type="date">
+            </label>
+
+
+            <label class="date-filtro">
+              <span>Vence hasta</span>
+              <input type="date">
+            </label>
+
+          </div>
+
+
+          <!-- CAMBIO DE VISTA SOLO VISUAL -->
+          <div class="vista-tabs">
+
+            <button
+              class="active"
+              type="button"
+            >
+              Kanban
+            </button>
+
+            <button type="button">
+              Tabla
+            </button>
+
+            <button
+              class="export-btn"
+              type="button"
+            >
+              Exportar CSV
+            </button>
+
+          </div>
+
+
+          <!-- KANBAN -->
+          <div class="kanban">
+
+            <!-- PENDIENTES -->
+            <section class="kanban-col">
+
+              <div class="kanban-col-head pending">
+                <span class="kanban-dot"></span>
+
+                <strong>
+                  Pendientes
+                </strong>
+
+                <span class="kanban-count">
+                  2
+                </span>
+              </div>
+
+
+              <div class="kanban-cards">
+
+                <article class="kanban-card priority-urgente vencida">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority urgent">
+                      URGENTE
+                    </span>
+
+                    <span class="kanban-fecha overdue">
+                      09 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Presentar escrito de absolución
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Preparar y revisar el escrito antes de la presentación.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 01452-2026 · Alimentos
+                  </span>
+
+
+                  <div class="kanban-progress">
+
+                    <div class="kanban-progress-bar">
+                      <div class="kanban-progress-fill p-50"></div>
+                    </div>
+
+                    <span class="kanban-progress-text">
+                      2/4
+                    </span>
+
+                  </div>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar purple">
+                        SR
+                      </span>
+
+                      <span>
+                        Sofía Ramírez
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+
+                <article class="kanban-card priority-alta">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority high">
+                      ALTA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      14 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Revisar expediente laboral
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Verificar anexos y antecedentes del cliente.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 00891-2026 · Laboral
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar blue">
+                        AF
+                      </span>
+
+                      <span>
+                        Ana María Fernández
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+              </div>
+
+            </section>
+
+
+            <!-- EN PROGRESO -->
+            <section class="kanban-col">
+
+              <div class="kanban-col-head progress">
+                <span class="kanban-dot"></span>
+
+                <strong>
+                  En progreso
+                </strong>
+
+                <span class="kanban-count">
+                  2
+                </span>
+              </div>
+
+
+              <div class="kanban-cards">
+
+                <article class="kanban-card priority-media">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority medium">
+                      MEDIA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      17 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Elaborar informe de audiencia
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Resumen de acuerdos y próximos pasos procesales.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 02388-2025 · Civil
+                  </span>
+
+
+                  <div class="kanban-progress">
+
+                    <div class="kanban-progress-bar">
+                      <div class="kanban-progress-fill p-66"></div>
+                    </div>
+
+                    <span class="kanban-progress-text">
+                      2/3
+                    </span>
+
+                  </div>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar cyan">
+                        LT
+                      </span>
+
+                      <span>
+                        Luis Torres
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+
+                <article class="kanban-card priority-alta">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority high">
+                      ALTA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      18 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Preparar medios probatorios
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Organizar documentos para la audiencia programada.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 03321-2024 · Familia
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar orange">
+                        AM
+                      </span>
+
+                      <span>
+                        Ana Morales
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+              </div>
+
+            </section>
+
+
+            <!-- EN REVISIÓN -->
+            <section class="kanban-col">
+
+              <div class="kanban-col-head review">
+                <span class="kanban-dot"></span>
+
+                <strong>
+                  En revisión
+                </strong>
+
+                <span class="kanban-count">
+                  2
+                </span>
+              </div>
+
+
+              <div class="kanban-cards">
+
+                <article class="kanban-card priority-media">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority medium">
+                      MEDIA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      19 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Revisar contrato de servicios
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Validar cláusulas y observaciones del cliente.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 00521-2024 · Civil
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar green">
+                        JR
+                      </span>
+
+                      <span>
+                        Jorge Ruiz
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+
+                <article class="kanban-card priority-baja">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag priority low">
+                      BAJA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      23 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Actualizar datos del expediente
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Completar información pendiente en la ficha jurídica.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 01780-2026 · Administrativo
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar pink">
+                        DV
+                      </span>
+
+                      <span>
+                        Daniela Vargas
+                      </span>
+                    </div>
+
+                    <button
+                      class="btn-link"
+                      type="button"
+                    >
+                      •••
+                    </button>
+
+                  </div>
+
+                </article>
+
+              </div>
+
+            </section>
+
+
+            <!-- COMPLETADAS -->
+            <section class="kanban-col">
+
+              <div class="kanban-col-head completed">
+                <span class="kanban-dot"></span>
+
+                <strong>
+                  Completadas
+                </strong>
+
+                <span class="kanban-count">
+                  2
+                </span>
+              </div>
+
+
+              <div class="kanban-cards">
+
+                <article class="kanban-card completed-card">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag completed-tag">
+                      COMPLETADA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      08 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Registrar resolución judicial
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Resolución incorporada al expediente.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 01452-2026 · Alimentos
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar purple">
+                        SR
+                      </span>
+
+                      <span>
+                        Sofía Ramírez
+                      </span>
+                    </div>
+
+                    <span class="task-check">
+                      ✓
+                    </span>
+
+                  </div>
+
+                </article>
+
+
+                <article class="kanban-card completed-card">
+
+                  <div class="kanban-card-top">
+
+                    <span class="tag completed-tag">
+                      COMPLETADA
+                    </span>
+
+                    <span class="kanban-fecha">
+                      07 sep.
+                    </span>
+
+                  </div>
+
+                  <strong class="kanban-titulo">
+                    Contactar al cliente
+                  </strong>
+
+                  <span class="kanban-sub">
+                    Coordinación realizada para próxima audiencia.
+                  </span>
+
+                  <span class="kanban-sub">
+                    EXP. 00332-2026 · Daños
+                  </span>
+
+
+                  <div class="kanban-card-meta">
+
+                    <div class="kanban-responsable">
+                      <span class="kanban-avatar cyan">
+                        LT
+                      </span>
+
+                      <span>
+                        Luis Torres
+                      </span>
+                    </div>
+
+                    <span class="task-check">
+                      ✓
+                    </span>
+
+                  </div>
+
+                </article>
+
+              </div>
+
+            </section>
+
+          </div>
+
+
+          <!-- RESUMEN TABULAR SOLO VISUAL -->
+          <div class="table-summary">
+
+            <div class="table-summary-header">
+              <strong>
+                Resumen de tareas
+              </strong>
+
+              <span>
+                Vista complementaria
+              </span>
+            </div>
+
+            <div class="table-wrap">
+
+              <table class="tareas-table">
+
+                <thead>
+                  <tr>
+                    <th>Tarea</th>
+                    <th>Expediente</th>
+                    <th>Asignación</th>
+                    <th>Prioridad</th>
+                    <th>Vence</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+
+
+                <tbody>
+
+                  <tr>
+                    <td>
+                      <strong class="tarea-titulo">
+                        Presentar escrito de absolución
+                      </strong>
+
+                      <span class="tarea-sub">
+                        2/4 subtareas
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="codigo">
+                        EXP. 01452-2026
+                      </span>
+
+                      <span class="tarea-sub">
+                        Alimentos
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tarea-sub">
+                        Sofía Ramírez
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tag priority urgent">
+                        URGENTE
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="due overdue">
+                        09 sep.
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="state-badge pending-state">
+                        Pendiente
+                      </span>
+                    </td>
+                  </tr>
+
+
+                  <tr>
+                    <td>
+                      <strong class="tarea-titulo">
+                        Elaborar informe de audiencia
+                      </strong>
+
+                      <span class="tarea-sub">
+                        2/3 subtareas
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="codigo">
+                        EXP. 02388-2025
+                      </span>
+
+                      <span class="tarea-sub">
+                        Civil
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tarea-sub">
+                        Luis Torres
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tag priority medium">
+                        MEDIA
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="due">
+                        17 sep.
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="state-badge progress-state">
+                        En progreso
+                      </span>
+                    </td>
+                  </tr>
+
+
+                  <tr>
+                    <td>
+                      <strong class="tarea-titulo">
+                        Registrar resolución judicial
+                      </strong>
+
+                      <span class="tarea-sub">
+                        Finalizada
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="codigo">
+                        EXP. 01452-2026
+                      </span>
+
+                      <span class="tarea-sub">
+                        Alimentos
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tarea-sub">
+                        Sofía Ramírez
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="tag priority low">
+                        BAJA
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="due">
+                        08 sep.
+                      </span>
+                    </td>
+
+                    <td>
+                      <span class="state-badge completed-state">
+                        Completada
+                      </span>
+                    </td>
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+          </div>
+
+        </section>
+
+      </div>
+
+
+      <!-- COLUMNA DERECHA -->
+      <aside class="right-col">
+
+        <!-- DETALLE EVENTO -->
+        <section class="panel evento-detalle">
+
+          <div class="panel-header">
+
+            <div>
+              <span class="panel-kicker">
+                Agenda vinculada
+              </span>
+
+              <h2>
+                Detalle del evento
+              </h2>
+
+              <p>
+                Audiencia seleccionada de esta semana
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="detalle-body">
+
+            <div class="detalle-audiencia">
+
+              <span class="audiencia-icon">
+                ⚖
+              </span>
+
+              <div>
+                <strong>
+                  Audiencia de Conciliación
+                </strong>
+
+                <span>
+                  14 sep. · 10:30 a. m.
+                </span>
+              </div>
+
+            </div>
+
+
+            <dl class="detalle-grid">
+
+              <div>
+                <dt>Expediente</dt>
+                <dd>
+                  <strong>EXP. 01452-2026</strong>
+                  · Alimentos
+                </dd>
+              </div>
+
+              <div>
+                <dt>Lugar</dt>
+                <dd>
+                  2° Juzgado de Familia
+                </dd>
+              </div>
+
+              <div>
+                <dt>Cliente</dt>
+                <dd>
+                  Caso Fernández
+                </dd>
+              </div>
+
+              <div>
+                <dt>Abogado</dt>
+                <dd>
+                  Sofía Ramírez
+                </dd>
+              </div>
+
+            </dl>
+
+          </div>
+
+        </section>
+
+
+        <!-- EVENTOS -->
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <h2>
+                Eventos próximos de la semana
+              </h2>
+
+              <p>
+                4 eventos
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="lista">
+
+            <div class="lista-item active">
+
+              <span class="evento-dia">
+                14 sep.
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  Audiencia de Conciliación
+                </strong>
+
+                <span>
+                  EXP. 01452-2026 · Alimentos
+                </span>
+              </div>
+
+              <span class="evento-hora">
+                10:30
+              </span>
+
+            </div>
+
+
+            <div class="lista-item">
+
+              <span class="evento-dia">
+                15 sep.
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  Reunión con cliente
+                </strong>
+
+                <span>
+                  EXP. 00891-2026 · Laboral
+                </span>
+              </div>
+
+              <span class="evento-hora">
+                15:00
+              </span>
+
+            </div>
+
+
+            <div class="lista-item">
+
+              <span class="evento-dia">
+                17 sep.
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  Audiencia virtual
+                </strong>
+
+                <span>
+                  EXP. 02388-2025 · Civil
+                </span>
+              </div>
+
+              <span class="evento-hora">
+                09:00
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- ALERTAS -->
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <h2>
+                Alerta de plazos
+              </h2>
+
+              <p>
+                Vencidos y próximos 7 días
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="lista">
+
+            <div class="grupo-titulo">
+              Vencidos
+            </div>
+
+
+            <div class="lista-item">
+
+              <span class="plazo-dias vencido">
+                hace 2d
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  EXP. 01452-2026 · Alimentos
+                </strong>
+
+                <span>
+                  Venció 09 sep.
+                </span>
+              </div>
+
+              <span class="tag risk">
+                Crítico
+              </span>
+
+            </div>
+
+
+            <div class="grupo-titulo">
+              Próximos
+            </div>
+
+
+            <div class="lista-item">
+
+              <span class="plazo-dias">
+                3d
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  EXP. 03321-2024 · Familia
+                </strong>
+
+                <span>
+                  Vence 14 sep.
+                </span>
+              </div>
+
+              <span class="tag">
+                Alto
+              </span>
+
+            </div>
+
+
+            <div class="lista-item">
+
+              <span class="plazo-dias">
+                6d
+              </span>
+
+              <div class="evento-info">
+                <strong>
+                  EXP. 02388-2025 · Civil
+                </strong>
+
+                <span>
+                  Vence 17 sep.
+                </span>
+              </div>
+
+              <span class="tag">
+                Medio
+              </span>
+
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <!-- NOTAS -->
+        <section class="panel">
+
+          <div class="panel-header">
+
+            <div>
+              <h2>
+                Notas de contactos recientes
+              </h2>
+
+              <p>
+                3 comentarios
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="lista">
+
+            <article class="nota-item">
+              <span class="nota-text">
+                Cliente confirmó asistencia a la audiencia del lunes.
+              </span>
+
+              <span class="nota-meta">
+                Sofía Ramírez · 11 sep. · EXP. 01452-2026
+              </span>
+            </article>
+
+
+            <article class="nota-item">
+              <span class="nota-text">
+                Pendiente recibir documento firmado del representante legal.
+              </span>
+
+              <span class="nota-meta">
+                Ana María Fernández · 10 sep. · EXP. 00891-2026
+              </span>
+            </article>
+
+
+            <article class="nota-item">
+              <span class="nota-text">
+                Se actualizó la estrategia para la próxima audiencia.
+              </span>
+
+              <span class="nota-meta">
+                Luis Torres · 09 sep. · EXP. 02388-2025
+              </span>
+            </article>
+
+          </div>
+
+        </section>
+
+      </aside>
+
+    </section>
+
+  </main>
+
+</div>

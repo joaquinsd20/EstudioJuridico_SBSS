@@ -1,0 +1,878 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <div class="reportes-wrapper">
+
+      <!-- ÁREA PRINCIPAL -->
+      <section class="main-report-panel">
+
+        <!-- ENCABEZADO -->
+        <header class="header-section">
+
+          <div class="header-titles">
+
+            <span class="eyebrow">
+              Analítica
+            </span>
+
+            <h1 class="module-title">
+              Reportes, Analítica y Rendimiento del Estudio
+            </h1>
+
+            <p class="module-subtitle">
+              Visión global y detallada de ingresos, casos y tiempos
+              del estudio jurídico.
+            </p>
+
+          </div>
+
+
+          <!-- FILTROS VISUALES -->
+          <div class="filters-row">
+
+            <div class="filter-group">
+              <label>
+                Rango de Fechas
+              </label>
+
+              <select class="custom-select">
+                <option>Últimos 3 Meses</option>
+                <option>Este Mes</option>
+                <option>Año en Curso</option>
+              </select>
+            </div>
+
+
+            <div class="filter-group">
+              <label>
+                Abogado
+              </label>
+
+              <select class="custom-select">
+                <option>Todos los Abogados</option>
+                <option>Sofía Ramírez</option>
+                <option>Ana María Fernández</option>
+              </select>
+            </div>
+
+
+            <div class="filter-group">
+              <label>
+                Materia
+              </label>
+
+              <select class="custom-select">
+                <option>Todas las Materias</option>
+                <option>Civil</option>
+                <option>Penal</option>
+                <option>Laboral</option>
+              </select>
+            </div>
+
+
+            <button
+              class="btn-export"
+              type="button"
+            >
+              Exportar Excel / PDF
+            </button>
+
+          </div>
+
+        </header>
+
+
+        <!-- KPIs -->
+        <section class="kpi-grid">
+
+          <article class="kpi-card">
+
+            <span class="kpi-title">
+              Ingresos Totales (Mes)
+            </span>
+
+            <div class="kpi-value-row">
+
+              <span class="kpi-value">
+                $124,850.00
+              </span>
+
+              <span class="kpi-badge positive">
+                +12.4% ▲
+              </span>
+
+            </div>
+
+          </article>
+
+
+          <article class="kpi-card">
+
+            <span class="kpi-title">
+              Casos Cerrados (Mes)
+            </span>
+
+            <div class="kpi-value-row">
+
+              <span class="kpi-value">
+                42
+              </span>
+
+              <span class="kpi-badge positive">
+                +5.4% ▲
+              </span>
+
+            </div>
+
+          </article>
+
+
+          <article class="kpi-card">
+
+            <span class="kpi-title">
+              Horas Facturables (Mes)
+            </span>
+
+            <div class="kpi-value-row">
+
+              <span class="kpi-value">
+                1420
+              </span>
+
+              <span class="kpi-badge positive">
+                +17.2% ▲
+              </span>
+
+            </div>
+
+          </article>
+
+
+          <article class="kpi-card">
+
+            <span class="kpi-title">
+              Tiempo Promedio por Caso
+            </span>
+
+            <div class="kpi-value-row">
+
+              <span class="kpi-value">
+                8.5 meses
+              </span>
+
+              <span class="kpi-badge positive">
+                +13.3% ▲
+              </span>
+
+            </div>
+
+          </article>
+
+        </section>
+
+
+        <!-- GRÁFICOS -->
+        <section class="charts-section">
+
+          <div class="section-heading">
+
+            <div>
+              <span class="section-kicker">
+                Rendimiento
+              </span>
+
+              <h2 class="section-subtitle">
+                Panel Integral de Rendimiento
+              </h2>
+            </div>
+
+            <span class="section-number">
+              01
+            </span>
+
+          </div>
+
+
+          <div class="charts-grid">
+
+            <!-- GRÁFICO 1 -->
+            <article class="chart-card">
+
+              <h3 class="chart-title">
+                Tendencia de Ingresos Mensuales
+              </h3>
+
+              <div class="chart-placeholder line-chart">
+
+                <div class="chart-y-labels">
+                  <span>120k</span>
+                  <span>90k</span>
+                  <span>60k</span>
+                  <span>30k</span>
+                  <span>0</span>
+                </div>
+
+                <div class="line-area">
+
+                  <svg
+                    viewBox="0 0 500 170"
+                    preserveAspectRatio="none"
+                  >
+
+                    <defs>
+                      <linearGradient
+                        id="reportIncomeGradient"
+                        x1="0"
+                        x2="0"
+                        y1="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="0%"
+                          stop-color="#6366f1"
+                          stop-opacity=".22"
+                        ></stop>
+
+                        <stop
+                          offset="100%"
+                          stop-color="#6366f1"
+                          stop-opacity="0"
+                        ></stop>
+                      </linearGradient>
+                    </defs>
+
+                    <path
+                      d="
+                        M0 135
+                        C45 125, 70 100, 110 106
+                        C145 110, 175 78, 210 82
+                        C255 87, 275 52, 315 58
+                        C360 64, 390 42, 430 47
+                        C462 51, 482 35, 500 27
+                        L500 170
+                        L0 170
+                        Z
+                      "
+                      fill="url(#reportIncomeGradient)"
+                    ></path>
+
+                    <path
+                      d="
+                        M0 135
+                        C45 125, 70 100, 110 106
+                        C145 110, 175 78, 210 82
+                        C255 87, 275 52, 315 58
+                        C360 64, 390 42, 430 47
+                        C462 51, 482 35, 500 27
+                      "
+                      fill="none"
+                      stroke="#6366f1"
+                      stroke-width="3"
+                    ></path>
+
+                  </svg>
+
+                  <div class="chart-labels">
+                    <span>E</span>
+                    <span>F</span>
+                    <span>M</span>
+                    <span>A</span>
+                    <span>M</span>
+                    <span>J</span>
+                    <span>J</span>
+                    <span>A</span>
+                    <span>S</span>
+                    <span>O</span>
+                    <span>N</span>
+                    <span>D</span>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </article>
+
+
+            <!-- GRÁFICO 2 -->
+            <article class="chart-card">
+
+              <h3 class="chart-title">
+                Distribución de Casos por Materia
+              </h3>
+
+              <div class="chart-placeholder donut-container">
+
+                <div class="mock-donut">
+
+                  <div class="donut-center">
+                    <strong>
+                      100%
+                    </strong>
+
+                    <span>
+                      Casos
+                    </span>
+                  </div>
+
+                </div>
+
+
+                <ul class="chart-legend">
+
+                  <li>
+                    <span class="dot c-1"></span>
+                    Alimentos
+                    <strong>30%</strong>
+                  </li>
+
+                  <li>
+                    <span class="dot c-2"></span>
+                    Laboral
+                    <strong>25%</strong>
+                  </li>
+
+                  <li>
+                    <span class="dot c-3"></span>
+                    Civil
+                    <strong>20%</strong>
+                  </li>
+
+                  <li>
+                    <span class="dot c-4"></span>
+                    Constitucional
+                    <strong>16%</strong>
+                  </li>
+
+                  <li>
+                    <span class="dot c-5"></span>
+                    Otros
+                    <strong>9%</strong>
+                  </li>
+
+                </ul>
+
+              </div>
+
+            </article>
+
+
+            <!-- GRÁFICO 3 -->
+            <article class="chart-card">
+
+              <h3 class="chart-title">
+                Productividad por Abogado
+              </h3>
+
+              <div class="chart-placeholder bar-chart">
+
+                <div class="bar-item">
+                  <div class="bar-group">
+                    <div class="bar h-80"></div>
+                    <div class="bar h-50 alt"></div>
+                  </div>
+                  <span>SR</span>
+                </div>
+
+                <div class="bar-item">
+                  <div class="bar-group">
+                    <div class="bar h-60"></div>
+                    <div class="bar h-40 alt"></div>
+                  </div>
+                  <span>AF</span>
+                </div>
+
+                <div class="bar-item">
+                  <div class="bar-group">
+                    <div class="bar h-75"></div>
+                    <div class="bar h-70 alt"></div>
+                  </div>
+                  <span>LT</span>
+                </div>
+
+                <div class="bar-item">
+                  <div class="bar-group">
+                    <div class="bar h-45"></div>
+                    <div class="bar h-55 alt"></div>
+                  </div>
+                  <span>AM</span>
+                </div>
+
+              </div>
+
+              <div class="bar-legend">
+                <span>
+                  <i class="legend-square primary"></i>
+                  Casos atendidos
+                </span>
+
+                <span>
+                  <i class="legend-square secondary"></i>
+                  Horas facturables
+                </span>
+              </div>
+
+            </article>
+
+
+            <!-- GRÁFICO 4 -->
+            <article class="chart-card">
+
+              <h3 class="chart-title">
+                Evolución de Tiempos de Resolución
+              </h3>
+
+              <div class="chart-placeholder wave-chart">
+
+                <svg
+                  viewBox="0 0 500 170"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+                    <linearGradient
+                      id="reportTimeGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stop-color="#8b5cf6"
+                        stop-opacity=".20"
+                      ></stop>
+
+                      <stop
+                        offset="100%"
+                        stop-color="#8b5cf6"
+                        stop-opacity="0"
+                      ></stop>
+                    </linearGradient>
+                  </defs>
+
+                  <path
+                    d="
+                      M0 115
+                      C45 82, 80 86, 120 102
+                      C165 118, 205 61, 245 69
+                      C292 79, 320 42, 365 54
+                      C405 65, 440 98, 500 49
+                      L500 170
+                      L0 170
+                      Z
+                    "
+                    fill="url(#reportTimeGradient)"
+                  ></path>
+
+                  <path
+                    d="
+                      M0 115
+                      C45 82, 80 86, 120 102
+                      C165 118, 205 61, 245 69
+                      C292 79, 320 42, 365 54
+                      C405 65, 440 98, 500 49
+                    "
+                    fill="none"
+                    stroke="#7c3aed"
+                    stroke-width="3"
+                  ></path>
+
+                </svg>
+
+                <div class="chart-labels">
+                  <span>E</span>
+                  <span>F</span>
+                  <span>M</span>
+                  <span>A</span>
+                  <span>M</span>
+                  <span>J</span>
+                  <span>J</span>
+                  <span>A</span>
+                  <span>S</span>
+                  <span>O</span>
+                  <span>N</span>
+                  <span>D</span>
+                </div>
+
+              </div>
+
+            </article>
+
+          </div>
+
+        </section>
+
+
+        <!-- TABLA -->
+        <section class="reports-table-card">
+
+          <div class="section-heading table-heading">
+
+            <div>
+              <span class="section-kicker">
+                Historial
+              </span>
+
+              <h2 class="section-subtitle">
+                Resumen de Reportes Detallados Generados
+              </h2>
+
+              <p>
+                3 reportes disponibles
+              </p>
+            </div>
+
+            <span class="section-number">
+              02
+            </span>
+
+          </div>
+
+
+          <div class="table-responsive">
+
+            <table class="custom-table">
+
+              <thead>
+                <tr>
+                  <th>Fecha de Reporte</th>
+                  <th>Abogado Responsable</th>
+                  <th>Materia Principal</th>
+                  <th>Tipo de Reporte</th>
+                  <th>Métricas Clave</th>
+                  <th>Descarga</th>
+                  <th class="text-right">Acciones</th>
+                </tr>
+              </thead>
+
+
+              <tbody>
+
+                <tr>
+
+                  <td>
+                    06/06/2026
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">
+                        SR
+                      </span>
+
+                      <strong>
+                        Sofía Ramírez
+                      </strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="matter-badge food">
+                      Alimentos
+                    </span>
+                  </td>
+
+                  <td>
+                    Rendimiento y Carga
+                  </td>
+
+                  <td>
+                    <strong class="metric-text">
+                      42 Casos - $12,400
+                    </strong>
+                  </td>
+
+                  <td>
+                    <button class="download-btn" type="button">
+                      PDF
+                    </button>
+                  </td>
+
+                  <td class="text-right">
+                    <button class="btn-icon" type="button">
+                      Editar
+                    </button>
+
+                    <button class="btn-icon more" type="button">
+                      •••
+                    </button>
+                  </td>
+
+                </tr>
+
+
+                <tr>
+
+                  <td>
+                    07/06/2026
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="matter-badge labor">
+                      Laboral
+                    </span>
+                  </td>
+
+                  <td>
+                    Productividad
+                  </td>
+
+                  <td>
+                    <strong class="metric-text">
+                      18 Audiencias - 95%
+                    </strong>
+                  </td>
+
+                  <td>
+                    <button class="download-btn" type="button">
+                      PDF
+                    </button>
+                  </td>
+
+                  <td class="text-right">
+                    <button class="btn-icon" type="button">
+                      Editar
+                    </button>
+
+                    <button class="btn-icon more" type="button">
+                      •••
+                    </button>
+                  </td>
+
+                </tr>
+
+
+                <tr>
+
+                  <td>
+                    05/06/2026
+                  </td>
+
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">
+                        SR
+                      </span>
+
+                      <strong>
+                        Sofía Ramírez
+                      </strong>
+                    </div>
+                  </td>
+
+                  <td>
+                    <span class="matter-badge civil">
+                      Civil
+                    </span>
+                  </td>
+
+                  <td>
+                    Ingresos y Cobranzas
+                  </td>
+
+                  <td>
+                    <strong class="metric-text">
+                      S/ 45,000 Facturados
+                    </strong>
+                  </td>
+
+                  <td>
+                    <button class="download-btn" type="button">
+                      PDF
+                    </button>
+                  </td>
+
+                  <td class="text-right">
+                    <button class="btn-icon" type="button">
+                      Editar
+                    </button>
+
+                    <button class="btn-icon more" type="button">
+                      •••
+                    </button>
+                  </td>
+
+                </tr>
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- PANEL DERECHO DEL MÓDULO -->
+      <aside class="details-sidebar">
+
+        <section class="sidebar-card">
+
+          <div class="sidebar-header">
+            <span class="sidebar-icon">
+              ▤
+            </span>
+
+            <h2 class="sidebar-title">
+              Detalles del Último Movimiento
+            </h2>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="detail-label">
+              Expediente
+            </span>
+
+            <span class="detail-value font-bold">
+              01452-2026
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="detail-label">
+              Movimiento
+            </span>
+
+            <span class="detail-value">
+              Resolución N° 0021
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="detail-label">
+              Juzgado
+            </span>
+
+            <span class="detail-value">
+              2° Juzgado Civil
+            </span>
+          </div>
+
+
+          <div class="detail-item">
+            <span class="detail-label">
+              Notificado
+            </span>
+
+            <span class="detail-value">
+              Caso Fernández - Exp. 01452
+            </span>
+          </div>
+
+
+          <div class="detail-box">
+
+            <strong>
+              Resumen del Auto
+            </strong>
+
+            <p>
+              Se declara fundada la solicitud de ampliación de plazo
+              para la presentación de medios probatorios.
+            </p>
+
+          </div>
+
+        </section>
+
+
+        <section class="sidebar-card">
+
+          <div class="sidebar-header">
+            <span class="sidebar-icon actions">
+              ⚡
+            </span>
+
+            <h2 class="sidebar-title">
+              Acciones Rápidas
+            </h2>
+          </div>
+
+
+          <ul class="quick-actions-list">
+
+            <li>
+              <button
+                class="action-btn"
+                type="button"
+              >
+                <span>▤</span>
+                Ver Texto Completo
+              </button>
+            </li>
+
+            <li>
+              <button
+                class="action-btn"
+                type="button"
+              >
+                <span>✓</span>
+                Registrar Tarea
+              </button>
+            </li>
+
+            <li>
+              <button
+                class="action-btn"
+                type="button"
+              >
+                <span>↓</span>
+                Descargar Notificación
+              </button>
+            </li>
+
+          </ul>
+
+        </section>
+
+
+        <section class="sidebar-card summary-card">
+
+          <span class="summary-label">
+            Rendimiento General
+          </span>
+
+          <strong>
+            92%
+          </strong>
+
+          <div class="progress-track">
+            <span></span>
+          </div>
+
+          <small>
+            Indicador visual del periodo seleccionado
+          </small>
+
+        </section>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

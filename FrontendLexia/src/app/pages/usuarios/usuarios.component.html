@@ -1,0 +1,985 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- CABECERA -->
+    <header class="page-header">
+
+      <div>
+        <span class="eyebrow">Administración</span>
+
+        <h1>
+          Gestión de usuarios
+        </h1>
+
+        <p>
+          Registra, consulta y administra visualmente a los usuarios internos de LEXIA.
+        </p>
+      </div>
+
+      <button
+        class="btn-primary"
+        type="button"
+      >
+        <span class="plus">+</span>
+        Nuevo usuario
+      </button>
+
+    </header>
+
+
+    <!-- ESTADÍSTICAS -->
+    <section class="stats-grid">
+
+      <article class="stat-card">
+        <span class="stat-label">
+          Total usuarios
+        </span>
+
+        <strong>
+          8
+        </strong>
+
+        <small>
+          Registros en el sistema
+        </small>
+      </article>
+
+
+      <article class="stat-card">
+        <span class="stat-label">
+          Activos
+        </span>
+
+        <strong>
+          7
+        </strong>
+
+        <small>
+          Con acceso habilitado
+        </small>
+      </article>
+
+
+      <article class="stat-card">
+        <span class="stat-label">
+          Inactivos
+        </span>
+
+        <strong>
+          1
+        </strong>
+
+        <small>
+          Sin acceso al sistema
+        </small>
+      </article>
+
+
+      <article class="stat-card">
+        <span class="stat-label">
+          Dominio corporativo
+        </span>
+
+        <strong class="domain-stat">
+          @lexia.com
+        </strong>
+
+        <small>
+          Único dominio permitido
+        </small>
+      </article>
+
+    </section>
+
+
+    <!-- PANEL DE USUARIOS -->
+    <section class="panel">
+
+      <div class="panel-header">
+
+        <div>
+          <h2>
+            Usuarios registrados
+          </h2>
+
+          <p>
+            8 usuarios encontrados
+          </p>
+        </div>
+
+      </div>
+
+
+      <!-- FILTROS SOLO VISUALES -->
+      <div class="filters">
+
+        <div class="search-box">
+          <span>⌕</span>
+
+          <input
+            type="search"
+            placeholder="Buscar por código, DNI, nombre, correo o teléfono"
+          >
+        </div>
+
+
+        <select aria-label="Filtrar por rol">
+
+          <option>
+            Todos los roles
+          </option>
+
+          <option>
+            Administrador
+          </option>
+
+          <option>
+            Abogado
+          </option>
+
+          <option>
+            Asistente
+          </option>
+
+          <option>
+            Recepción
+          </option>
+
+        </select>
+
+
+        <select aria-label="Filtrar por estado">
+
+          <option>
+            Todos los estados
+          </option>
+
+          <option>
+            Activos
+          </option>
+
+          <option>
+            Inactivos
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <!-- TABLA -->
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>Código</th>
+              <th>Usuario</th>
+              <th>DNI</th>
+              <th>Contacto</th>
+              <th>Rol</th>
+              <th>Salario</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            <!-- USUARIO 1 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-001
+                </strong>
+
+                <small class="date-small">
+                  10/01/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    CM
+                  </div>
+
+                  <div>
+                    <strong>
+                      Carlos Mendoza Rojas
+                    </strong>
+
+                    <small>
+                      carlos.mendoza@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                45876231
+              </td>
+
+
+              <td>
+                <span>
+                  +51 987 654 321
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 987 654 321
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Administrador
+                </span>
+              </td>
+
+
+              <td>
+                S/ 4,500.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button
+                    class="icon-action view"
+                    type="button"
+                  >
+                    Ver
+                  </button>
+
+                  <button
+                    class="icon-action edit"
+                    type="button"
+                  >
+                    Editar
+                  </button>
+
+                  <button
+                    class="icon-action cv"
+                    type="button"
+                  >
+                    CV
+                  </button>
+
+                  <button
+                    class="icon-action delete"
+                    type="button"
+                  >
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 2 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-002
+                </strong>
+
+                <small class="date-small">
+                  15/01/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    AF
+                  </div>
+
+                  <div>
+                    <strong>
+                      Ana María Fernández
+                    </strong>
+
+                    <small>
+                      ana.fernandez@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                70214569
+              </td>
+
+
+              <td>
+                <span>
+                  +51 956 231 478
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 956 231 478
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Abogado
+                </span>
+              </td>
+
+
+              <td>
+                S/ 3,800.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 3 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-003
+                </strong>
+
+                <small class="date-small">
+                  22/01/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    LT
+                  </div>
+
+                  <div>
+                    <strong>
+                      Luis Torres Salazar
+                    </strong>
+
+                    <small>
+                      luis.torres@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                43125698
+              </td>
+
+
+              <td>
+                <span>
+                  +51 978 541 236
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 978 541 236
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Abogado
+                </span>
+              </td>
+
+
+              <td>
+                S/ 3,600.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 4 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-004
+                </strong>
+
+                <small class="date-small">
+                  05/02/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    AM
+                  </div>
+
+                  <div>
+                    <strong>
+                      Ana Morales Vega
+                    </strong>
+
+                    <small>
+                      ana.morales@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                48362174
+              </td>
+
+
+              <td>
+                <span>
+                  +51 944 365 821
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 944 365 821
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Asistente
+                </span>
+              </td>
+
+
+              <td>
+                S/ 2,400.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 5 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-005
+                </strong>
+
+                <small class="date-small">
+                  16/02/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    SR
+                  </div>
+
+                  <div>
+                    <strong>
+                      Sofía Ramírez Díaz
+                    </strong>
+
+                    <small>
+                      sofia.ramirez@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                72541863
+              </td>
+
+
+              <td>
+                <span>
+                  +51 966 721 345
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 966 721 345
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Recepción
+                </span>
+              </td>
+
+
+              <td>
+                S/ 1,900.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 6 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-006
+                </strong>
+
+                <small class="date-small">
+                  01/03/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    JR
+                  </div>
+
+                  <div>
+                    <strong>
+                      Jorge Ruiz Campos
+                    </strong>
+
+                    <small>
+                      jorge.ruiz@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                76451238
+              </td>
+
+
+              <td>
+                <span>
+                  +51 955 482 136
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 955 482 136
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Asistente
+                </span>
+              </td>
+
+
+              <td>
+                S/ 2,300.00
+              </td>
+
+
+              <td>
+                <span class="status off">
+                  <i></i>
+                  Inactivo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action restore" type="button">
+                    Reactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 7 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-007
+                </strong>
+
+                <small class="date-small">
+                  18/03/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    DV
+                  </div>
+
+                  <div>
+                    <strong>
+                      Daniela Vargas León
+                    </strong>
+
+                    <small>
+                      daniela.vargas@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                71236548
+              </td>
+
+
+              <td>
+                <span>
+                  +51 922 617 354
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 922 617 354
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Abogado
+                </span>
+              </td>
+
+
+              <td>
+                S/ 3,500.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+
+            <!-- USUARIO 8 -->
+            <tr>
+
+              <td>
+                <strong class="code">
+                  USR-008
+                </strong>
+
+                <small class="date-small">
+                  03/04/2026
+                </small>
+              </td>
+
+
+              <td>
+                <div class="person-cell">
+
+                  <div class="mini-avatar">
+                    MP
+                  </div>
+
+                  <div>
+                    <strong>
+                      Miguel Pérez Silva
+                    </strong>
+
+                    <small>
+                      miguel.perez@lexia.com
+                    </small>
+                  </div>
+
+                </div>
+              </td>
+
+
+              <td>
+                74125896
+              </td>
+
+
+              <td>
+                <span>
+                  +51 933 258 741
+                </span>
+
+                <small class="contact-small">
+                  WhatsApp: +51 933 258 741
+                </small>
+              </td>
+
+
+              <td>
+                <span class="role-pill">
+                  Abogado
+                </span>
+              </td>
+
+
+              <td>
+                S/ 3,700.00
+              </td>
+
+
+              <td>
+                <span class="status">
+                  <i></i>
+                  Activo
+                </span>
+              </td>
+
+
+              <td>
+                <div class="row-actions">
+
+                  <button class="icon-action view" type="button">
+                    Ver
+                  </button>
+
+                  <button class="icon-action edit" type="button">
+                    Editar
+                  </button>
+
+                  <button class="icon-action cv" type="button">
+                    CV
+                  </button>
+
+                  <button class="icon-action delete" type="button">
+                    Desactivar
+                  </button>
+
+                </div>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

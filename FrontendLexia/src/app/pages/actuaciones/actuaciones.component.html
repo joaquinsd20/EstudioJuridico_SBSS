@@ -1,0 +1,1504 @@
+<div class="layout-wrapper">
+
+  <!-- ===================================================== -->
+  <!-- PANEL REUTILIZABLE -->
+  <!-- ===================================================== -->
+
+  <app-panel></app-panel>
+
+
+  <!-- ===================================================== -->
+  <!-- CONTENIDO PRINCIPAL -->
+  <!-- ===================================================== -->
+
+  <main class="main-content">
+
+
+    <!-- =================================================== -->
+    <!-- TÍTULO -->
+    <!-- =================================================== -->
+
+    <header class="actuaciones-header">
+
+      <h1>
+        Gestión Integral de Actuaciones
+      </h1>
+
+      <p>
+        Consulta y organiza las actuaciones realizadas en los expedientes jurídicos.
+      </p>
+
+    </header>
+
+
+    <!-- =================================================== -->
+    <!-- FILTROS SOLO VISUALES -->
+    <!-- =================================================== -->
+
+    <section class="filters-card">
+
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Tipo de Actuación
+          </option>
+
+          <option>
+            Redacción de Escrito
+          </option>
+
+          <option>
+            Presentación Demanda
+          </option>
+
+          <option>
+            Audiencia
+          </option>
+
+          <option>
+            Presentación de Escrito
+          </option>
+
+          <option>
+            Reunión
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <input
+          type="text"
+          placeholder="Cliente"
+        >
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <input
+          type="text"
+          placeholder="Expediente"
+        >
+
+      </div>
+
+
+      <div class="filter-control">
+
+        <select>
+
+          <option>
+            Estado
+          </option>
+
+          <option>
+            En Trámite
+          </option>
+
+          <option>
+            Completado
+          </option>
+
+          <option>
+            Pendiente
+          </option>
+
+        </select>
+
+      </div>
+
+
+      <button
+        type="button"
+        class="clear-filter"
+        title="Limpiar filtros"
+      >
+        ×
+      </button>
+
+    </section>
+
+
+    <!-- =================================================== -->
+    <!-- LAYOUT PRINCIPAL -->
+    <!-- =================================================== -->
+
+    <div class="actuaciones-layout">
+
+
+      <!-- ================================================= -->
+      <!-- COLUMNA IZQUIERDA -->
+      <!-- ================================================= -->
+
+      <div class="actuaciones-left">
+
+
+        <!-- =============================================== -->
+        <!-- TABLA -->
+        <!-- =============================================== -->
+
+        <section class="actuaciones-card table-card">
+
+
+          <div class="table-header">
+
+            <div>
+
+              <h2>
+                Últimas Actuaciones Registradas
+              </h2>
+
+              <span>
+                7 actuaciones encontradas
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <div class="table-wrapper">
+
+            <table class="actuaciones-table">
+
+
+              <thead>
+
+                <tr>
+
+                  <th>
+                    Fecha/Hora
+                  </th>
+
+                  <th>
+                    Tipo de Actuación
+                  </th>
+
+                  <th>
+                    Expediente / Caso
+                  </th>
+
+                  <th>
+                    Asunto / Tarea
+                  </th>
+
+                  <th>
+                    Abogado Responsable
+                  </th>
+
+                  <th>
+                    Estado
+                  </th>
+
+                </tr>
+
+              </thead>
+
+
+              <tbody>
+
+
+                <!-- ACTUACIÓN 1 -->
+
+                <tr class="selected-row">
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        06/02/2024
+                      </strong>
+
+                      <span>
+                        12:00
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon">
+                        ▤
+                      </span>
+
+                      <strong>
+                        Redacción de Escrito
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Fernández
+                      </strong>
+
+                      <span>
+                        EXP. 01452
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Redacción de Escrito en Caso Fernández
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge processing">
+                      En Trámite
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 2 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        09/02/2024
+                      </strong>
+
+                      <span>
+                        17:30
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon">
+                        ▤
+                      </span>
+
+                      <strong>
+                        Presentación Demanda
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Ramírez
+                      </strong>
+
+                      <span>
+                        EXP. 00521
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Presentación Demanda
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge completed">
+                      Completado
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 3 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        13/02/2024
+                      </strong>
+
+                      <span>
+                        18:30
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon">
+                        ▤
+                      </span>
+
+                      <strong>
+                        Presentación Demanda
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Ramírez
+                      </strong>
+
+                      <span>
+                        EXP. 00521
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Presentación de Demanda en vía Escrito
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge pending">
+                      Pendiente
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 4 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        16/02/2024
+                      </strong>
+
+                      <span>
+                        17:30
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon audiencia">
+                        ▣
+                      </span>
+
+                      <strong>
+                        Audiencia Testimonial
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Torres
+                      </strong>
+
+                      <span>
+                        EXP. 00332
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Audiencia Testimonial - Caso Torres
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge pending">
+                      Pendiente
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 5 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        20/02/2024
+                      </strong>
+
+                      <span>
+                        10:00
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon audiencia">
+                        ▣
+                      </span>
+
+                      <strong>
+                        Audiencia
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Fernández
+                      </strong>
+
+                      <span>
+                        EXP. 01452
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Audiencia de conciliación
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge processing">
+                      En Trámite
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 6 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        22/02/2024
+                      </strong>
+
+                      <span>
+                        09:15
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon">
+                        ▤
+                      </span>
+
+                      <strong>
+                        Presentación de Escrito
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso López
+                      </strong>
+
+                      <span>
+                        EXP. 02388
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Presentación de escrito complementario
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        LT
+                      </span>
+
+                      <strong>
+                        Luis Torres
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge completed">
+                      Completado
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+                <!-- ACTUACIÓN 7 -->
+
+                <tr>
+
+                  <td>
+
+                    <div class="date-cell">
+
+                      <strong>
+                        24/02/2024
+                      </strong>
+
+                      <span>
+                        15:00
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="type-cell">
+
+                      <span class="actuacion-icon">
+                        ▤
+                      </span>
+
+                      <strong>
+                        Reunión con Cliente
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="case-cell">
+
+                      <strong>
+                        Caso Morales
+                      </strong>
+
+                      <span>
+                        EXP. 03321
+                      </span>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="subject-text">
+                      Revisión de estrategia del expediente
+                    </span>
+
+                  </td>
+
+
+                  <td>
+
+                    <div class="lawyer-cell">
+
+                      <span class="lawyer-avatar">
+                        AF
+                      </span>
+
+                      <strong>
+                        Ana María Fernández
+                      </strong>
+
+                    </div>
+
+                  </td>
+
+
+                  <td>
+
+                    <span class="status-badge pending">
+                      Pendiente
+                    </span>
+
+                  </td>
+
+                </tr>
+
+
+              </tbody>
+
+            </table>
+
+          </div>
+
+        </section>
+
+
+        <!-- ================================================= -->
+        <!-- GRÁFICOS -->
+        <!-- ================================================= -->
+
+        <div class="bottom-grid">
+
+
+          <!-- DONUT -->
+
+          <section class="actuaciones-card chart-card">
+
+            <div class="chart-header">
+
+              <span>
+                ▣
+              </span>
+
+              <h3>
+                Distribución de Tiempo por Actividad
+              </h3>
+
+            </div>
+
+
+            <div class="donut-wrapper">
+
+
+              <div class="activity-donut">
+
+                <div class="donut-center">
+
+                  <strong>
+                    100%
+                  </strong>
+
+                  <span>
+                    Actividad
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="activity-legend">
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-circle green"></i>
+                    Actuaciones
+                  </span>
+
+                  <strong>
+                    25%
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-circle red"></i>
+                    Reuniones de Clientes
+                  </span>
+
+                  <strong>
+                    20%
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-circle orange"></i>
+                    Escritos y Tareas
+                  </span>
+
+                  <strong>
+                    25%
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-circle gray"></i>
+                    Prospecto
+                  </span>
+
+                  <strong>
+                    15%
+                  </strong>
+
+                </div>
+
+
+                <div>
+
+                  <span>
+                    <i class="legend-circle purple"></i>
+                    Atención
+                  </span>
+
+                  <strong>
+                    15%
+                  </strong>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- GRÁFICO DE LÍNEA -->
+
+          <section class="actuaciones-card chart-card">
+
+            <div class="chart-header">
+
+              <span>
+                ↗
+              </span>
+
+              <h3>
+                Evolución de Eventos Semanales
+              </h3>
+
+            </div>
+
+
+            <div class="line-chart-container">
+
+
+              <div class="chart-y">
+
+                <span>12</span>
+                <span>10</span>
+                <span>8</span>
+                <span>6</span>
+                <span>4</span>
+                <span>2</span>
+                <span>0</span>
+
+              </div>
+
+
+              <div class="line-chart-area">
+
+                <svg
+                  viewBox="0 0 500 190"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+
+                    <linearGradient
+                      id="actuacionesGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+
+                      <stop
+                        offset="0%"
+                        stop-color="#7643d5"
+                        stop-opacity=".28"
+                      ></stop>
+
+                      <stop
+                        offset="100%"
+                        stop-color="#7643d5"
+                        stop-opacity="0"
+                      ></stop>
+
+                    </linearGradient>
+
+                  </defs>
+
+
+                  <path
+                    d="
+                      M0 155
+                      C45 95, 75 80, 120 88
+                      C165 95, 180 130, 220 126
+                      C260 122, 260 45, 315 44
+                      C365 42, 375 45, 405 83
+                      C435 120, 470 88, 500 45
+                      L500 190
+                      L0 190 Z
+                    "
+                    fill="url(#actuacionesGradient)"
+                  ></path>
+
+
+                  <path
+                    d="
+                      M0 155
+                      C45 95, 75 80, 120 88
+                      C165 95, 180 130, 220 126
+                      C260 122, 260 45, 315 44
+                      C365 42, 375 45, 405 83
+                      C435 120, 470 88, 500 45
+                    "
+                    fill="none"
+                    stroke="#5e367b"
+                    stroke-width="3"
+                  ></path>
+
+                </svg>
+
+
+                <div class="chart-months">
+
+                  <span>Ene</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Abr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </div>
+
+
+      <!-- ================================================= -->
+      <!-- TAREAS PENDIENTES -->
+      <!-- ================================================= -->
+
+      <aside class="tasks-panel">
+
+
+        <div class="tasks-header">
+
+          <h3>
+            Vista Previa de Tareas Pendientes
+          </h3>
+
+        </div>
+
+
+        <div class="task-item">
+
+          <strong>
+            Actuaciones de Escrito en casos urgentes
+          </strong>
+
+          <span>
+            EXP. 01452-2026
+          </span>
+
+          <small class="urgent">
+            Urgente
+          </small>
+
+        </div>
+
+
+        <div class="task-item">
+
+          <strong>
+            Presentación Demanda en Demanda
+          </strong>
+
+          <span>
+            EXP. 02388-2025
+          </span>
+
+          <small class="urgent">
+            Urgente
+          </small>
+
+        </div>
+
+
+        <div class="task-item">
+
+          <strong>
+            Audiencia Testimonial en la semana
+          </strong>
+
+          <span>
+            EXP. 03321-2025
+          </span>
+
+          <small>
+            Pendiente
+          </small>
+
+        </div>
+
+      </aside>
+
+
+      <!-- ================================================= -->
+      <!-- DETALLE SOLO VISUAL -->
+      <!-- ================================================= -->
+
+      <aside class="detail-panel">
+
+
+        <div class="detail-header">
+
+          <h2>
+            Detalles del Evento Seleccionado
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+
+        <div class="detail-content">
+
+
+          <!-- TÍTULO -->
+
+          <div class="detail-title">
+
+            <h3>
+              Redacción de Escrito: Caso Fernández
+            </h3>
+
+            <span>
+              EXP. 01452
+            </span>
+
+          </div>
+
+
+          <!-- HORA -->
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◷
+            </span>
+
+            <div>
+
+              <small>
+                Fecha / Hora
+              </small>
+
+              <strong>
+                06/02/2024 - 12:00
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- PARTICIPANTES -->
+
+          <section class="detail-section">
+
+            <h4>
+              Participantes
+            </h4>
+
+
+            <div class="participant">
+
+              <span class="participant-avatar">
+                F
+              </span>
+
+              <div>
+
+                <strong>
+                  Fernández
+                </strong>
+
+                <span>
+                  Cliente
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="participant">
+
+              <span class="participant-avatar lawyer">
+                AF
+              </span>
+
+              <div>
+
+                <strong>
+                  Ana María Fernández
+                </strong>
+
+                <span>
+                  Abogado responsable
+                </span>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- LUGAR -->
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◉
+            </span>
+
+            <div>
+
+              <small>
+                Lugar
+              </small>
+
+              <strong>
+                Estudio Jurídico LEXIA
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- EXPEDIENTE -->
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◇
+            </span>
+
+            <div>
+
+              <small>
+                Expediente
+              </small>
+
+              <strong>
+                EXP. 01452
+              </strong>
+
+            </div>
+
+          </div>
+
+
+          <!-- DESCRIPCIÓN -->
+
+          <section class="detail-section">
+
+            <h4>
+              Detalle de la Actuación
+            </h4>
+
+            <p class="actuacion-description">
+              Redacción y revisión de escrito correspondiente al expediente.
+            </p>
+
+          </section>
+
+
+          <!-- EVENTOS PRÓXIMOS -->
+
+          <section class="detail-section">
+
+            <h4>
+              Eventos Próximos de la Semana
+            </h4>
+
+
+            <div class="upcoming-item">
+
+              <strong>
+                EXP. 01452-2026
+              </strong>
+
+              <span class="upcoming-tag green">
+                Alimentos
+              </span>
+
+              <span>
+                •••
+              </span>
+
+            </div>
+
+
+            <div class="upcoming-item">
+
+              <strong>
+                EXP. 02388-2025
+              </strong>
+
+              <span class="upcoming-tag green">
+                Daños
+              </span>
+
+              <span>
+                •••
+              </span>
+
+            </div>
+
+
+            <div class="upcoming-item">
+
+              <strong>
+                EXP. 03321-2024
+              </strong>
+
+              <span class="upcoming-tag orange">
+                En Trámite
+              </span>
+
+              <span>
+                •••
+              </span>
+
+            </div>
+
+          </section>
+
+
+          <!-- ALERTA -->
+
+          <section class="detail-section">
+
+            <h4>
+              Alertas de Plazos Críticos
+            </h4>
+
+            <div class="deadline-alert">
+
+              <strong>
+                EXP. 00521-2024
+              </strong>
+
+              <span>
+                Vence mañana
+              </span>
+
+            </div>
+
+          </section>
+
+
+          <!-- DOCUMENTOS -->
+
+          <section class="detail-section">
+
+            <h4>
+              Notas y Contactos Recientes
+            </h4>
+
+
+            <div class="document-item">
+
+              <span>
+                ▤
+              </span>
+
+              <strong>
+                Documento de descarga...
+              </strong>
+
+              <span>
+                ↓
+              </span>
+
+            </div>
+
+
+            <div class="document-item">
+
+              <span>
+                ▤
+              </span>
+
+              <strong>
+                Documento del expediente...
+              </strong>
+
+              <span>
+                ↓
+              </span>
+
+            </div>
+
+
+            <div class="document-item">
+
+              <span>
+                ▤
+              </span>
+
+              <strong>
+                Documento reciente 1
+              </strong>
+
+              <span>
+                ↓
+              </span>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>
