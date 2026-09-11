@@ -1,0 +1,1201 @@
+.layout-wrapper {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: #f5f7fb;
+}
+
+:host {
+  display: block;
+
+  min-height: 100vh;
+
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  color: #172033;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+select,
+input {
+  font: inherit;
+}
+
+
+/* =========================================================
+   CONTENIDO
+========================================================= */
+
+.main-content {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 100vh;
+
+  padding:
+    30px
+    30px
+    35px;
+
+  background: #f5f7fb;
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.agenda-header {
+  margin-bottom: 22px;
+}
+
+.agenda-header h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 25px;
+
+  line-height: 1.15;
+
+  font-weight: 750;
+
+  letter-spacing: -0.5px;
+}
+
+.agenda-header p {
+  margin:
+    6px
+    0
+    0;
+
+  color: #88909f;
+
+  font-size: 11px;
+}
+
+
+/* =========================================================
+   ESTRUCTURA
+========================================================= */
+
+.agenda-main-layout {
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    145px
+    285px;
+
+  gap: 14px;
+
+  align-items: start;
+}
+
+.agenda-center {
+  min-width: 0;
+}
+
+
+/* =========================================================
+   CARD
+========================================================= */
+
+.agenda-card {
+  overflow: hidden;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+
+/* =========================================================
+   TOOLBAR
+========================================================= */
+
+.calendar-toolbar {
+  min-height: 54px;
+
+  display: grid;
+
+  grid-template-columns:
+    100px
+    1fr
+    auto;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding:
+    8px
+    12px;
+
+  border-bottom:
+    1px solid #e8ebef;
+}
+
+.calendar-select,
+.calendar-actions select {
+  height: 31px;
+
+  padding:
+    0
+    9px;
+
+  border:
+    1px solid #d9dde4;
+
+  border-radius: 6px;
+
+  outline: 0;
+
+  background: #ffffff;
+
+  color: #4e5663;
+
+  font-size: 8px;
+}
+
+.month-navigation {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.month-navigation h2 {
+  margin:
+    0
+    0
+    0
+    5px;
+
+  color: #242b36;
+
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.month-navigation button,
+.calendar-actions button {
+  width: 29px;
+  height: 29px;
+
+  display: grid;
+
+  place-items: center;
+
+  padding: 0;
+
+  border: 0;
+
+  border-radius: 5px;
+
+  background: transparent;
+
+  color: #555e6b;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+.month-navigation button:hover,
+.calendar-actions button:hover {
+  background: #f1f2f5;
+}
+
+.calendar-actions {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+}
+
+
+/* =========================================================
+   CALENDARIO
+========================================================= */
+
+.calendar-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(7, minmax(0, 1fr));
+}
+
+.calendar-day-name {
+  min-height: 31px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  border-right:
+    1px solid #eceef2;
+
+  border-bottom:
+    1px solid #eceef2;
+
+  background: #fafafa;
+
+  color: #666e7b;
+
+  font-size: 8px;
+
+  font-weight: 600;
+}
+
+.calendar-cell {
+  position: relative;
+
+  min-height: 94px;
+
+  padding:
+    6px
+    5px;
+
+  border-right:
+    1px solid #eceef2;
+
+  border-bottom:
+    1px solid #eceef2;
+
+  background: #ffffff;
+}
+
+.calendar-cell.other-month {
+  background: #fafafa;
+
+  opacity: .65;
+}
+
+.day-number {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #2d3440;
+
+  font-size: 8px;
+
+  font-weight: 600;
+}
+
+.events-list {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 3px;
+}
+
+.calendar-event {
+  width: 100%;
+
+  min-height: 18px;
+
+  overflow: hidden;
+
+  padding:
+    3px
+    5px;
+
+  border: 0;
+
+  border-radius: 3px;
+
+  color: #ffffff;
+
+  font-size: 6.5px;
+
+  text-align: left;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  cursor: pointer;
+}
+
+.evento-audiencia {
+  background: #448ea2;
+}
+
+.evento-reunion {
+  background: #7952a8;
+}
+
+.evento-plazo {
+  background: #cb5b54;
+}
+
+.evento-actuacion {
+  background: #58a96d;
+}
+
+
+/* =========================================================
+   TIPOS DE EVENTO
+========================================================= */
+
+.event-types-panel {
+  min-height: 510px;
+
+  padding:
+    12px
+    10px;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.event-types-header h3 {
+  margin:
+    0
+    0
+    10px;
+
+  color: #252c38;
+
+  font-size: 10px;
+}
+
+.add-event-button {
+  width: 100%;
+
+  height: 30px;
+
+  margin-bottom: 8px;
+
+  border:
+    1px solid #dadee5;
+
+  border-radius: 5px;
+
+  background: #ffffff;
+
+  color: #573671;
+
+  font-size: 7.5px;
+
+  cursor: pointer;
+}
+
+.event-type-item {
+  margin-bottom: 6px;
+
+  padding:
+    8px;
+
+  border-radius: 5px;
+
+  color: #323946;
+
+  font-size: 7.5px;
+
+  line-height: 1.25;
+
+  font-weight: 600;
+}
+
+.event-type-item.audiencia {
+  background: #dce5f8;
+}
+
+.event-type-item.actuacion {
+  background: #dff4e3;
+}
+
+.event-type-item.reunion {
+  background: #eee5f7;
+}
+
+.event-type-item.plazo {
+  background: #f9dddd;
+}
+
+.event-type-item.consulta {
+  background: #f8eacb;
+}
+
+
+/* =========================================================
+   GRÁFICOS INFERIORES
+========================================================= */
+
+.agenda-bottom-grid {
+  display: grid;
+
+  grid-template-columns:
+    .85fr
+    1.15fr;
+
+  gap: 14px;
+
+  margin-top: 14px;
+}
+
+.chart-card {
+  min-height: 210px;
+}
+
+.chart-header {
+  min-height: 43px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding:
+    9px
+    14px;
+}
+
+.chart-header span {
+  color: #63359c;
+
+  font-size: 12px;
+}
+
+.chart-header h3 {
+  margin: 0;
+
+  color: #292f3a;
+
+  font-size: 10px;
+}
+
+
+/* =========================================================
+   DONUT
+========================================================= */
+
+.donut-wrapper {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 27px;
+
+  padding:
+    8px
+    15px
+    20px;
+}
+
+.agenda-donut {
+  position: relative;
+
+  width: 115px;
+  height: 115px;
+
+  flex:
+    0
+    0
+    115px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background:
+    conic-gradient(
+      #65b867 0 25%,
+      #cf563d 25% 55%,
+      #e3a04c 55% 70%,
+      #95958d 70% 85%,
+      #7143a0 85% 100%
+    );
+}
+
+.agenda-donut::after {
+  content: '';
+
+  position: absolute;
+
+  width: 76px;
+  height: 76px;
+
+  border-radius: 50%;
+
+  background: #ffffff;
+}
+
+.donut-center {
+  position: relative;
+
+  z-index: 1;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+}
+
+.donut-center strong {
+  color: #2a313d;
+
+  font-size: 15px;
+}
+
+.donut-center span {
+  color: #8b929f;
+
+  font-size: 7px;
+}
+
+.activity-legend {
+  min-width: 145px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 9px;
+}
+
+.activity-legend > div {
+  display: flex;
+
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 14px;
+
+  font-size: 7.5px;
+}
+
+.activity-legend span {
+  color: #5e6674;
+}
+
+.activity-legend strong {
+  color: #444b58;
+
+  font-size: 7px;
+}
+
+.legend-circle {
+  width: 8px;
+  height: 8px;
+
+  display: inline-block;
+
+  margin-right: 6px;
+
+  border-radius: 50%;
+}
+
+.legend-circle.green {
+  background: #65b867;
+}
+
+.legend-circle.red {
+  background: #cf563d;
+}
+
+.legend-circle.orange {
+  background: #e3a04c;
+}
+
+.legend-circle.gray {
+  background: #95958d;
+}
+
+.legend-circle.purple {
+  background: #7143a0;
+}
+
+
+/* =========================================================
+   GRÁFICO LÍNEA
+========================================================= */
+
+.line-chart-container {
+  height: 160px;
+
+  display: grid;
+
+  grid-template-columns:
+    27px
+    1fr;
+
+  padding:
+    5px
+    14px
+    14px;
+}
+
+.chart-y {
+  height: 130px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  justify-content: space-between;
+
+  color: #8f97a4;
+
+  font-size: 6.5px;
+}
+
+.chart-line-area {
+  position: relative;
+
+  height: 135px;
+
+  border-left:
+    1px solid #eceff3;
+
+  border-bottom:
+    1px solid #eceff3;
+
+  background:
+    repeating-linear-gradient(
+      to top,
+      transparent,
+      transparent 26px,
+      #edf0f4 27px
+    );
+}
+
+.chart-line-area svg {
+  position: absolute;
+
+  inset:
+    4px
+    0
+    18px;
+
+  width: 100%;
+
+  height:
+    calc(100% - 22px);
+}
+
+.chart-months {
+  position: absolute;
+
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  color: #79818e;
+
+  font-size: 6.5px;
+}
+
+
+/* =========================================================
+   PANEL DE DETALLES
+========================================================= */
+
+.event-detail-panel {
+  overflow: hidden;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.detail-header {
+  min-height: 67px;
+
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 10px;
+
+  padding: 14px;
+
+  border-bottom:
+    1px solid #e8ebef;
+}
+
+.detail-header h2 {
+  max-width: 205px;
+
+  margin: 0;
+
+  color: #202733;
+
+  font-size: 12px;
+
+  line-height: 1.3;
+}
+
+.detail-header button {
+  width: 25px;
+  height: 25px;
+
+  border: 0;
+
+  background: transparent;
+
+  color: #626a76;
+
+  font-size: 18px;
+
+  cursor: pointer;
+}
+
+.detail-content {
+  padding: 14px;
+}
+
+
+/* =========================================================
+   TÍTULO DEL EVENTO
+========================================================= */
+
+.detail-event-title {
+  padding-bottom: 11px;
+
+  border-bottom:
+    1px solid #e9ebef;
+}
+
+.detail-event-title h3 {
+  margin:
+    0
+    0
+    4px;
+
+  color: #252c37;
+
+  font-size: 13px;
+}
+
+.detail-event-title span {
+  color: #858c98;
+
+  font-size: 7.5px;
+}
+
+
+/* =========================================================
+   INFORMACIÓN
+========================================================= */
+
+.detail-time,
+.detail-info-row {
+  min-height: 43px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+}
+
+.detail-icon {
+  width: 27px;
+  height: 27px;
+
+  display: grid;
+
+  place-items: center;
+
+  flex:
+    0
+    0
+    27px;
+
+  border-radius: 6px;
+
+  background: #f4effa;
+
+  color: #633a9d;
+
+  font-size: 11px;
+}
+
+.detail-time > div,
+.detail-info-row > div {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.detail-time small,
+.detail-info-row small {
+  color: #8b929f;
+
+  font-size: 6.5px;
+}
+
+.detail-time strong,
+.detail-info-row strong {
+  max-width: 190px;
+
+  overflow: hidden;
+
+  color: #343b47;
+
+  font-size: 8px;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SECCIONES PANEL
+========================================================= */
+
+.detail-section {
+  padding-top: 13px;
+}
+
+.detail-section h4 {
+  margin:
+    0
+    0
+    9px;
+
+  color: #292f3a;
+
+  font-size: 9px;
+}
+
+
+/* =========================================================
+   PARTICIPANTES
+========================================================= */
+
+.participant {
+  min-height: 39px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.participant-avatar {
+  width: 30px;
+  height: 30px;
+
+  flex:
+    0
+    0
+    30px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 50%;
+
+  background: #eadfe6;
+
+  color: #6a485b;
+
+  font-size: 7px;
+
+  font-weight: 700;
+}
+
+.participant-avatar.lawyer {
+  background: #e6e4f5;
+
+  color: #504988;
+}
+
+.participant > div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 2px;
+}
+
+.participant strong {
+  color: #353c48;
+
+  font-size: 8px;
+}
+
+.participant span {
+  color: #9198a4;
+
+  font-size: 6.5px;
+}
+
+
+/* =========================================================
+   EVENTOS PRÓXIMOS
+========================================================= */
+
+.upcoming-item {
+  min-height: 31px;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0, 1fr)
+    72px
+    20px;
+
+  align-items: center;
+
+  gap: 5px;
+}
+
+.upcoming-item > strong {
+  color: #343b47;
+
+  font-size: 7px;
+}
+
+.upcoming-item > span:last-child {
+  color: #727a87;
+
+  font-size: 8px;
+
+  text-align: center;
+}
+
+.upcoming-tag {
+  min-height: 24px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    0
+    7px;
+
+  border-radius: 4px;
+
+  color: #ffffff;
+
+  font-size: 6.5px;
+}
+
+.upcoming-tag.green {
+  background: #65ad6d;
+}
+
+.upcoming-tag.orange {
+  background: #e69a40;
+}
+
+
+/* =========================================================
+   ALERTAS
+========================================================= */
+
+.deadline-alert {
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    auto;
+
+  gap: 7px;
+
+  align-items: center;
+}
+
+.deadline-alert strong {
+  min-height: 29px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    0
+    8px;
+
+  border:
+    1px solid #e0e3e8;
+
+  border-radius: 5px;
+
+  color: #363d49;
+
+  font-size: 7px;
+}
+
+.deadline-alert span {
+  min-height: 29px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding:
+    0
+    8px;
+
+  border-radius: 5px;
+
+  background: #f4dddd;
+
+  color: #a53639;
+
+  font-size: 7px;
+
+  font-weight: 650;
+}
+
+
+/* =========================================================
+   DOCUMENTOS
+========================================================= */
+
+.document-item {
+  min-height: 30px;
+
+  display: grid;
+
+  grid-template-columns:
+    17px
+    minmax(0, 1fr)
+    17px;
+
+  align-items: center;
+
+  gap: 6px;
+}
+
+.document-item > span {
+  color: #5e3475;
+
+  font-size: 9px;
+}
+
+.document-item strong {
+  overflow: hidden;
+
+  color: #3a414d;
+
+  font-size: 7px;
+
+  font-weight: 500;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1450px) {
+
+  .agenda-main-layout {
+    grid-template-columns:
+      minmax(0, 1fr)
+      140px;
+  }
+
+  .event-detail-panel {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 1150px) {
+
+  .agenda-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .event-types-panel {
+    display: none;
+  }
+
+  .agenda-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .main-content {
+    padding:
+      24px
+      18px;
+  }
+
+  .calendar-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-actions {
+    justify-content: flex-start;
+  }
+
+  .calendar-cell {
+    min-height: 80px;
+  }
+
+}

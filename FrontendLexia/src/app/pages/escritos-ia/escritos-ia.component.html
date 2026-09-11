@@ -1,0 +1,478 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- CABECERA -->
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">Asistencia legal</span>
+        <h1>Escritos con IA</h1>
+        <p>
+          Redacción asistida de escritos jurídicos, plantillas recomendadas
+          y seguimiento de borradores.
+        </p>
+      </div>
+
+      <button class="btn-primary" type="button">
+        ✦ Generar con IA
+      </button>
+    </header>
+
+
+    <!-- CUERPO SUPERIOR -->
+    <section class="editor-layout">
+
+      <!-- COLUMNA IZQUIERDA -->
+      <aside class="assistant-panel card">
+
+        <div class="section-heading">
+          <div>
+            <span class="panel-kicker">Asistente</span>
+            <h2>Asistente de Redacción Avanzado</h2>
+          </div>
+          <span class="panel-number">01</span>
+        </div>
+
+        <div class="prompt-box">
+          <label>Describe el escrito a generar</label>
+
+          <textarea
+            placeholder="Ej. Redactar una contestación de demanda de alimentos para el expediente 01452-2026..."
+          ></textarea>
+        </div>
+
+        <div class="templates-title">
+          <h3>Plantillas Recomendadas</h3>
+          <span>Modelos sugeridos para iniciar un borrador</span>
+        </div>
+
+        <div class="template-list">
+          <button type="button">Demanda de Alimentos</button>
+          <button type="button">Contestación de Demanda</button>
+          <button type="button">Recurso de Apelación</button>
+          <button type="button">Escrito de Apersonamiento</button>
+          <button type="button">Solicitud de Medida Cautelar</button>
+          <button type="button">Recurso de Reconsideración</button>
+          <button type="button">Contestación de Demanda</button>
+          <button type="button">Recurso de Nulidad</button>
+          <button type="button">Escrito de Cumplimiento</button>
+        </div>
+
+      </aside>
+
+
+      <!-- COLUMNA CENTRAL -->
+      <section class="draft-panel">
+
+        <!-- PASOS -->
+        <div class="workflow card">
+
+          <div class="workflow-step">
+            <span class="step-icon">⚙</span>
+            <span>Configuración</span>
+          </div>
+
+          <span class="workflow-arrow">→</span>
+
+          <div class="workflow-step active">
+            <span>Borrador</span>
+          </div>
+
+          <span class="workflow-arrow">→</span>
+
+          <div class="workflow-step">
+            <span>Revisión</span>
+          </div>
+
+        </div>
+
+
+        <!-- BORRADOR -->
+        <section class="draft-card card">
+
+          <div class="draft-header">
+
+            <div>
+              <span class="panel-kicker">Documento en proceso</span>
+              <h2>Borrador en Proceso</h2>
+              <p>Caso Fernández: Escrito de Demanda</p>
+            </div>
+
+            <button class="more-button" type="button">•••</button>
+
+          </div>
+
+
+          <div class="draft-content">
+
+            <!-- EDITOR -->
+            <div class="document-editor">
+
+              <div class="editor-toolbar">
+                <button type="button"><strong>B</strong></button>
+                <button type="button"><em>I</em></button>
+                <button type="button">🔗</button>
+                <button type="button">☷</button>
+                <button type="button">▣</button>
+
+                <button class="toolbar-ai" type="button">
+                  Generar con IA
+                </button>
+              </div>
+
+
+              <article class="document-page">
+
+                <h3>Introducción</h3>
+
+                <p>
+                  SEÑOR JUEZ DEL SEGUNDO JUZGADO DE FAMILIA DE TRUJILLO:
+                  Ana María Fernández, identificada con DNI N.º 00000000,
+                  en el proceso seguido sobre alimentos, a usted respetuosamente digo:
+                </p>
+
+
+                <h3>Hechos</h3>
+
+                <p>
+                  Que, dentro del plazo legal correspondiente, se presenta el
+                  presente escrito con la finalidad de exponer los hechos
+                  relevantes del caso, así como los fundamentos que sustentan
+                  la pretensión formulada ante su despacho.
+                </p>
+
+
+                <h3>Fundamentos de Derecho</h3>
+
+                <p>
+                  La presente solicitud se sustenta en las normas aplicables
+                  del ordenamiento jurídico peruano, así como en los principios
+                  de tutela jurisdiccional efectiva y debido proceso.
+                </p>
+
+
+                <h3>Petitorio</h3>
+
+                <p>
+                  Solicito a su despacho tener por presentado el presente
+                  escrito y disponer lo que corresponda conforme a ley.
+                </p>
+
+
+                <h3>Anexos</h3>
+
+                <p>
+                  1-A Copia de documento de identidad.<br>
+                  1-B Documentos de sustento.<br>
+                  1-C Medios probatorios pertinentes.
+                </p>
+
+              </article>
+
+            </div>
+
+
+            <!-- RECOMENDACIONES IA -->
+            <aside class="ai-sidebar">
+
+              <div class="ai-box">
+
+                <div class="ai-box-header">
+                  <span>✦</span>
+                  <strong>Recomendaciones de IA</strong>
+                </div>
+
+                <div class="recommendation">
+                  Generar una introducción más formal y contextualizada.
+                </div>
+
+                <div class="recommendation">
+                  Agregar referencias normativas aplicables al caso.
+                </div>
+
+                <div class="recommendation">
+                  Revisar consistencia entre hechos y petitorio.
+                </div>
+
+              </div>
+
+
+              <div class="ai-box">
+
+                <div class="ai-box-header">
+                  <span>⚖</span>
+                  <strong>Jurisprudencia Relacionada</strong>
+                </div>
+
+                <div class="juris-item">
+                  Jurisprudencia vinculada a procesos de alimentos.
+                  <small>Exp. 01452-2023</small>
+                </div>
+
+                <div class="juris-item">
+                  Criterios sobre valoración de medios probatorios.
+                  <small>Exp. 03521-2024</small>
+                </div>
+
+                <div class="juris-item">
+                  Pronunciamientos sobre tutela procesal efectiva.
+                  <small>Exp. 00521-2024</small>
+                </div>
+
+              </div>
+
+            </aside>
+
+          </div>
+
+        </section>
+
+      </section>
+
+
+      <!-- COLUMNA DERECHA -->
+      <aside class="details-panel">
+
+        <section class="card details-card">
+
+          <div class="details-header">
+            <div>
+              <span class="panel-kicker">Evento vinculado</span>
+              <h2>Detalles del Evento Seleccionado</h2>
+            </div>
+
+            <button type="button">×</button>
+          </div>
+
+
+          <div class="event-main">
+            <strong>Audiencia: Caso Fernández</strong>
+            <span>Resolución N.º 0021</span>
+          </div>
+
+
+          <div class="detail-line">
+            <span class="detail-icon">◷</span>
+
+            <div>
+              <small>Horario</small>
+              <strong>12:00 - 18:00</strong>
+            </div>
+          </div>
+
+
+          <div class="detail-block">
+            <h3>Participantes</h3>
+
+            <div class="participant">
+              <span class="person-avatar">AF</span>
+
+              <div>
+                <strong>Ana María Fernández</strong>
+                <span>Caso 01452-2026</span>
+              </div>
+            </div>
+
+            <div class="participant">
+              <span class="person-avatar purple">AM</span>
+
+              <div>
+                <strong>Ana María Fernández</strong>
+                <span>Abogada</span>
+              </div>
+            </div>
+          </div>
+
+
+          <div class="detail-line">
+            <span class="detail-icon">⌖</span>
+
+            <div>
+              <small>Lugar</small>
+              <strong>Zoom / Sala virtual</strong>
+            </div>
+          </div>
+
+
+          <div class="detail-line">
+            <span class="detail-icon">🔗</span>
+
+            <div>
+              <small>Expediente</small>
+              <strong>Caso Exp. 01452-2026</strong>
+            </div>
+          </div>
+
+        </section>
+
+
+        <section class="card mini-card">
+
+          <div class="mini-card-header">
+            <h3>Eventos Próximos de la Semana</h3>
+          </div>
+
+          <div class="event-list">
+
+            <div class="event-item">
+              <span>EXP. 01452-2026</span>
+              <span class="status-pill green">Alimentos</span>
+            </div>
+
+            <div class="event-item">
+              <span>EXP. 02388-2025</span>
+              <span class="status-pill green">Daños</span>
+            </div>
+
+            <div class="event-item">
+              <span>EXP. 03321-2024</span>
+              <span class="status-pill orange">En Trámite</span>
+            </div>
+
+          </div>
+
+        </section>
+
+
+        <section class="card mini-card">
+
+          <div class="mini-card-header">
+            <h3>Alertas de Plazos Críticos</h3>
+          </div>
+
+          <div class="event-item">
+            <span>EXP. 00521-2024</span>
+            <span class="status-pill gray">Archivado</span>
+          </div>
+
+        </section>
+
+
+        <section class="card mini-card">
+
+          <div class="mini-card-header">
+            <h3>Notas y Contactos Recientes</h3>
+          </div>
+
+          <div class="notes-list">
+            <div class="note-row"><span>▣</span><p>Documento de descarga reciente</p><span>↓</span></div>
+            <div class="note-row"><span>▣</span><p>Documento del expediente</p><span>↓</span></div>
+            <div class="note-row"><span>▣</span><p>Documento reciente 1</p><span>↓</span></div>
+            <div class="note-row"><span>▣</span><p>Documento de audiencia</p><span>↓</span></div>
+            <div class="note-row"><span>▣</span><p>Documento reciente 2</p><span>↓</span></div>
+          </div>
+
+        </section>
+
+      </aside>
+
+    </section>
+
+
+    <!-- HISTORIAL -->
+    <section class="history-card card">
+
+      <div class="section-heading history-heading">
+
+        <div>
+          <span class="panel-kicker">Documentos generados</span>
+          <h2>Historial de Escritos Generados</h2>
+          <p>Seguimiento visual de escritos preparados recientemente.</p>
+        </div>
+
+        <span class="panel-number">02</span>
+
+      </div>
+
+
+      <div class="table-wrap">
+
+        <table class="history-table">
+
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Expediente</th>
+              <th>Tipo de Escrito</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+
+          <tbody>
+
+            <tr>
+              <td>06/06/2026</td>
+              <td><strong>Caso 01452</strong></td>
+              <td>Contestación de Demanda</td>
+              <td><span class="history-status draft">Borrador</span></td>
+              <td>
+                <div class="history-actions">
+                  <button type="button">Ver</button>
+                  <button type="button">Editar</button>
+                  <button type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>06/06/2026</td>
+              <td><strong>Caso 01452</strong></td>
+              <td>Contestación de Demanda</td>
+              <td><span class="history-status review">En revisión</span></td>
+              <td>
+                <div class="history-actions">
+                  <button type="button">Ver</button>
+                  <button type="button">Editar</button>
+                  <button type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>05/06/2026</td>
+              <td><strong>Caso 02388</strong></td>
+              <td>Recurso de Apelación</td>
+              <td><span class="history-status approved">Aprobado</span></td>
+              <td>
+                <div class="history-actions">
+                  <button type="button">Ver</button>
+                  <button type="button">Editar</button>
+                  <button type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+
+            <tr>
+              <td>04/06/2026</td>
+              <td><strong>Caso 03321</strong></td>
+              <td>Escrito de Apersonamiento</td>
+              <td><span class="history-status approved">Aprobado</span></td>
+              <td>
+                <div class="history-actions">
+                  <button type="button">Ver</button>
+                  <button type="button">Editar</button>
+                  <button type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

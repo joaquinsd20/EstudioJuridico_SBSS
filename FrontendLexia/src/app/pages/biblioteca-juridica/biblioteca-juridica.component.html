@@ -1,0 +1,410 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <main class="main-content">
+
+    <!-- CABECERA -->
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">Material de consulta</span>
+        <h1>Biblioteca Jurídica</h1>
+        <p>Consulta jurisprudencia, legislación, doctrina, contratos, modelos y plantillas de uso interno.</p>
+      </div>
+
+      <button class="btn-primary" type="button">
+        <span class="plus">+</span>
+        Agregar recurso
+      </button>
+    </header>
+
+    <!-- RESUMEN -->
+    <section class="stats-grid">
+      <article class="stat-card">
+        <span class="stat-label">Recursos Totales</span>
+        <strong>24</strong>
+        <small>Material registrado</small>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Recursos Activos</span>
+        <strong>21</strong>
+        <small>Disponibles para consulta</small>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Con Archivo</span>
+        <strong>18</strong>
+        <small>Documentos adjuntos</small>
+      </article>
+
+      <article class="stat-card">
+        <span class="stat-label">Categorías</span>
+        <strong class="stat-accent">10</strong>
+        <small>Áreas jurídicas</small>
+      </article>
+    </section>
+
+    <!-- CATÁLOGO -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="panel-kicker">Catálogo jurídico</span>
+          <h2>Recursos disponibles</h2>
+          <p>Material organizado por tipo, categoría y expediente.</p>
+        </div>
+        <span class="panel-number">01</span>
+      </div>
+
+      <!-- FILTROS SOLO VISUALES -->
+      <div class="filters">
+        <div class="search-box">
+          <span>⌕</span>
+          <input type="search" placeholder="Buscar por título, autor, descripción o tags">
+        </div>
+
+        <select aria-label="Filtrar por tipo">
+          <option>Todos los tipos</option>
+          <option>Jurisprudencia</option>
+          <option>Legislación</option>
+          <option>Doctrina</option>
+          <option>Contrato</option>
+          <option>Modelo</option>
+          <option>Plantilla</option>
+          <option>Formato</option>
+          <option>Libro</option>
+        </select>
+
+        <select aria-label="Filtrar por categoría">
+          <option>Todas las categorías</option>
+          <option>Derecho Civil</option>
+          <option>Derecho Penal</option>
+          <option>Derecho Laboral</option>
+          <option>Derecho Constitucional</option>
+          <option>Derecho Tributario</option>
+          <option>Derecho Social</option>
+          <option>Derecho Migratorio</option>
+          <option>Derecho Administrativo</option>
+          <option>Procesal</option>
+          <option>General</option>
+        </select>
+
+        <select aria-label="Filtrar por estado">
+          <option>Todos los estados</option>
+          <option>Activo</option>
+          <option>Archivado</option>
+        </select>
+
+        <select aria-label="Filtrar por archivo">
+          <option>Con o sin archivo</option>
+          <option>Con archivo</option>
+          <option>Solo URL externa</option>
+        </select>
+      </div>
+
+      <!-- CONTROLES SOLO VISUALES -->
+      <div class="vista-tabs">
+        <button class="active" type="button">Tabla</button>
+        <button type="button">Tarjetas</button>
+        <button class="btn-secondary export-btn" type="button">Exportar catálogo</button>
+      </div>
+
+      <div class="stats-mini">
+        <span><strong>24</strong> recursos totales</span>
+        <span><strong>21</strong> activos</span>
+        <span><strong>18</strong> con archivo</span>
+      </div>
+
+      <!-- TABLA -->
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Tipo</th>
+              <th>Categoría</th>
+              <th>Año</th>
+              <th>Expediente</th>
+              <th>Archivo</th>
+              <th>Registro</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon jurisprudencia">⚖</span>
+                  <div>
+                    <strong>Jurisprudencia sobre obligación alimentaria</strong>
+                    <small class="sub-line">Recurso jurídico interno</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill jurisprudencia-pill">Jurisprudencia</span></td>
+              <td>Derecho Civil</td>
+              <td>2026</td>
+              <td><span class="exp-link">EXP. 01452-2026</span></td>
+              <td>jurisprudencia_alimentos.pdf</td>
+              <td>05/06/2026</td>
+              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon legislacion">§</span>
+                  <div>
+                    <strong>Normativa procesal de consulta</strong>
+                    <small class="sub-line">Fuente institucional</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill legislacion-pill">Legislación</span></td>
+              <td>Procesal</td>
+              <td>2026</td>
+              <td>—</td>
+              <td>normativa_procesal.pdf</td>
+              <td>02/06/2026</td>
+              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon doctrina">📚</span>
+                  <div>
+                    <strong>Doctrina sobre responsabilidad civil</strong>
+                    <small class="sub-line">Material doctrinario</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill doctrina-pill">Doctrina</span></td>
+              <td>Derecho Civil</td>
+              <td>2025</td>
+              <td>EXP. 02388-2025</td>
+              <td>doctrina_responsabilidad.pdf</td>
+              <td>28/05/2026</td>
+              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon contrato">✎</span>
+                  <div>
+                    <strong>Contrato de servicios profesionales</strong>
+                    <small class="sub-line">Modelo de uso interno</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill contrato-pill">Contrato</span></td>
+              <td>General</td>
+              <td>2026</td>
+              <td>—</td>
+              <td>contrato_servicios.docx</td>
+              <td>20/05/2026</td>
+              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon plantilla">▤</span>
+                  <div>
+                    <strong>Plantilla de escrito judicial</strong>
+                    <small class="sub-line">Documento reutilizable</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill plantilla-pill">Plantilla</span></td>
+              <td>Procesal</td>
+              <td>2026</td>
+              <td>EXP. 03321-2024</td>
+              <td>plantilla_escrito.docx</td>
+              <td>15/05/2026</td>
+              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                <div class="person-cell">
+                  <span class="resource-icon libro">▥</span>
+                  <div>
+                    <strong>Manual de consulta jurídica</strong>
+                    <small class="sub-line">Biblioteca interna</small>
+                  </div>
+                </div>
+              </td>
+              <td><span class="role-pill libro-pill">Libro</span></td>
+              <td>General</td>
+              <td>2024</td>
+              <td>—</td>
+              <td>Sin archivo</td>
+              <td>12/05/2026</td>
+              <td><span class="status off"><i></i>Archivado</span></td>
+              <td>
+                <div class="row-actions">
+                  <button class="icon-action view" type="button">Ver</button>
+                  <button class="icon-action edit" type="button">Editar</button>
+                  <button class="icon-action download" type="button">Descargar</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- RECURSOS DESTACADOS -->
+    <section class="featured-section">
+
+      <div class="section-heading">
+        <div>
+          <span class="panel-kicker">Vista rápida</span>
+          <h2>Recursos destacados</h2>
+          <p>Tarjetas visuales para identificar rápidamente el tipo de material.</p>
+        </div>
+
+        <span class="panel-number">02</span>
+      </div>
+
+      <div class="cards-grid">
+
+        <article class="recurso-card">
+          <div class="card-top">
+            <span class="card-icon jurisprudencia">⚖</span>
+            <span class="status"><i></i>Activo</span>
+          </div>
+
+          <strong class="card-titulo">
+            Jurisprudencia sobre obligación alimentaria
+          </strong>
+
+          <span class="card-autor">
+            Recurso jurídico interno
+          </span>
+
+          <div class="card-tags">
+            <span class="role-pill">Jurisprudencia</span>
+            <span class="role-pill">Derecho Civil</span>
+            <span class="role-pill">2026</span>
+          </div>
+
+          <span class="card-exp">
+            EXP. 01452-2026
+          </span>
+
+          <div class="card-acciones">
+            <button class="icon-action view" type="button">Vista previa</button>
+            <button class="icon-action download" type="button">Descargar</button>
+          </div>
+        </article>
+
+
+        <article class="recurso-card">
+          <div class="card-top">
+            <span class="card-icon doctrina">📚</span>
+            <span class="status"><i></i>Activo</span>
+          </div>
+
+          <strong class="card-titulo">
+            Doctrina sobre responsabilidad civil
+          </strong>
+
+          <span class="card-autor">
+            Material doctrinario
+          </span>
+
+          <div class="card-tags">
+            <span class="role-pill">Doctrina</span>
+            <span class="role-pill">Derecho Civil</span>
+            <span class="role-pill">2025</span>
+          </div>
+
+          <span class="card-exp">
+            EXP. 02388-2025
+          </span>
+
+          <div class="card-acciones">
+            <button class="icon-action view" type="button">Vista previa</button>
+            <button class="icon-action download" type="button">Descargar</button>
+          </div>
+        </article>
+
+
+        <article class="recurso-card">
+          <div class="card-top">
+            <span class="card-icon plantilla">▤</span>
+            <span class="status"><i></i>Activo</span>
+          </div>
+
+          <strong class="card-titulo">
+            Plantilla de escrito judicial
+          </strong>
+
+          <span class="card-autor">
+            Documento reutilizable
+          </span>
+
+          <div class="card-tags">
+            <span class="role-pill">Plantilla</span>
+            <span class="role-pill">Procesal</span>
+            <span class="role-pill">2026</span>
+          </div>
+
+          <span class="card-exp">
+            EXP. 03321-2024
+          </span>
+
+          <div class="card-acciones">
+            <button class="icon-action view" type="button">Vista previa</button>
+            <button class="icon-action download" type="button">Descargar</button>
+          </div>
+        </article>
+
+      </div>
+
+    </section>
+
+  </main>
+
+</div>

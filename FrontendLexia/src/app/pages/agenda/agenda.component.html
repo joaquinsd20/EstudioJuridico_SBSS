@@ -1,0 +1,709 @@
+<div class="layout-wrapper">
+
+  <!-- PANEL REUTILIZABLE -->
+  <app-panel></app-panel>
+
+  <!-- CONTENIDO -->
+  <main class="main-content">
+
+    <!-- ENCABEZADO -->
+    <header class="agenda-header">
+      <div>
+        <h1>Gestión Integral de Agenda</h1>
+        <p>Organiza audiencias, reuniones, actuaciones y plazos jurídicos.</p>
+      </div>
+    </header>
+
+    <!-- LAYOUT -->
+    <div class="agenda-main-layout">
+
+      <!-- ZONA CENTRAL -->
+      <div class="agenda-center">
+
+        <!-- CALENDARIO -->
+        <section class="agenda-card calendar-card">
+
+          <div class="calendar-toolbar">
+
+            <select class="calendar-select">
+              <option>Caso</option>
+              <option>Abogado</option>
+              <option>Materia</option>
+            </select>
+
+            <div class="month-navigation">
+              <button type="button">‹</button>
+              <button type="button">›</button>
+              <h2>Noviembre 2024</h2>
+            </div>
+
+            <div class="calendar-actions">
+              <button type="button" title="Buscar">⌕</button>
+              <button type="button" title="Calendario">▦</button>
+              <button type="button" title="Configuración">⚙</button>
+
+              <select>
+                <option>Todos</option>
+                <option>Audiencias</option>
+                <option>Reuniones</option>
+                <option>Plazos</option>
+              </select>
+            </div>
+
+          </div>
+
+          <div class="calendar-grid">
+
+            <div class="calendar-day-name">Lun</div>
+            <div class="calendar-day-name">Mar</div>
+            <div class="calendar-day-name">Mié</div>
+            <div class="calendar-day-name">Jue</div>
+            <div class="calendar-day-name">Vie</div>
+            <div class="calendar-day-name">Sáb</div>
+            <div class="calendar-day-name">Dom</div>
+
+            <!-- SEMANA 1 -->
+            <div class="calendar-cell">
+              <span class="day-number">1</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">2</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">3</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">4</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">5</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión con cliente
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">6</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">7</span>
+              <div class="events-list"></div>
+            </div>
+
+            <!-- SEMANA 2 -->
+            <div class="calendar-cell">
+              <span class="day-number">8</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">9</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">10</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">11</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">12</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">13</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">14</span>
+              <div class="events-list"></div>
+            </div>
+
+            <!-- SEMANA 3 -->
+            <div class="calendar-cell">
+              <span class="day-number">15</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">16</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">17</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">18</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">19</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">20</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">21</span>
+              <div class="events-list"></div>
+            </div>
+
+            <!-- SEMANA 4 -->
+            <div class="calendar-cell">
+              <span class="day-number">22</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">23</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">24</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">25</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-reunion">
+                  Reunión
+                </button>
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">26</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-plazo">
+                  Plazo
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">27</span>
+              <div class="events-list">
+                <button type="button" class="calendar-event evento-audiencia">
+                  Audiencia
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">28</span>
+              <div class="events-list"></div>
+            </div>
+
+            <!-- SEMANA 5 -->
+            <div class="calendar-cell">
+              <span class="day-number">29</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell">
+              <span class="day-number">30</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell other-month">
+              <span class="day-number">1</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell other-month">
+              <span class="day-number">2</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell other-month">
+              <span class="day-number">3</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell other-month">
+              <span class="day-number">4</span>
+              <div class="events-list"></div>
+            </div>
+
+            <div class="calendar-cell other-month">
+              <span class="day-number">5</span>
+              <div class="events-list"></div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- GRÁFICOS -->
+        <div class="agenda-bottom-grid">
+
+          <section class="agenda-card chart-card">
+
+            <div class="chart-header">
+              <span>▣</span>
+              <h3>Distribución de Tiempo por Actividad</h3>
+            </div>
+
+            <div class="donut-wrapper">
+
+              <div class="agenda-donut">
+                <div class="donut-center">
+                  <strong>100%</strong>
+                  <span>Agenda</span>
+                </div>
+              </div>
+
+              <div class="activity-legend">
+
+                <div>
+                  <span>
+                    <i class="legend-circle green"></i>
+                    Audiencias
+                  </span>
+                  <strong>25%</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <i class="legend-circle red"></i>
+                    Reuniones
+                  </span>
+                  <strong>30%</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <i class="legend-circle orange"></i>
+                    Plazos
+                  </span>
+                  <strong>15%</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <i class="legend-circle gray"></i>
+                    Actuaciones
+                  </span>
+                  <strong>15%</strong>
+                </div>
+
+                <div>
+                  <span>
+                    <i class="legend-circle purple"></i>
+                    Otros
+                  </span>
+                  <strong>15%</strong>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          <section class="agenda-card chart-card">
+
+            <div class="chart-header">
+              <span>↗</span>
+              <h3>Evolución de Eventos Semanales</h3>
+            </div>
+
+            <div class="line-chart-container">
+
+              <div class="chart-y">
+                <span>12</span>
+                <span>10</span>
+                <span>8</span>
+                <span>6</span>
+                <span>4</span>
+                <span>2</span>
+                <span>0</span>
+              </div>
+
+              <div class="chart-line-area">
+
+                <svg
+                  viewBox="0 0 500 190"
+                  preserveAspectRatio="none"
+                >
+
+                  <defs>
+                    <linearGradient
+                      id="agendaGradient"
+                      x1="0"
+                      x2="0"
+                      y1="0"
+                      y2="1"
+                    >
+                      <stop
+                        offset="0%"
+                        stop-color="#7643d5"
+                        stop-opacity=".28"
+                      ></stop>
+
+                      <stop
+                        offset="100%"
+                        stop-color="#7643d5"
+                        stop-opacity="0"
+                      ></stop>
+                    </linearGradient>
+                  </defs>
+
+                  <path
+                    d="
+                      M0 155
+                      C45 95, 75 80, 120 88
+                      C165 95, 180 130, 220 126
+                      C260 122, 260 45, 315 44
+                      C365 42, 375 45, 405 83
+                      C435 120, 470 88, 500 45
+                      L500 190
+                      L0 190
+                      Z
+                    "
+                    fill="url(#agendaGradient)"
+                  ></path>
+
+                  <path
+                    d="
+                      M0 155
+                      C45 95, 75 80, 120 88
+                      C165 95, 180 130, 220 126
+                      C260 122, 260 45, 315 44
+                      C365 42, 375 45, 405 83
+                      C435 120, 470 88, 500 45
+                    "
+                    fill="none"
+                    stroke="#5e367b"
+                    stroke-width="3"
+                  ></path>
+
+                </svg>
+
+                <div class="chart-months">
+                  <span>Ene</span>
+                  <span>Feb</span>
+                  <span>Mar</span>
+                  <span>Abr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+        </div>
+
+      </div>
+
+      <!-- TIPOS DE EVENTOS -->
+      <aside class="event-types-panel">
+
+        <div class="event-types-header">
+          <h3>Tipos de evento</h3>
+        </div>
+
+        <button
+          type="button"
+          class="add-event-button"
+        >
+          ＋ Nuevo evento
+        </button>
+
+        <div class="event-type-item audiencia">
+          Audiencias
+        </div>
+
+        <div class="event-type-item actuacion">
+          Actuaciones
+        </div>
+
+        <div class="event-type-item reunion">
+          Reuniones con Clientes
+        </div>
+
+        <div class="event-type-item plazo">
+          Plazos
+        </div>
+
+        <div class="event-type-item consulta">
+          Consultas
+        </div>
+
+      </aside>
+
+      <!-- DETALLE SOLO VISUAL -->
+      <aside class="event-detail-panel">
+
+        <div class="detail-header">
+
+          <h2>
+            Detalles del Evento Seleccionado
+          </h2>
+
+          <button type="button">
+            ×
+          </button>
+
+        </div>
+
+        <div class="detail-content">
+
+          <div class="detail-event-title">
+
+            <h3>
+              Audiencia
+            </h3>
+
+            <span>
+              EXP. 01452-2026
+            </span>
+
+          </div>
+
+          <div class="detail-time">
+
+            <span class="detail-icon">
+              ◷
+            </span>
+
+            <div>
+              <small>Horario</small>
+              <strong>09:00 AM</strong>
+            </div>
+
+          </div>
+
+          <section class="detail-section">
+
+            <h4>
+              Participantes
+            </h4>
+
+            <div class="participant">
+
+              <span class="participant-avatar">
+                A
+              </span>
+
+              <div>
+                <strong>Ana María Fernández</strong>
+                <span>Cliente / participante</span>
+              </div>
+
+            </div>
+
+            <div class="participant">
+
+              <span class="participant-avatar lawyer">
+                CM
+              </span>
+
+              <div>
+                <strong>Carlos Mendoza Rojas</strong>
+                <span>Abogado responsable</span>
+              </div>
+
+            </div>
+
+          </section>
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◉
+            </span>
+
+            <div>
+              <small>Lugar</small>
+              <strong>Sala Virtual - Zoom</strong>
+            </div>
+
+          </div>
+
+          <div class="detail-info-row">
+
+            <span class="detail-icon">
+              ◇
+            </span>
+
+            <div>
+              <small>Expediente</small>
+              <strong>EXP. 01452-2026</strong>
+            </div>
+
+          </div>
+
+          <section class="detail-section">
+
+            <h4>
+              Eventos Próximos de la Semana
+            </h4>
+
+            <div class="upcoming-item">
+              <strong>EXP. 01452-2026</strong>
+              <span class="upcoming-tag green">Alimentos</span>
+              <span>•••</span>
+            </div>
+
+            <div class="upcoming-item">
+              <strong>EXP. 02388-2025</strong>
+              <span class="upcoming-tag green">Daños</span>
+              <span>•••</span>
+            </div>
+
+            <div class="upcoming-item">
+              <strong>EXP. 03321-2024</strong>
+              <span class="upcoming-tag orange">En Trámite</span>
+              <span>•••</span>
+            </div>
+
+          </section>
+
+          <section class="detail-section">
+
+            <h4>
+              Alertas de Plazos Críticos
+            </h4>
+
+            <div class="deadline-alert">
+              <strong>EXP. 00521-2024</strong>
+              <span>Vence mañana</span>
+            </div>
+
+          </section>
+
+          <section class="detail-section">
+
+            <h4>
+              Notas y Contactos Recientes
+            </h4>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Documento de descarga...</strong>
+              <span>↓</span>
+            </div>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Ficha del expediente...</strong>
+              <span>↓</span>
+            </div>
+
+            <div class="document-item">
+              <span>▤</span>
+              <strong>Documento reciente 1</strong>
+              <span>↓</span>
+            </div>
+
+          </section>
+
+        </div>
+
+      </aside>
+
+    </div>
+
+  </main>
+
+</div>

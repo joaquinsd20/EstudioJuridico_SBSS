@@ -1,0 +1,765 @@
+:host {
+  display: block;
+  min-height: 100vh;
+
+  font-family:
+    'Segoe UI',
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
+
+  color: #172033;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+
+/* =========================================================
+   ESTRUCTURA GENERAL
+========================================================= */
+
+.layout-wrapper {
+  display: flex;
+
+  width: 100%;
+  min-height: 100vh;
+
+  margin: 0;
+  padding: 0;
+
+  background: #f5f7fb;
+}
+
+.main-content {
+  flex: 1;
+
+  min-width: 0;
+  min-height: 100vh;
+
+  padding:
+    28px
+    32px
+    40px;
+
+  background: #f5f7fb;
+}
+
+
+/* =========================================================
+   CABECERA
+========================================================= */
+
+.facturacion-header {
+  display: flex;
+
+  justify-content: space-between;
+  align-items: flex-start;
+
+  gap: 24px;
+
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #6366f1;
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: .09em;
+
+  text-transform: uppercase;
+}
+
+.facturacion-header h1 {
+  margin: 0;
+
+  color: #111827;
+
+  font-size: 25px;
+
+  line-height: 1.15;
+
+  font-weight: 750;
+
+  letter-spacing: -.5px;
+}
+
+.facturacion-header p {
+  max-width: 720px;
+
+  margin:
+    7px
+    0
+    0;
+
+  color: #88909f;
+
+  font-size: 11px;
+
+  line-height: 1.45;
+}
+
+
+/* =========================================================
+   BOTÓN PRINCIPAL
+========================================================= */
+
+.btn-primary-action {
+  min-height: 38px;
+
+  padding:
+    0
+    16px;
+
+  border: 0;
+
+  border-radius: 8px;
+
+  background: #6366f1;
+
+  color: #ffffff;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 16px
+    rgba(99, 102, 241, .16);
+
+  transition: .18s ease;
+}
+
+.btn-primary-action:hover {
+  background: #5558e8;
+
+  transform: translateY(-1px);
+}
+
+
+/* =========================================================
+   KPIs
+========================================================= */
+
+.kpi-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4, minmax(0, 1fr));
+
+  gap: 12px;
+
+  margin-bottom: 14px;
+}
+
+.kpi-card {
+  padding:
+    15px
+    16px;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.kpi-label {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #64748b;
+
+  font-size: 8px;
+
+  font-weight: 700;
+}
+
+.kpi-value {
+  display: block;
+
+  margin-bottom: 4px;
+
+  font-size: 20px;
+
+  font-weight: 800;
+}
+
+.kpi-card small {
+  color: #94a3b8;
+
+  font-size: 7px;
+}
+
+.text-indigo {
+  color: #4f46e5;
+}
+
+.text-success {
+  color: #15803d;
+}
+
+.text-danger {
+  color: #b91c1c;
+}
+
+.text-warning {
+  color: #c87914;
+}
+
+
+/* =========================================================
+   TARJETAS
+========================================================= */
+
+.card-panel {
+  padding: 18px;
+
+  border:
+    1px solid #e1e5eb;
+
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow:
+    0 2px 8px
+    rgba(15, 23, 42, .025);
+}
+
+.mb-4 {
+  margin-bottom: 14px;
+}
+
+.panel-heading {
+  display: flex;
+
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding-bottom: 14px;
+
+  margin-bottom: 16px;
+
+  border-bottom:
+    1px solid #eef1f5;
+}
+
+.panel-heading-row {
+  align-items: center;
+}
+
+.panel-kicker {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #6366f1;
+
+  font-size: 7px;
+
+  font-weight: 800;
+
+  letter-spacing: .08em;
+
+  text-transform: uppercase;
+}
+
+.panel-heading h2 {
+  margin: 0;
+
+  color: #202733;
+
+  font-size: 14px;
+
+  font-weight: 750;
+}
+
+.panel-heading p {
+  margin:
+    5px
+    0
+    0;
+
+  color: #8b929f;
+
+  font-size: 8px;
+}
+
+.panel-number {
+  min-width: 30px;
+  height: 30px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 8px;
+
+  background: #f1f2f6;
+
+  color: #6b7280;
+
+  font-size: 8px;
+
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   FILTROS
+========================================================= */
+
+.form-grid-3 {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 14px;
+}
+
+.form-group {
+  min-width: 0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.form-group label {
+  color: #475569;
+
+  font-size: 8px;
+
+  font-weight: 700;
+}
+
+.custom-input,
+.custom-select {
+  width: 100%;
+
+  height: 38px;
+
+  padding:
+    0
+    11px;
+
+  border:
+    1px solid #d9dee6;
+
+  border-radius: 6px;
+
+  outline: 0;
+
+  background: #ffffff;
+
+  color: #4c5462;
+
+  font-size: 9px;
+
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease;
+}
+
+.custom-input::placeholder {
+  color: #9299a6;
+}
+
+.custom-input:focus,
+.custom-select:focus {
+  border-color: #7461d7;
+
+  box-shadow:
+    0 0 0 3px
+    rgba(99, 102, 241, .07);
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+.table-container {
+  width: 100%;
+
+  overflow-x: auto;
+}
+
+.custom-table {
+  width: 100%;
+
+  min-width: 1220px;
+
+  border-collapse: collapse;
+}
+
+.custom-table th {
+  height: 38px;
+
+  padding:
+    0
+    10px;
+
+  border-bottom:
+    1px solid #e8ebef;
+
+  background: #f8f9fb;
+
+  color: #64748b;
+
+  font-size: 7.3px;
+
+  font-weight: 800;
+
+  text-align: left;
+
+  white-space: nowrap;
+}
+
+.custom-table td {
+  padding:
+    10px;
+
+  border-bottom:
+    1px solid #eef1f5;
+
+  color: #3d4450;
+
+  font-size: 8px;
+
+  vertical-align: middle;
+}
+
+.custom-table tbody tr {
+  background: #ffffff;
+}
+
+.custom-table tbody tr:hover {
+  background: #faf9ff;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+
+/* =========================================================
+   EXPEDIENTE / CLIENTE
+========================================================= */
+
+.expediente-code {
+  color: #4f3757;
+
+  font-size: 8px;
+
+  text-decoration: underline;
+
+  white-space: nowrap;
+}
+
+.client-cell {
+  min-width: 215px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+}
+
+.client-avatar {
+  width: 31px;
+  height: 31px;
+
+  flex:
+    0
+    0
+    31px;
+
+  display: grid;
+
+  place-items: center;
+
+  border-radius: 8px;
+
+  background: #eef2ff;
+
+  color: #4f46e5;
+
+  font-size: 7px;
+
+  font-weight: 850;
+}
+
+.client-cell strong {
+  display: block;
+
+  color: #2f3743;
+
+  font-size: 8px;
+
+  line-height: 1.3;
+}
+
+.client-cell small {
+  display: block;
+
+  margin-top: 3px;
+
+  color: #94a3b8;
+
+  font-size: 6.5px;
+}
+
+
+/* =========================================================
+   MODALIDAD / MONTOS
+========================================================= */
+
+.billing-type {
+  display: inline-flex;
+
+  min-height: 25px;
+
+  align-items: center;
+
+  padding:
+    0
+    7px;
+
+  border-radius: 6px;
+
+  background: #f1f5f9;
+
+  color: #475569;
+
+  font-size: 7px;
+
+  font-weight: 700;
+}
+
+.amount-cell {
+  color: #343b47;
+
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+.amount-paid {
+  color: #15803d;
+
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+.amount-pending {
+  color: #b91c1c;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+.amount-zero {
+  color: #15803d;
+
+  font-weight: 800;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   BADGES
+========================================================= */
+
+.badge {
+  display: inline-flex;
+
+  align-items: center;
+
+  min-height: 25px;
+
+  padding:
+    0
+    8px;
+
+  border-radius: 6px;
+
+  font-size: 6.8px;
+
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+.badge-success {
+  background: #dcfce7;
+
+  color: #15803d;
+}
+
+.badge-pending {
+  background: #fef3c7;
+
+  color: #a16207;
+}
+
+.badge-danger {
+  background: #fee2e2;
+
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   ACCIONES
+========================================================= */
+
+.btn-icon {
+  margin-left: 5px;
+
+  padding:
+    5px
+    7px;
+
+  border:
+    1px solid #e2e8f0;
+
+  border-radius: 6px;
+
+  background: #ffffff;
+
+  color: #4f46e5;
+
+  font-size: 7px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  transition: .18s ease;
+}
+
+.btn-icon:hover {
+  background: #f8fafc;
+
+  border-color: #cbd5e1;
+}
+
+.btn-icon.payment {
+  color: #15803d;
+}
+
+
+/* =========================================================
+   SCROLL
+========================================================= */
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+
+  background: #cbd5e1;
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1150px) {
+
+  .kpi-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .form-grid-3 {
+    grid-template-columns:
+      1fr
+      1fr;
+  }
+
+  .form-grid-3 .form-group:first-child {
+    grid-column:
+      span 2;
+  }
+
+}
+
+
+@media (max-width: 850px) {
+
+  .main-content {
+    padding:
+      24px
+      18px
+      35px;
+  }
+
+  .facturacion-header {
+    flex-direction: column;
+  }
+
+  .facturacion-header .btn-primary-action {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  .form-grid-3 .form-group:first-child {
+    grid-column:
+      span 1;
+  }
+
+}
