@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, catchError, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { LoginRequest, LoginResponse, UsuarioAutenticado } from '../models/auth.models';
 
@@ -37,6 +37,39 @@ export class AuthService {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credenciales)
       .pipe(tap(respuesta => this.guardarSesion(respuesta)));
+  }
+
+  /**
+   * Comprueba contra el backend que el token guardado siga sirviendo. Se ejecuta
+   * al arrancar la aplicacion.
+   *
+   * Sin esto, el guard solo verifica que EXISTA un token, no que sea valido: con
+   * un token expirado se entraria a la aplicacion entera con una sesion muerta y
+   * cada peticion fallaria despues.
+   *
+   * De paso refresca los datos del usuario, asi que si el Administrador le cambia
+   * el rol a alguien, lo ve al recargar y no cuando expire su token.
+   */
+  restaurarSesion(): Observable<UsuarioAutenticado | null> {
+    if (!this.token) {
+      return of(null);
+    }
+
+    return this.http.get<UsuarioAutenticado>(`${environment.apiUrl}/auth/yo`).pipe(
+      tap(usuario => {
+        this._usuario.set(usuario);
+        localStorage.setItem(this.CLAVE_USUARIO, JSON.stringify(usuario));
+      }),
+      catchError((error: HttpErrorResponse) => {
+        // Solo se cierra la sesion si el servidor dice que el token no sirve.
+        // Un fallo de red (status 0, backend apagado) no significa que la sesion
+        // sea invalida: expulsar al usuario por un corte momentaneo seria peor.
+        if (error.status === 401 || error.status === 403) {
+          this.cerrarSesion();
+        }
+        return of(null);
+      })
+    );
   }
 
   /** Borra la sesion local. No llama al backend: el token es stateless. */
