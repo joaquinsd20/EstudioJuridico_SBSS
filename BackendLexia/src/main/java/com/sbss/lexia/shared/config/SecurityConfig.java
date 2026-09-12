@@ -83,6 +83,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        // Spring Boot reenvia internamente a /error para renderizar
+                        // cualquier excepcion no manejada (415, 500, etc.). Sin esto,
+                        // ese reenvio vuelve a pasar por seguridad, se rechaza por no
+                        // estar autenticado, y el cliente recibe 401 "NO_AUTENTICADO"
+                        // en vez del error real — un 500 por un bug se veria identico
+                        // a un problema de login. Se confirmo pidiendo /error directo:
+                        // devolvia 401 antes de esta linea.
+                        .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtService, usuarioDetailsService),

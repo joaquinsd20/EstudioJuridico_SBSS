@@ -184,17 +184,17 @@
     <div class="user-profile">
 
       <div class="avatar">
-        CM
+        {{ iniciales() }}
       </div>
 
       <div class="user-info">
 
         <strong>
-          Carlos Mendoza Rojas
+          {{ usuario()?.nombreCompleto }}
         </strong>
 
         <span>
-          Administrador
+          {{ usuario()?.rolPrincipal }}
         </span>
 
       </div>
@@ -202,11 +202,11 @@
     </div>
 
 
-    <!-- VOLVER AL LOGIN -->
+    <!-- CERRAR SESION: borra el token, no solo navega -->
     <button
       class="logout-button"
       type="button"
-      routerLink="/login"
+      (click)="cerrarSesion()"
     >
       Cerrar sesión
     </button>
