@@ -143,3 +143,36 @@
   color: red;
   margin-top: 10px;
 }
+
+/* El boton mientras la peticion esta en curso: sin hover ni cursor de click,
+   para que se note que no responde a un segundo intento. */
+.btn-login:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-login:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* Error de un campo concreto (correo mal escrito, campo vacio). */
+.campo-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: #dc2626;
+}
+
+/* Error devuelto por el servidor: credenciales incorrectas, cuenta bloqueada,
+   backend caido. */
+.login-error {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 1.4;
+}
