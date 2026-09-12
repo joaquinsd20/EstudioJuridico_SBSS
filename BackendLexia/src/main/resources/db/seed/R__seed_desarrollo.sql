@@ -141,31 +141,34 @@ INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        --
 
 -- =============================================================================
 -- USUARIOS — nombres del prototipo, para que las demos coincidan
--- password_hash: BCrypt de marcador. El primer login obliga a cambiarla.
+-- password_hash: BCrypt cost 12 de la contrasena de DESARROLLO 'Lexia.Dev.2026',
+-- igual para los 11 usuarios. Sirve para probar el login en local; todos tienen
+-- debe_cambiar_password = 1. Esta semilla no corre en produccion: el perfil prod
+-- no incluye db/seed en flyway.locations.
 -- =============================================================================
 INSERT INTO usuarios (id, estudio_id, tipo_usuario, codigo_usuario, nombres, apellidos,
                       tipo_documento, numero_documento, email, password_hash, telefono,
                       cargo, numero_colegiatura, estado, debe_cambiar_password) VALUES
 ( 1,1,'INTERNO','U-0001','Sofia',     'Ramirez Delgado', 'DNI','44112233','sofia.ramirez@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0000','949112233','Socia principal','CAL-45821','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949112233','Socia principal','CAL-45821','ACTIVO',1),
 ( 2,1,'INTERNO','U-0002','Ana',       'Morales Vega',    'DNI','44223344','ana.morales@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0001','949223344','Abogada','CAL-51203','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949223344','Abogada','CAL-51203','ACTIVO',1),
 ( 3,1,'INTERNO','U-0003','Luis',      'Torres Quiroz',   'DNI','44334455','luis.torres@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0002','949334455','Abogado','CAL-49877','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949334455','Abogado','CAL-49877','ACTIVO',1),
 ( 4,1,'INTERNO','U-0004','Maria',     'Lopez Sanchez',   'DNI','44445566','maria.lopez@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0003','949445566','Abogada auxiliar','CAL-58990','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949445566','Abogada auxiliar','CAL-58990','ACTIVO',1),
 ( 5,1,'INTERNO','U-0005','Ana Maria', 'Fernandez Salas', 'DNI','44556677','anamaria.fernandez@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0004','949556677','Abogada','CAL-47310','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949556677','Abogada','CAL-47310','ACTIVO',1),
 ( 6,1,'INTERNO','U-0006','Juan',      'Perez Rojas',     'DNI','44667788','juan.perez@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0005','949667788','Abogado','CAL-46002','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949667788','Abogado','CAL-46002','ACTIVO',1),
 ( 7,1,'INTERNO','U-0007','Carlos',    'Mendoza Rios',    'DNI','44778899','carlos.mendoza@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0006','949778899','Administrador de sistemas',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949778899','Administrador de sistemas',NULL,'ACTIVO',1),
 ( 8,1,'INTERNO','U-0008','Rosa',      'Jimenez Vargas',  'DNI','44889900','rosa.jimenez@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0007','949889900','Asistente legal',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949889900','Asistente legal',NULL,'ACTIVO',1),
 ( 9,1,'INTERNO','U-0009','Roberto',   'Diaz Camacho',    'DNI','44990011','roberto.diaz@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0008','949990011','Contador',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949990011','Contador',NULL,'ACTIVO',1),
 (10,1,'INTERNO','U-0010','Lucia',     'Castillo Reyes',  'DNI','44001122','lucia.castillo@lexia.com',
-    '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0009','949001122','Recepcionista',NULL,'ACTIVO',1);
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949001122','Recepcionista',NULL,'ACTIVO',1);
 
 -- Sofia es SOCIA y ABOGADA a la vez: el caso real que justifica los roles M:N.
 -- Como SOCIA tiene CALENDARIO_APROBAR, que es el permiso que cierra el flujo
@@ -334,7 +337,7 @@ INSERT INTO clientes (id, estudio_id, tipo_persona, tipo_documento, numero_docum
 INSERT INTO usuarios (id, estudio_id, tipo_usuario, nombres, apellidos, email, password_hash,
                       estado, cliente_id, debe_cambiar_password) VALUES
 (11,1,'CLIENTE','Ana Maria','Fernandez Salas','anamaria.fsalas@correo.com',
-   '$2a$12$SemillaLexiaHashDeMarcadorNoUsarEnProduccion0010','ACTIVO',1,1);
+   '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','ACTIVO',1,1);
 INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (11,8);
 
 INSERT INTO cliente_contactos (cliente_id, nombre_completo, tipo_documento, numero_documento, cargo,

@@ -27,6 +27,16 @@ spring:
     # baseline explicito y documentado, nunca activando esto por descarte.
     baseline-on-migrate: false
 
+lexia:
+  jwt:
+    # Sin valor por defecto: si falta, la aplicacion no arranca. Un secreto de JWT
+    # filtrado permite falsificar la sesion de cualquier usuario, incluido el
+    # Administrador, asi que jamas puede vivir en un archivo del repositorio.
+    secreto: ${JWT_SECRETO}
+  cors:
+    # Dominio real del frontend. Nunca '*' con allowCredentials activo.
+    origenes: ${CORS_ORIGENES}
+
 logging:
   level:
     root: WARN

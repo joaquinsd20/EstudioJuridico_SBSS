@@ -42,3 +42,9 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+
+lexia:
+  jwt:
+    # 8 horas: cubre una jornada de trabajo sin obligar a reautenticarse a media
+    # audiencia. El secreto se define por perfil.
+    expiracion-segundos: 28800

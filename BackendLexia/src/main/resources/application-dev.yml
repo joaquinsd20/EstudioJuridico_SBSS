@@ -27,6 +27,16 @@ spring:
     # Esquema + semilla. 'db/seed' SOLO se lista en este perfil.
     locations: classpath:db/migration,classpath:db/seed
 
+lexia:
+  jwt:
+    # Secreto SOLO de desarrollo. Esta en el repositorio a proposito para que el
+    # equipo pueda levantar el proyecto sin configurar nada. En produccion viene
+    # de una variable de entorno y no tiene valor por defecto.
+    secreto: ${JWT_SECRETO:lexia-desarrollo-secreto-no-usar-en-produccion-32bytes-minimo}
+  cors:
+    # El servidor de desarrollo de Angular.
+    origenes: http://localhost:4200
+
 logging:
   level:
     org.flywaydb: INFO

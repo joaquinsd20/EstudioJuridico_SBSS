@@ -42,6 +42,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
 		<!-- En Spring Boot 4 la autoconfiguracion se partio en modulos por
 		     tecnologia: flyway-core aporta la libreria, spring-boot-flyway es
 		     lo que la ejecuta al arrancar. Sin este modulo las migraciones
@@ -73,6 +77,28 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+
+		<!-- JWT. Se usa el serializador Gson y no el de Jackson a proposito:
+		     Spring Boot 4 trae Jackson 3 (tools.jackson) y jjwt-jackson espera
+		     Jackson 2 (com.fasterxml), lo que daria un fallo en tiempo de
+		     ejecucion. Gson es autocontenido y evita ese choque. -->
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.12.6</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.12.6</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-gson</artifactId>
+			<version>0.12.6</version>
+			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
