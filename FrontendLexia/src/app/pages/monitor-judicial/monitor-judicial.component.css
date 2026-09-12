@@ -12,10 +12,6 @@
   color: #172033;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 button,
 select {
   font: inherit;
@@ -58,31 +54,7 @@ select {
 ========================================================= */
 
 .page-header {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 24px;
-
   margin-bottom: 18px;
-}
-
-.eyebrow,
-.panel-kicker {
-  display: block;
-
-  margin-bottom: 5px;
-
-  color: #6366f1;
-
-  font-size: 8px;
-
-  font-weight: 800;
-
-  letter-spacing: .08em;
-
-  text-transform: uppercase;
 }
 
 .page-header h1 {
@@ -157,17 +129,6 @@ select {
 /* =========================================================
    TARJETAS DE RESUMEN
 ========================================================= */
-
-.stats-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
-  gap: 12px;
-
-  margin-bottom: 14px;
-}
 
 .stat-card {
   padding:
@@ -308,25 +269,6 @@ select {
   color: #8b929f;
 
   font-size: 7px;
-}
-
-.panel-number {
-  min-width: 30px;
-  height: 30px;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 8px;
-
-  background: #f1f2f6;
-
-  color: #6b7280;
-
-  font-size: 8px;
-
-  font-weight: 800;
 }
 
 
@@ -886,8 +828,7 @@ select {
 }
 
 .detail-content {
-  padding:
-    12px
+  padding: 12px
     14px
     15px;
 }
@@ -1047,10 +988,6 @@ select {
   height: 6px;
 }
 
-.table-wrap::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
 .table-wrap::-webkit-scrollbar-thumb {
   border-radius: 999px;
 
@@ -1124,4 +1061,14 @@ select {
     grid-template-columns: 1fr;
   }
 
+}
+.eyebrow,
+.panel-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #6366f1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }

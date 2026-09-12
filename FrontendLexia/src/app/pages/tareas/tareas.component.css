@@ -12,16 +12,6 @@
   color: #172033;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
 
 /* =========================================================
    ESTRUCTURA GENERAL
@@ -59,31 +49,7 @@ select {
 ========================================================= */
 
 .page-header {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 24px;
-
   margin-bottom: 20px;
-}
-
-.eyebrow,
-.panel-kicker {
-  display: block;
-
-  margin-bottom: 5px;
-
-  color: #6366f1;
-
-  font-size: 8px;
-
-  font-weight: 800;
-
-  letter-spacing: .08em;
-
-  text-transform: uppercase;
 }
 
 .page-header h1 {
@@ -390,25 +356,6 @@ select {
   color: #8b929f;
 
   font-size: 7px;
-}
-
-.panel-number {
-  min-width: 30px;
-  height: 30px;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 8px;
-
-  background: #f1f2f6;
-
-  color: #6b7280;
-
-  font-size: 8px;
-
-  font-weight: 800;
 }
 
 
@@ -1652,4 +1599,14 @@ select {
     grid-template-columns: 1fr;
   }
 
+}
+.eyebrow,
+.panel-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #6366f1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }

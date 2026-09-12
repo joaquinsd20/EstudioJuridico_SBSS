@@ -12,16 +12,6 @@
   color: #172033;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
 
 /* =========================================================
    ESTRUCTURA GENERAL
@@ -355,22 +345,6 @@ select {
   align-items: center;
 }
 
-.panel-kicker {
-  display: block;
-
-  margin-bottom: 4px;
-
-  color: #6366f1;
-
-  font-size: 7px;
-
-  font-weight: 800;
-
-  letter-spacing: .08em;
-
-  text-transform: uppercase;
-}
-
 .panel-heading h2 {
   margin: 0;
 
@@ -390,25 +364,6 @@ select {
   color: #8b929f;
 
   font-size: 8px;
-}
-
-.panel-number {
-  min-width: 30px;
-  height: 30px;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 8px;
-
-  background: #f1f2f6;
-
-  color: #6b7280;
-
-  font-size: 8px;
-
-  font-weight: 800;
 }
 
 .panel-actions {
@@ -549,14 +504,6 @@ select {
   font-size: 8px;
 
   vertical-align: middle;
-}
-
-.custom-table tbody tr:hover {
-  background: #faf9ff;
-}
-
-.text-right {
-  text-align: right !important;
 }
 
 .role-pill {
@@ -1106,4 +1053,13 @@ select {
     grid-column: 2;
   }
 
+}
+.panel-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #6366f1;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }

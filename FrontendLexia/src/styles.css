@@ -124,3 +124,161 @@ app-root {
 .layout-wrapper > .main-content::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
+
+/* =========================================================
+   COMPONENTES COMPARTIDOS ENTRE PANTALLAS
+   Extraido automaticamente: estas reglas eran IDENTICAS, byte a byte,
+   en 3 o mas paginas. Una sola copia aqui reemplaza a todas.
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+.table-header h2 {
+  margin: 0;
+  color: #242b36;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.donut-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.participant > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.upcoming-item {
+  min-height: 31px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr)
+    72px
+    20px;
+  align-items: center;
+  gap: 5px;
+}
+
+.upcoming-item > strong {
+  color: #343b47;
+  font-size: 7px;
+}
+
+.upcoming-tag {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  padding: 0
+    7px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 6.5px;
+}
+
+.upcoming-tag.green {
+  background: #65ad6d;
+}
+
+.upcoming-tag.orange {
+  background: #e69a40;
+}
+
+.document-item > span {
+  color: #5e3475;
+  font-size: 9px;
+}
+
+.panel-number {
+  min-width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f1f2f6;
+  color: #6b7280;
+  font-size: 8px;
+  font-weight: 800;
+}
+
+.table-wrap::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.stat-icon.blue {
+  background: #e7effd;
+  color: #4471c5;
+}
+
+.actions {
+  display: flex;
+  gap: 2px;
+}
+
+.custom-table tbody tr:hover {
+  background: #faf9ff;
+}
+
+.text-right {
+  text-align: right !important;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.filters-card {
+  display: grid;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  border: 1px solid #e1e5eb;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 7px
+    rgba(15, 23, 42, .02);
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid #e8ebef;
+}
+
+.detail-content {
+  padding: 14px;
+}
+
+.detail-section {
+  padding-top: 13px;
+}

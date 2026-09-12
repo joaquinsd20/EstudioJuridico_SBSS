@@ -5,10 +5,6 @@
   color: #172033;
 }
 
-* {
-  box-sizing: border-box;
-}
-
 button,
 textarea {
   font: inherit;
@@ -48,31 +44,7 @@ textarea {
 ========================================================= */
 
 .page-header {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 24px;
-
   margin-bottom: 18px;
-}
-
-.eyebrow,
-.panel-kicker {
-  display: block;
-
-  margin-bottom: 5px;
-
-  color: #6366f1;
-
-  font-size: 8px;
-
-  font-weight: 800;
-
-  letter-spacing: .08em;
-
-  text-transform: uppercase;
 }
 
 .page-header h1 {
@@ -205,25 +177,6 @@ textarea {
   color: #8b929f;
 
   font-size: 7px;
-}
-
-.panel-number {
-  min-width: 30px;
-  height: 30px;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 8px;
-
-  background: #f1f2f6;
-
-  color: #6b7280;
-
-  font-size: 8px;
-
-  font-weight: 800;
 }
 
 
@@ -1026,10 +979,6 @@ textarea {
   height: 6px;
 }
 
-.table-wrap::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
 .table-wrap::-webkit-scrollbar-thumb {
   border-radius: 999px;
 
@@ -1152,4 +1101,14 @@ textarea {
     width: 100%;
   }
 
+}
+.eyebrow,
+.panel-kicker {
+  display: block;
+  margin-bottom: 5px;
+  color: #6366f1;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
