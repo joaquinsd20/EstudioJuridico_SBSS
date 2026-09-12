@@ -12,16 +12,6 @@
   color: #172033;
 }
 
-* {
-  box-sizing: border-box;
-}
-
-button,
-input,
-select {
-  font: inherit;
-}
-
 
 /* =========================================================
    ESTRUCTURA GENERAL
@@ -59,13 +49,6 @@ select {
 ========================================================= */
 
 .page-header {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: flex-start;
-
-  gap: 24px;
-
   margin-bottom: 20px;
 }
 
@@ -188,17 +171,6 @@ select {
    ESTADÍSTICAS
 ========================================================= */
 
-.stats-grid {
-  display: grid;
-
-  grid-template-columns:
-    repeat(4, minmax(0, 1fr));
-
-  gap: 12px;
-
-  margin-bottom: 14px;
-}
-
 .stat-card {
   padding:
     14px
@@ -292,22 +264,6 @@ select {
     1px solid #eef1f5;
 }
 
-.panel-kicker {
-  display: block;
-
-  margin-bottom: 4px;
-
-  color: #6366f1;
-
-  font-size: 7px;
-
-  font-weight: 800;
-
-  letter-spacing: .08em;
-
-  text-transform: uppercase;
-}
-
 .panel-header h2,
 .section-heading h2 {
   margin: 0;
@@ -329,25 +285,6 @@ select {
   color: #8b929f;
 
   font-size: 8px;
-}
-
-.panel-number {
-  min-width: 30px;
-  height: 30px;
-
-  display: grid;
-
-  place-items: center;
-
-  border-radius: 8px;
-
-  background: #f1f2f6;
-
-  color: #6b7280;
-
-  font-size: 8px;
-
-  font-weight: 800;
 }
 
 
@@ -939,10 +876,6 @@ tbody tr:hover {
   height: 6px;
 }
 
-.table-wrap::-webkit-scrollbar-track {
-  background: #f1f5f9;
-}
-
 .table-wrap::-webkit-scrollbar-thumb {
   border-radius: 10px;
 
@@ -1045,4 +978,13 @@ tbody tr:hover {
     grid-template-columns: 1fr;
   }
 
+}
+.panel-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: #6366f1;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
 }
