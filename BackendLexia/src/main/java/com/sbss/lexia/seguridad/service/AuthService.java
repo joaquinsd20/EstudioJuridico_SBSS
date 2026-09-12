@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -24,14 +25,26 @@ public class AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final UsuarioRepository usuarioRepository;
+    private final IntentosFallidosService intentosFallidosService;
     private final com.sbss.lexia.shared.security.JwtService jwtService;
 
     @Transactional
     public LoginResponse login(LoginRequest peticion) {
-        // Lanza AuthenticationException si las credenciales no son validas, si la
-        // cuenta esta inactiva o si esta bloqueada. El manejador la traduce a 401.
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(peticion.email(), peticion.password()));
+        Authentication auth;
+        try {
+            // Lanza BadCredentialsException si el correo no existe o la password
+            // es incorrecta (Spring oculta cual de las dos a proposito), o
+            // DisabledException/LockedException si la cuenta esta inactiva o ya
+            // bloqueada. El manejador global traduce cada una a su codigo HTTP.
+            auth = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(peticion.email(), peticion.password()));
+        } catch (BadCredentialsException e) {
+            // Bean aparte, transaccion aparte: ver el comentario en
+            // IntentosFallidosService sobre por que no puede ser un metodo mas
+            // de esta clase.
+            intentosFallidosService.registrarIntentoFallido(peticion.email());
+            throw e;
+        }
 
         UsuarioPrincipal principal = (UsuarioPrincipal) auth.getPrincipal();
 
