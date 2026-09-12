@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
 
@@ -33,7 +34,8 @@ export const routes: Routes = [
     path: 'dashboard',
     loadComponent: () =>
       import('./pages/dashboard/dashboard.component')
-        .then(m => m.DashboardComponent)
+        .then(m => m.DashboardComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -45,7 +47,8 @@ export const routes: Routes = [
     path: 'expedientes',
     loadComponent: () =>
       import('./pages/expedientes/expedientes.component')
-        .then(m => m.ExpedientesComponent)
+        .then(m => m.ExpedientesComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -57,7 +60,8 @@ export const routes: Routes = [
     path: 'clientes',
     loadComponent: () =>
       import('./pages/clientes/clientes.component')
-        .then(m => m.ClientesComponent)
+        .then(m => m.ClientesComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -69,7 +73,8 @@ export const routes: Routes = [
     path: 'agenda',
     loadComponent: () =>
       import('./pages/agenda/agenda.component')
-        .then(m => m.AgendaComponent)
+        .then(m => m.AgendaComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -81,7 +86,8 @@ export const routes: Routes = [
     path: 'actuaciones',
     loadComponent: () =>
       import('./pages/actuaciones/actuaciones.component')
-        .then(m => m.ActuacionesComponent)
+        .then(m => m.ActuacionesComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -93,7 +99,8 @@ export const routes: Routes = [
     path: 'plazos',
     loadComponent: () =>
       import('./pages/plazos/plazos.component')
-        .then(m => m.PlazosComponent)
+        .then(m => m.PlazosComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -105,7 +112,8 @@ export const routes: Routes = [
     path: 'tareas',
     loadComponent: () =>
       import('./pages/tareas/tareas.component')
-        .then(m => m.TareasComponent)
+        .then(m => m.TareasComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -117,7 +125,8 @@ export const routes: Routes = [
     path: 'documentos',
     loadComponent: () =>
       import('./pages/documentos/documentos.component')
-        .then(m => m.DocumentosComponent)
+        .then(m => m.DocumentosComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -129,7 +138,8 @@ export const routes: Routes = [
     path: 'escritos-ia',
     loadComponent: () =>
       import('./pages/escritos-ia/escritos-ia.component')
-        .then(m => m.EscritosIaComponent)
+        .then(m => m.EscritosIaComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -141,7 +151,8 @@ export const routes: Routes = [
     path: 'biblioteca-juridica',
     loadComponent: () =>
       import('./pages/biblioteca-juridica/biblioteca-juridica.component')
-        .then(m => m.BibliotecaJuridicaComponent)
+        .then(m => m.BibliotecaJuridicaComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -153,7 +164,8 @@ export const routes: Routes = [
     path: 'monitor-judicial',
     loadComponent: () =>
       import('./pages/monitor-judicial/monitor-judicial.component')
-        .then(m => m.MonitorJudicialComponent)
+        .then(m => m.MonitorJudicialComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -165,7 +177,8 @@ export const routes: Routes = [
     path: 'reportes',
     loadComponent: () =>
       import('./pages/reportes/reportes.component')
-        .then(m => m.ReportesComponent)
+        .then(m => m.ReportesComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -177,7 +190,8 @@ export const routes: Routes = [
     path: 'facturacion',
     loadComponent: () =>
       import('./pages/facturacion/facturacion.component')
-        .then(m => m.FacturacionComponent)
+        .then(m => m.FacturacionComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -189,7 +203,8 @@ export const routes: Routes = [
     path: 'usuarios',
     loadComponent: () =>
       import('./pages/usuarios/usuarios.component')
-        .then(m => m.UsuariosComponent)
+        .then(m => m.UsuariosComponent),
+    canActivate: [authGuard]
   },
 
 
@@ -201,7 +216,8 @@ export const routes: Routes = [
     path: 'configuracion',
     loadComponent: () =>
       import('./pages/configuracion/configuracion.component')
-        .then(m => m.ConfiguracionComponent)
+        .then(m => m.ConfiguracionComponent),
+    canActivate: [authGuard]
   },
 
 

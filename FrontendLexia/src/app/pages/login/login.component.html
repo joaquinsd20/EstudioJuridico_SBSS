@@ -19,7 +19,7 @@
     </p>
 
 
-    <form>
+    <form [formGroup]="formulario" (ngSubmit)="entrar()">
 
       <div class="form-group">
 
@@ -32,7 +32,19 @@
           id="email"
           class="input-field"
           placeholder="tucorreo@lexia.com"
+          formControlName="email"
+          autocomplete="username"
         >
+
+        @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
+          <span class="campo-error">
+            @if (formulario.controls.email.hasError('required')) {
+              El correo es obligatorio
+            } @else {
+              El correo no tiene un formato válido
+            }
+          </span>
+        }
 
       </div>
 
@@ -48,17 +60,32 @@
           id="password"
           class="input-field"
           placeholder="••••••••"
+          formControlName="password"
+          autocomplete="current-password"
         >
+
+        @if (formulario.controls.password.touched && formulario.controls.password.invalid) {
+          <span class="campo-error">
+            La contraseña es obligatoria
+          </span>
+        }
 
       </div>
 
 
+      @if (error()) {
+        <div class="login-error" role="alert">
+          {{ error() }}
+        </div>
+      }
+
+
       <button
-        type="button"
+        type="submit"
         class="btn-login"
-        (click)="entrar()"
+        [disabled]="cargando()"
       >
-        Iniciar sesión
+        {{ cargando() ? 'Ingresando…' : 'Iniciar sesión' }}
       </button>
 
     </form>
