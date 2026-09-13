@@ -1,1579 +1,827 @@
 <div class="layout-wrapper">
-
-  <!-- ===================================================== -->
-  <!-- PANEL REUTILIZABLE -->
-  <!-- ===================================================== -->
-
   <app-panel></app-panel>
 
-
-  <!-- ===================================================== -->
-  <!-- CONTENIDO PRINCIPAL -->
-  <!-- ===================================================== -->
-
   <main class="main-content">
-
-
-    <!-- =================================================== -->
-    <!-- CABECERA -->
-    <!-- =================================================== -->
-
     <header class="documentos-header">
-
       <div>
-
-        <h1>
-          Gestión Documental Jurídica
-        </h1>
-
-        <p>
-          Organiza y consulta los documentos vinculados
-          a los expedientes del estudio jurídico.
-        </p>
-
+        <h1>Gestión Documental Jurídica</h1>
+        <p>Organiza, edita, exporta y consulta los documentos vinculados a los expedientes.</p>
       </div>
 
-
-      <button
-        type="button"
-        class="btn-primary"
-      >
-        <span class="plus">
-          +
-        </span>
-
+      <button type="button" class="btn-primary" (click)="abrirNuevo()">
+        <span class="plus">+</span>
         Nuevo Documento
       </button>
-
     </header>
 
-
-    <!-- =================================================== -->
-    <!-- TARJETAS SUPERIORES -->
-    <!-- =================================================== -->
-
-    <section class="stats-grid">
-
-
-      <!-- TOTAL -->
-
-      <article class="stat-card">
-
-        <div class="stat-icon purple">
-          ▤
+    <div class="feedback-stack" aria-live="polite">
+      @if (error) {
+        <div class="alert alert-error" role="alert">
+          <span class="alert-icon">!</span>
+          <span>{{ error }}</span>
+          <button type="button" aria-label="Cerrar mensaje" (click)="error = ''">×</button>
         </div>
+      }
 
-        <div class="stat-information">
-
-          <span>
-            Total documentos
-          </span>
-
-          <strong>
-            128
-          </strong>
-
-          <small>
-            Registrados en el sistema
-          </small>
-
+      @if (exito) {
+        <div class="alert alert-success" role="status">
+          <span class="alert-icon">✓</span>
+          <span>{{ exito }}</span>
+          <button type="button" aria-label="Cerrar mensaje" (click)="exito = ''">×</button>
         </div>
-
-      </article>
-
-
-      <!-- RECIENTES -->
-
-      <article class="stat-card">
-
-        <div class="stat-icon blue">
-          ◷
-        </div>
-
-        <div class="stat-information">
-
-          <span>
-            Documentos recientes
-          </span>
-
-          <strong>
-            12
-          </strong>
-
-          <small>
-            En los últimos 7 días
-          </small>
-
-        </div>
-
-      </article>
-
-
-      <!-- BORRADORES -->
-
-      <article class="stat-card">
-
-        <div class="stat-icon orange">
-          ✎
-        </div>
-
-        <div class="stat-information">
-
-          <span>
-            Borradores
-          </span>
-
-          <strong>
-            6
-          </strong>
-
-          <small>
-            Pendientes de revisión
-          </small>
-
-        </div>
-
-      </article>
-
-
-      <!-- ARCHIVADOS -->
-
-      <article class="stat-card">
-
-        <div class="stat-icon gray">
-          ▣
-        </div>
-
-        <div class="stat-information">
-
-          <span>
-            Archivados
-          </span>
-
-          <strong>
-            24
-          </strong>
-
-          <small>
-            Documentación histórica
-          </small>
-
-        </div>
-
-      </article>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- FILTROS SOLO VISUALES -->
-    <!-- =================================================== -->
-
-    <section class="filters-card">
-
-
-      <div class="search-control">
-
-        <span class="search-icon">
-          ⌕
-        </span>
-
-        <input
-          type="text"
-          placeholder="Buscar documento, expediente o cliente..."
-        >
-
-      </div>
-
-
-      <div class="filter-control">
-
-        <select>
-
-          <option>
-            Todas las categorías
-          </option>
-
-          <option>
-            Demandas
-          </option>
-
-          <option>
-            Escritos
-          </option>
-
-          <option>
-            Resoluciones
-          </option>
-
-          <option>
-            Contratos
-          </option>
-
-          <option>
-            Evidencias
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="filter-control">
-
-        <select>
-
-          <option>
-            Todos los estados
-          </option>
-
-          <option>
-            Vigente
-          </option>
-
-          <option>
-            Borrador
-          </option>
-
-          <option>
-            Archivado
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <button
-        type="button"
-        class="clear-button"
-      >
-        ×
-      </button>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- LAYOUT DOCUMENTOS -->
-    <!-- =================================================== -->
-
-    <div class="documentos-layout">
-
-
-      <!-- ================================================= -->
-      <!-- PARTE IZQUIERDA -->
-      <!-- ================================================= -->
-
-      <div class="documentos-left">
-
-
-        <!-- =============================================== -->
-        <!-- TABLA -->
-        <!-- =============================================== -->
-
-        <section class="card table-card">
-
-
-          <div class="table-header">
-
-            <div>
-
-              <h2>
-                Biblioteca de Documentos
-              </h2>
-
-              <span>
-                7 documentos encontrados
-              </span>
-
-            </div>
-
-
-            <div class="table-tools">
-
-              <button type="button">
-                ↕ Ordenar
-              </button>
-
-              <button type="button">
-                ⌁ Filtrar
-              </button>
-
-            </div>
-
-          </div>
-
-
-          <div class="table-wrapper">
-
-            <table class="documents-table">
-
-
-              <thead>
-
-                <tr>
-
-                  <th>
-                    Documento
-                  </th>
-
-                  <th>
-                    Expediente
-                  </th>
-
-                  <th>
-                    Cliente
-                  </th>
-
-                  <th>
-                    Categoría
-                  </th>
-
-                  <th>
-                    Fecha
-                  </th>
-
-                  <th>
-                    Estado
-                  </th>
-
-                  <th>
-                    Acciones
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 1 -->
-                <!-- ======================================= -->
-
-                <tr class="selected-row">
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon pdf">
-                        PDF
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Demanda de Alimentos
-                        </strong>
-
-                        <span>
-                          Demanda_Alimentos_01452.pdf
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 01452-2026
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        MF
-                      </span>
-
-                      <span>
-                        María Fernández
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category demand">
-                      Demanda
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    28/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Vigente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 2 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon pdf">
-                        PDF
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Resolución N.° 006
-                        </strong>
-
-                        <span>
-                          Resolucion_006.pdf
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 01452-2026
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        MF
-                      </span>
-
-                      <span>
-                        María Fernández
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category resolution">
-                      Resolución
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    28/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Vigente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 3 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon pdf">
-                        PDF
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Contrato de Servicios Jurídicos
-                        </strong>
-
-                        <span>
-                          Contrato_Servicios.pdf
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 02388-2025
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        JL
-                      </span>
-
-                      <span>
-                        Juan López
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category contract">
-                      Contrato
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    25/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Vigente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 4 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon word">
-                        DOC
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Escrito de Contestación
-                        </strong>
-
-                        <span>
-                          Contestacion_Demanda.docx
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 03321-2025
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        AR
-                      </span>
-
-                      <span>
-                        Ana Ramírez
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category writing">
-                      Escrito
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    23/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status draft">
-                      Borrador
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 5 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon zip">
-                        ZIP
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Evidencia Fotográfica
-                        </strong>
-
-                        <span>
-                          Evidencias_Caso_Torres.zip
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 07745-2026
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        LT
-                      </span>
-
-                      <span>
-                        Luis Torres
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category evidence">
-                      Evidencia
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    20/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Vigente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 6 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon pdf">
-                        PDF
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Acta de Conciliación
-                        </strong>
-
-                        <span>
-                          Acta_Conciliacion.pdf
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 00521-2026
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        SF
-                      </span>
-
-                      <span>
-                        Sofía Fernández
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category other">
-                      Otro
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    18/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status archived">
-                      Archivado
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- DOCUMENTO 7 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="document-cell">
-
-                      <div class="file-icon pdf">
-                        PDF
-                      </div>
-
-                      <div class="document-information">
-
-                        <strong>
-                          Resolución de Audiencia
-                        </strong>
-
-                        <span>
-                          Resolucion_Audiencia.pdf
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="exp-link">
-                      EXP. 02382-2025
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        JL
-                      </span>
-
-                      <span>
-                        Juan López
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="category resolution">
-                      Resolución
-                    </span>
-
-                  </td>
-
-
-                  <td>
-                    17/05/2026
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Vigente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ↓
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </section>
-
-
-        <!-- =============================================== -->
-        <!-- PARTE INFERIOR -->
-        <!-- =============================================== -->
-
-        <section class="bottom-grid">
-
-
-          <!-- ============================================= -->
-          <!-- ACTIVIDAD RECIENTE -->
-          <!-- ============================================= -->
-
-          <article class="card activity-card">
-
-
-            <div class="section-header">
-
-              <span class="section-icon">
-                ◷
-              </span>
-
-              <h3>
-                Actividad Documental Reciente
-              </h3>
-
-            </div>
-
-
-            <div class="activity-list">
-
-
-              <div class="activity-item">
-
-                <span class="activity-avatar">
-                  CM
-                </span>
-
-                <div>
-
-                  <strong>
-                    Carlos Mendoza actualizó una demanda
-                  </strong>
-
-                  <span>
-                    EXP. 01452-2026 · Hace 25 minutos
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="activity-item">
-
-                <span class="activity-avatar">
-                  AM
-                </span>
-
-                <div>
-
-                  <strong>
-                    Ana Morales agregó una resolución
-                  </strong>
-
-                  <span>
-                    EXP. 03321-2025 · Hace 1 hora
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="activity-item">
-
-                <span class="activity-avatar">
-                  LT
-                </span>
-
-                <div>
-
-                  <strong>
-                    Luis Torres creó un nuevo escrito
-                  </strong>
-
-                  <span>
-                    EXP. 02388-2025 · Hace 3 horas
-                  </span>
-
-                </div>
-
-              </div>
-
-
-            </div>
-
-          </article>
-
-
-          <!-- ============================================= -->
-          <!-- ALMACENAMIENTO -->
-          <!-- ============================================= -->
-
-          <article class="card storage-card">
-
-
-            <div class="section-header">
-
-              <span class="section-icon">
-                ▣
-              </span>
-
-              <h3>
-                Almacenamiento Documental
-              </h3>
-
-            </div>
-
-
-            <div class="storage-content">
-
-
-              <div class="storage-number">
-
-                <strong>
-                  6.8 GB
-                </strong>
-
-                <span>
-                  de 10 GB utilizados
-                </span>
-
-              </div>
-
-
-              <div class="storage-progress">
-
-                <span></span>
-
-              </div>
-
-
-              <div class="storage-summary">
-
-                <span>
-                  68% utilizado
-                </span>
-
-                <span>
-                  3.2 GB disponibles
-                </span>
-
-              </div>
-
-
-              <div class="storage-types">
-
-
-                <div>
-
-                  <i class="storage-dot pdf-dot"></i>
-
-                  <span>
-                    PDF
-                  </span>
-
-                  <strong>
-                    4.1 GB
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <i class="storage-dot word-dot"></i>
-
-                  <span>
-                    Word
-                  </span>
-
-                  <strong>
-                    1.6 GB
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <i class="storage-dot other-dot"></i>
-
-                  <span>
-                    Otros
-                  </span>
-
-                  <strong>
-                    1.1 GB
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-            </div>
-
-          </article>
-
-        </section>
-
-      </div>
-
-
-      <!-- ================================================= -->
-      <!-- PANEL DERECHO -->
-      <!-- SOLO VISUAL -->
-      <!-- ================================================= -->
-
-      <aside class="detail-panel">
-
-
-        <div class="detail-header">
-
-          <h2>
-            Detalles del Documento
-          </h2>
-
-          <button type="button">
-            ×
-          </button>
-
-        </div>
-
-
-        <div class="detail-content">
-
-
-          <!-- ============================================= -->
-          <!-- ARCHIVO -->
-          <!-- ============================================= -->
-
-          <div class="document-preview">
-
-            <div class="preview-file">
-              PDF
-            </div>
-
-            <h3>
-              Demanda de Alimentos
-            </h3>
-
-            <span>
-              Demanda_Alimentos_01452.pdf
-            </span>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- BOTONES -->
-          <!-- ============================================= -->
-
-          <div class="detail-buttons">
-
-            <button
-              type="button"
-              class="open-button"
-            >
-              ◉ Abrir
-            </button>
-
-            <button
-              type="button"
-            >
-              ↓ Descargar
-            </button>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- INFORMACIÓN -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Información del Archivo
-            </h4>
-
-
-            <div class="detail-row">
-
-              <span>
-                Tipo
-              </span>
-
-              <strong>
-                PDF
-              </strong>
-
-            </div>
-
-
-            <div class="detail-row">
-
-              <span>
-                Tamaño
-              </span>
-
-              <strong>
-                2.4 MB
-              </strong>
-
-            </div>
-
-
-            <div class="detail-row">
-
-              <span>
-                Versión
-              </span>
-
-              <strong>
-                v1.2
-              </strong>
-
-            </div>
-
-
-            <div class="detail-row">
-
-              <span>
-                Fecha
-              </span>
-
-              <strong>
-                28/05/2026
-              </strong>
-
-            </div>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- VINCULACIÓN -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Vinculación
-            </h4>
-
-
-            <div class="relation-card">
-
-              <span>
-                Expediente
-              </span>
-
-              <strong>
-                EXP. 01452-2026
-              </strong>
-
-            </div>
-
-
-            <div class="relation-card">
-
-              <span>
-                Cliente
-              </span>
-
-              <strong>
-                María Fernández López
-              </strong>
-
-            </div>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- RESPONSABLE -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Responsable
-            </h4>
-
-
-            <div class="responsible-card">
-
-              <div class="responsible-avatar">
-                CM
-              </div>
-
-              <div>
-
-                <strong>
-                  Carlos Mendoza Rojas
-                </strong>
-
-                <span>
-                  Responsable del documento
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- DESCRIPCIÓN -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Descripción
-            </h4>
-
-            <p class="description">
-              Demanda principal presentada dentro del proceso
-              de alimentos correspondiente al expediente
-              EXP. 01452-2026.
-            </p>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- HISTORIAL -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Historial Reciente
-            </h4>
-
-
-            <div class="history-item">
-
-              <span class="history-dot"></span>
-
-              <div>
-
-                <strong>
-                  Documento actualizado
-                </strong>
-
-                <span>
-                  Hoy, 10:45 AM
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="history-item">
-
-              <span class="history-dot"></span>
-
-              <div>
-
-                <strong>
-                  Documento registrado
-                </strong>
-
-                <span>
-                  28/05/2026
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-        </div>
-
-      </aside>
-
+      }
     </div>
 
-  </main>
+    <section class="stats-grid">
+      <article class="stat-card">
+        <div class="stat-icon purple">▤</div>
+        <div class="stat-information">
+          <span>Total documentos</span>
+          <strong>{{ estadisticas.total }}</strong>
+          <small>Registrados y activos</small>
+        </div>
+      </article>
 
+      <article class="stat-card">
+        <div class="stat-icon blue">◷</div>
+        <div class="stat-information">
+          <span>Documentos recientes</span>
+          <strong>{{ estadisticas.recientes }}</strong>
+          <small>Creados en los últimos 7 días</small>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div class="stat-icon orange">◆</div>
+        <div class="stat-information">
+          <span>Confidenciales</span>
+          <strong>{{ estadisticas.confidenciales }}</strong>
+          <small>Documentación restringida</small>
+        </div>
+      </article>
+
+      <article class="stat-card clickable-card" (click)="abrirPapelera()">
+        <div class="stat-icon gray">▣</div>
+        <div class="stat-information">
+          <span>Papelera</span>
+          <strong>{{ estadisticas.papelera }}</strong>
+          <small>Eliminación definitiva en 7 días</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="filters-card">
+      <div class="search-control">
+        <span class="search-icon">⌕</span>
+        <input
+          type="text"
+          [(ngModel)]="filtros.texto"
+          (keyup.enter)="buscar()"
+          placeholder="Buscar documento, expediente, archivo o cliente..."
+        >
+      </div>
+
+      <div class="filter-control">
+        <select [(ngModel)]="filtros.categoria" (change)="buscar()">
+          <option value="">Todas las categorías</option>
+          @for (categoria of categorias; track categoria) {
+            <option [value]="categoria">{{ etiqueta(categoria) }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-control">
+        <select [(ngModel)]="filtros.estado" (change)="buscar()">
+          <option value="">Todos los estados</option>
+          @for (estado of estados; track estado) {
+            <option [value]="estado">{{ etiqueta(estado) }}</option>
+          }
+        </select>
+      </div>
+
+      <button type="button" class="clear-button" title="Limpiar filtros" (click)="limpiarFiltros()">×</button>
+    </section>
+
+    <section class="advanced-filter-bar">
+      <button type="button" class="text-button" (click)="mostrarFiltrosAvanzados = !mostrarFiltrosAvanzados">
+        {{ mostrarFiltrosAvanzados ? 'Ocultar filtros avanzados' : 'Más filtros' }}
+      </button>
+      <button type="button" class="text-button" (click)="buscar()">Actualizar resultados</button>
+    </section>
+
+    @if (mostrarFiltrosAvanzados) {
+      <section class="advanced-filters">
+        <label>
+          <span>Expediente</span>
+          <select [(ngModel)]="filtros.expedienteId" (change)="buscar()">
+            <option [ngValue]="null">Todos</option>
+            @for (exp of expedientes; track exp.id) {
+              <option [ngValue]="exp.id">{{ exp.codigo }} — {{ exp.clienteNombre }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Creado por</span>
+          <select [(ngModel)]="filtros.creadorId" (change)="buscar()">
+            <option [ngValue]="null">Todos</option>
+            @for (usuario of creadores; track usuario.id) {
+              <option [ngValue]="usuario.id">{{ usuario.nombre }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Formato</span>
+          <select [(ngModel)]="filtros.extension" (change)="buscar()">
+            <option value="">Todos</option>
+            <option value="pdf">PDF</option>
+            <option value="docx">Word DOCX</option>
+            <option value="doc">Word DOC</option>
+            <option value="txt">Texto</option>
+            <option value="png">PNG</option>
+            <option value="jpg">JPG</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Confidencialidad</span>
+          <select [(ngModel)]="filtros.confidencial" (change)="buscar()">
+            <option [ngValue]="null">Todos</option>
+            <option [ngValue]="true">Confidencial</option>
+            <option [ngValue]="false">No confidencial</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Desde</span>
+          <input type="date" [(ngModel)]="filtros.fechaDesde" (change)="buscar()">
+        </label>
+
+        <label>
+          <span>Hasta</span>
+          <input type="date" [(ngModel)]="filtros.fechaHasta" (change)="buscar()">
+        </label>
+      </section>
+    }
+
+    <div class="documentos-layout">
+      <div class="documentos-left">
+        <section class="card table-card">
+          <div class="table-header">
+            <div>
+              <h2>Biblioteca de Documentos</h2>
+              <span>{{ documentos.length }} documentos encontrados</span>
+            </div>
+            <div class="table-tools">
+              @if (cargando) {
+                <span class="loading-text">Cargando...</span>
+              }
+              <button type="button" (click)="abrirPapelera()">▣ Papelera</button>
+            </div>
+          </div>
+
+          <div class="table-wrapper">
+            <table class="documents-table">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Expediente</th>
+                  <th>Cliente</th>
+                  <th>Categoría</th>
+                  <th>Creado por</th>
+                  <th>Fecha</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                @for (documento of documentos; track documento.uuid) {
+                  <tr
+                    [class.selected-row]="seleccionado?.uuid === documento.uuid"
+                    (click)="seleccionar(documento)"
+                  >
+                    <td>
+                      <div class="document-cell">
+                        <div class="file-icon" [class.pdf]="documento.extension === 'pdf'">
+                          {{ (documento.extension || 'DOC').toUpperCase() }}
+                        </div>
+                        <div class="document-information">
+                          <strong>
+                            {{ documento.nombre }}
+                            @if (documento.confidencial) { <span class="lock-mini">◆</span> }
+                          </strong>
+                          <span>{{ documento.nombreArchivo || 'Sin archivo vigente' }}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td>
+                      <span class="exp-link">{{ documento.expedienteCodigo }}</span>
+                    </td>
+
+                    <td>
+                      <div class="client-cell">
+                        <span class="client-avatar">{{ iniciales(documento.clienteNombre) }}</span>
+                        <span>{{ documento.clienteNombre }}</span>
+                      </div>
+                    </td>
+
+                    <td><span class="category">{{ etiqueta(documento.categoria) }}</span></td>
+                    <td>{{ documento.creadoPor || 'Sistema' }}</td>
+                    <td>{{ documento.fechaCreacion | date:'dd/MM/yyyy' }}</td>
+                    <td><span class="status active">{{ etiqueta(documento.estado) }}</span></td>
+
+                    <td>
+                      <div class="actions" (click)="$event.stopPropagation()">
+                        <button type="button" title="Visualizar" (click)="visualizar(documento)">◉</button>
+                        <button type="button" title="Descargar original" (click)="descargar(documento)">↓</button>
+                        <details class="action-menu">
+                          <summary title="Más acciones">•••</summary>
+                          <div class="action-menu-list">
+                            <button type="button" (click)="visualizar(documento)">Visualizar</button>
+                            @if (puedeEditar(documento)) {
+                              <button type="button" (click)="abrirEditor(documento)">Editar documento</button>
+                            }
+                            <button type="button" (click)="abrirEditarInformacion(documento)">Editar información</button>
+                            <button type="button" (click)="descargar(documento)">Descargar original</button>
+                            <button type="button" (click)="exportar(documento, 'pdf')">Exportar PDF</button>
+                            <button type="button" (click)="exportar(documento, 'docx')">Exportar Word</button>
+                            <button type="button" (click)="abrirSubirVersion(documento)">Subir nueva versión</button>
+                            <button type="button" (click)="abrirVersiones(documento)">Historial de versiones</button>
+                            <button type="button" class="danger-link" (click)="enviarPapelera(documento)">Enviar a papelera</button>
+                          </div>
+                        </details>
+                      </div>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8" class="empty-cell">
+                      No se encontraron documentos con los filtros seleccionados.
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="card recent-card">
+          <div class="table-header">
+            <div>
+              <h2>Documentos recientes</h2>
+              <span>Creados durante los últimos 7 días</span>
+            </div>
+          </div>
+
+          <div class="recent-list">
+            @for (documento of recientes; track documento.uuid) {
+              <button type="button" class="recent-item" (click)="seleccionar(documento)">
+                <span class="recent-file">{{ (documento.extension || 'DOC').toUpperCase() }}</span>
+                <span class="recent-main">
+                  <strong>{{ documento.nombre }}</strong>
+                  <small>{{ documento.expedienteCodigo }} · {{ documento.clienteNombre }}</small>
+                </span>
+                <span class="recent-meta">
+                  <strong>{{ documento.creadoPor || 'Sistema' }}</strong>
+                  <small>{{ documento.fechaCreacion | date:'dd/MM/yyyy HH:mm' }}</small>
+                </span>
+              </button>
+            } @empty {
+              <div class="empty-state">No hay documentos recientes.</div>
+            }
+          </div>
+        </section>
+      </div>
+
+      <aside class="detail-panel card">
+        @if (seleccionado) {
+          <div class="detail-title">
+            <div class="file-icon pdf">{{ (seleccionado.extension || 'DOC').toUpperCase() }}</div>
+            <div>
+              <h3>{{ seleccionado.nombre }}</h3>
+              <span>{{ seleccionado.nombreArchivo }}</span>
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button type="button" class="btn-secondary" (click)="visualizar()">Visualizar</button>
+            <button type="button" class="btn-secondary" (click)="descargar()">Descargar</button>
+          </div>
+
+          <div class="detail-section">
+            <h4>Información del archivo</h4>
+            <dl class="detail-list">
+              <div><dt>Formato</dt><dd>{{ (seleccionado.extension || '—').toUpperCase() }}</dd></div>
+              <div><dt>Tamaño</dt><dd>{{ tamano(seleccionado.tamanoBytes) }}</dd></div>
+              <div><dt>Versión</dt><dd>v{{ seleccionado.numeroVersion || 1 }}</dd></div>
+              <div><dt>Estado</dt><dd>{{ etiqueta(seleccionado.estado) }}</dd></div>
+              <div><dt>Categoría</dt><dd>{{ etiqueta(seleccionado.categoria) }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="detail-section">
+            <h4>Vinculación</h4>
+            <dl class="detail-list">
+              <div><dt>Expediente</dt><dd>{{ seleccionado.expedienteCodigo }}</dd></div>
+              <div><dt>Cliente</dt><dd>{{ seleccionado.clienteNombre }}</dd></div>
+              <div><dt>Responsable</dt><dd>{{ seleccionado.responsable || '—' }}</dd></div>
+              <div><dt>Creado por</dt><dd>{{ seleccionado.creadoPor || 'Sistema' }}</dd></div>
+            </dl>
+          </div>
+
+          <div class="detail-section">
+            <h4>Descripción</h4>
+            <p class="detail-description">{{ seleccionado.descripcion || 'Sin descripción.' }}</p>
+          </div>
+
+          <div class="detail-command-grid">
+            @if (puedeEditar(seleccionado)) {
+              <button type="button" (click)="abrirEditor()">Editar documento</button>
+            }
+            <button type="button" (click)="abrirEditarInformacion()">Editar información</button>
+            <button type="button" (click)="exportar(seleccionado, 'pdf')">Exportar PDF</button>
+            <button type="button" (click)="exportar(seleccionado, 'docx')">Exportar Word</button>
+            <button type="button" (click)="abrirVersiones()">Versiones</button>
+            <button type="button" (click)="abrirSubirVersion()">Nueva versión</button>
+          </div>
+        } @else {
+          <div class="empty-detail">
+            Selecciona un documento para ver su información.
+          </div>
+        }
+      </aside>
+    </div>
+  </main>
 </div>
+
+<!-- NUEVO DOCUMENTO -->
+@if (modalNuevo) {
+  <div class="modal-backdrop" (click)="modalNuevo = false">
+    <section class="modal-card modal-large" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Nuevo Documento</h2><p>Registra el archivo y vincúlalo con su expediente.</p></div>
+        <button type="button" (click)="modalNuevo = false">×</button>
+      </header>
+
+      <div class="form-grid">
+        <label class="span-2">
+          <span>Nombre *</span>
+          <input type="text" [(ngModel)]="formNuevo.nombre" maxlength="250">
+        </label>
+
+        <label>
+          <span>Expediente *</span>
+          <select [(ngModel)]="formNuevo.expedienteId" (change)="cambiarExpedienteNuevo()">
+            <option [ngValue]="null">Seleccionar...</option>
+            @for (exp of expedientes; track exp.id) {
+              <option [ngValue]="exp.id">{{ exp.codigo }} — {{ exp.clienteNombre }}</option>
+            }
+          </select>
+        </label>
+
+        <label>
+          <span>Categoría *</span>
+          <select [(ngModel)]="formNuevo.categoria">
+            @for (cat of categorias; track cat) { <option [value]="cat">{{ etiqueta(cat) }}</option> }
+          </select>
+        </label>
+
+        <label>
+          <span>Estado</span>
+          <select [(ngModel)]="formNuevo.estado">
+            @for (estado of estados; track estado) { <option [value]="estado">{{ etiqueta(estado) }}</option> }
+          </select>
+        </label>
+
+        <label>
+          <span>Actuación relacionada</span>
+          <select [(ngModel)]="formNuevo.actuacionId">
+            <option [ngValue]="null">Ninguna</option>
+            @for (item of actuaciones; track item.id) { <option [ngValue]="item.id">{{ item.texto }}</option> }
+          </select>
+        </label>
+
+        <label>
+          <span>Tarea relacionada</span>
+          <select [(ngModel)]="formNuevo.tareaId">
+            <option [ngValue]="null">Ninguna</option>
+            @for (item of tareas; track item.id) { <option [ngValue]="item.id">{{ item.texto }}</option> }
+          </select>
+        </label>
+
+        <label class="check-field">
+          <input type="checkbox" [(ngModel)]="formNuevo.esConfidencial">
+          <span>Documento confidencial</span>
+        </label>
+
+        <label class="span-2">
+          <span>Descripción</span>
+          <textarea rows="3" [(ngModel)]="formNuevo.descripcion"></textarea>
+        </label>
+
+        <label class="span-2 file-field">
+          <span>Archivo *</span>
+          <input type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" (change)="onArchivoNuevo($event)">
+          <small>PDF, Word, TXT, PNG o JPG. Máximo 25 MB.</small>
+        </label>
+
+        <label class="span-2">
+          <span>Observación de la primera versión</span>
+          <input type="text" [(ngModel)]="formNuevo.observaciones" maxlength="500">
+        </label>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-light" (click)="modalNuevo = false">Cancelar</button>
+        <button type="button" class="btn-primary" [disabled]="guardando" (click)="guardarNuevo()">
+          {{ guardando ? 'Guardando...' : 'Registrar documento' }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- EDITAR INFORMACION -->
+@if (modalEditarInfo && formEditar) {
+  <div class="modal-backdrop" (click)="modalEditarInfo = false">
+    <section class="modal-card modal-large" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Editar información</h2><p>Esto no modifica el archivo; solo sus datos de gestión.</p></div>
+        <button type="button" (click)="modalEditarInfo = false">×</button>
+      </header>
+
+      <div class="form-grid">
+        <label class="span-2"><span>Nombre</span><input type="text" [(ngModel)]="formEditar.nombre"></label>
+        <label>
+          <span>Expediente</span>
+          <select [(ngModel)]="formEditar.expedienteId" (change)="cambiarExpedienteEditar()">
+            @for (exp of expedientes; track exp.id) {
+              <option [ngValue]="exp.id">{{ exp.codigo }} — {{ exp.clienteNombre }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          <span>Categoría</span>
+          <select [(ngModel)]="formEditar.categoria">
+            @for (cat of categorias; track cat) { <option [value]="cat">{{ etiqueta(cat) }}</option> }
+          </select>
+        </label>
+        <label>
+          <span>Estado</span>
+          <select [(ngModel)]="formEditar.estado">
+            @for (estado of estados; track estado) { <option [value]="estado">{{ etiqueta(estado) }}</option> }
+          </select>
+        </label>
+        <label>
+          <span>Actuación</span>
+          <select [(ngModel)]="formEditar.actuacionId">
+            <option [ngValue]="null">Ninguna</option>
+            @for (item of actuaciones; track item.id) { <option [ngValue]="item.id">{{ item.texto }}</option> }
+          </select>
+        </label>
+        <label>
+          <span>Tarea</span>
+          <select [(ngModel)]="formEditar.tareaId">
+            <option [ngValue]="null">Ninguna</option>
+            @for (item of tareas; track item.id) { <option [ngValue]="item.id">{{ item.texto }}</option> }
+          </select>
+        </label>
+        <label class="check-field"><input type="checkbox" [(ngModel)]="formEditar.esConfidencial"><span>Confidencial</span></label>
+        <label class="span-2"><span>Descripción</span><textarea rows="4" [(ngModel)]="formEditar.descripcion"></textarea></label>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-light" (click)="modalEditarInfo = false">Cancelar</button>
+        <button type="button" class="btn-primary" [disabled]="guardando" (click)="guardarEdicionInformacion()">
+          {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- VISOR -->
+@if (modalVisor && seleccionado) {
+  <div class="modal-backdrop viewer-backdrop" (click)="cerrarVisor()">
+    <section class="modal-card viewer-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>{{ seleccionado.nombre }}</h2><p>{{ seleccionado.nombreArchivo }}</p></div>
+        <div class="header-actions">
+          <button type="button" class="btn-light" (click)="descargar()">Descargar</button>
+          <button type="button" (click)="cerrarVisor()">×</button>
+        </div>
+      </header>
+
+      <div class="viewer-body">
+        @if (visorCargando) {
+          <div class="viewer-loading">
+            <span class="viewer-spinner"></span>
+            <strong>Cargando documento...</strong>
+            <small>Preparando la vista previa.</small>
+          </div>
+        } @else {
+          @if (visorTipo === 'pdf' && visorPdfUrl) {
+            <iframe [src]="visorPdfUrl" title="Visor PDF"></iframe>
+          }
+          @if (visorTipo === 'imagen' && visorImagenUrl) {
+            <img [src]="visorImagenUrl" [alt]="seleccionado.nombre">
+          }
+          @if (visorTipo === 'html') {
+            <article class="document-preview" [innerHTML]="visorHtml"></article>
+          }
+        }
+      </div>
+    </section>
+  </div>
+}
+
+<!-- EDITOR -->
+@if (modalEditor && seleccionado) {
+  <div class="modal-backdrop editor-backdrop" (click)="cerrarEditor()">
+    <section class="modal-card editor-card" (click)="$event.stopPropagation()">
+      <header class="modal-header editor-modal-header">
+        <div>
+          <h2>Editar documento</h2>
+          <p>{{ seleccionado.nombre }} · los cambios crean una nueva versión DOCX.</p>
+        </div>
+        <button type="button" (click)="cerrarEditor()">×</button>
+      </header>
+
+      <div class="editor-toolbar-shell">
+        <div class="editor-toolbar-group editor-toolbar-selects">
+          <select
+            [(ngModel)]="editorBloque"
+            [disabled]="editorCargando"
+            (mousedown)="guardarSeleccionEditor()"
+            (change)="aplicarBloque()"
+            aria-label="Estilo de párrafo">
+            <option value="p">Párrafo</option>
+            <option value="h1">Título 1</option>
+            <option value="h2">Título 2</option>
+            <option value="h3">Título 3</option>
+          </select>
+
+          <select
+            [(ngModel)]="editorFuente"
+            [disabled]="editorCargando"
+            (mousedown)="guardarSeleccionEditor()"
+            (change)="aplicarFuente()"
+            aria-label="Fuente">
+            <option value="Arial">Arial</option>
+            <option value="Calibri">Calibri</option>
+            <option value="Times New Roman">Times New Roman</option>
+            <option value="Georgia">Georgia</option>
+            <option value="Verdana">Verdana</option>
+          </select>
+
+          <select
+            class="editor-size-select"
+            [(ngModel)]="editorTamano"
+            [disabled]="editorCargando"
+            (mousedown)="guardarSeleccionEditor()"
+            (change)="aplicarTamano()"
+            aria-label="Tamaño de letra">
+            <option value="1">8 pt</option>
+            <option value="2">10 pt</option>
+            <option value="3">12 pt</option>
+            <option value="4">14 pt</option>
+            <option value="5">18 pt</option>
+            <option value="6">24 pt</option>
+            <option value="7">32 pt</option>
+          </select>
+        </div>
+
+        <span class="toolbar-separator"></span>
+
+        <div class="editor-toolbar-group">
+          <button type="button" title="Negrita" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('bold')"><b>B</b></button>
+          <button type="button" title="Cursiva" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('italic')"><i>I</i></button>
+          <button type="button" title="Subrayado" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('underline')"><u>U</u></button>
+
+          <label class="editor-color-control" title="Color de texto">
+            <span>A</span>
+            <input type="color" [(ngModel)]="editorColor" [disabled]="editorCargando"
+                   (mousedown)="guardarSeleccionEditor()" (change)="aplicarColor()">
+          </label>
+        </div>
+
+        <span class="toolbar-separator"></span>
+
+        <div class="editor-toolbar-group">
+          <button type="button" title="Alinear a la izquierda" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('justifyLeft')">Izq.</button>
+          <button type="button" title="Centrar" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('justifyCenter')">Centro</button>
+          <button type="button" title="Alinear a la derecha" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('justifyRight')">Der.</button>
+          <button type="button" title="Justificar" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('justifyFull')">Just.</button>
+        </div>
+
+        <span class="toolbar-separator"></span>
+
+        <div class="editor-toolbar-group">
+          <button type="button" title="Lista con viñetas" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('insertUnorderedList')">• Lista</button>
+          <button type="button" title="Lista numerada" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('insertOrderedList')">1. Lista</button>
+          <button type="button" title="Disminuir sangría" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('outdent')">←</button>
+          <button type="button" title="Aumentar sangría" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('indent')">→</button>
+        </div>
+
+        <span class="toolbar-separator"></span>
+
+        <div class="editor-toolbar-group">
+          <button type="button" title="Deshacer" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('undo')">↶</button>
+          <button type="button" title="Rehacer" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="aplicarFormato('redo')">↷</button>
+          <button type="button" title="Quitar formato" [disabled]="editorCargando"
+                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
+                  (click)="quitarFormato()">Tx</button>
+        </div>
+      </div>
+
+      @if (editorEsPdf) {
+        <div class="editor-pdf-notice">
+          <span class="editor-pdf-notice-icon">PDF</span>
+          <div>
+            <strong>Modo de edición PDF</strong>
+            <small>Se carga una versión liviana y realmente editable del texto para evitar bloqueos. La opción <b>Exportar Word</b> sigue usando la conversión de alta fidelidad.</small>
+          </div>
+        </div>
+      }
+
+      <div class="editor-document-area">
+        @if (editorCargando) {
+          <div class="editor-loading-state">
+            <div class="editor-spinner"></div>
+            <strong>Preparando documento editable...</strong>
+            <span>Estamos conservando páginas, estilos, tablas e imágenes.</span>
+          </div>
+        } @else if (editorError) {
+          <div class="editor-error-state">
+            <strong>No se pudo abrir el documento para editar.</strong>
+            <span>{{ editorError }}</span>
+          </div>
+        } @else {
+          <div
+            #editorDocumento
+            class="word-editor"
+            contenteditable="true"
+            spellcheck="true"
+            [innerHTML]="editorHtmlSeguro"
+            (mouseup)="guardarSeleccionEditor()"
+            (keyup)="guardarSeleccionEditor()"
+            (input)="guardarSeleccionEditor()"
+          ></div>
+        }
+      </div>
+
+      <div class="editor-note">
+        <label>
+          <span>Observación de la nueva versión</span>
+          <input type="text" [(ngModel)]="editorObservaciones" maxlength="500"
+                 placeholder="Ej.: Corrección de datos del cliente">
+        </label>
+      </div>
+
+      <footer class="modal-footer editor-footer">
+        <span class="editor-save-help">A4 · Los cambios se guardan como una nueva versión Word.</span>
+        <div class="editor-footer-actions">
+          <button type="button" class="btn-light" (click)="cerrarEditor()">Cancelar</button>
+          <button type="button" class="btn-primary"
+                  [disabled]="guardando || editorCargando || !!editorError"
+                  (click)="guardarEdicionDocumento()">
+            {{ guardando ? 'Guardando...' : 'Guardar nueva versión' }}
+          </button>
+        </div>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- VERSIONES -->
+@if (modalVersiones && seleccionado) {
+  <div class="modal-backdrop" (click)="modalVersiones = false">
+    <section class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Historial de versiones</h2><p>{{ seleccionado.nombre }}</p></div>
+        <button type="button" (click)="modalVersiones = false">×</button>
+      </header>
+
+      <div class="version-list">
+        @for (version of versiones; track version.id) {
+          <article class="version-item" [class.current-version]="version.vigente">
+            <div class="version-number">v{{ version.numeroVersion }}</div>
+            <div class="version-info">
+              <strong>{{ version.nombreArchivo }}</strong>
+              <span>{{ version.cargadoPor }} · {{ version.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</span>
+              <small>{{ version.observaciones || 'Sin observaciones' }}</small>
+            </div>
+            <div class="version-meta">
+              <span>{{ version.extension.toUpperCase() }}</span>
+              <span>{{ tamano(version.tamanoBytes) }}</span>
+              @if (version.vigente) { <strong>Vigente</strong> }
+            </div>
+          </article>
+        }
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-light" (click)="modalVersiones = false">Cerrar</button>
+        <button type="button" class="btn-primary" (click)="modalVersiones = false; abrirSubirVersion()">Subir nueva versión</button>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- SUBIR VERSION -->
+@if (modalSubirVersion && seleccionado) {
+  <div class="modal-backdrop" (click)="modalSubirVersion = false">
+    <section class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Subir nueva versión</h2><p>{{ seleccionado.nombre }}</p></div>
+        <button type="button" (click)="modalSubirVersion = false">×</button>
+      </header>
+
+      <div class="single-form">
+        <label class="file-field">
+          <span>Archivo</span>
+          <input type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" (change)="onArchivoVersion($event)">
+        </label>
+        <label>
+          <span>Observaciones</span>
+          <textarea rows="3" [(ngModel)]="observacionVersion" maxlength="500"></textarea>
+        </label>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-light" (click)="modalSubirVersion = false">Cancelar</button>
+        <button type="button" class="btn-primary" [disabled]="guardando" (click)="subirVersion()">
+          {{ guardando ? 'Subiendo...' : 'Subir versión' }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- PAPELERA -->
+@if (modalPapelera) {
+  <div class="modal-backdrop" (click)="modalPapelera = false">
+    <section class="modal-card modal-large" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Papelera</h2><p>Los documentos se eliminan automáticamente después de 7 días.</p></div>
+        <button type="button" (click)="modalPapelera = false">×</button>
+      </header>
+
+      <div class="trash-list">
+        @for (documento of papelera; track documento.uuid) {
+          <article class="trash-item">
+            <div class="file-icon">{{ (documento.extension || 'DOC').toUpperCase() }}</div>
+            <div class="trash-info">
+              <strong>{{ documento.nombre }}</strong>
+              <span>{{ documento.expedienteCodigo }} · {{ documento.clienteNombre }}</span>
+              <small>Enviado a papelera: {{ documento.fechaPapelera | date:'dd/MM/yyyy HH:mm' }}</small>
+            </div>
+            <div class="trash-days">
+              <strong>{{ diasRestantes(documento) }}</strong>
+              <span>días restantes</span>
+            </div>
+            <div class="trash-actions">
+              <button type="button" class="btn-light" [disabled]="guardando" (click)="restaurar(documento)">Restaurar</button>
+              <button type="button" class="btn-danger" [disabled]="guardando" (click)="eliminarDefinitivamente(documento)">Eliminar definitivamente</button>
+            </div>
+          </article>
+        } @empty {
+          <div class="empty-state">La papelera está vacía.</div>
+        }
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="btn-light" (click)="modalPapelera = false">Cerrar</button>
+      </footer>
+    </section>
+  </div>
+}

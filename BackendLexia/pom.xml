@@ -100,6 +100,38 @@
 			<version>0.12.6</version>
 			<scope>runtime</scope>
 		</dependency>
+				<!-- =========================================================
+		     GESTIÓN DOCUMENTAL
+		     Se agregan sin modificar las dependencias existentes.
+		     ========================================================= -->
+
+		<!-- Leer y generar documentos Word .docx -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>5.5.1</version>
+		</dependency>
+
+		<!-- Soporte para documentos Word antiguos .doc -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-scratchpad</artifactId>
+			<version>5.5.1</version>
+		</dependency>
+
+		<!-- Lectura y generación de archivos PDF -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>3.0.8</version>
+		</dependency>
+
+		<!-- Procesar el HTML generado por el editor de documentos -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>1.23.1</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
