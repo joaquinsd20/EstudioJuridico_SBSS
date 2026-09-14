@@ -198,14 +198,28 @@ INSERT INTO materias (id, especialidad_id, nombre, via_procedimental) VALUES
 (11,5,'Accion de amparo','Unico'),
 (12,6,'Impugnacion de resolucion administrativa','Especial');
 
-INSERT INTO organos_jurisdiccionales (id, estudio_id, tipo, nombre, distrito_judicial, instancia) VALUES
-(1,1,'JUZGADO','2do Juzgado Civil de Trujillo','La Libertad','PRIMERA'),
-(2,1,'SALA','1ra Sala Penal de Apelaciones de La Libertad','La Libertad','SEGUNDA'),
-(3,1,'SALA','Sala Constitucional de La Libertad','La Libertad','SEGUNDA'),
-(4,1,'JUZGADO','3er Juzgado de Familia de Trujillo','La Libertad','PRIMERA'),
-(5,1,'FISCALIA','1ra Fiscalia Provincial Penal Corporativa de Trujillo','La Libertad','PRIMERA'),
-(6,1,'JUZGADO','Juzgado Especializado de Trabajo de Trujillo','La Libertad','PRIMERA'),
-(7,1,'ENTIDAD_ADMINISTRATIVA','Municipalidad Provincial de Trujillo','La Libertad',NULL);
+-- Las cuatro columnas CEJ (V9) permiten COMPONER el numero de expediente al
+-- aperturarlo, en vez de teclearlo. El distrito judicial de La Libertad es 1601;
+-- 1801 es Lima y no corresponde a este estudio.
+-- Una fiscalia lleva carpeta fiscal y una entidad administrativa no tiene
+-- numeracion judicial: por eso esas dos van con las cuatro columnas en NULL.
+INSERT INTO organos_jurisdiccionales (id, estudio_id, tipo, nombre, distrito_judicial, instancia,
+                                      distrito_judicial_codigo, codigo_tipo_organo,
+                                      codigo_especialidad, numero_organo) VALUES
+(1,1,'JUZGADO','2do Juzgado Civil de Trujillo','La Libertad','PRIMERA','1601','JR','CI',2),
+(2,1,'SALA','1ra Sala Penal de Apelaciones de La Libertad','La Libertad','SEGUNDA','1601','SP','PE',1),
+(3,1,'SALA','Sala Constitucional de La Libertad','La Libertad','SEGUNDA','1601','SP','CO',1),
+(4,1,'JUZGADO','3er Juzgado de Familia de Trujillo','La Libertad','PRIMERA','1601','JR','FC',3),
+(5,1,'FISCALIA','1ra Fiscalia Provincial Penal Corporativa de Trujillo','La Libertad','PRIMERA',
+   NULL,NULL,NULL,NULL),
+(6,1,'JUZGADO','Juzgado Especializado de Trabajo de Trujillo','La Libertad','PRIMERA','1601','JR','LA',1),
+(7,1,'ENTIDAD_ADMINISTRATIVA','Municipalidad Provincial de Trujillo','La Libertad',NULL,
+   NULL,NULL,NULL,NULL),
+-- Los dos que faltaban. Sin ellos, el expediente penal quedaba colgado de una
+-- fiscalia y el de amparo de una Sala, ambos con numeros CEJ que decian 'JR'.
+(8,1,'JUZGADO','Juzgado Constitucional de Trujillo','La Libertad','PRIMERA','1601','JR','CO',1),
+(9,1,'JUZGADO','1er Juzgado de Investigacion Preparatoria de Trujillo','La Libertad','PRIMERA',
+   '1601','JR','PE',1);
 
 INSERT INTO estados_expediente (id, estudio_id, codigo, nombre, color_hex, es_estado_final, cuenta_como_activo, orden) VALUES
 ( 1,1,'CONSULTA','Consulta','#94A3B8',0,0,1),   ( 2,1,'PROSPECTO','Prospecto','#A78BFA',0,0,2),
@@ -365,39 +379,39 @@ INSERT INTO expedientes (id, estudio_id, codigo_interno, numero_expediente, nume
                          etapa_procesal, instancia, abogado_responsable_id, socio_supervisor_id,
                          nivel_riesgo, cuantia, fecha_inicio, fecha_ingreso_estudio,
                          fecha_ultima_actuacion, es_confidencial, resumen) VALUES
-( 1,1,'EXP-0142',CONCAT('01452-',@anio,'-0-1801-JR-FT-02'),'01452',@anio,1,2,1,4,4,
+( 1,1,'EXP-0142',CONCAT('01452-',@anio,'-0-1601-JR-FC-03'),'01452',@anio,1,2,1,4,4,
    'Postulatoria','PRIMERA',1,1,'CRITICO',18000.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 210 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 215 DAY),
    DATE_SUB(NOW(3), INTERVAL 3 DAY),0,'Demanda de alimentos a favor de menor.'),
-( 2,1,'EXP-0238',CONCAT('02388-',@anio-1,'-0-1801-JR-CI-05'),'02388',@anio-1,7,1,4,1,5,
+( 2,1,'EXP-0238',CONCAT('02388-',@anio-1,'-0-1601-JR-CI-02'),'02388',@anio-1,7,1,4,1,5,
    'Probatoria','PRIMERA',2,1,'ALTO',250000.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 440 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 445 DAY),
    DATE_SUB(NOW(3), INTERVAL 5 DAY),0,'Indemnizacion por danos derivada de accidente de transito.'),
-( 3,1,'EXP-0332',CONCAT('03321-',@anio-2,'-0-1801-JR-FT-03'),'03321',@anio-2,3,2,1,4,5,
+( 3,1,'EXP-0332',CONCAT('03321-',@anio-2,'-0-1601-JR-FC-03'),'03321',@anio-2,3,2,1,4,5,
    'Impugnatoria','PRIMERA',3,1,'ALTO',24000.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 660 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 665 DAY),
    DATE_SUB(NOW(3), INTERVAL 4 DAY),0,'Alimentos. Apelacion de la sentencia de primera instancia.'),
-( 4,1,'EXP-0774',CONCAT('07745-',@anio,'-0-1801-JR-FT-01'),'07745',@anio,4,2,2,4,4,
+( 4,1,'EXP-0774',CONCAT('07745-',@anio,'-0-1601-JR-FC-03'),'07745',@anio,4,2,2,4,4,
    'Probatoria','PRIMERA',5,1,'ALTO',0.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 140 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 142 DAY),
    DATE_SUB(NOW(3), INTERVAL 7 DAY),0,'Tenencia y regimen de visitas. Informe psicologico pendiente.'),
-( 5,1,'EXP-0052',CONCAT('00521-',@anio,'-0-1801-JR-FA-01'),'00521',@anio,5,2,2,4,8,
+( 5,1,'EXP-0052',CONCAT('00521-',@anio,'-0-1601-JR-FC-03'),'00521',@anio,5,2,2,4,8,
    'Ejecucion','PRIMERA',1,1,'BAJO',0.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 240 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 243 DAY),
    DATE_SUB(NOW(3), INTERVAL 110 DAY),0,'Tenencia. Conciliado y archivado.'),
-( 6,1,'EXP-0239',CONCAT('02382-',@anio-1,'-0-1801-JR-CI-02'),'02382',@anio-1,2,1,5,1,8,
+( 6,1,'EXP-0239',CONCAT('02382-',@anio-1,'-0-1601-JR-CI-02'),'02382',@anio-1,2,1,5,1,8,
    'Ejecucion','PRIMERA',2,1,'BAJO',95000.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 550 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 555 DAY),
    DATE_SUB(NOW(3), INTERVAL 200 DAY),0,'Obligacion de dar suma de dinero. Sentencia ejecutada.'),
-( 7,1,'EXP-0452',CONCAT('04521-',@anio,'-0-1801-JR-LA-01'),'04521',@anio,6,3,8,6,4,
+( 7,1,'EXP-0452',CONCAT('04521-',@anio,'-0-1601-JR-LA-01'),'04521',@anio,6,3,8,6,4,
    'Postulatoria','PRIMERA',6,1,'MEDIO',145000.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 100 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 103 DAY),
    DATE_SUB(NOW(3), INTERVAL 6 DAY),0,'Despido arbitrario. Reposicion y remuneraciones devengadas.'),
-( 8,1,'EXP-0033',CONCAT('00332-',@anio,'-0-1801-JR-PE-04'),'00332',@anio,4,4,10,5,5,
+( 8,1,'EXP-0033',CONCAT('00332-',@anio,'-0-1601-JR-PE-01'),'00332',@anio,4,4,10,9,5,
    'Probatoria','PRIMERA',3,1,'CRITICO',0.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 185 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 188 DAY),
    DATE_SUB(NOW(3), INTERVAL 5 DAY),0,'Defensa tecnica en investigacion preparatoria por hurto agravado.'),
-( 9,1,'EXP-0088',CONCAT('00885-',@anio,'-0-1801-JR-CO-01'),'00885',@anio,7,5,11,3,4,
+( 9,1,'EXP-0088',CONCAT('00885-',@anio,'-0-1601-JR-CO-01'),'00885',@anio,7,5,11,8,4,
    'Postulatoria','PRIMERA',4,1,'ALTO',0.00,
    DATE_SUB(CURRENT_DATE, INTERVAL 85 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 88 DAY),
    DATE_SUB(NOW(3), INTERVAL 2 DAY),1,'Accion de amparo. EXPEDIENTE CONFIDENCIAL.'),
@@ -473,25 +487,25 @@ INSERT INTO actuaciones (id, expediente_id, tipo_actuacion_id, fecha_hora, asunt
 -- =============================================================================
 -- RESOLUCIONES — 3 sin ver alimentan "Nuevas resoluciones: 3"
 -- =============================================================================
-INSERT INTO resoluciones (id, expediente_id, actuacion_id, numero_resolucion, tipo_resolucion,
+INSERT INTO resoluciones (id, expediente_id, actuacion_id, numero_orden, numero_resolucion, tipo_resolucion,
                           fecha_resolucion, fecha_notificacion, sumilla, fuente, origen,
                           estado_verificacion, usuario_verificacion_id, fecha_verificacion, vista) VALUES
-(1,1, 2,'Resolucion N.o 0021','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 10 DAY),
+(1,1, 2,21,'Resolucion N.o 0021','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 14 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 10 DAY),
    'Se tiene por presentada la demanda. Traslado a la parte demandada por el plazo de ley.',
    'Portal CEJ','MONITOR_JUDICIAL','VERIFICADA',1, DATE_SUB(NOW(3), INTERVAL 10 DAY),1),
-(2,2, 4,'Resolucion N.o 0018','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 25 DAY),
+(2,2, 4,18,'Resolucion N.o 0018','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 30 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 25 DAY),
    'Se declara saneado el proceso y se fija plazo para medios probatorios.',
    'Portal CEJ','MONITOR_JUDICIAL','VERIFICADA',2, DATE_SUB(NOW(3), INTERVAL 25 DAY),1),
-(3,3, 6,'Resolucion N.o 0009','SENTENCIA', DATE_SUB(CURRENT_DATE, INTERVAL 22 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 18 DAY),
+(3,3, 6, 9,'Resolucion N.o 0009','SENTENCIA', DATE_SUB(CURRENT_DATE, INTERVAL 22 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 18 DAY),
    'Se declara fundada en parte la demanda de alimentos.',
    'Casilla electronica','MONITOR_JUDICIAL','VERIFICADA',3, DATE_SUB(NOW(3), INTERVAL 18 DAY),1),
-(4,8,12,'Resolucion N.o 0004','DECRETO', DATE_SUB(CURRENT_DATE, INTERVAL 8 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY),
+(4,8,12, 4,'Resolucion N.o 0004','DECRETO', DATE_SUB(CURRENT_DATE, INTERVAL 8 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY),
    'Se amplia el plazo de la investigacion preparatoria por sesenta dias.',
    'Mesa de partes fiscal','MONITOR_JUDICIAL','PENDIENTE',NULL,NULL,0),
-(5,9,13,'Resolucion N.o 0002','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY),
+(5,9,13, 2,'Resolucion N.o 0002','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 5 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 2 DAY),
    'Se admite a tramite la demanda de amparo.',
    'Portal CEJ','MONITOR_JUDICIAL','PENDIENTE',NULL,NULL,0),
-(6,7,10,'Resolucion N.o 0011','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 48 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 45 DAY),
+(6,7,10,11,'Resolucion N.o 0011','AUTO', DATE_SUB(CURRENT_DATE, INTERVAL 48 DAY), DATE_SUB(CURRENT_DATE, INTERVAL 45 DAY),
    'Se tiene por contestada la demanda y se corre traslado.',
    'Portal CEJ','MONITOR_JUDICIAL','PENDIENTE',NULL,NULL,0);
 
