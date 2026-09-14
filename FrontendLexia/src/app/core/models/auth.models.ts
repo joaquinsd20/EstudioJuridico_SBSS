@@ -19,6 +19,13 @@ export interface UsuarioAutenticado {
   debeCambiarPassword: boolean;
   /** Codigos inmutables de rol. Se decide con estos, no con la etiqueta visible. */
   roles: string[];
+  /**
+   * Codigos de permiso de todos los roles del usuario, sin duplicar. Para
+   * decidir que botones mostrar hay que comprobar ESTO, no `roles`: un permiso
+   * como "CLIENTE_CREAR" nunca aparece en `roles`, que solo trae codigos como
+   * "ADMINISTRADOR" o "ABOGADO".
+   */
+  permisos: string[];
   /** Etiqueta del rol de mayor nivel. Es lo que muestra el sidebar. */
   rolPrincipal: string | null;
   nivelAcceso: number;

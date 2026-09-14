@@ -3,6 +3,7 @@ package com.sbss.lexia.seguridad.service;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
 import com.sbss.lexia.seguridad.dto.LoginResponse;
 import com.sbss.lexia.seguridad.dto.UsuarioAutenticadoDto;
+import com.sbss.lexia.seguridad.entity.Permiso;
 import com.sbss.lexia.seguridad.entity.Rol;
 import com.sbss.lexia.seguridad.entity.Usuario;
 import com.sbss.lexia.seguridad.repository.UsuarioRepository;
@@ -75,8 +76,17 @@ public class AuthService {
                 .max(Comparator.comparing(Rol::getNivelAcceso))
                 .orElse(null);
 
-        List<String> codigos = usuario.getRoles().stream()
+        List<String> codigosRol = usuario.getRoles().stream()
                 .map(Rol::getCodigo)
+                .sorted()
+                .toList();
+
+        // De TODOS los roles, no solo el principal: un usuario con varios roles
+        // (p.ej. Socio + Abogado) tiene la union de los permisos de ambos.
+        List<String> codigosPermiso = usuario.getRoles().stream()
+                .flatMap(rol -> rol.getPermisos().stream())
+                .map(Permiso::getCodigo)
+                .distinct()
                 .sorted()
                 .toList();
 
@@ -87,7 +97,8 @@ public class AuthService {
                 usuario.getCargo(),
                 usuario.getFotoUrl(),
                 Boolean.TRUE.equals(usuario.getDebeCambiarPassword()),
-                codigos,
+                codigosRol,
+                codigosPermiso,
                 principal != null ? principal.getNombre() : null,
                 principal != null ? principal.getNivelAcceso() : 0);
     }
