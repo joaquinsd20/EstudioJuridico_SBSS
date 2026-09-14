@@ -64,11 +64,25 @@ public class Estudio {
     @Column(name = "moneda_base", nullable = false, length = 3)
     private String monedaBase;
 
-    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    /**
+     * DEFAULT CURRENT_TIMESTAMP(3) en la base. Mismo motivo que uuidPublico:
+     * sin insertable=false, Hibernate manda NULL explicito en el INSERT (no
+     * hay valor Java ni @PrePersist que lo llene) y eso pisa el DEFAULT de
+     * MySQL — un DEFAULT de columna solo se aplica cuando la columna se OMITE
+     * del INSERT, no cuando se manda NULL a proposito. Bug real, no teorico:
+     * lo disparo el primer INSERT de un Estudio nuevo hecho por JPA en todo
+     * el proyecto (AislamientoPorEstudioIT); hasta ahora el unico Estudio
+     * (id=1) lo carga la semilla con SQL crudo, que si omite la columna.
+     */
+    @Generated(event = EventType.INSERT)
+    @Column(name = "fecha_creacion", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     private LocalDateTime fechaCreacion;
 
-    @Column(name = "fecha_modificacion")
+    /** ON UPDATE CURRENT_TIMESTAMP(3) en la base: no tiene valor hasta la
+     * primera actualizacion, por eso el evento es solo UPDATE. */
+    @Generated(event = EventType.UPDATE)
+    @Column(name = "fecha_modificacion", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     private LocalDateTime fechaModificacion;
 

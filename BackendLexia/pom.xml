@@ -138,6 +138,16 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- En Spring Boot 4 el soporte de pruebas tambien se partio por
+		     tecnologia: spring-boot-starter-test ya NO trae MockMvc/
+		     @AutoConfigureMockMvc (ese paquete migro a
+		     org.springframework.boot.webmvc.test.autoconfigure). Sin este
+		     modulo, cualquier test que use MockMvc no compila. -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webmvc-test</artifactId>
+			<scope>test</scope>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
