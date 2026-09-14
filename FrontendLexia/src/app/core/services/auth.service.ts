@@ -87,8 +87,18 @@ export class AuthService {
     return this.token !== null;
   }
 
-  /** True si el usuario tiene ese codigo de rol o de permiso. */
+  /**
+   * True si el usuario tiene ese codigo de PERMISO (p.ej. "CLIENTE_CREAR").
+   * Comprueba contra `permisos`, no contra `roles`: un permiso nunca aparece en
+   * `roles`, asi que antes de que existiera este campo esta comprobacion
+   * siempre devolvia false.
+   */
   tienePermiso(codigo: string): boolean {
+    return this._usuario()?.permisos.includes(codigo) ?? false;
+  }
+
+  /** True si el usuario tiene ese codigo de ROL (p.ej. "ADMINISTRADOR", "ABOGADO"). */
+  tieneRol(codigo: string): boolean {
     return this._usuario()?.roles.includes(codigo) ?? false;
   }
 

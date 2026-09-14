@@ -17,6 +17,15 @@ public record UsuarioAutenticadoDto(
         boolean debeCambiarPassword,
         /** Codigos inmutables de rol. Angular decide con estos, no con la etiqueta. */
         List<String> roles,
+        /**
+         * Codigos de permiso de TODOS los roles del usuario, sin duplicar. Es lo
+         * que Angular debe usar para decidir que botones mostrar (p.ej.
+         * "CLIENTE_CREAR"), porque es lo mismo contra lo que el backend evalua
+         * @PreAuthorize. Antes de este campo, tienePermiso() en el frontend
+         * comprobaba contra `roles`, que nunca contiene un codigo de permiso:
+         * siempre devolvia false.
+         */
+        List<String> permisos,
         /** Etiqueta visible del rol de mayor nivel. Es lo que muestra el sidebar. */
         String rolPrincipal,
         /** Nivel del rol mas alto. Numero ALTO = MAS acceso. */

@@ -18,12 +18,21 @@ import org.springframework.security.core.userdetails.UserDetails;
  *
  * Guarda el id BIGINT porque la auditoria lo necesita, pero este objeto no se
  * serializa a JSON: hacia Angular va UsuarioAutenticadoDto, que expone el uuid.
+ *
+ * Tambien guarda `estudioId`: es la frontera de multi-tenencia. Toda consulta
+ * del CRM (clientes, expedientes...) debe acotarse con este valor — ver
+ * SesionActual. Deliberadamente NO va en el JWT: el token dura 8 horas, y si un
+ * administrador reasigna a alguien de estudio, meterlo en el token dejaria a
+ * esa persona viendo datos del estudio anterior hasta que expire, sin que
+ * ningun log lo delate. Se lee de la base en cada peticion, vía el JOIN FETCH
+ * de UsuarioRepository.findByEmailConRoles.
  */
 @Getter
 public class UsuarioPrincipal implements UserDetails {
 
     private final Long id;
     private final String uuid;
+    private final Integer estudioId;
     private final String email;
     private final String passwordHash;
     private final String nombreCompleto;
@@ -34,6 +43,7 @@ public class UsuarioPrincipal implements UserDetails {
     private UsuarioPrincipal(Usuario usuario, Collection<GrantedAuthority> authorities) {
         this.id = usuario.getId();
         this.uuid = usuario.getUuidPublico();
+        this.estudioId = usuario.getEstudio().getId();
         this.email = usuario.getEmail();
         this.passwordHash = usuario.getPasswordHash();
         this.nombreCompleto = usuario.getNombreCompleto();
