@@ -19,9 +19,9 @@
 # =============================================================================
 spring:
   datasource:
-    url: jdbc:(1111)/lexia_db?useUnicode=true&characterEncoding=UTF-8&connectionTimeZone=America/Lima&allowPublicKeyRetrieval=true&useSSL=false
-    username: 
-    password: 
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:lexia_db}?useUnicode=true&characterEncoding=UTF-8&connectionTimeZone=America/Lima&allowPublicKeyRetrieval=true&useSSL=false
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:}
 
   flyway:
     # Esquema + semilla. 'db/seed' SOLO se lista en este perfil.
