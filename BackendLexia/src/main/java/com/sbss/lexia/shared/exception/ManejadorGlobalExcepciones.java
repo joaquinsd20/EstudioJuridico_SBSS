@@ -125,6 +125,17 @@ public class ManejadorGlobalExcepciones {
     }
 
     /**
+     * Un parametro de la peticion no pasa una validacion propia del endpoint,
+     * mas alla de lo que cubre @Valid — p.ej. un campo de ?sort= que existe en
+     * la entidad pero no esta en la lista blanca de ordenamientos permitidos.
+     */
+    @ExceptionHandler(ParametroInvalidoException.class)
+    public ResponseEntity<ErrorRespuesta> parametroInvalido(ParametroInvalidoException e) {
+        return ResponseEntity.badRequest().body(ErrorRespuesta.de(400,
+                "PARAMETRO_INVALIDO", e.getMessage()));
+    }
+
+    /**
      * Cuando @PreAuthorize deniega, Spring Security la intercepta ANTES de que
      * llegue aqui (via ExceptionTranslationFilter -> ApiAccessDeniedHandler, que
      * arma el 403). Este handler solo se declara para que, si mas adelante se
