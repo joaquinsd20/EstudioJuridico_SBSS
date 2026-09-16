@@ -28,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -50,6 +51,7 @@ public class DocumentoController {
 
     private final DocumentoService documentoService;
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping
     public List<DocumentoResponse> listar(
             @RequestParam(required = false) String texto,
@@ -67,48 +69,57 @@ public class DocumentoController {
                 extension, confidencial, fechaDesde, fechaHasta, false, limite);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/papelera")
     public List<DocumentoResponse> papelera(@RequestParam(defaultValue = "200") int limite) {
         return documentoService.listar(null, null, null, null, null, null,
                 null, null, null, null, true, limite);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/recientes")
     public List<DocumentoResponse> recientes(@RequestParam(defaultValue = "6") int limite) {
         return documentoService.listar(null, null, null, null, null, null,
                 null, null, LocalDate.now().minusDays(7), null, false, limite);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/estadisticas")
     public DocumentoEstadisticasResponse estadisticas() {
         return documentoService.estadisticas();
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/catalogos/expedientes")
     public List<ExpedienteOpcion> expedientes() {
         return documentoService.expedientes();
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/catalogos/creadores")
     public List<UsuarioOpcion> creadores() {
         return documentoService.creadores();
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/catalogos/expedientes/{expedienteId}/actuaciones")
     public List<RelacionOpcion> actuaciones(@PathVariable Long expedienteId) {
         return documentoService.actuaciones(expedienteId);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/catalogos/expedientes/{expedienteId}/tareas")
     public List<RelacionOpcion> tareas(@PathVariable Long expedienteId) {
         return documentoService.tareas(expedienteId);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/{uuid}")
     public DocumentoResponse obtener(@PathVariable String uuid) {
         return documentoService.obtener(uuid);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DocumentoResponse crear(
             @RequestPart("datos") @Valid DocumentoCrearRequest datos,
@@ -117,6 +128,7 @@ public class DocumentoController {
         return documentoService.crear(datos, archivo, usuario.getId());
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PutMapping("/{uuid}")
     public DocumentoResponse actualizar(
             @PathVariable String uuid,
@@ -124,6 +136,7 @@ public class DocumentoController {
         return documentoService.actualizar(uuid, datos);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PostMapping(value = "/{uuid}/versiones", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public DocumentoVersionResponse subirVersion(
             @PathVariable String uuid,
@@ -133,11 +146,13 @@ public class DocumentoController {
         return documentoService.subirVersion(uuid, archivo, observaciones, usuario.getId());
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/{uuid}/versiones")
     public List<DocumentoVersionResponse> versiones(@PathVariable String uuid) {
         return documentoService.versiones(uuid);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PostMapping("/{uuid}/versiones/{versionId}/restaurar")
     public DocumentoVersionResponse restaurarVersion(
             @PathVariable String uuid,
@@ -147,23 +162,27 @@ public class DocumentoController {
         return documentoService.restaurarVersion(uuid, versionId, observaciones, usuario.getId());
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/{uuid}/contenido")
     public DocumentoContenidoResponse contenido(@PathVariable String uuid) {
         return documentoService.contenido(uuid);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_DESCARGAR')")
     @GetMapping("/{uuid}/visualizar")
     public ResponseEntity<byte[]> visualizar(@PathVariable String uuid) {
         ArchivoDocumento archivo = documentoService.archivoVigente(uuid);
         return respuestaArchivo(archivo, true);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_DESCARGAR')")
     @GetMapping("/{uuid}/descargar")
     public ResponseEntity<byte[]> descargar(@PathVariable String uuid) {
         ArchivoDocumento archivo = documentoService.archivoVigente(uuid);
         return respuestaArchivo(archivo, false);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_DESCARGAR')")
     @GetMapping("/{uuid}/exportar")
     public ResponseEntity<Resource> exportar(
             @PathVariable String uuid,
@@ -180,18 +199,21 @@ public class DocumentoController {
                 .body(recurso);
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PatchMapping("/{uuid}/papelera")
     public ResponseEntity<Void> enviarPapelera(@PathVariable String uuid) {
         documentoService.enviarPapelera(uuid);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAuthority('DOCUMENTO_CREAR')")
     @PatchMapping("/{uuid}/restaurar")
     public ResponseEntity<Void> restaurar(@PathVariable String uuid) {
         documentoService.restaurar(uuid);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @DeleteMapping("/{uuid}")
     public ResponseEntity<Void> eliminarDefinitivamente(@PathVariable String uuid) {
         documentoService.eliminarDefinitivamente(uuid);
