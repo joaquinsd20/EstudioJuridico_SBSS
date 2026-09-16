@@ -4,7 +4,6 @@ import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.ExpedienteOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.RelacionOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.UsuarioOpcion;
 import com.sbss.lexia.documental.dto.DocumentoActualizarRequest;
-import com.sbss.lexia.documental.dto.DocumentoContenidoRequest;
 import com.sbss.lexia.documental.dto.DocumentoContenidoResponse;
 import com.sbss.lexia.documental.dto.DocumentoCrearRequest;
 import com.sbss.lexia.documental.dto.DocumentoEstadisticasResponse;
@@ -139,17 +138,18 @@ public class DocumentoController {
         return documentoService.versiones(uuid);
     }
 
+    @PostMapping("/{uuid}/versiones/{versionId}/restaurar")
+    public DocumentoVersionResponse restaurarVersion(
+            @PathVariable String uuid,
+            @PathVariable Long versionId,
+            @RequestParam(required = false) String observaciones,
+            @AuthenticationPrincipal UsuarioPrincipal usuario) {
+        return documentoService.restaurarVersion(uuid, versionId, observaciones, usuario.getId());
+    }
+
     @GetMapping("/{uuid}/contenido")
     public DocumentoContenidoResponse contenido(@PathVariable String uuid) {
         return documentoService.contenido(uuid);
-    }
-
-    @PutMapping("/{uuid}/contenido")
-    public DocumentoVersionResponse guardarContenido(
-            @PathVariable String uuid,
-            @RequestBody @Valid DocumentoContenidoRequest datos,
-            @AuthenticationPrincipal UsuarioPrincipal usuario) {
-        return documentoService.guardarContenido(uuid, datos, usuario.getId());
     }
 
     @GetMapping("/{uuid}/visualizar")

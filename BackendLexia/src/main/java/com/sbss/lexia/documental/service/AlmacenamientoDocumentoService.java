@@ -21,8 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class AlmacenamientoDocumentoService {
 
-    private static final Set<String> EXTENSIONES_PERMITIDAS = Set.of(
-            "pdf", "docx", "doc", "txt", "png", "jpg", "jpeg");
+    private static final Set<String> EXTENSIONES_PERMITIDAS = Set.of("pdf", "mp3", "wav", "mp4");
 
     private final Path raiz;
 
@@ -38,7 +37,7 @@ public class AlmacenamientoDocumentoService {
 
     public ArchivoGuardado guardar(
             MultipartFile archivo,
-            Long expedienteId,
+            String expedienteCodigo,
             Long documentoId,
             int numeroVersion) {
         if (archivo == null || archivo.isEmpty()) {
@@ -50,7 +49,7 @@ public class AlmacenamientoDocumentoService {
 
         try (InputStream in = archivo.getInputStream()) {
             return guardarFlujo(in, archivo.getSize(), nombreOriginal, extension,
-                    archivo.getContentType(), expedienteId, documentoId, numeroVersion);
+                    archivo.getContentType(), expedienteCodigo, documentoId, numeroVersion);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "No se pudo guardar el archivo", e);
@@ -61,7 +60,7 @@ public class AlmacenamientoDocumentoService {
             Path archivoOrigen,
             String nombreOriginal,
             String mimeType,
-            Long expedienteId,
+            String expedienteCodigo,
             Long documentoId,
             int numeroVersion) {
         nombreOriginal = nombreSeguro(nombreOriginal);
@@ -69,7 +68,7 @@ public class AlmacenamientoDocumentoService {
         validarExtension(extension);
         try (InputStream in = Files.newInputStream(archivoOrigen)) {
             return guardarFlujo(in, Files.size(archivoOrigen), nombreOriginal, extension,
-                    mimeType, expedienteId, documentoId, numeroVersion);
+                    mimeType, expedienteCodigo, documentoId, numeroVersion);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "No se pudo guardar la nueva version", e);
@@ -82,12 +81,12 @@ public class AlmacenamientoDocumentoService {
             String nombreOriginal,
             String extension,
             String mimeType,
-            Long expedienteId,
+            String expedienteCodigo,
             Long documentoId,
             int numeroVersion) throws IOException {
 
         Path carpeta = raiz
-                .resolve("expediente-" + expedienteId)
+                .resolve(carpetaExpediente(expedienteCodigo))
                 .resolve("documento-" + documentoId)
                 .normalize();
         validarDentroDeRaiz(carpeta);
@@ -166,6 +165,13 @@ public class AlmacenamientoDocumentoService {
         }
     }
 
+    private static String carpetaExpediente(String codigo) {
+        String valor = codigo == null ? "" : codigo.trim();
+        valor = valor.replaceAll("[^A-Za-z0-9._-]", "_");
+        if (valor.isBlank()) valor = "sin-codigo";
+        return valor.length() > 80 ? valor.substring(0, 80) : valor;
+    }
+
     private void validarDentroDeRaiz(Path ruta) {
         if (!ruta.toAbsolutePath().normalize().startsWith(raiz)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Ruta de archivo invalida");
@@ -192,7 +198,7 @@ public class AlmacenamientoDocumentoService {
     private static void validarExtension(String extension) {
         if (!EXTENSIONES_PERMITIDAS.contains(extension)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Formato no permitido. Usa PDF, DOCX, DOC, TXT, PNG, JPG o JPEG");
+                    "Formato interno no permitido. Solo se almacenan PDF, MP3, WAV o MP4");
         }
     }
 
@@ -212,6 +218,9 @@ public class AlmacenamientoDocumentoService {
             case "txt" -> "text/plain";
             case "png" -> "image/png";
             case "jpg", "jpeg" -> "image/jpeg";
+            case "mp3" -> "audio/mpeg";
+            case "wav" -> "audio/wav";
+            case "mp4" -> "video/mp4";
             default -> "application/octet-stream";
         };
     }

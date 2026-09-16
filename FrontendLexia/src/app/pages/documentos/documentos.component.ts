@@ -3,16 +3,14 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
-  ElementRef,
   HostListener,
   OnDestroy,
   OnInit,
-  ViewChild,
   inject
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeHtml, SafeResourceUrl } from '@angular/platform-browser';
-import { finalize, forkJoin, Subscription } from 'rxjs';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { finalize, forkJoin } from 'rxjs';
 
 import {
   CategoriaDocumento,
@@ -42,7 +40,6 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   private readonly sanitizer = inject(DomSanitizer);
   private readonly cdr = inject(ChangeDetectorRef);
 
-  @ViewChild('editorDocumento') editorDocumento?: ElementRef<HTMLDivElement>;
 
   readonly categorias: CategoriaDocumento[] = [
     'DEMANDA', 'CONTESTACION', 'RECURSO', 'ESCRITO', 'RESOLUCION',
@@ -77,6 +74,9 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   error = '';
   exito = '';
 
+  readonly maxTamanoArchivoMb = 250;
+  private readonly maxTamanoArchivoBytes = this.maxTamanoArchivoMb * 1024 * 1024;
+
   filtros: DocumentoFiltro = {
     texto: '',
     categoria: '',
@@ -94,10 +94,38 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   modalNuevo = false;
   modalEditarInfo = false;
   modalVisor = false;
-  modalEditor = false;
   modalVersiones = false;
   modalSubirVersion = false;
   modalPapelera = false;
+  modalConfirmarVersion = false;
+  versionPendienteRestaurar: DocumentoVersion | null = null;
+
+  // Confirmaciones dentro de LEXIA (sin ventanas nativas del navegador).
+  modalConfirmarPapelera = false;
+  documentoPendientePapelera: Documento | null = null;
+  modalConfirmarEliminacion = false;
+  documentoPendienteEliminar: Documento | null = null;
+
+  // Menú contextual único de los tres puntos.
+  menuAccionesDocumento: Documento | null = null;
+  menuAccionesTop = 0;
+  menuAccionesLeft = 0;
+  private menuAccionesAnchor: HTMLElement | null = null;
+  private menuScrollRaf: number | null = null;
+
+  /**
+   * Captura el scroll de cualquier contenedor (incluida la tabla).
+   * Reposiciona el menú para que permanezca pegado al botón •••.
+   */
+  private readonly onAnyScroll = (): void => {
+    if (!this.menuAccionesDocumento || !this.menuAccionesAnchor) return;
+    if (this.menuScrollRaf !== null) return;
+
+    this.menuScrollRaf = window.requestAnimationFrame(() => {
+      this.menuScrollRaf = null;
+      this.posicionarMenuAcciones();
+    });
+  };
 
   archivoNuevo: File | null = null;
   archivoVersion: File | null = null;
@@ -108,43 +136,28 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
   visorPdfUrl: SafeResourceUrl | null = null;
   visorImagenUrl = '';
+  visorMediaUrl = '';
   visorHtml = '';
-  visorTipo: 'pdf' | 'imagen' | 'html' | '' = '';
+  visorTipo: 'pdf' | 'imagen' | 'audio' | 'video' | 'html' | '' = '';
   visorCargando = false;
   private visorObjectUrl = '';
   private mensajeTimer: ReturnType<typeof setTimeout> | null = null;
 
-  editorHtml = '';
-  editorHtmlSeguro: SafeHtml | null = null;
-  editorObservaciones = '';
-  editorCargando = false;
-  editorError = '';
-  editorBloque = 'p';
-  editorFuente = 'Arial';
-  editorTamano = '3';
-  editorColor = '#111827';
-  editorEsPdf = false;
-  private rangoEditor: Range | null = null;
-  private editorCargaSub: Subscription | null = null;
-
   ngOnInit(): void {
+    // scroll no burbujea normalmente; con capture=true también detectamos
+    // el desplazamiento interno de .table-wrapper.
+    document.addEventListener('scroll', this.onAnyScroll, true);
     this.cargarTodo();
   }
 
   ngOnDestroy(): void {
-    this.editorCargaSub?.unsubscribe();
-    this.editorCargaSub = null;
+    document.removeEventListener('scroll', this.onAnyScroll, true);
+    if (this.menuScrollRaf !== null) {
+      window.cancelAnimationFrame(this.menuScrollRaf);
+      this.menuScrollRaf = null;
+    }
     this.liberarVisor();
     if (this.mensajeTimer) clearTimeout(this.mensajeTimer);
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscapeDocumento(): void {
-    // El editor siempre debe poder cerrarse aunque una petición de PDF siga
-    // procesándose o el usuario todavía no haya terminado de cargar el contenido.
-    if (this.modalEditor) {
-      this.cerrarEditor();
-    }
   }
 
   cargarTodo(): void {
@@ -211,6 +224,167 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     this.seleccionado = documento;
   }
 
+  /**
+   * Abre un único menú flotante asociado al botón de tres puntos.
+   * El menú está fuera del flujo de la tabla, pero su posición se recalcula
+   * desde el botón mientras la tabla se desplaza.
+   */
+  toggleMenuAcciones(event: MouseEvent, documento: Documento): void {
+    event.stopPropagation();
+
+    if (this.menuAccionesDocumento?.uuid === documento.uuid) {
+      this.cerrarMenuAcciones();
+      return;
+    }
+
+    const boton = event.currentTarget as HTMLElement | null;
+    if (!boton) return;
+
+    this.menuAccionesDocumento = documento;
+    this.menuAccionesAnchor = boton;
+
+    // Primera posición inmediata para evitar que el menú aparezca en 0,0.
+    this.posicionarMenuAcciones();
+    this.actualizarVista();
+
+    // Una vez renderizado, usamos sus dimensiones reales.
+    window.requestAnimationFrame(() => {
+      if (!this.menuAccionesDocumento || this.menuAccionesAnchor !== boton) return;
+      this.posicionarMenuAcciones();
+    });
+  }
+
+  /** Mantiene el menú pegado al botón ••• que lo abrió. */
+  private posicionarMenuAcciones(): void {
+    const boton = this.menuAccionesAnchor;
+    if (!boton || !boton.isConnected || !this.menuAccionesDocumento) {
+      this.cerrarMenuAcciones();
+      return;
+    }
+
+    const rect = boton.getBoundingClientRect();
+    const contenedor = boton.closest('.table-wrapper') as HTMLElement | null;
+
+    // Si la fila salió del área visible de la tabla, el menú deja de tener
+    // un ancla visible y se cierra.
+    if (contenedor) {
+      const area = contenedor.getBoundingClientRect();
+      const altoScrollbar = Math.max(0, contenedor.offsetHeight - contenedor.clientHeight);
+      const anchoScrollbar = Math.max(0, contenedor.offsetWidth - contenedor.clientWidth);
+      const limiteInferior = area.bottom - altoScrollbar;
+      const limiteDerecho = area.right - anchoScrollbar;
+
+      const visible =
+        rect.bottom > area.top &&
+        rect.top < limiteInferior &&
+        rect.right > area.left &&
+        rect.left < limiteDerecho;
+
+      if (!visible) {
+        this.cerrarMenuAcciones();
+        return;
+      }
+    }
+
+    const menu = document.querySelector('.action-menu-floating') as HTMLElement | null;
+    const anchoMenu = menu?.offsetWidth || 240;
+    const altoMenu = menu?.offsetHeight || 342;
+    const margenPantalla = 10;
+    const separacion = 6;
+
+    // Calculamos el rectángulo visible donde debe vivir el menú.
+    // Si existe la tabla, lo mantenemos sobre esa tabla y nunca debajo
+    // de su scrollbar horizontal.
+    let limiteIzquierdo = margenPantalla;
+    let limiteDerecho = window.innerWidth - margenPantalla;
+    let limiteSuperior = margenPantalla;
+    let limiteInferior = window.innerHeight - margenPantalla;
+
+    if (contenedor) {
+      const area = contenedor.getBoundingClientRect();
+      const altoScrollbar = Math.max(0, contenedor.offsetHeight - contenedor.clientHeight);
+      const anchoScrollbar = Math.max(0, contenedor.offsetWidth - contenedor.clientWidth);
+
+      limiteIzquierdo = Math.max(limiteIzquierdo, area.left + 4);
+      limiteDerecho = Math.min(limiteDerecho, area.right - anchoScrollbar - 4);
+      limiteSuperior = Math.max(limiteSuperior, area.top + 4);
+      limiteInferior = Math.min(limiteInferior, area.bottom - altoScrollbar - 4);
+    }
+
+    // Borde derecho del menú alineado con el borde derecho del botón.
+    let left = rect.right - anchoMenu;
+    const maxLeft = limiteDerecho - anchoMenu;
+    left = maxLeft >= limiteIzquierdo
+      ? Math.max(limiteIzquierdo, Math.min(left, maxLeft))
+      : Math.max(margenPantalla, Math.min(left, window.innerWidth - anchoMenu - margenPantalla));
+
+    const espacioAbajo = limiteInferior - rect.bottom - separacion;
+    const espacioArriba = rect.top - limiteSuperior - separacion;
+
+    let top: number;
+    if (espacioAbajo >= altoMenu) {
+      // Hay espacio: abre justo debajo de los tres puntos.
+      top = rect.bottom + separacion;
+    } else if (espacioArriba >= altoMenu) {
+      // No cabe abajo: abre justo encima de los tres puntos.
+      top = rect.top - altoMenu - separacion;
+    } else {
+      // Si no cabe completo ni arriba ni abajo, lo superponemos a las filas
+      // manteniendo el menú dentro del área visible de la tabla.
+      const minTop = limiteSuperior;
+      const maxTop = limiteInferior - altoMenu;
+
+      if (maxTop >= minTop) {
+        top = Math.max(minTop, Math.min(rect.top, maxTop));
+      } else {
+        // Solo ocurre si la tabla es más baja que el propio menú.
+        top = Math.max(
+          margenPantalla,
+          Math.min(rect.top, window.innerHeight - altoMenu - margenPantalla)
+        );
+      }
+    }
+
+    this.menuAccionesLeft = Math.round(left);
+    this.menuAccionesTop = Math.round(top);
+    this.actualizarVista();
+  }
+
+  cerrarMenuAcciones(): void {
+    if (!this.menuAccionesDocumento && !this.menuAccionesAnchor) return;
+
+    this.menuAccionesDocumento = null;
+    this.menuAccionesAnchor = null;
+
+    if (this.menuScrollRaf !== null) {
+      window.cancelAnimationFrame(this.menuScrollRaf);
+      this.menuScrollRaf = null;
+    }
+
+    this.actualizarVista();
+  }
+
+  /** Cierra el menú apenas se hace clic fuera del botón o de sus opciones. */
+  @HostListener('document:pointerdown', ['$event'])
+  cerrarMenuAlClickFuera(event: PointerEvent): void {
+    if (!this.menuAccionesDocumento) return;
+    const target = event.target as HTMLElement | null;
+    if (target?.closest('.action-menu-floating') || target?.closest('.action-menu-trigger')) return;
+    this.cerrarMenuAcciones();
+  }
+
+  @HostListener('document:keydown.escape')
+  cerrarMenuConEscape(): void {
+    this.cerrarMenuAcciones();
+  }
+
+  @HostListener('window:resize')
+  reposicionarMenuAlRedimensionar(): void {
+    if (!this.menuAccionesDocumento) return;
+    this.posicionarMenuAcciones();
+  }
+
+
   abrirNuevo(): void {
     this.formNuevo = this.nuevoFormulario();
     this.archivoNuevo = null;
@@ -222,7 +396,22 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
   onArchivoNuevo(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.archivoNuevo = input.files?.[0] ?? null;
+    const archivo = input.files?.[0] ?? null;
+
+    if (!archivo) {
+      this.archivoNuevo = null;
+      return;
+    }
+
+    const validacion = this.validarArchivoSeleccionado(archivo, this.formNuevo.categoria);
+    if (validacion) {
+      input.value = '';
+      this.archivoNuevo = null;
+      this.mostrarError(validacion);
+      return;
+    }
+
+    this.archivoNuevo = archivo;
   }
 
   cambiarExpedienteNuevo(): void {
@@ -234,6 +423,15 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   guardarNuevo(): void {
     if (!this.formNuevo.expedienteId || !this.formNuevo.nombre.trim() || !this.archivoNuevo) {
       this.mostrarError('Completa expediente, nombre y archivo.');
+      return;
+    }
+
+    const validacionArchivo = this.validarArchivoSeleccionado(
+      this.archivoNuevo,
+      this.formNuevo.categoria
+    );
+    if (validacionArchivo) {
+      this.mostrarError(validacionArchivo);
       return;
     }
 
@@ -319,16 +517,22 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
     const ext = (documento.extension ?? '').toLowerCase();
 
-    if (ext === 'pdf' || ['png', 'jpg', 'jpeg'].includes(ext)) {
+    if (ext === 'pdf' || ['png', 'jpg', 'jpeg', 'mp3', 'wav', 'mp4'].includes(ext)) {
       this.documentoService.visualizar(documento.uuid).subscribe({
         next: blob => {
           this.visorObjectUrl = URL.createObjectURL(blob);
           if (ext === 'pdf') {
             this.visorTipo = 'pdf';
             this.visorPdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.visorObjectUrl);
-          } else {
+          } else if (['png', 'jpg', 'jpeg'].includes(ext)) {
             this.visorTipo = 'imagen';
             this.visorImagenUrl = this.visorObjectUrl;
+          } else if (['mp3', 'wav'].includes(ext)) {
+            this.visorTipo = 'audio';
+            this.visorMediaUrl = this.visorObjectUrl;
+          } else {
+            this.visorTipo = 'video';
+            this.visorMediaUrl = this.visorObjectUrl;
           }
           this.visorCargando = false;
           this.actualizarVista();
@@ -357,186 +561,6 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     });
   }
 
-  abrirEditor(documento = this.seleccionado): void {
-    if (!documento) return;
-
-    // Si quedó una carga anterior viva (muy común al abrir/cerrar PDF), la
-    // cancelamos antes de comenzar otra. Así una respuesta pesada antigua no
-    // vuelve a insertarse en el DOM después de cerrar el modal.
-    this.editorCargaSub?.unsubscribe();
-    this.editorCargaSub = null;
-
-    this.seleccionado = documento;
-    this.editorEsPdf = (documento.extension ?? '').toLowerCase() === 'pdf';
-    this.editorHtml = '';
-    this.editorHtmlSeguro = null;
-    this.editorObservaciones = '';
-    this.editorError = '';
-    this.editorCargando = true;
-    this.rangoEditor = null;
-    this.modalEditor = true;
-    this.limpiarMensajes();
-    this.actualizarVista();
-
-    this.editorCargaSub = this.documentoService.contenido(documento.uuid).subscribe({
-      next: contenido => {
-        // Si el usuario cerró mientras llegaba la respuesta, no insertamos
-        // contenido ni imágenes en un editor que ya no existe.
-        if (!this.modalEditor) return;
-
-        this.editorHtml = contenido.html;
-        this.editorHtmlSeguro = this.sanitizer.bypassSecurityTrustHtml(contenido.html);
-        this.editorCargando = false;
-        this.actualizarVista();
-      },
-      error: e => {
-        if (!this.modalEditor) return;
-        this.editorCargando = false;
-        this.editorError = this.mensajeError(e);
-        this.actualizarVista();
-      },
-      complete: () => {
-        this.editorCargaSub = null;
-      }
-    });
-  }
-
-  cerrarEditor(): void {
-    // Cerrar debe ser instantáneo incluso para PDFs grandes.
-    this.editorCargaSub?.unsubscribe();
-    this.editorCargaSub = null;
-
-    this.modalEditor = false;
-    this.editorCargando = false;
-    this.editorError = '';
-    this.editorHtml = '';
-    this.editorHtmlSeguro = null;
-    this.editorObservaciones = '';
-    this.editorEsPdf = false;
-    this.rangoEditor = null;
-    this.actualizarVista();
-  }
-
-  guardarSeleccionEditor(): void {
-    const editor = this.editorDocumento?.nativeElement;
-    const selection = window.getSelection();
-    if (!editor || !selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const nodo = range.commonAncestorContainer;
-    if (editor === nodo || editor.contains(nodo.nodeType === Node.TEXT_NODE ? nodo.parentNode : nodo)) {
-      this.rangoEditor = range.cloneRange();
-    }
-  }
-
-  private restaurarSeleccionEditor(): void {
-    const editor = this.editorDocumento?.nativeElement;
-    if (!editor) return;
-    editor.focus();
-    if (!this.rangoEditor) return;
-
-    const selection = window.getSelection();
-    if (!selection) return;
-    selection.removeAllRanges();
-    selection.addRange(this.rangoEditor);
-  }
-
-  aplicarFormato(comando: string, valor?: string): void {
-    if (this.editorCargando) return;
-    this.restaurarSeleccionEditor();
-    document.execCommand('styleWithCSS', false, 'true');
-    document.execCommand(comando, false, valor);
-    this.normalizarFormatoEditor();
-    this.guardarSeleccionEditor();
-  }
-
-  aplicarBloque(): void {
-    this.aplicarFormato('formatBlock', this.editorBloque);
-  }
-
-  aplicarFuente(): void {
-    this.aplicarFormato('fontName', this.editorFuente);
-  }
-
-  aplicarTamano(): void {
-    if (this.editorCargando) return;
-    this.restaurarSeleccionEditor();
-
-    // Para tamaño usamos temporalmente etiquetas FONT porque permiten mapear
-    // de forma predecible los niveles 1..7 a puntos reales. Inmediatamente
-    // después las convertimos a CSS y el FONT queda solo como contenedor.
-    document.execCommand('styleWithCSS', false, 'false');
-    document.execCommand('fontSize', false, this.editorTamano);
-
-    const editor = this.editorDocumento?.nativeElement;
-    if (!editor) return;
-    const puntos: Record<string, string> = {
-      '1': '8pt', '2': '10pt', '3': '12pt', '4': '14pt',
-      '5': '18pt', '6': '24pt', '7': '32pt'
-    };
-    editor.querySelectorAll('font[size]').forEach(el => {
-      const html = el as HTMLElement;
-      const size = el.getAttribute('size') || this.editorTamano;
-      html.style.fontSize = puntos[size] || '12pt';
-      el.removeAttribute('size');
-    });
-
-    document.execCommand('styleWithCSS', false, 'true');
-    this.guardarSeleccionEditor();
-  }
-
-  aplicarColor(): void {
-    this.aplicarFormato('foreColor', this.editorColor);
-  }
-
-  quitarFormato(): void {
-    this.aplicarFormato('removeFormat');
-  }
-
-  private normalizarFormatoEditor(): void {
-    const editor = this.editorDocumento?.nativeElement;
-    if (!editor) return;
-
-    // execCommand puede crear etiquetas FONT. Las convertimos a estilos CSS para
-    // que el backend pueda reconstruir correctamente el DOCX.
-    editor.querySelectorAll('font').forEach(font => {
-      const el = font as HTMLElement;
-      const face = font.getAttribute('face');
-      const color = font.getAttribute('color');
-      if (face) el.style.fontFamily = face;
-      if (color) el.style.color = color;
-      font.removeAttribute('face');
-      font.removeAttribute('color');
-    });
-  }
-
-  guardarEdicionDocumento(): void {
-    if (!this.seleccionado || !this.editorDocumento) return;
-
-    this.normalizarFormatoEditor();
-    const html = this.editorDocumento.nativeElement.innerHTML;
-    this.guardando = true;
-    this.documentoService.guardarContenido(
-      this.seleccionado.uuid,
-      html,
-      this.editorObservaciones
-    )
-      .pipe(finalize(() => {
-        this.guardando = false;
-        this.actualizarVista();
-      }))
-      .subscribe({
-        next: version => {
-          this.cerrarEditor();
-          this.editorObservaciones = '';
-          this.mostrarExito(`Documento guardado correctamente. Se creó la versión v${version.numeroVersion}.`);
-          this.actualizarVista();
-          this.cargarTodo();
-        },
-        error: e => this.mostrarError(this.mensajeError(e))
-      });
-  }
-
   abrirVersiones(documento = this.seleccionado): void {
     if (!documento) return;
     this.seleccionado = documento;
@@ -563,12 +587,37 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
   onArchivoVersion(event: Event): void {
     const input = event.target as HTMLInputElement;
-    this.archivoVersion = input.files?.[0] ?? null;
+    const archivo = input.files?.[0] ?? null;
+    const categoria = this.seleccionado?.categoria ?? 'OTRO';
+
+    if (!archivo) {
+      this.archivoVersion = null;
+      return;
+    }
+
+    const validacion = this.validarArchivoSeleccionado(archivo, categoria);
+    if (validacion) {
+      input.value = '';
+      this.archivoVersion = null;
+      this.mostrarError(validacion);
+      return;
+    }
+
+    this.archivoVersion = archivo;
   }
 
   subirVersion(): void {
     if (!this.seleccionado || !this.archivoVersion) {
       this.mostrarError('Selecciona el archivo de la nueva versión.');
+      return;
+    }
+
+    const validacionArchivo = this.validarArchivoSeleccionado(
+      this.archivoVersion,
+      this.seleccionado.categoria
+    );
+    if (validacionArchivo) {
+      this.mostrarError(validacionArchivo);
       return;
     }
 
@@ -595,35 +644,120 @@ export class DocumentosComponent implements OnInit, OnDestroy {
       });
   }
 
-  descargar(documento = this.seleccionado): void {
+  regresarVersion(version: DocumentoVersion): void {
+    if (!this.seleccionado || version.vigente || this.guardando) return;
+
+    this.versionPendienteRestaurar = version;
+    this.modalConfirmarVersion = true;
+    this.actualizarVista();
+  }
+
+  cancelarRegresoVersion(): void {
+    if (this.guardando) return;
+    this.modalConfirmarVersion = false;
+    this.versionPendienteRestaurar = null;
+    this.actualizarVista();
+  }
+
+  confirmarRegresoVersion(): void {
+    const version = this.versionPendienteRestaurar;
+    const documento = this.seleccionado;
+
+    if (!documento || !version || version.vigente || this.guardando) return;
+
+    const uuid = documento.uuid;
+    this.guardando = true;
+
+    this.documentoService.restaurarVersion(uuid, version.id)
+      .pipe(finalize(() => {
+        this.guardando = false;
+        this.actualizarVista();
+      }))
+      .subscribe({
+        next: nueva => {
+          this.modalConfirmarVersion = false;
+          this.versionPendienteRestaurar = null;
+          this.mostrarExito(`Versión v${version.numeroVersion} recuperada como nueva versión v${nueva.numeroVersion}.`);
+
+          this.documentoService.versiones(uuid).subscribe({
+            next: versiones => {
+              this.versiones = versiones;
+              this.actualizarVista();
+            },
+            error: e => this.mostrarError(this.mensajeError(e))
+          });
+
+          this.cargarTodo();
+        },
+        error: e => this.mostrarError(this.mensajeError(e))
+      });
+  }
+
+  async descargar(documento = this.seleccionado): Promise<void> {
     if (!documento) return;
 
     this.limpiarMensajes();
+    const nombre = documento.nombreArchivo ?? `${documento.nombre}.${documento.extension ?? 'pdf'}`;
+
+    const destino = await this.solicitarDestinoDescarga(nombre);
+    if (destino.cancelado) return;
+
     this.documentoService.descargar(documento.uuid).subscribe({
-      next: blob => {
-        this.guardarBlob(
-          blob,
-          documento.nombreArchivo ?? `${documento.nombre}.${documento.extension ?? 'bin'}`
-        );
-        this.mostrarExito('Documento descargado correctamente.');
+      next: async blob => {
+        try {
+          const confirmado = await this.guardarBlob(blob, nombre, destino.handle);
+          if (confirmado) {
+            this.mostrarExito('Documento descargado correctamente.');
+          }
+        } catch (e) {
+          this.mostrarError(this.mensajeErrorDescarga(e));
+        }
       },
       error: e => this.mostrarError(this.mensajeError(e))
     });
   }
 
-  exportar(documento: Documento | null, formato: 'pdf' | 'docx'): void {
+  async exportar(documento: Documento | null, formato: 'pdf' | 'docx'): Promise<void> {
     if (!documento) return;
+
+    this.limpiarMensajes();
+    const nombre = `${this.nombreArchivoSeguro(documento.nombre)}.${formato}`;
+
+    const destino = await this.solicitarDestinoDescarga(nombre);
+    if (destino.cancelado) return;
+
     this.documentoService.exportar(documento.uuid, formato).subscribe({
-      next: blob => this.guardarBlob(blob, `${this.nombreArchivoSeguro(documento.nombre)}.${formato}`),
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.actualizarVista();
-      }
+      next: async blob => {
+        try {
+          const confirmado = await this.guardarBlob(blob, nombre, destino.handle);
+          if (confirmado) {
+            this.mostrarExito(`Documento exportado a ${formato === 'pdf' ? 'PDF' : 'Word'} correctamente.`);
+          }
+        } catch (e) {
+          this.mostrarError(this.mensajeErrorDescarga(e));
+        }
+      },
+      error: e => this.mostrarError(this.mensajeError(e))
     });
   }
 
   enviarPapelera(documento: Documento): void {
-    if (!confirm(`¿Enviar "${documento.nombre}" a la papelera? Podrás restaurarlo durante 7 días.`)) return;
+    if (this.guardando) return;
+    this.documentoPendientePapelera = documento;
+    this.modalConfirmarPapelera = true;
+    this.actualizarVista();
+  }
+
+  cancelarEnvioPapelera(): void {
+    if (this.guardando) return;
+    this.modalConfirmarPapelera = false;
+    this.documentoPendientePapelera = null;
+    this.actualizarVista();
+  }
+
+  confirmarEnvioPapelera(): void {
+    const documento = this.documentoPendientePapelera;
+    if (!documento || this.guardando) return;
 
     this.guardando = true;
     this.documentoService.enviarPapelera(documento.uuid)
@@ -633,6 +767,8 @@ export class DocumentosComponent implements OnInit, OnDestroy {
       }))
       .subscribe({
         next: () => {
+          this.modalConfirmarPapelera = false;
+          this.documentoPendientePapelera = null;
           if (this.seleccionado?.uuid === documento.uuid) this.seleccionado = null;
           this.mostrarExito('Documento enviado a la papelera correctamente.');
           this.actualizarVista();
@@ -675,7 +811,22 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   eliminarDefinitivamente(documento: Documento): void {
-    if (!confirm(`¿Eliminar definitivamente "${documento.nombre}"? Esta acción no se puede deshacer.`)) return;
+    if (this.guardando) return;
+    this.documentoPendienteEliminar = documento;
+    this.modalConfirmarEliminacion = true;
+    this.actualizarVista();
+  }
+
+  cancelarEliminacionDefinitiva(): void {
+    if (this.guardando) return;
+    this.modalConfirmarEliminacion = false;
+    this.documentoPendienteEliminar = null;
+    this.actualizarVista();
+  }
+
+  confirmarEliminacionDefinitiva(): void {
+    const documento = this.documentoPendienteEliminar;
+    if (!documento || this.guardando) return;
 
     this.guardando = true;
     this.documentoService.eliminarDefinitivamente(documento.uuid)
@@ -685,6 +836,8 @@ export class DocumentosComponent implements OnInit, OnDestroy {
       }))
       .subscribe({
         next: () => {
+          this.modalConfirmarEliminacion = false;
+          this.documentoPendienteEliminar = null;
           this.mostrarExito('Documento eliminado definitivamente.');
           this.actualizarVista();
           this.refrescarPapelera();
@@ -723,8 +876,72 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     return Math.max(0, Math.ceil((fin - Date.now()) / (24 * 60 * 60 * 1000)));
   }
 
-  puedeEditar(documento: Documento | null): boolean {
-    return !!documento && ['docx', 'doc', 'pdf', 'txt'].includes((documento.extension ?? '').toLowerCase());
+  formatosPermitidos(categoria: CategoriaDocumento): string[] {
+    if (categoria === 'MULTIMEDIA') {
+      return ['jpg', 'jpeg', 'png', 'mp3', 'wav', 'mp4'];
+    }
+    if (categoria === 'PRUEBA' || categoria === 'OTRO') {
+      return ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png', 'mp3', 'wav', 'mp4'];
+    }
+    return ['pdf', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
+  }
+
+  formatosPermitidosTexto(categoria: CategoriaDocumento): string {
+    return this.formatosPermitidos(categoria).map(ext => ext.toUpperCase()).join(', ');
+  }
+
+  acceptParaCategoria(categoria: CategoriaDocumento): string {
+    return this.formatosPermitidos(categoria).map(ext => `.${ext}`).join(',');
+  }
+
+  textoConversionCategoria(categoria: CategoriaDocumento): string {
+    const formatos = this.formatosPermitidos(categoria);
+    const partes: string[] = [];
+
+    if (formatos.includes('doc') || formatos.includes('docx')) {
+      partes.push('Word se convierte a PDF');
+    }
+    if (formatos.some(ext => ['jpg', 'jpeg', 'png'].includes(ext))) {
+      partes.push('las imágenes se convierten a PDF');
+    }
+    if (formatos.some(ext => ['mp3', 'wav', 'mp4'].includes(ext))) {
+      partes.push('audio y video se conservan en su formato original');
+    }
+
+    return partes.join(' · ');
+  }
+
+  puedeExportar(documento: Documento | null): boolean {
+    const ext = (documento?.extension ?? '').toLowerCase();
+    return !['mp3', 'wav', 'mp4'].includes(ext);
+  }
+
+  private archivoPermitido(archivo: File, categoria: CategoriaDocumento): boolean {
+    const nombre = archivo.name.toLowerCase();
+    const punto = nombre.lastIndexOf('.');
+    if (punto < 0 || punto === nombre.length - 1) return false;
+    const extension = nombre.substring(punto + 1);
+    return this.formatosPermitidos(categoria).includes(extension);
+  }
+
+
+  private validarArchivoSeleccionado(archivo: File, categoria: CategoriaDocumento): string | null {
+    if (archivo.size <= 0) {
+      return 'El archivo está vacío.';
+    }
+
+    if (archivo.size > this.maxTamanoArchivoBytes) {
+      return `El archivo pesa ${this.tamano(archivo.size)} y supera el máximo permitido de ${this.maxTamanoArchivoMb} MB.`;
+    }
+
+    if (!this.archivoPermitido(archivo, categoria)) {
+      return (
+        `Formato no permitido para ${this.etiqueta(categoria)}. ` +
+        `Permitidos: ${this.formatosPermitidosTexto(categoria)}.`
+      );
+    }
+
+    return null;
   }
 
   private nuevoFormulario(): DocumentoCrear {
@@ -777,13 +994,67 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     });
   }
 
-  private guardarBlob(blob: Blob, nombre: string): void {
+  /**
+   * Abre primero el selector de destino del navegador (Chrome/Edge).
+   * De esta manera podemos distinguir entre Guardar y Cancelar.
+   * Si el navegador no soporta File System Access API, usamos la descarga
+   * tradicional, pero NO mostramos un mensaje de "descargado correctamente"
+   * porque el navegador no informa si el usuario canceló posteriormente.
+   */
+  private async solicitarDestinoDescarga(nombre: string): Promise<{ cancelado: boolean; handle?: any }> {
+    const selector = (window as any).showSaveFilePicker;
+
+    if (typeof selector !== 'function') {
+      return { cancelado: false };
+    }
+
+    try {
+      const handle = await selector.call(window, {
+        suggestedName: nombre
+      });
+      return { cancelado: false, handle };
+    } catch (e: any) {
+      if (e?.name === 'AbortError') {
+        // El usuario pulsó "Cancelar": no descargamos y no mostramos éxito.
+        return { cancelado: true };
+      }
+      throw e;
+    }
+  }
+
+  private async guardarBlob(blob: Blob, nombre: string, handle?: any): Promise<boolean> {
+    // Navegadores Chromium: podemos confirmar que el archivo sí se escribió.
+    if (handle) {
+      const writable = await handle.createWritable();
+      try {
+        await writable.write(blob);
+      } finally {
+        await writable.close();
+      }
+      return true;
+    }
+
+    // Fallback para navegadores sin showSaveFilePicker.
+    // La descarga se inicia, pero JavaScript no puede saber si el usuario
+    // cancela después el diálogo nativo del navegador; por eso devolvemos false
+    // y evitamos mostrar un falso mensaje de éxito.
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = nombre;
+    a.style.display = 'none';
+    document.body.appendChild(a);
     a.click();
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return false;
+  }
+
+  private mensajeErrorDescarga(error: unknown): string {
+    if ((error as any)?.name === 'AbortError') {
+      return 'La descarga fue cancelada.';
+    }
+    return 'No se pudo guardar el archivo.';
   }
 
   private liberarVisor(): void {
@@ -791,6 +1062,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
     this.visorObjectUrl = '';
     this.visorPdfUrl = null;
     this.visorImagenUrl = '';
+    this.visorMediaUrl = '';
     this.visorTipo = '';
   }
 
@@ -844,8 +1116,18 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
   private mensajeError(error: unknown): string {
     if (error instanceof HttpErrorResponse) {
-      return error.error?.mensaje || error.error?.detail || error.error?.message ||
-        `No se pudo completar la operación (${error.status || 'sin conexión'}).`;
+      const mensajeBackend = error.error?.mensaje || error.error?.detail || error.error?.message;
+      if (mensajeBackend) return mensajeBackend;
+
+      if (error.status === 413) {
+        return `El archivo es demasiado grande. El tamaño máximo permitido es ${this.maxTamanoArchivoMb} MB.`;
+      }
+
+      if (error.status === 0) {
+        return 'No se pudo conectar con el servidor. Verifica que el backend esté ejecutándose.';
+      }
+
+      return `No se pudo completar la operación (${error.status || 'sin conexión'}).`;
     }
     return 'Ocurrió un error inesperado.';
   }

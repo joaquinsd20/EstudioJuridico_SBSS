@@ -82,15 +82,18 @@ export class DocumentoService {
     return this.http.post<DocumentoVersion>(`${this.base}/${uuid}/versiones`, form).pipe(timeout(60000));
   }
 
-  contenido(uuid: string): Observable<DocumentoContenido> {
-    return this.http.get<DocumentoContenido>(`${this.base}/${uuid}/contenido`);
+  restaurarVersion(uuid: string, versionId: number, observaciones = ''): Observable<DocumentoVersion> {
+    let params = new HttpParams();
+    if (observaciones.trim()) params = params.set('observaciones', observaciones.trim());
+    return this.http.post<DocumentoVersion>(
+      `${this.base}/${uuid}/versiones/${versionId}/restaurar`,
+      {},
+      { params }
+    ).pipe(timeout(60000));
   }
 
-  guardarContenido(uuid: string, html: string, observaciones = ''): Observable<DocumentoVersion> {
-    return this.http.put<DocumentoVersion>(`${this.base}/${uuid}/contenido`, {
-      html,
-      observaciones
-    }).pipe(timeout(60000));
+  contenido(uuid: string): Observable<DocumentoContenido> {
+    return this.http.get<DocumentoContenido>(`${this.base}/${uuid}/contenido`);
   }
 
   visualizar(uuid: string): Observable<Blob> {

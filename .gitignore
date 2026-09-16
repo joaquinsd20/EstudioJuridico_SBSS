@@ -17,17 +17,35 @@ target/
 *.jar
 *.war
 *.ear
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
 # =========================
-# INTELLIJ
+# ARCHIVOS SUBIDOS POR LOS USUARIOS
+# =========================
+# Los documentos viven en el disco del servidor, nunca en el repositorio
+# (regla 7 de CLAUDE.md: ningun binario en la base, y tampoco en git).
+# Sin esta regla vuelven solos en el primer `git add -A` de quien suba un
+# documento en local.
+BackendLexia/storage/
+
+# =========================
+# IDEs
 # =========================
 .idea/
 *.iml
-
-# =========================
-# VISUAL STUDIO CODE
-# =========================
+*.iws
+*.ipr
 .vscode/
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
 # =========================
 # WINDOWS / MACOS
@@ -39,6 +57,9 @@ Desktop.ini
 # =========================
 # ENVIRONMENT / SECRETS
 # =========================
+# application-local.yml es el archivo que application-dev.yml le recomienda
+# al equipo para poner sus credenciales de MySQL. Si deja de estar aqui, la
+# primera persona que siga esa recomendacion sube su contrasena al repo.
 .env
 .env.*
 application-local.properties

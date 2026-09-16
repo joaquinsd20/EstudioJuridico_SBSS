@@ -40,7 +40,10 @@ public class DocumentoConsultaRepository {
                 e.id AS expediente_id,
                 d.actuacion_id,
                 d.tarea_id,
-                e.codigo_interno AS expediente_codigo,
+                CONCAT(
+                    COALESCE(NULLIF(TRIM(e.numero_correlativo), ''), REPLACE(e.codigo_interno, 'EXP-', '')),
+                    '-', e.anio
+                ) AS expediente_codigo,
                 e.numero_expediente,
                 c.id AS cliente_id,
                 c.nombre_busqueda AS cliente_nombre,
@@ -85,6 +88,10 @@ public class DocumentoConsultaRepository {
                         LOWER(d.nombre) LIKE :texto
                         OR LOWER(COALESCE(d.descripcion, '')) LIKE :texto
                         OR LOWER(e.codigo_interno) LIKE :texto
+                        OR LOWER(CONCAT(
+                            COALESCE(NULLIF(TRIM(e.numero_correlativo), ''), REPLACE(e.codigo_interno, 'EXP-', '')),
+                            '-', e.anio
+                        )) LIKE :texto
                         OR LOWER(COALESCE(e.numero_expediente, '')) LIKE :texto
                         OR LOWER(c.nombre_busqueda) LIKE :texto
                         OR LOWER(COALESCE(dv.nombre_archivo, '')) LIKE :texto
@@ -183,7 +190,12 @@ public class DocumentoConsultaRepository {
 
     public List<ExpedienteOpcion> expedientes() {
         String sql = """
-                SELECT e.id, e.codigo_interno, e.numero_expediente,
+                SELECT e.id,
+                       CONCAT(
+                           COALESCE(NULLIF(TRIM(e.numero_correlativo), ''), REPLACE(e.codigo_interno, 'EXP-', '')),
+                           '-', e.anio
+                       ) AS codigo_documental,
+                       e.numero_expediente,
                        c.id cliente_id, c.nombre_busqueda cliente_nombre
                 FROM expedientes e
                 JOIN clientes c ON c.id = e.cliente_id
@@ -191,7 +203,7 @@ public class DocumentoConsultaRepository {
                 ORDER BY e.fecha_creacion DESC, e.codigo_interno
                 """;
         return jdbc.query(sql, Map.of(), (rs, row) -> new ExpedienteOpcion(
-                rs.getLong("id"), rs.getString("codigo_interno"), rs.getString("numero_expediente"),
+                rs.getLong("id"), rs.getString("codigo_documental"), rs.getString("numero_expediente"),
                 rs.getLong("cliente_id"), rs.getString("cliente_nombre")));
     }
 
@@ -227,6 +239,25 @@ public class DocumentoConsultaRepository {
                 """;
         return jdbc.query(sql, Map.of("expedienteId", expedienteId),
                 (rs, row) -> new RelacionOpcion(rs.getLong("id"), rs.getString("texto")));
+    }
+
+
+    public String codigoCarpetaExpediente(Long expedienteId) {
+        String sql = """
+                SELECT CONCAT(
+                    COALESCE(NULLIF(TRIM(numero_correlativo), ''), REPLACE(codigo_interno, 'EXP-', '')),
+                    '-', anio
+                )
+                FROM expedientes
+                WHERE id = :id AND activo = 1
+                """;
+        List<String> codigos = jdbc.query(
+                sql, Map.of("id", expedienteId),
+                (rs, row) -> rs.getString(1));
+        if (codigos.isEmpty() || codigos.getFirst() == null || codigos.getFirst().isBlank()) {
+            throw new IllegalArgumentException("No se pudo obtener el codigo del expediente");
+        }
+        return codigos.getFirst();
     }
 
     public boolean existeExpediente(Long id) {

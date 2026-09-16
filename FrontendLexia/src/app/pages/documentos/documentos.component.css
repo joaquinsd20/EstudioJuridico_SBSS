@@ -3239,3 +3239,797 @@ button:disabled {
   cursor: text;
   pointer-events: auto;
 }
+
+/* Restaurar una versión anterior conserva el historial creando una nueva versión vigente. */
+.version-restore-button {
+  margin-top: 6px;
+  border: 1px solid #d7dce5;
+  background: #ffffff;
+  border-radius: 7px;
+  padding: 6px 9px;
+  font-size: 8px;
+  font-weight: 700;
+  color: #4f46e5;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.version-restore-button:hover:not(:disabled) {
+  background: #f5f6ff;
+  border-color: #b8bdf6;
+}
+
+.version-restore-button:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   FIX UX - ÁREA CLICKEABLE COMPLETA DEL MENÚ DE ACCIONES
+   Evita que .actions button limite los botones del desplegable a 28px.
+========================================================= */
+.actions .action-menu-list {
+  width: 220px;
+  padding: 6px;
+  box-sizing: border-box;
+}
+
+.actions .action-menu-list button {
+  width: 100% !important;
+  min-width: 100% !important;
+  height: auto !important;
+  min-height: 38px;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  padding: 9px 12px !important;
+  box-sizing: border-box;
+  border: 0 !important;
+  border-radius: 6px;
+  background: transparent !important;
+  color: #394150 !important;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.actions .action-menu-list button:hover,
+.actions .action-menu-list button:focus-visible {
+  background: #f6f2fd !important;
+}
+
+.actions .action-menu-list .danger-link {
+  color: #b42318 !important;
+}
+
+/* =========================================================
+   CONFIRMACIÓN EN PÁGINA — RESTAURAR VERSIÓN
+   Reemplaza el confirm() nativo del navegador.
+========================================================= */
+.restore-version-backdrop {
+  z-index: 3600;
+  padding: 20px;
+  background: rgba(15, 23, 42, .58);
+  backdrop-filter: blur(5px);
+}
+
+.restore-version-modal {
+  position: relative;
+  width: min(500px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid rgba(99, 102, 241, .14);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow:
+    0 28px 80px rgba(15, 23, 42, .28),
+    0 10px 28px rgba(99, 102, 241, .10);
+  animation: restoreVersionEnter .18s ease-out;
+}
+
+.restore-version-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: #f5f6f8;
+  color: #596273;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+
+.restore-version-close:hover:not(:disabled) {
+  background: #eceef3;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.restore-version-close:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.restore-version-icon {
+  width: 58px;
+  height: 58px;
+  margin: 28px auto 14px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: linear-gradient(145deg, #ede9fe, #f5f3ff);
+  box-shadow: inset 0 0 0 1px #ddd6fe;
+  color: #6d28d9;
+  font-size: 31px;
+  font-weight: 700;
+}
+
+.restore-version-content {
+  padding: 0 28px 24px;
+  text-align: center;
+}
+
+.restore-version-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f5f3ff;
+  color: #6d28d9;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.restore-version-content h2 {
+  margin: 11px 0 7px;
+  color: #111827;
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.restore-version-question {
+  margin: 0 auto;
+  max-width: 390px;
+  color: #697386;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.restore-version-file {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid #e7e9ef;
+  border-radius: 12px;
+  background: #fbfcfe;
+  text-align: left;
+}
+
+.restore-version-file-badge {
+  width: 46px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 11px;
+  font-weight: 850;
+}
+
+.restore-version-file > div:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.restore-version-file strong {
+  overflow: hidden;
+  color: #263041;
+  font-size: 10.5px;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.restore-version-file span {
+  color: #8a93a3;
+  font-size: 8.5px;
+}
+
+.restore-version-notice {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 12px 13px;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  background: #faf8ff;
+  text-align: left;
+}
+
+.restore-version-notice-icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ede9fe;
+  color: #6d28d9;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.restore-version-notice p {
+  margin: 1px 0 0;
+  color: #5f6675;
+  font-size: 9.2px;
+  line-height: 1.55;
+}
+
+.restore-version-notice strong {
+  color: #4c1d95;
+}
+
+.restore-version-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid #edf0f4;
+  background: #fbfcfe;
+}
+
+.restore-version-actions button {
+  min-height: 42px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 780;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.restore-version-cancel {
+  border: 1px solid #d9dee7;
+  background: #ffffff;
+  color: #4b5565;
+}
+
+.restore-version-cancel:hover:not(:disabled) {
+  background: #f7f8fa;
+  transform: translateY(-1px);
+}
+
+.restore-version-confirm {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid #6d28d9;
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  color: #ffffff;
+  box-shadow: 0 8px 18px rgba(109, 40, 217, .20);
+}
+
+.restore-version-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px rgba(109, 40, 217, .27);
+}
+
+.restore-version-actions button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.restore-version-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, .38);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: restoreVersionSpin .7s linear infinite;
+}
+
+@keyframes restoreVersionEnter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes restoreVersionSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 560px) {
+  .restore-version-backdrop { padding: 12px; }
+  .restore-version-content { padding: 0 18px 20px; }
+  .restore-version-content h2 { font-size: 18px; }
+  .restore-version-actions {
+    grid-template-columns: 1fr;
+    padding: 14px 16px 16px;
+  }
+  .restore-version-confirm { grid-row: 1; }
+  .restore-version-cancel { grid-row: 2; }
+}
+
+
+/* =========================================================
+   V10.7 — MENÚ DE ACCIONES FLOTANTE
+   El menú de los tres puntos se dibuja sobre la tabla y no
+   modifica el tamaño del contenedor ni genera scroll extra.
+========================================================= */
+.actions .action-menu-list {
+  position: fixed !important;
+  left: var(--action-menu-left, 12px) !important;
+  top: var(--action-menu-top, 12px) !important;
+  right: auto !important;
+  z-index: 5000 !important;
+  width: 220px !important;
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  margin: 0 !important;
+  background: #ffffff;
+  border: 1px solid #e1e5ec;
+  border-radius: 10px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, .20);
+}
+
+/* Evita que el menú flotante altere el flujo de la celda. */
+.actions .action-menu {
+  position: relative;
+}
+
+/* El menú permanece por encima del encabezado, filas y paneles cercanos. */
+.documents-table td,
+.documents-table tr,
+.table-wrapper {
+  position: relative;
+}
+
+
+/* =========================================================
+   V10.8 — MENÚ ANCLADO A LOS TRES PUNTOS
+   Un único menú contextual se renderiza fuera de la tabla.
+   No altera el scroll ni las dimensiones del listado.
+========================================================= */
+.action-menu-trigger {
+  width: 30px !important;
+  min-width: 30px !important;
+  height: 30px !important;
+  padding: 0 !important;
+  display: inline-grid !important;
+  place-items: center;
+  border: 1px solid transparent !important;
+  border-radius: 7px !important;
+  background: transparent !important;
+  color: #475569 !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  letter-spacing: 1px;
+  cursor: pointer;
+}
+
+.action-menu-trigger:hover,
+.action-menu-trigger[aria-expanded="true"] {
+  background: #f5f3ff !important;
+  border-color: #c4b5fd !important;
+  color: #5b21b6 !important;
+}
+
+.action-menu-floating {
+  position: fixed;
+  z-index: 12000;
+  width: 240px;
+  padding: 7px;
+  display: grid;
+  gap: 2px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, .22);
+  animation: actionMenuAppear .12s ease-out;
+}
+
+.action-menu-floating button {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #374151;
+  font: inherit;
+  font-size: 12px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action-menu-floating button:hover,
+.action-menu-floating button:focus-visible {
+  background: #f6f2fd;
+  color: #4c1d95;
+  outline: none;
+}
+
+.action-menu-floating .danger-link {
+  color: #c81e1e;
+}
+
+.action-menu-floating .danger-link:hover,
+.action-menu-floating .danger-link:focus-visible {
+  background: #fff1f2;
+  color: #b91c1c;
+}
+
+@keyframes actionMenuAppear {
+  from { opacity: 0; transform: translateY(3px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* =========================================================
+   DOCUMENTOS V12 — FORMATOS POR CATEGORÍA / MULTIMEDIA
+   ========================================================= */
+
+.file-field small strong {
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+.media-preview {
+  width: min(760px, calc(100% - 32px));
+  min-height: 260px;
+  margin: 24px auto;
+  padding: 28px;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, .08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+}
+
+.media-preview-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: #f3efff;
+  color: #6d28d9;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.audio-preview audio {
+  width: min(620px, 100%);
+}
+
+.video-preview {
+  width: min(980px, calc(100% - 32px));
+  min-height: 360px;
+  padding: 18px;
+  background: #111827;
+}
+
+.video-preview video {
+  display: block;
+  width: 100%;
+  max-height: 70vh;
+  border-radius: 12px;
+  background: #000000;
+}
+
+
+/* =========================================================
+   V16 — CONFIRMACIONES DENTRO DE LEXIA
+   Sustituye las ventanas confirm() del navegador para
+   "Enviar a papelera" y "Eliminar definitivamente".
+========================================================= */
+.document-confirm-backdrop {
+  z-index: 3900;
+  padding: 20px;
+  background: rgba(15, 23, 42, .58);
+  backdrop-filter: blur(5px);
+}
+
+.document-confirm-modal {
+  --confirm-accent: #7c3aed;
+  --confirm-accent-dark: #6d28d9;
+  --confirm-soft: #f5f3ff;
+  --confirm-border: #ddd6fe;
+  position: relative;
+  width: min(500px, calc(100vw - 32px));
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--confirm-accent) 18%, transparent);
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 28px 80px rgba(15, 23, 42, .28), 0 10px 28px rgba(15, 23, 42, .10);
+  animation: documentConfirmEnter .18s ease-out;
+}
+
+.document-confirm-modal--trash {
+  --confirm-accent: #7c3aed;
+  --confirm-accent-dark: #6d28d9;
+  --confirm-soft: #f5f3ff;
+  --confirm-border: #ddd6fe;
+}
+
+.document-confirm-modal--danger {
+  --confirm-accent: #dc2626;
+  --confirm-accent-dark: #b91c1c;
+  --confirm-soft: #fef2f2;
+  --confirm-border: #fecaca;
+}
+
+.document-confirm-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  background: #f5f6f8;
+  color: #596273;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+
+.document-confirm-close:hover:not(:disabled) {
+  background: #eceef3;
+  color: #111827;
+  transform: translateY(-1px);
+}
+
+.document-confirm-close:disabled {
+  opacity: .5;
+  cursor: not-allowed;
+}
+
+.document-confirm-icon {
+  width: 58px;
+  height: 58px;
+  margin: 28px auto 14px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--confirm-border);
+  border-radius: 18px;
+  background: var(--confirm-soft);
+  color: var(--confirm-accent-dark);
+  font-size: 26px;
+  font-weight: 850;
+}
+
+.document-confirm-content {
+  padding: 0 28px 24px;
+  text-align: center;
+}
+
+.document-confirm-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--confirm-soft);
+  color: var(--confirm-accent-dark);
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.document-confirm-content h2 {
+  margin: 11px 0 7px;
+  color: #111827;
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.document-confirm-content > p {
+  margin: 0 auto;
+  max-width: 410px;
+  color: #697386;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.document-confirm-content > p strong {
+  color: #293244;
+}
+
+.document-confirm-file {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid #e7e9ef;
+  border-radius: 12px;
+  background: #fbfcfe;
+  text-align: left;
+}
+
+.document-confirm-file-badge {
+  min-width: 50px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: var(--confirm-soft);
+  color: var(--confirm-accent-dark);
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.document-confirm-file > div:last-child {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.document-confirm-file strong {
+  overflow: hidden;
+  color: #263041;
+  font-size: 10.5px;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-confirm-file span {
+  overflow: hidden;
+  color: #8a93a3;
+  font-size: 8.5px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.document-confirm-notice {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 14px;
+  padding: 12px 13px;
+  border: 1px solid var(--confirm-border);
+  border-radius: 12px;
+  background: var(--confirm-soft);
+  text-align: left;
+}
+
+.document-confirm-notice-icon {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--confirm-accent-dark);
+  font-size: 10px;
+  font-weight: 900;
+  box-shadow: inset 0 0 0 1px var(--confirm-border);
+}
+
+.document-confirm-notice p {
+  margin: 1px 0 0;
+  color: #5f6675;
+  font-size: 9.2px;
+  line-height: 1.55;
+}
+
+.document-confirm-notice strong {
+  color: var(--confirm-accent-dark);
+}
+
+.document-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr;
+  gap: 10px;
+  padding: 16px 20px 20px;
+  border-top: 1px solid #edf0f4;
+  background: #fbfcfe;
+}
+
+.document-confirm-actions button {
+  min-height: 42px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 780;
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+.document-confirm-cancel {
+  border: 1px solid #d9dee7;
+  background: #ffffff;
+  color: #4b5565;
+}
+
+.document-confirm-cancel:hover:not(:disabled) {
+  background: #f7f8fa;
+  transform: translateY(-1px);
+}
+
+.document-confirm-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid var(--confirm-accent-dark);
+  background: linear-gradient(135deg, var(--confirm-accent), var(--confirm-accent-dark));
+  color: #ffffff;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--confirm-accent) 22%, transparent);
+}
+
+.document-confirm-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 22px color-mix(in srgb, var(--confirm-accent) 30%, transparent);
+}
+
+.document-confirm-actions button:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.document-confirm-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid rgba(255, 255, 255, .38);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: documentConfirmSpin .7s linear infinite;
+}
+
+@keyframes documentConfirmEnter {
+  from { opacity: 0; transform: translateY(10px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes documentConfirmSpin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 560px) {
+  .document-confirm-backdrop { padding: 12px; }
+  .document-confirm-content { padding: 0 18px 20px; }
+  .document-confirm-content h2 { font-size: 18px; }
+  .document-confirm-actions {
+    grid-template-columns: 1fr;
+    padding: 14px 16px 16px;
+  }
+  .document-confirm-submit { grid-row: 1; }
+  .document-confirm-cancel { grid-row: 2; }
+}
