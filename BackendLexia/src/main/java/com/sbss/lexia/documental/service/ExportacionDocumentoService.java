@@ -37,6 +37,7 @@ import org.apache.pdfbox.util.Matrix;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.extractor.WordExtractor;
 import org.apache.poi.util.Units;
+import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.Document;
 import org.apache.poi.xwpf.usermodel.ParagraphAlignment;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -49,6 +50,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 /**
@@ -101,9 +103,77 @@ public class ExportacionDocumentoService {
         };
     }
 
+    /**
+     * Convierte un Word recibido en la carga (DOC/DOCX) a PDF antes de que se
+     * almacene como versión documental. La validación real del contenedor Word
+     * la hace Apache POI; renombrar otro archivo a .doc/.docx no es suficiente.
+     */
+    public byte[] convertirWordSubidoAPdf(MultipartFile archivo, String extension) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un archivo");
+        }
+        String ext = safeExtension(extension);
+        try (InputStream in = archivo.getInputStream()) {
+            String texto = switch (ext) {
+                case "docx" -> {
+                    try (XWPFDocument doc = new XWPFDocument(in);
+                         XWPFWordExtractor extractor = new XWPFWordExtractor(doc)) {
+                        yield extractor.getText();
+                    }
+                }
+                case "doc" -> {
+                    try (HWPFDocument doc = new HWPFDocument(in);
+                         WordExtractor extractor = new WordExtractor(doc)) {
+                        yield extractor.getText();
+                    }
+                }
+                default -> throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Solo se puede convertir Word DOC o DOCX");
+            };
+            return textoAPdf(texto);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El archivo Word no es válido o está dañado", e);
+        }
+    }
+
+    /**
+     * Convierte una imagen subida (JPG/JPEG/PNG) a PDF. ImageIO valida el
+     * contenido real del archivo, por lo que cambiar solamente la extensión
+     * de otro archivo no permite superar la validación.
+     */
+    public byte[] convertirImagenSubidaAPdf(MultipartFile archivo, String extension) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un archivo");
+        }
+
+        String ext = safeExtension(extension);
+        if (!esImagen(ext)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Solo se puede convertir JPG, JPEG o PNG");
+        }
+
+        try (InputStream in = archivo.getInputStream()) {
+            BufferedImage imagen = ImageIO.read(in);
+            if (imagen == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "La imagen no es válida o está dañada");
+            }
+            return imagenAPdf(imagen);
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se pudo procesar la imagen", e);
+        }
+    }
+
     private ArchivoExportado exportarWord(DocumentoVersion version, String nombreBase) {
         Path origen = almacenamiento.resolver(version.getRutaAlmacenamiento());
         String ext = safeExtension(version.getExtension());
+        validarExportable(ext);
 
         try {
             byte[] bytes;
@@ -139,6 +209,7 @@ public class ExportacionDocumentoService {
     private ArchivoExportado exportarPdf(DocumentoVersion version, String nombreBase) {
         Path origen = almacenamiento.resolver(version.getRutaAlmacenamiento());
         String ext = safeExtension(version.getExtension());
+        validarExportable(ext);
         try {
             byte[] bytes;
             if ("pdf".equals(ext)) {
@@ -944,6 +1015,10 @@ public class ExportacionDocumentoService {
     private byte[] imagenAPdf(Path imagen) throws IOException {
         BufferedImage buffered = ImageIO.read(imagen.toFile());
         if (buffered == null) throw new IOException("Imagen no reconocida");
+        return imagenAPdf(buffered);
+    }
+
+    private byte[] imagenAPdf(BufferedImage buffered) throws IOException {
         try (PDDocument doc = new PDDocument(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             PDRectangle paginaTam = PDRectangle.A4;
             PDPage pagina = new PDPage(paginaTam);
@@ -1036,6 +1111,14 @@ public class ExportacionDocumentoService {
             }
         }
         return r.toString();
+    }
+
+    private static void validarExportable(String ext) {
+        if ("mp3".equals(ext) || "wav".equals(ext) || "mp4".equals(ext)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Los archivos de audio y video se descargan en su formato original; no se convierten a PDF o Word");
+        }
     }
 
     private static boolean esImagen(String ext) {

@@ -4,7 +4,6 @@ import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.ExpedienteOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.RelacionOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.UsuarioOpcion;
 import com.sbss.lexia.documental.dto.DocumentoActualizarRequest;
-import com.sbss.lexia.documental.dto.DocumentoContenidoRequest;
 import com.sbss.lexia.documental.dto.DocumentoContenidoResponse;
 import com.sbss.lexia.documental.dto.DocumentoCrearRequest;
 import com.sbss.lexia.documental.dto.DocumentoEstadisticasResponse;
@@ -17,6 +16,7 @@ import com.sbss.lexia.documental.repository.DocumentoRepository;
 import com.sbss.lexia.documental.repository.DocumentoVersionRepository;
 import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService.ArchivoGuardado;
 import com.sbss.lexia.documental.service.ExportacionDocumentoService.ArchivoExportado;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -42,6 +42,18 @@ public class DocumentoService {
 
     private static final Set<String> ESTADOS = Set.of(
             "BORRADOR", "EN_REVISION", "OBSERVADO", "APROBADO", "FIRMADO", "PRESENTADO", "CERRADO");
+
+    private static final Set<String> FORMATOS_DOCUMENTALES = Set.of(
+            "pdf", "doc", "docx", "jpg", "jpeg", "png");
+
+    private static final Set<String> FORMATOS_MULTIMEDIA = Set.of(
+            "jpg", "jpeg", "png", "mp3", "wav", "mp4");
+
+    private static final Set<String> FORMATOS_DOCUMENTALES_Y_MULTIMEDIA = Set.of(
+            "pdf", "doc", "docx", "jpg", "jpeg", "png", "mp3", "wav", "mp4");
+
+    private static final Set<String> FORMATOS_AUDIO_VIDEO = Set.of("mp3", "wav", "mp4");
+    private static final Set<String> FORMATOS_IMAGEN = Set.of("jpg", "jpeg", "png");
 
     private final DocumentoRepository documentoRepository;
     private final DocumentoVersionRepository versionRepository;
@@ -105,8 +117,9 @@ public class DocumentoService {
 
         ArchivoGuardado guardado = null;
         try {
-            guardado = almacenamiento.guardar(archivo, d.getExpedienteId(), d.getId(), 1);
-            DocumentoVersion v = nuevaVersion(d.getId(), 1, guardado, usuarioId, req.observaciones());
+            guardado = guardarNormalizado(archivo, d, 1);
+            DocumentoVersion v = nuevaVersion(d.getId(), 1, guardado, usuarioId,
+                    observacionONormal(req.observaciones(), "Carga inicial del documento"));
             v = versionRepository.saveAndFlush(v);
             d.setVersionVigenteId(v.getId());
             documentoRepository.saveAndFlush(d);
@@ -129,7 +142,9 @@ public class DocumentoService {
         d.setTareaId(req.tareaId());
         d.setNombre(req.nombre().trim());
         d.setDescripcion(limpiar(req.descripcion()));
-        d.setCategoria(validarCategoria(req.categoria()));
+        String nuevaCategoria = validarCategoria(req.categoria());
+        validarCategoriaContraVersionVigente(d, nuevaCategoria);
+        d.setCategoria(nuevaCategoria);
         d.setEstado(validarEstado(req.estado()));
         d.setEsConfidencial(Boolean.TRUE.equals(req.esConfidencial()));
         documentoRepository.saveAndFlush(d);
@@ -141,9 +156,10 @@ public class DocumentoService {
         Documento d = obtenerEntidad(uuid);
         asegurarFueraPapelera(d);
         int numero = versionRepository.obtenerUltimaVersion(d.getId()) + 1;
-        ArchivoGuardado guardado = almacenamiento.guardar(archivo, d.getExpedienteId(), d.getId(), numero);
+        ArchivoGuardado guardado = guardarNormalizado(archivo, d, numero);
         try {
-            DocumentoVersion v = nuevaVersion(d.getId(), numero, guardado, usuarioId, observaciones);
+            DocumentoVersion v = nuevaVersion(d.getId(), numero, guardado, usuarioId,
+                    observacionONormal(observaciones, "Nueva versión cargada"));
             v = versionRepository.saveAndFlush(v);
             d.setVersionVigenteId(v.getId());
             documentoRepository.saveAndFlush(d);
@@ -160,6 +176,43 @@ public class DocumentoService {
         return consultaRepository.versiones(d.getId(), d.getVersionVigenteId());
     }
 
+    @Transactional
+    public DocumentoVersionResponse restaurarVersion(
+            String uuid,
+            Long versionId,
+            String observaciones,
+            Long usuarioId) {
+        Documento d = obtenerEntidad(uuid);
+        asegurarFueraPapelera(d);
+
+        DocumentoVersion origen = versionRepository.findById(versionId)
+                .filter(v -> v.getDocumentoId().equals(d.getId()))
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "La versión no pertenece a este documento"));
+
+        if (origen.getId().equals(d.getVersionVigenteId())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "La versión seleccionada ya es la vigente");
+        }
+
+        int numero = versionRepository.obtenerUltimaVersion(d.getId()) + 1;
+        ArchivoGuardado guardado = copiarVersionNormalizada(origen, d, numero);
+        try {
+            String detalle = "Restaurada desde la versión v" + origen.getNumeroVersion();
+            String obs = observaciones == null || observaciones.isBlank()
+                    ? detalle
+                    : detalle + ". " + observaciones.trim();
+            DocumentoVersion nueva = nuevaVersion(d.getId(), numero, guardado, usuarioId, obs);
+            nueva = versionRepository.saveAndFlush(nueva);
+            d.setVersionVigenteId(nueva.getId());
+            documentoRepository.saveAndFlush(d);
+            return aVersionResponse(nueva, d.getVersionVigenteId(), usuarioId);
+        } catch (RuntimeException e) {
+            try { almacenamiento.eliminar(guardado.rutaRelativa()); } catch (RuntimeException ignored) { }
+            throw e;
+        }
+    }
+
     @Transactional(readOnly = true)
     public DocumentoContenidoResponse contenido(String uuid) {
         Documento d = obtenerEntidad(uuid);
@@ -167,57 +220,17 @@ public class DocumentoService {
         DocumentoVersion v = versionVigente(d);
         if (!editor.esEditable(v.getExtension())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                    "Este formato no se puede editar. Puedes visualizarlo, descargarlo o exportarlo");
+                    "No se puede generar una vista previa HTML para este formato");
         }
 
-        String extension = v.getExtension() == null ? "" : v.getExtension().toLowerCase(Locale.ROOT);
         String html;
 
-        // IMPORTANTE: el editor web NO usa la conversión PDF -> DOCX de alta
-        // fidelidad. Esa conversión puede representar páginas complejas como
-        // imágenes completas y, en documentos grandes, vuelve el navegador muy
-        // pesado y además esas páginas dejan de ser editables.
-        //
-        // Para editar un PDF usamos el HTML liviano y editable generado por
-        // EditorDocumentoService. La exportación PDF -> Word mantiene, por
-        // separado, el modo de alta fidelidad.
+        // Se conserva únicamente para previsualizar versiones antiguas que no sean PDF.
+        // La edición del contenido del archivo fue retirada del módulo.
         html = editor.extraerHtml(v);
 
         return new DocumentoContenidoResponse(
-                uuid, d.getNombre(), v.getExtension(), html, true);
-    }
-
-    @Transactional
-    public DocumentoVersionResponse guardarContenido(
-            String uuid,
-            DocumentoContenidoRequest req,
-            Long usuarioId) {
-        Documento d = obtenerEntidad(uuid);
-        asegurarFueraPapelera(d);
-        int numero = versionRepository.obtenerUltimaVersion(d.getId()) + 1;
-        Path temp = editor.crearDocxDesdeHtml(req.html());
-        ArchivoGuardado guardado = null;
-        try {
-            String nombre = nombreBase(d.getNombre()) + "_v" + numero + ".docx";
-            guardado = almacenamiento.guardar(
-                    temp, nombre,
-                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                    d.getExpedienteId(), d.getId(), numero);
-            DocumentoVersion v = nuevaVersion(d.getId(), numero, guardado, usuarioId,
-                    req.observaciones() == null || req.observaciones().isBlank()
-                            ? "Edicion realizada desde LEXIA" : req.observaciones());
-            v = versionRepository.saveAndFlush(v);
-            d.setVersionVigenteId(v.getId());
-            documentoRepository.saveAndFlush(d);
-            return aVersionResponse(v, d.getVersionVigenteId(), usuarioId);
-        } catch (RuntimeException e) {
-            if (guardado != null) {
-                try { almacenamiento.eliminar(guardado.rutaRelativa()); } catch (RuntimeException ignored) { }
-            }
-            throw e;
-        } finally {
-            try { Files.deleteIfExists(temp); } catch (Exception ignored) { }
-        }
+                uuid, d.getNombre(), v.getExtension(), html, false);
     }
 
     @Transactional(readOnly = true)
@@ -289,6 +302,272 @@ public class DocumentoService {
     @Transactional(readOnly = true)
     public List<RelacionOpcion> tareas(Long expedienteId) {
         return consultaRepository.tareas(expedienteId);
+    }
+
+    private ArchivoGuardado guardarNormalizado(
+            MultipartFile archivo, Documento documento, int numeroVersion) {
+        String extension = extensionCarga(archivo);
+        validarFormatoPorCategoria(documento.getCategoria(), extension);
+
+        String expedienteCodigo = consultaRepository.codigoCarpetaExpediente(documento.getExpedienteId());
+
+        if ("pdf".equals(extension)) {
+            validarFirmaPdf(archivo);
+            return almacenamiento.guardar(archivo, expedienteCodigo, documento.getId(), numeroVersion);
+        }
+
+        if ("doc".equals(extension) || "docx".equals(extension)) {
+            byte[] pdf = exportacion.convertirWordSubidoAPdf(archivo, extension);
+            return guardarBytesComoPdf(
+                    pdf,
+                    archivo.getOriginalFilename(),
+                    "lexia-word-a-pdf-",
+                    "No se pudo preparar el PDF convertido desde Word",
+                    expedienteCodigo,
+                    documento.getId(),
+                    numeroVersion);
+        }
+
+        if (FORMATOS_IMAGEN.contains(extension)) {
+            byte[] pdf = exportacion.convertirImagenSubidaAPdf(archivo, extension);
+            return guardarBytesComoPdf(
+                    pdf,
+                    archivo.getOriginalFilename(),
+                    "lexia-imagen-a-pdf-",
+                    "No se pudo preparar el PDF convertido desde imagen",
+                    expedienteCodigo,
+                    documento.getId(),
+                    numeroVersion);
+        }
+
+        if (FORMATOS_AUDIO_VIDEO.contains(extension)) {
+            validarFirmaMultimedia(archivo, extension);
+            return almacenamiento.guardar(archivo, expedienteCodigo, documento.getId(), numeroVersion);
+        }
+
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                "Formato no permitido para la categoría seleccionada");
+    }
+
+    private ArchivoGuardado guardarBytesComoPdf(
+            byte[] pdf,
+            String nombreOriginal,
+            String prefijoTemporal,
+            String mensajeError,
+            String expedienteCodigo,
+            Long documentoId,
+            int numeroVersion) {
+        Path temporal = null;
+        try {
+            temporal = Files.createTempFile(prefijoTemporal, ".pdf");
+            Files.write(temporal, pdf);
+            String nombrePdf = nombreSinExtension(nombreOriginal) + ".pdf";
+            return almacenamiento.guardar(temporal, nombrePdf, "application/pdf",
+                    expedienteCodigo, documentoId, numeroVersion);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, mensajeError, e);
+        } finally {
+            if (temporal != null) {
+                try { Files.deleteIfExists(temporal); } catch (IOException ignored) { }
+            }
+        }
+    }
+
+    private ArchivoGuardado copiarVersionNormalizada(
+            DocumentoVersion origen, Documento documento, int numeroVersion) {
+        String extension = normalizarExtension(origen.getExtension());
+        validarVersionRestaurableEnCategoria(documento.getCategoria(), extension);
+
+        String expedienteCodigo = consultaRepository.codigoCarpetaExpediente(documento.getExpedienteId());
+        Path temporal = null;
+        try {
+            Path original = almacenamiento.resolver(origen.getRutaAlmacenamiento());
+
+            if ("pdf".equals(extension) || FORMATOS_AUDIO_VIDEO.contains(extension)) {
+                String mime = origen.getMimeType();
+                if (mime == null || mime.isBlank()) {
+                    mime = "application/octet-stream";
+                }
+                String nombre = nombreBase(documento.getNombre())
+                        + "_restaurada_v" + origen.getNumeroVersion() + "." + extension;
+                return almacenamiento.guardar(original, nombre, mime,
+                        expedienteCodigo, documento.getId(), numeroVersion);
+            }
+
+            ArchivoExportado convertido = exportacion.exportar(origen, "pdf", documento.getNombre());
+            temporal = Files.createTempFile("lexia-restaurar-version-", ".pdf");
+            Files.write(temporal, convertido.bytes());
+            return almacenamiento.guardar(temporal,
+                    nombreBase(documento.getNombre()) + "_restaurada_v" + origen.getNumeroVersion() + ".pdf",
+                    "application/pdf", expedienteCodigo, documento.getId(), numeroVersion);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                    "No se pudo restaurar la versión seleccionada", e);
+        } finally {
+            if (temporal != null) {
+                try { Files.deleteIfExists(temporal); } catch (IOException ignored) { }
+            }
+        }
+    }
+
+    private static String extensionCarga(MultipartFile archivo) {
+        if (archivo == null || archivo.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Debes seleccionar un archivo");
+        }
+        String nombre = archivo.getOriginalFilename();
+        if (nombre == null || nombre.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El archivo no tiene nombre");
+        }
+        int punto = nombre.lastIndexOf('.');
+        if (punto < 0 || punto == nombre.length() - 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "El archivo debe tener una extensión válida");
+        }
+        return nombre.substring(punto + 1).toLowerCase(Locale.ROOT);
+    }
+
+    private static void validarFormatoPorCategoria(String categoria, String extension) {
+        Set<String> permitidos = formatosEntradaPorCategoria(categoria);
+        if (!permitidos.contains(extension)) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Formato no permitido para " + etiquetaCategoria(categoria)
+                            + ". Permitidos: " + formatosPermitidosTexto(categoria));
+        }
+    }
+
+    private void validarCategoriaContraVersionVigente(Documento documento, String nuevaCategoria) {
+        if (documento.getVersionVigenteId() == null) return;
+
+        DocumentoVersion vigente = versionVigente(documento);
+        String ext = normalizarExtension(vigente.getExtension());
+
+        if ("pdf".equals(ext)) return;
+        if (FORMATOS_AUDIO_VIDEO.contains(ext)
+                && Set.of("PRUEBA", "MULTIMEDIA", "OTRO").contains(nuevaCategoria)) {
+            return;
+        }
+
+        // Compatibilidad con versiones antiguas que pudieron quedar guardadas
+        // antes de normalizar Word e imágenes a PDF.
+        if (formatosEntradaPorCategoria(nuevaCategoria).contains(ext)) return;
+
+        throw new ResponseStatusException(
+                HttpStatus.BAD_REQUEST,
+                "La versión vigente (" + ext.toUpperCase(Locale.ROOT)
+                        + ") no es compatible con la categoría "
+                        + etiquetaCategoria(nuevaCategoria));
+    }
+
+    private static void validarVersionRestaurableEnCategoria(String categoria, String extension) {
+        if ("pdf".equals(extension)) return;
+
+        if (FORMATOS_AUDIO_VIDEO.contains(extension)) {
+            if (!Set.of("PRUEBA", "MULTIMEDIA", "OTRO").contains(categoria)) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "Esta versión multimedia no puede restaurarse en la categoría "
+                                + etiquetaCategoria(categoria));
+            }
+            return;
+        }
+
+        validarFormatoPorCategoria(categoria, extension);
+    }
+
+    private static Set<String> formatosEntradaPorCategoria(String categoria) {
+        return switch (categoria) {
+            case "MULTIMEDIA" -> FORMATOS_MULTIMEDIA;
+            case "PRUEBA", "OTRO" -> FORMATOS_DOCUMENTALES_Y_MULTIMEDIA;
+            default -> FORMATOS_DOCUMENTALES;
+        };
+    }
+
+    private static String formatosPermitidosTexto(String categoria) {
+        return switch (categoria) {
+            case "MULTIMEDIA" -> "JPG, JPEG, PNG, MP3, WAV, MP4";
+            case "PRUEBA", "OTRO" -> "PDF, DOC, DOCX, JPG, JPEG, PNG, MP3, WAV, MP4";
+            default -> "PDF, DOC, DOCX, JPG, JPEG, PNG";
+        };
+    }
+
+    private static String etiquetaCategoria(String categoria) {
+        if (categoria == null || categoria.isBlank()) return "la categoría seleccionada";
+        String normal = categoria.toLowerCase(Locale.ROOT).replace('_', ' ');
+        return Character.toUpperCase(normal.charAt(0)) + normal.substring(1);
+    }
+
+    private static String normalizarExtension(String extension) {
+        return extension == null ? "" : extension.trim().toLowerCase(Locale.ROOT).replace(".", "");
+    }
+
+    private static void validarFirmaMultimedia(MultipartFile archivo, String extension) {
+        try (var in = archivo.getInputStream()) {
+            byte[] cabecera = in.readNBytes(64);
+            boolean valida = switch (extension) {
+                case "mp3" -> esMp3(cabecera);
+                case "wav" -> esWav(cabecera);
+                case "mp4" -> esMp4(cabecera);
+                default -> false;
+            };
+            if (!valida) {
+                throw new ResponseStatusException(
+                        HttpStatus.BAD_REQUEST,
+                        "El archivo ." + extension + " no tiene una firma válida o está dañado");
+            }
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "No se pudo validar el archivo multimedia", e);
+        }
+    }
+
+    private static boolean esMp3(byte[] b) {
+        if (b.length >= 3 && b[0] == 'I' && b[1] == 'D' && b[2] == '3') return true;
+        return b.length >= 2
+                && (b[0] & 0xFF) == 0xFF
+                && ((b[1] & 0xE0) == 0xE0);
+    }
+
+    private static boolean esWav(byte[] b) {
+        return b.length >= 12
+                && b[0] == 'R' && b[1] == 'I' && b[2] == 'F' && b[3] == 'F'
+                && b[8] == 'W' && b[9] == 'A' && b[10] == 'V' && b[11] == 'E';
+    }
+
+    private static boolean esMp4(byte[] b) {
+        return b.length >= 12
+                && b[4] == 'f' && b[5] == 't' && b[6] == 'y' && b[7] == 'p';
+    }
+
+    private static void validarFirmaPdf(MultipartFile archivo) {
+        try (var in = archivo.getInputStream()) {
+            byte[] cabecera = in.readNBytes(1024);
+            String firma = new String(cabecera, java.nio.charset.StandardCharsets.ISO_8859_1);
+            if (!firma.contains("%PDF-")) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "El archivo indicado como PDF no es un PDF válido");
+            }
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "No se pudo validar el archivo PDF", e);
+        }
+    }
+
+    private static String nombreSinExtension(String nombre) {
+        String n = nombre == null || nombre.isBlank() ? "documento" : nombre.trim();
+        int punto = n.lastIndexOf('.');
+        if (punto > 0) n = n.substring(0, punto);
+        return nombreBase(n);
+    }
+
+    private static String observacionONormal(String valor, String defecto) {
+        String limpio = limpiar(valor);
+        return limpio == null ? defecto : limpio;
     }
 
     private void eliminarEntidad(Documento d) {

@@ -5,7 +5,7 @@
     <header class="documentos-header">
       <div>
         <h1>Gestión Documental Jurídica</h1>
-        <p>Organiza, edita, exporta y consulta los documentos vinculados a los expedientes.</p>
+        <p>Organiza, versiona, exporta y consulta los documentos vinculados a los expedientes.</p>
       </div>
 
       <button type="button" class="btn-primary" (click)="abrirNuevo()">
@@ -136,11 +136,11 @@
           <select [(ngModel)]="filtros.extension" (change)="buscar()">
             <option value="">Todos</option>
             <option value="pdf">PDF</option>
-            <option value="docx">Word DOCX</option>
-            <option value="doc">Word DOC</option>
-            <option value="txt">Texto</option>
-            <option value="png">PNG</option>
-            <option value="jpg">JPG</option>
+            <option value="mp3">Audio MP3</option>
+            <option value="wav">Audio WAV</option>
+            <option value="mp4">Video MP4</option>
+            <option value="docx">Word DOCX (versiones antiguas)</option>
+            <option value="doc">Word DOC (versiones antiguas)</option>
           </select>
         </label>
 
@@ -181,7 +181,7 @@
             </div>
           </div>
 
-          <div class="table-wrapper">
+          <div class="table-wrapper" (scroll)="cerrarMenuAcciones()">
             <table class="documents-table">
               <thead>
                 <tr>
@@ -236,23 +236,14 @@
                     <td>
                       <div class="actions" (click)="$event.stopPropagation()">
                         <button type="button" title="Visualizar" (click)="visualizar(documento)">◉</button>
-                        <button type="button" title="Descargar original" (click)="descargar(documento)">↓</button>
-                        <details class="action-menu">
-                          <summary title="Más acciones">•••</summary>
-                          <div class="action-menu-list">
-                            <button type="button" (click)="visualizar(documento)">Visualizar</button>
-                            @if (puedeEditar(documento)) {
-                              <button type="button" (click)="abrirEditor(documento)">Editar documento</button>
-                            }
-                            <button type="button" (click)="abrirEditarInformacion(documento)">Editar información</button>
-                            <button type="button" (click)="descargar(documento)">Descargar original</button>
-                            <button type="button" (click)="exportar(documento, 'pdf')">Exportar PDF</button>
-                            <button type="button" (click)="exportar(documento, 'docx')">Exportar Word</button>
-                            <button type="button" (click)="abrirSubirVersion(documento)">Subir nueva versión</button>
-                            <button type="button" (click)="abrirVersiones(documento)">Historial de versiones</button>
-                            <button type="button" class="danger-link" (click)="enviarPapelera(documento)">Enviar a papelera</button>
-                          </div>
-                        </details>
+                        <button type="button" title="Descargar" (click)="descargar(documento)">↓</button>
+                        <button
+                          type="button"
+                          class="action-menu-trigger"
+                          title="Más acciones"
+                          [attr.aria-expanded]="menuAccionesDocumento?.uuid === documento.uuid"
+                          (click)="toggleMenuAcciones($event, documento)"
+                        >•••</button>
                       </div>
                     </td>
                   </tr>
@@ -338,12 +329,15 @@
           </div>
 
           <div class="detail-command-grid">
-            @if (puedeEditar(seleccionado)) {
-              <button type="button" (click)="abrirEditor()">Editar documento</button>
-            }
             <button type="button" (click)="abrirEditarInformacion()">Editar información</button>
-            <button type="button" (click)="exportar(seleccionado, 'pdf')">Exportar PDF</button>
-            <button type="button" (click)="exportar(seleccionado, 'docx')">Exportar Word</button>
+            <button type="button"
+                    [disabled]="!puedeExportar(seleccionado)"
+                    [title]="puedeExportar(seleccionado) ? 'Exportar a PDF' : 'Audio y video se descargan en su formato original'"
+                    (click)="exportar(seleccionado, 'pdf')">Exportar PDF</button>
+            <button type="button"
+                    [disabled]="!puedeExportar(seleccionado)"
+                    [title]="puedeExportar(seleccionado) ? 'Exportar a Word' : 'Audio y video se descargan en su formato original'"
+                    (click)="exportar(seleccionado, 'docx')">Exportar Word</button>
             <button type="button" (click)="abrirVersiones()">Versiones</button>
             <button type="button" (click)="abrirSubirVersion()">Nueva versión</button>
           </div>
@@ -356,6 +350,31 @@
     </div>
   </main>
 </div>
+
+<!-- MENÚ FLOTANTE DE ACCIONES: uno solo para toda la tabla -->
+@if (menuAccionesDocumento) {
+  <div
+    class="action-menu-floating"
+    [style.top.px]="menuAccionesTop"
+    [style.left.px]="menuAccionesLeft"
+    (click)="$event.stopPropagation()"
+  >
+    <button type="button" (click)="visualizar(menuAccionesDocumento); cerrarMenuAcciones()">Visualizar</button>
+    <button type="button" (click)="abrirEditarInformacion(menuAccionesDocumento); cerrarMenuAcciones()">Editar información</button>
+    <button type="button" (click)="descargar(menuAccionesDocumento); cerrarMenuAcciones()">Descargar</button>
+    <button type="button"
+            [disabled]="!puedeExportar(menuAccionesDocumento)"
+            [title]="puedeExportar(menuAccionesDocumento) ? 'Exportar a PDF' : 'Audio y video se descargan en su formato original'"
+            (click)="exportar(menuAccionesDocumento, 'pdf'); cerrarMenuAcciones()">Exportar PDF</button>
+    <button type="button"
+            [disabled]="!puedeExportar(menuAccionesDocumento)"
+            [title]="puedeExportar(menuAccionesDocumento) ? 'Exportar a Word' : 'Audio y video se descargan en su formato original'"
+            (click)="exportar(menuAccionesDocumento, 'docx'); cerrarMenuAcciones()">Exportar Word</button>
+    <button type="button" (click)="abrirSubirVersion(menuAccionesDocumento); cerrarMenuAcciones()">Subir nueva versión</button>
+    <button type="button" (click)="abrirVersiones(menuAccionesDocumento); cerrarMenuAcciones()">Historial de versiones</button>
+    <button type="button" class="danger-link" (click)="enviarPapelera(menuAccionesDocumento); cerrarMenuAcciones()">Enviar a papelera</button>
+  </div>
+}
 
 <!-- NUEVO DOCUMENTO -->
 @if (modalNuevo) {
@@ -424,8 +443,15 @@
 
         <label class="span-2 file-field">
           <span>Archivo *</span>
-          <input type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" (change)="onArchivoNuevo($event)">
-          <small>PDF, Word, TXT, PNG o JPG. Máximo 25 MB.</small>
+          <input type="file"
+                 [attr.accept]="acceptParaCategoria(formNuevo.categoria)"
+                 (change)="onArchivoNuevo($event)">
+          <small>
+            Formatos para {{ etiqueta(formNuevo.categoria) }}:
+            <strong>{{ formatosPermitidosTexto(formNuevo.categoria) }}</strong>.
+            {{ textoConversionCategoria(formNuevo.categoria) }}.
+            Tamaño máximo: <strong>{{ maxTamanoArchivoMb }} MB</strong>.
+          </small>
         </label>
 
         <label class="span-2">
@@ -529,195 +555,23 @@
           @if (visorTipo === 'imagen' && visorImagenUrl) {
             <img [src]="visorImagenUrl" [alt]="seleccionado.nombre">
           }
+          @if (visorTipo === 'audio' && visorMediaUrl) {
+            <div class="media-preview audio-preview">
+              <div class="media-preview-icon">♫</div>
+              <strong>{{ seleccionado.nombreArchivo || seleccionado.nombre }}</strong>
+              <audio [src]="visorMediaUrl" controls preload="metadata"></audio>
+            </div>
+          }
+          @if (visorTipo === 'video' && visorMediaUrl) {
+            <div class="media-preview video-preview">
+              <video [src]="visorMediaUrl" controls preload="metadata"></video>
+            </div>
+          }
           @if (visorTipo === 'html') {
             <article class="document-preview" [innerHTML]="visorHtml"></article>
           }
         }
       </div>
-    </section>
-  </div>
-}
-
-<!-- EDITOR -->
-@if (modalEditor && seleccionado) {
-  <div class="modal-backdrop editor-backdrop" (click)="cerrarEditor()">
-    <section class="modal-card editor-card" (click)="$event.stopPropagation()">
-      <header class="modal-header editor-modal-header">
-        <div>
-          <h2>Editar documento</h2>
-          <p>{{ seleccionado.nombre }} · los cambios crean una nueva versión DOCX.</p>
-        </div>
-        <button type="button" (click)="cerrarEditor()">×</button>
-      </header>
-
-      <div class="editor-toolbar-shell">
-        <div class="editor-toolbar-group editor-toolbar-selects">
-          <select
-            [(ngModel)]="editorBloque"
-            [disabled]="editorCargando"
-            (mousedown)="guardarSeleccionEditor()"
-            (change)="aplicarBloque()"
-            aria-label="Estilo de párrafo">
-            <option value="p">Párrafo</option>
-            <option value="h1">Título 1</option>
-            <option value="h2">Título 2</option>
-            <option value="h3">Título 3</option>
-          </select>
-
-          <select
-            [(ngModel)]="editorFuente"
-            [disabled]="editorCargando"
-            (mousedown)="guardarSeleccionEditor()"
-            (change)="aplicarFuente()"
-            aria-label="Fuente">
-            <option value="Arial">Arial</option>
-            <option value="Calibri">Calibri</option>
-            <option value="Times New Roman">Times New Roman</option>
-            <option value="Georgia">Georgia</option>
-            <option value="Verdana">Verdana</option>
-          </select>
-
-          <select
-            class="editor-size-select"
-            [(ngModel)]="editorTamano"
-            [disabled]="editorCargando"
-            (mousedown)="guardarSeleccionEditor()"
-            (change)="aplicarTamano()"
-            aria-label="Tamaño de letra">
-            <option value="1">8 pt</option>
-            <option value="2">10 pt</option>
-            <option value="3">12 pt</option>
-            <option value="4">14 pt</option>
-            <option value="5">18 pt</option>
-            <option value="6">24 pt</option>
-            <option value="7">32 pt</option>
-          </select>
-        </div>
-
-        <span class="toolbar-separator"></span>
-
-        <div class="editor-toolbar-group">
-          <button type="button" title="Negrita" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('bold')"><b>B</b></button>
-          <button type="button" title="Cursiva" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('italic')"><i>I</i></button>
-          <button type="button" title="Subrayado" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('underline')"><u>U</u></button>
-
-          <label class="editor-color-control" title="Color de texto">
-            <span>A</span>
-            <input type="color" [(ngModel)]="editorColor" [disabled]="editorCargando"
-                   (mousedown)="guardarSeleccionEditor()" (change)="aplicarColor()">
-          </label>
-        </div>
-
-        <span class="toolbar-separator"></span>
-
-        <div class="editor-toolbar-group">
-          <button type="button" title="Alinear a la izquierda" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('justifyLeft')">Izq.</button>
-          <button type="button" title="Centrar" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('justifyCenter')">Centro</button>
-          <button type="button" title="Alinear a la derecha" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('justifyRight')">Der.</button>
-          <button type="button" title="Justificar" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('justifyFull')">Just.</button>
-        </div>
-
-        <span class="toolbar-separator"></span>
-
-        <div class="editor-toolbar-group">
-          <button type="button" title="Lista con viñetas" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('insertUnorderedList')">• Lista</button>
-          <button type="button" title="Lista numerada" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('insertOrderedList')">1. Lista</button>
-          <button type="button" title="Disminuir sangría" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('outdent')">←</button>
-          <button type="button" title="Aumentar sangría" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('indent')">→</button>
-        </div>
-
-        <span class="toolbar-separator"></span>
-
-        <div class="editor-toolbar-group">
-          <button type="button" title="Deshacer" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('undo')">↶</button>
-          <button type="button" title="Rehacer" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="aplicarFormato('redo')">↷</button>
-          <button type="button" title="Quitar formato" [disabled]="editorCargando"
-                  (mousedown)="$event.preventDefault(); guardarSeleccionEditor()"
-                  (click)="quitarFormato()">Tx</button>
-        </div>
-      </div>
-
-      @if (editorEsPdf) {
-        <div class="editor-pdf-notice">
-          <span class="editor-pdf-notice-icon">PDF</span>
-          <div>
-            <strong>Modo de edición PDF</strong>
-            <small>Se carga una versión liviana y realmente editable del texto para evitar bloqueos. La opción <b>Exportar Word</b> sigue usando la conversión de alta fidelidad.</small>
-          </div>
-        </div>
-      }
-
-      <div class="editor-document-area">
-        @if (editorCargando) {
-          <div class="editor-loading-state">
-            <div class="editor-spinner"></div>
-            <strong>Preparando documento editable...</strong>
-            <span>Estamos conservando páginas, estilos, tablas e imágenes.</span>
-          </div>
-        } @else if (editorError) {
-          <div class="editor-error-state">
-            <strong>No se pudo abrir el documento para editar.</strong>
-            <span>{{ editorError }}</span>
-          </div>
-        } @else {
-          <div
-            #editorDocumento
-            class="word-editor"
-            contenteditable="true"
-            spellcheck="true"
-            [innerHTML]="editorHtmlSeguro"
-            (mouseup)="guardarSeleccionEditor()"
-            (keyup)="guardarSeleccionEditor()"
-            (input)="guardarSeleccionEditor()"
-          ></div>
-        }
-      </div>
-
-      <div class="editor-note">
-        <label>
-          <span>Observación de la nueva versión</span>
-          <input type="text" [(ngModel)]="editorObservaciones" maxlength="500"
-                 placeholder="Ej.: Corrección de datos del cliente">
-        </label>
-      </div>
-
-      <footer class="modal-footer editor-footer">
-        <span class="editor-save-help">A4 · Los cambios se guardan como una nueva versión Word.</span>
-        <div class="editor-footer-actions">
-          <button type="button" class="btn-light" (click)="cerrarEditor()">Cancelar</button>
-          <button type="button" class="btn-primary"
-                  [disabled]="guardando || editorCargando || !!editorError"
-                  (click)="guardarEdicionDocumento()">
-            {{ guardando ? 'Guardando...' : 'Guardar nueva versión' }}
-          </button>
-        </div>
-      </footer>
     </section>
   </div>
 }
@@ -743,7 +597,13 @@
             <div class="version-meta">
               <span>{{ version.extension.toUpperCase() }}</span>
               <span>{{ tamano(version.tamanoBytes) }}</span>
-              @if (version.vigente) { <strong>Vigente</strong> }
+              @if (version.vigente) {
+                <strong>Vigente</strong>
+              } @else {
+                <button type="button" class="version-restore-button" [disabled]="guardando" (click)="regresarVersion(version)">
+                  Regresar a esta versión
+                </button>
+              }
             </div>
           </article>
         }
@@ -757,6 +617,80 @@
   </div>
 }
 
+<!-- CONFIRMAR RESTAURACIÓN DE VERSIÓN -->
+@if (modalConfirmarVersion && seleccionado && versionPendienteRestaurar) {
+  <div class="modal-backdrop restore-version-backdrop" (click)="cancelarRegresoVersion()">
+    <section
+      class="restore-version-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="restore-version-title"
+      (click)="$event.stopPropagation()">
+
+      <button
+        type="button"
+        class="restore-version-close"
+        aria-label="Cerrar"
+        [disabled]="guardando"
+        (click)="cancelarRegresoVersion()">×</button>
+
+      <div class="restore-version-icon" aria-hidden="true">↶</div>
+
+      <div class="restore-version-content">
+        <span class="restore-version-kicker">Historial de versiones</span>
+        <h2 id="restore-version-title">Restaurar versión v{{ versionPendienteRestaurar.numeroVersion }}</h2>
+        <p class="restore-version-question">
+          ¿Deseas recuperar el contenido de esta versión del documento?
+        </p>
+
+        <div class="restore-version-file">
+          <div class="restore-version-file-badge">v{{ versionPendienteRestaurar.numeroVersion }}</div>
+          <div>
+            <strong>{{ versionPendienteRestaurar.nombreArchivo }}</strong>
+            <span>
+              {{ versionPendienteRestaurar.cargadoPor }} ·
+              {{ versionPendienteRestaurar.fechaCarga | date:'dd/MM/yyyy HH:mm' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="restore-version-notice">
+          <span class="restore-version-notice-icon">i</span>
+          <p>
+            Se creará una <strong>nueva versión vigente</strong> con el contenido de la
+            versión v{{ versionPendienteRestaurar.numeroVersion }}. Ninguna versión anterior
+            será eliminada y el historial completo se conservará.
+          </p>
+        </div>
+      </div>
+
+      <footer class="restore-version-actions">
+        <button
+          type="button"
+          class="restore-version-cancel"
+          [disabled]="guardando"
+          (click)="cancelarRegresoVersion()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="restore-version-confirm"
+          [disabled]="guardando"
+          (click)="confirmarRegresoVersion()">
+          @if (guardando) {
+            <span class="restore-version-spinner" aria-hidden="true"></span>
+            Restaurando...
+          } @else {
+            <span aria-hidden="true">↶</span>
+            Restaurar versión
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+
 <!-- SUBIR VERSION -->
 @if (modalSubirVersion && seleccionado) {
   <div class="modal-backdrop" (click)="modalSubirVersion = false">
@@ -769,7 +703,15 @@
       <div class="single-form">
         <label class="file-field">
           <span>Archivo</span>
-          <input type="file" accept=".pdf,.doc,.docx,.txt,.png,.jpg,.jpeg" (change)="onArchivoVersion($event)">
+          <input type="file"
+                 [attr.accept]="acceptParaCategoria(seleccionado.categoria)"
+                 (change)="onArchivoVersion($event)">
+          <small>
+            Formatos para {{ etiqueta(seleccionado.categoria) }}:
+            <strong>{{ formatosPermitidosTexto(seleccionado.categoria) }}</strong>.
+            {{ textoConversionCategoria(seleccionado.categoria) }}.
+            Tamaño máximo: <strong>{{ maxTamanoArchivoMb }} MB</strong>.
+          </small>
         </label>
         <label>
           <span>Observaciones</span>
@@ -781,6 +723,141 @@
         <button type="button" class="btn-light" (click)="modalSubirVersion = false">Cancelar</button>
         <button type="button" class="btn-primary" [disabled]="guardando" (click)="subirVersion()">
           {{ guardando ? 'Subiendo...' : 'Subir versión' }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+
+<!-- CONFIRMAR ENVÍO A PAPELERA -->
+@if (modalConfirmarPapelera && documentoPendientePapelera) {
+  <div class="modal-backdrop document-confirm-backdrop" (click)="cancelarEnvioPapelera()">
+    <section
+      class="document-confirm-modal document-confirm-modal--trash"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-trash-title"
+      (click)="$event.stopPropagation()">
+
+      <button
+        type="button"
+        class="document-confirm-close"
+        aria-label="Cerrar"
+        [disabled]="guardando"
+        (click)="cancelarEnvioPapelera()">×</button>
+
+      <div class="document-confirm-icon" aria-hidden="true">⌫</div>
+
+      <div class="document-confirm-content">
+        <span class="document-confirm-kicker">Papelera</span>
+        <h2 id="confirm-trash-title">Enviar documento a la papelera</h2>
+        <p>
+          ¿Deseas enviar <strong>“{{ documentoPendientePapelera.nombre }}”</strong> a la papelera?
+        </p>
+
+        <div class="document-confirm-file">
+          <div class="document-confirm-file-badge">{{ (documentoPendientePapelera.extension || 'DOC').toUpperCase() }}</div>
+          <div>
+            <strong>{{ documentoPendientePapelera.nombre }}</strong>
+            <span>{{ documentoPendientePapelera.expedienteCodigo }} · {{ documentoPendientePapelera.clienteNombre }}</span>
+          </div>
+        </div>
+
+        <div class="document-confirm-notice">
+          <span class="document-confirm-notice-icon">i</span>
+          <p>
+            Podrás <strong>restaurar el documento durante 7 días</strong> desde la papelera.
+          </p>
+        </div>
+      </div>
+
+      <footer class="document-confirm-actions">
+        <button
+          type="button"
+          class="document-confirm-cancel"
+          [disabled]="guardando"
+          (click)="cancelarEnvioPapelera()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="document-confirm-submit document-confirm-submit--trash"
+          [disabled]="guardando"
+          (click)="confirmarEnvioPapelera()">
+          @if (guardando) {
+            <span class="document-confirm-spinner" aria-hidden="true"></span>
+            Enviando...
+          } @else {
+            Enviar a papelera
+          }
+        </button>
+      </footer>
+    </section>
+  </div>
+}
+
+<!-- CONFIRMAR ELIMINACIÓN DEFINITIVA -->
+@if (modalConfirmarEliminacion && documentoPendienteEliminar) {
+  <div class="modal-backdrop document-confirm-backdrop" (click)="cancelarEliminacionDefinitiva()">
+    <section
+      class="document-confirm-modal document-confirm-modal--danger"
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="confirm-delete-title"
+      (click)="$event.stopPropagation()">
+
+      <button
+        type="button"
+        class="document-confirm-close"
+        aria-label="Cerrar"
+        [disabled]="guardando"
+        (click)="cancelarEliminacionDefinitiva()">×</button>
+
+      <div class="document-confirm-icon" aria-hidden="true">!</div>
+
+      <div class="document-confirm-content">
+        <span class="document-confirm-kicker">Eliminación definitiva</span>
+        <h2 id="confirm-delete-title">Eliminar documento definitivamente</h2>
+        <p>
+          ¿Deseas eliminar <strong>“{{ documentoPendienteEliminar.nombre }}”</strong>?
+        </p>
+
+        <div class="document-confirm-file">
+          <div class="document-confirm-file-badge">{{ (documentoPendienteEliminar.extension || 'DOC').toUpperCase() }}</div>
+          <div>
+            <strong>{{ documentoPendienteEliminar.nombre }}</strong>
+            <span>{{ documentoPendienteEliminar.expedienteCodigo }} · {{ documentoPendienteEliminar.clienteNombre }}</span>
+          </div>
+        </div>
+
+        <div class="document-confirm-notice">
+          <span class="document-confirm-notice-icon">!</span>
+          <p>
+            Esta acción es <strong>permanente</strong>. El archivo y su historial de versiones no podrán recuperarse.
+          </p>
+        </div>
+      </div>
+
+      <footer class="document-confirm-actions">
+        <button
+          type="button"
+          class="document-confirm-cancel"
+          [disabled]="guardando"
+          (click)="cancelarEliminacionDefinitiva()">
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="document-confirm-submit document-confirm-submit--danger"
+          [disabled]="guardando"
+          (click)="confirmarEliminacionDefinitiva()">
+          @if (guardando) {
+            <span class="document-confirm-spinner" aria-hidden="true"></span>
+            Eliminando...
+          } @else {
+            Eliminar definitivamente
+          }
         </button>
       </footer>
     </section>
