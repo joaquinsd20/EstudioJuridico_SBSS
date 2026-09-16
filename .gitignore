@@ -1,10 +1,44 @@
-HELP.md
+# =========================
+# ANGULAR / NODE
+# =========================
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# =========================
+# SPRING BOOT / MAVEN
+# =========================
 target/
+*.class
+*.jar
+*.war
+*.ear
+HELP.md
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
 
-### STS ###
+# =========================
+# ARCHIVOS SUBIDOS POR LOS USUARIOS
+# =========================
+# Los documentos viven en el disco del servidor, nunca en el repositorio
+# (regla 7 de CLAUDE.md: ningun binario en la base, y tampoco en git).
+# Sin esta regla vuelven solos en el primer `git add -A` de quien suba un
+# documento en local.
+BackendLexia/storage/
+
+# =========================
+# IDEs
+# =========================
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
 .apt_generated
 .classpath
 .factorypath
@@ -13,21 +47,33 @@ target/
 .springBeans
 .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+# =========================
+# WINDOWS / MACOS
+# =========================
+Thumbs.db
+Desktop.ini
+.DS_Store
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+# =========================
+# ENVIRONMENT / SECRETS
+# =========================
+# application-local.yml es el archivo que application-dev.yml le recomienda
+# al equipo para poner sus credenciales de MySQL. Si deja de estar aqui, la
+# primera persona que siga esa recomendacion sube su contrasena al repo.
+.env
+.env.*
+application-local.properties
+application-local.yml
 
-### VS Code ###
-.vscode/
+# =========================
+# LOGS
+# =========================
+*.log
+logs/
+
+# =========================
+# Local, fuera del repo compartido
+# =========================
+Claude outputs/
+docs/
+CLAUDE.md
