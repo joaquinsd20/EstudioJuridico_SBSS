@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,7 @@ public class BibliotecaJuridicaController {
     // ESTADÍSTICAS
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/estadisticas")
     public ResponseEntity<BibliotecaEstadisticasResponse> obtenerEstadisticas() {
         return ResponseEntity.ok(servicio.obtenerEstadisticas());
@@ -51,6 +53,7 @@ public class BibliotecaJuridicaController {
     // LISTAR RECURSOS
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/recursos")
     public ResponseEntity<Page<RecursoJuridico>> listarRecursos(
             RecursoFiltroRequest filtro,
@@ -63,6 +66,7 @@ public class BibliotecaJuridicaController {
     // OBTENER POR ID
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/recursos/{id}")
     public ResponseEntity<RecursoJuridico> obtenerPorId(@PathVariable Long id) {
         return ResponseEntity.ok(servicio.obtenerPorId(id));
@@ -72,6 +76,7 @@ public class BibliotecaJuridicaController {
     // CREAR RECURSO
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
     @PostMapping(
             value = "/recursos",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -87,6 +92,7 @@ public class BibliotecaJuridicaController {
     // ACTUALIZAR RECURSO
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
     @PutMapping(
             value = "/recursos/{id}",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -103,6 +109,7 @@ public class BibliotecaJuridicaController {
     // VISTA PREVIA
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/recursos/{id}/ver")
     public ResponseEntity<Resource> verArchivo(@PathVariable Long id) {
         return respuestaArchivo(id, true);
@@ -112,6 +119,7 @@ public class BibliotecaJuridicaController {
     // DESCARGAR
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/recursos/{id}/descargar")
     public ResponseEntity<Resource> descargarArchivo(@PathVariable Long id) {
         return respuestaArchivo(id, false);
@@ -199,6 +207,7 @@ public class BibliotecaJuridicaController {
     // ELIMINAR
     // =========================================================
 
+    @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
     @DeleteMapping("/recursos/{id}")
     public ResponseEntity<Void> eliminarRecurso(@PathVariable Long id) {
         servicio.eliminar(id);

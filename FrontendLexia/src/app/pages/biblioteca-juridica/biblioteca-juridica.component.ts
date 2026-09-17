@@ -3,6 +3,42 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { PanelComponent } from '../panel/panel.component';
+import { environment } from '../../../environments/environment';
+
+/**
+ * La base guarda CODIGOS en MAYUSCULAS (convencion del proyecto: se puede
+ * renombrar la etiqueta sin migrar filas). Estos mapas los traducen a lo que
+ * ve el usuario. Si llega un codigo no listado se muestra tal cual, para que
+ * un valor nuevo sea visible en vez de desaparecer.
+ */
+export const ETIQUETA_TIPO: Record<string, string> = {
+  JURISPRUDENCIA: 'Jurisprudencia',
+  LEGISLACION: 'Legislación',
+  DOCTRINA: 'Doctrina',
+  CONTRATO: 'Contrato',
+  MODELO: 'Modelo',
+  PLANTILLA: 'Plantilla',
+  FORMATO: 'Formato',
+  LIBRO: 'Libro'
+};
+
+export const ETIQUETA_CATEGORIA: Record<string, string> = {
+  DERECHO_CIVIL: 'Derecho Civil',
+  DERECHO_PENAL: 'Derecho Penal',
+  DERECHO_LABORAL: 'Derecho Laboral',
+  DERECHO_CONSTITUCIONAL: 'Derecho Constitucional',
+  DERECHO_TRIBUTARIO: 'Derecho Tributario',
+  DERECHO_SOCIAL: 'Derecho Social',
+  DERECHO_MIGRATORIO: 'Derecho Migratorio',
+  DERECHO_ADMINISTRATIVO: 'Derecho Administrativo',
+  PROCESAL: 'Procesal',
+  GENERAL: 'General'
+};
+
+export const ETIQUETA_ESTADO: Record<string, string> = {
+  ACTIVO: 'Activo',
+  ARCHIVADO: 'Archivado'
+};
 
 export interface RecursoJuridico {
   id: number;
@@ -14,8 +50,8 @@ export interface RecursoJuridico {
   expedienteCodigo: string;
   nombreArchivo: string;
   extension?: string;
-  estado: 'Activo' | 'Archivado';
-  fechaRegistro: string;
+  estado: 'ACTIVO' | 'ARCHIVADO';
+  fechaCreacion: string;
 }
 
 @Component({
@@ -31,7 +67,14 @@ export interface RecursoJuridico {
 })
 export class BibliotecaJuridicaComponent implements OnInit {
 
-  private apiUrl = 'http://localhost:8080/api/v1/biblioteca/recursos';
+  /** La base guarda codigos; la pantalla muestra la etiqueta. */
+  etiquetaTipo(codigo: string): string { return ETIQUETA_TIPO[codigo] ?? codigo; }
+  etiquetaCategoria(codigo: string): string { return ETIQUETA_CATEGORIA[codigo] ?? codigo; }
+  etiquetaEstado(codigo: string): string { return ETIQUETA_ESTADO[codigo] ?? codigo; }
+
+  // environment.apiUrl, no una URL fija: en produccion vale '/api/v1'
+  // (mismo origen) y con localhost hardcodeado el modulo no funcionaria.
+  private apiUrl = `${environment.apiUrl}/biblioteca/recursos`;
 
   recursos: RecursoJuridico[] = [];
   recursosFiltrados: RecursoJuridico[] = [];
@@ -123,7 +166,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
   }
 
   get totalRecursos(): number { return this.recursos.length; }
-  get totalActivos(): number { return this.recursos.filter(r => r.estado === 'Activo').length; }
+  get totalActivos(): number { return this.recursos.filter(r => r.estado === 'ACTIVO').length; }
   get totalConArchivo(): number { return this.recursos.filter(r => r.nombreArchivo && r.nombreArchivo.trim() !== '').length; }
   get totalCategorias(): number { return new Set(this.recursos.map(r => r.categoria)).size; }
 
@@ -138,7 +181,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
       categoria: '',
       anio: new Date().getFullYear(),
       expedienteCodigo: '',
-      estado: 'Activo'
+      estado: 'ACTIVO'
     };
     this.archivoSeleccionado = null;
     this.mostrarModalCrear = true;
@@ -188,11 +231,11 @@ export class BibliotecaJuridicaComponent implements OnInit {
     const dtoData = {
       titulo: this.nuevoRecurso.titulo,
       subtituloDescripcion: this.nuevoRecurso.subtituloDescripcion || '',
-      tipo: this.nuevoRecurso.tipo || 'Doctrina',
-      categoria: this.nuevoRecurso.categoria || 'Derecho Social',
+      tipo: this.nuevoRecurso.tipo || 'DOCTRINA',
+      categoria: this.nuevoRecurso.categoria || 'DERECHO_SOCIAL',
       anio: this.nuevoRecurso.anio || new Date().getFullYear(),
       expedienteCodigo: this.nuevoRecurso.expedienteCodigo || '',
-      estado: this.nuevoRecurso.estado || 'Activo'
+      estado: this.nuevoRecurso.estado || 'ACTIVO'
     };
 
     const dataBlob = new Blob([JSON.stringify(dtoData)], { type: 'application/json' });

@@ -22,6 +22,7 @@ import com.sbss.lexia.biblioteca.dto.RecursoFiltroRequest;
 import com.sbss.lexia.biblioteca.entity.RecursoJuridico;
 import com.sbss.lexia.biblioteca.repository.RecursoJuridicoRepository;
 import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService;
+import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService.ArchivoGuardado;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -41,11 +42,12 @@ public class BibliotecaJuridicaService {
     // ESTADÍSTICAS
     // =========================================================
     public BibliotecaEstadisticasResponse obtenerEstadisticas() {
+        Integer estudioId = SesionActual.estudioId();
         return BibliotecaEstadisticasResponse.builder()
-                .recursosTotales(repository.count())
-                .recursosActivos(repository.countByEstado("Activo"))
-                .conArchivo(repository.countConArchivo())
-                .totalCategorias(repository.countCategoriasUnicas())
+                .recursosTotales(repository.countByEstudioId(estudioId))
+                .recursosActivos(repository.countByEstudioIdAndEstado(estudioId, "ACTIVO"))
+                .conArchivo(repository.countConArchivoDelEstudio(estudioId))
+                .totalCategorias(repository.countCategoriasUnicasDelEstudio(estudioId))
                 .build();
     }
 
@@ -55,8 +57,12 @@ public class BibliotecaJuridicaService {
     public Page<RecursoJuridico> listar(
             RecursoFiltroRequest filtro,
             Pageable pageable) {
+        Integer estudioId = SesionActual.estudioId();
         Specification<RecursoJuridico> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            // Obligatorio y primero: la frontera entre estudios. Sin esto, los
+            // demas filtros consultarian la biblioteca de todos los estudios.
+            predicates.add(cb.equal(root.get("estudioId"), estudioId));
             if (filtro.getBusqueda() != null && !filtro.getBusqueda().isBlank()) {
                 String likePattern = "%" + filtro.getBusqueda().toLowerCase() + "%";
                 predicates.add(cb.or(
@@ -90,7 +96,9 @@ public class BibliotecaJuridicaService {
     // OBTENER POR ID
     // =========================================================
     public RecursoJuridico obtenerPorId(Long id) {
-        return repository.findById(id)
+        // findByIdAndEstudioId y no findById: un recurso de otro estudio debe
+        // verse igual que uno inexistente.
+        return repository.findByIdAndEstudioId(id, SesionActual.estudioId())
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Recurso jurídico no encontrado con ID: " + id
                 ));
@@ -103,13 +111,14 @@ public class BibliotecaJuridicaService {
             RecursoCrearRequest request,
             MultipartFile archivo) {
         RecursoJuridico recurso = RecursoJuridico.builder()
+                .estudioId(SesionActual.estudioId())
                 .titulo(request.getTitulo())
                 .subtituloDescripcion(request.getSubtituloDescripcion())
                 .tipo(request.getTipo())
                 .categoria(request.getCategoria())
                 .anio(request.getAnio())
                 .expedienteCodigo(request.getExpedienteCodigo())
-                .estado(request.getEstado() != null ? request.getEstado() : "Activo")
+                .estado(request.getEstado() != null ? request.getEstado() : "ACTIVO")
                 .build();
 
         recurso = repository.save(recurso);
