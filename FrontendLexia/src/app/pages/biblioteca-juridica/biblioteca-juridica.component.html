@@ -1,10 +1,7 @@
 <div class="layout-wrapper">
-
   <!-- PANEL REUTILIZABLE -->
   <app-panel></app-panel>
-
   <main class="main-content">
-
     <!-- CABECERA -->
     <header class="page-header">
       <div>
@@ -12,40 +9,34 @@
         <h1>Biblioteca Jurídica</h1>
         <p>Consulta jurisprudencia, legislación, doctrina, contratos, modelos y plantillas de uso interno.</p>
       </div>
-
-      <button class="btn-primary" type="button">
+      <button class="btn-primary" type="button" (click)="abrirModalCrear()">
         <span class="plus">+</span>
         Agregar recurso
       </button>
     </header>
-
-    <!-- RESUMEN -->
+    <!-- RESUMEN DINÁMICO -->
     <section class="stats-grid">
       <article class="stat-card">
         <span class="stat-label">Recursos Totales</span>
-        <strong>24</strong>
+        <strong>{{ totalRecursos }}</strong>
         <small>Material registrado</small>
       </article>
-
       <article class="stat-card">
         <span class="stat-label">Recursos Activos</span>
-        <strong>21</strong>
+        <strong>{{ totalActivos }}</strong>
         <small>Disponibles para consulta</small>
       </article>
-
       <article class="stat-card">
         <span class="stat-label">Con Archivo</span>
-        <strong>18</strong>
+        <strong>{{ totalConArchivo }}</strong>
         <small>Documentos adjuntos</small>
       </article>
-
       <article class="stat-card">
         <span class="stat-label">Categorías</span>
-        <strong class="stat-accent">10</strong>
+        <strong class="stat-accent">{{ totalCategorias }}</strong>
         <small>Áreas jurídicas</small>
       </article>
     </section>
-
     <!-- CATÁLOGO -->
     <section class="panel">
       <div class="panel-header">
@@ -56,67 +47,61 @@
         </div>
         <span class="panel-number">01</span>
       </div>
-
-      <!-- FILTROS SOLO VISUALES -->
+      <!-- FILTROS FUNCIONALES -->
       <div class="filters">
         <div class="search-box">
           <span>⌕</span>
-          <input type="search" placeholder="Buscar por título, autor, descripción o tags">
+          <input
+            type="search"
+            placeholder="Buscar por título, autor, descripción o tags"
+            [(ngModel)]="filtros.busqueda"
+            (input)="aplicarFiltros()">
         </div>
-
-        <select aria-label="Filtrar por tipo">
-          <option>Todos los tipos</option>
-          <option>Jurisprudencia</option>
-          <option>Legislación</option>
-          <option>Doctrina</option>
-          <option>Contrato</option>
-          <option>Modelo</option>
-          <option>Plantilla</option>
-          <option>Formato</option>
-          <option>Libro</option>
+        <select
+          aria-label="Filtrar por tipo"
+          [(ngModel)]="filtros.tipo"
+          (change)="aplicarFiltros()">
+          <option value="">Todos los tipos</option>
+          <option value="Jurisprudencia">Jurisprudencia</option>
+          <option value="Legislación">Legislación</option>
+          <option value="Doctrina">Doctrina</option>
+          <option value="Contrato">Contrato</option>
+          <option value="Modelo">Modelo</option>
+          <option value="Plantilla">Plantilla</option>
+          <option value="Formato">Formato</option>
+          <option value="Libro">Libro</option>
         </select>
-
-        <select aria-label="Filtrar por categoría">
-          <option>Todas las categorías</option>
-          <option>Derecho Civil</option>
-          <option>Derecho Penal</option>
-          <option>Derecho Laboral</option>
-          <option>Derecho Constitucional</option>
-          <option>Derecho Tributario</option>
-          <option>Derecho Social</option>
-          <option>Derecho Migratorio</option>
-          <option>Derecho Administrativo</option>
-          <option>Procesal</option>
-          <option>General</option>
+        <select
+          aria-label="Filtrar por categoría"
+          [(ngModel)]="filtros.categoria"
+          (change)="aplicarFiltros()">
+          <option value="">Todas las categorías</option>
+          <option value="Derecho Civil">Derecho Civil</option>
+          <option value="Derecho Penal">Derecho Penal</option>
+          <option value="Derecho Laboral">Derecho Laboral</option>
+          <option value="Derecho Constitucional">Derecho Constitucional</option>
+          <option value="Derecho Tributario">Derecho Tributario</option>
+          <option value="Derecho Social">Derecho Social</option>
+          <option value="Derecho Migratorio">Derecho Migratorio</option>
+          <option value="Derecho Administrativo">Derecho Administrativo</option>
+          <option value="Procesal">Procesal</option>
+          <option value="General">General</option>
         </select>
-
-        <select aria-label="Filtrar por estado">
-          <option>Todos los estados</option>
-          <option>Activo</option>
-          <option>Archivado</option>
-        </select>
-
-        <select aria-label="Filtrar por archivo">
-          <option>Con o sin archivo</option>
-          <option>Con archivo</option>
-          <option>Solo URL externa</option>
+        <select
+          aria-label="Filtrar por estado"
+          [(ngModel)]="filtros.estado"
+          (change)="aplicarFiltros()">
+          <option value="">Todos los estados</option>
+          <option value="Activo">Activo</option>
+          <option value="Archivado">Archivado</option>
         </select>
       </div>
-
-      <!-- CONTROLES SOLO VISUALES -->
-      <div class="vista-tabs">
-        <button class="active" type="button">Tabla</button>
-        <button type="button">Tarjetas</button>
-        <button class="btn-secondary export-btn" type="button">Exportar catálogo</button>
-      </div>
-
       <div class="stats-mini">
-        <span><strong>24</strong> recursos totales</span>
-        <span><strong>21</strong> activos</span>
-        <span><strong>18</strong> con archivo</span>
+        <span><strong>{{ totalRecursos }}</strong> recursos totales</span>
+        <span><strong>{{ totalActivos }}</strong> activos</span>
+        <span><strong>{{ totalConArchivo }}</strong> con archivo</span>
       </div>
-
-      <!-- TABLA -->
+      <!-- TABLA DINÁMICA -->
       <div class="table-wrap">
         <table>
           <thead>
@@ -132,160 +117,67 @@
               <th>Acciones</th>
             </tr>
           </thead>
-
           <tbody>
-            <tr>
+            <tr *ngFor="let item of recursosFiltrados">
               <td>
                 <div class="person-cell">
-                  <span class="resource-icon jurisprudencia">⚖</span>
+                  <span
+                    class="resource-icon"
+                    [ngClass]="item.tipo.toLowerCase()">
+                    ⚖
+                  </span>
                   <div>
-                    <strong>Jurisprudencia sobre obligación alimentaria</strong>
-                    <small class="sub-line">Recurso jurídico interno</small>
+                    <strong>{{ item.titulo }}</strong>
+                    <small class="sub-line">
+                      {{ item.subtituloDescripcion }}
+                    </small>
                   </div>
                 </div>
               </td>
-              <td><span class="role-pill jurisprudencia-pill">Jurisprudencia</span></td>
-              <td>Derecho Civil</td>
-              <td>2026</td>
-              <td><span class="exp-link">EXP. 01452-2026</span></td>
-              <td>jurisprudencia_alimentos.pdf</td>
-              <td>05/06/2026</td>
-              <td><span class="status"><i></i>Activo</span></td>
+              <td>
+                <span class="role-pill">
+                  {{ item.tipo }}
+                </span>
+              </td>
+              <td>
+                {{ item.categoria }}
+              </td>
+              <td>
+                {{ item.anio }}
+              </td>
+              <td>
+                <span class="exp-link">
+                  {{ item.expedienteCodigo }}
+                </span>
+              </td>
+              <td>
+                {{ item.nombreArchivo || 'Sin archivo' }}
+              </td>
+              <td>
+                {{ item.fechaRegistro }}
+              </td>
+              <td>
+                <span
+                  class="status"
+                  [class.off]="item.estado === 'Archivado'">
+                  <i></i>
+                  {{ item.estado }}
+                </span>
+              </td>
               <td>
                 <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="person-cell">
-                  <span class="resource-icon legislacion">§</span>
-                  <div>
-                    <strong>Normativa procesal de consulta</strong>
-                    <small class="sub-line">Fuente institucional</small>
-                  </div>
-                </div>
-              </td>
-              <td><span class="role-pill legislacion-pill">Legislación</span></td>
-              <td>Procesal</td>
-              <td>2026</td>
-              <td>—</td>
-              <td>normativa_procesal.pdf</td>
-              <td>02/06/2026</td>
-              <td><span class="status"><i></i>Activo</span></td>
-              <td>
-                <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="person-cell">
-                  <span class="resource-icon doctrina">📚</span>
-                  <div>
-                    <strong>Doctrina sobre responsabilidad civil</strong>
-                    <small class="sub-line">Material doctrinario</small>
-                  </div>
-                </div>
-              </td>
-              <td><span class="role-pill doctrina-pill">Doctrina</span></td>
-              <td>Derecho Civil</td>
-              <td>2025</td>
-              <td>EXP. 02388-2025</td>
-              <td>doctrina_responsabilidad.pdf</td>
-              <td>28/05/2026</td>
-              <td><span class="status"><i></i>Activo</span></td>
-              <td>
-                <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="person-cell">
-                  <span class="resource-icon contrato">✎</span>
-                  <div>
-                    <strong>Contrato de servicios profesionales</strong>
-                    <small class="sub-line">Modelo de uso interno</small>
-                  </div>
-                </div>
-              </td>
-              <td><span class="role-pill contrato-pill">Contrato</span></td>
-              <td>General</td>
-              <td>2026</td>
-              <td>—</td>
-              <td>contrato_servicios.docx</td>
-              <td>20/05/2026</td>
-              <td><span class="status"><i></i>Activo</span></td>
-              <td>
-                <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="person-cell">
-                  <span class="resource-icon plantilla">▤</span>
-                  <div>
-                    <strong>Plantilla de escrito judicial</strong>
-                    <small class="sub-line">Documento reutilizable</small>
-                  </div>
-                </div>
-              </td>
-              <td><span class="role-pill plantilla-pill">Plantilla</span></td>
-              <td>Procesal</td>
-              <td>2026</td>
-              <td>EXP. 03321-2024</td>
-              <td>plantilla_escrito.docx</td>
-              <td>15/05/2026</td>
-              <td><span class="status"><i></i>Activo</span></td>
-              <td>
-                <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <td>
-                <div class="person-cell">
-                  <span class="resource-icon libro">▥</span>
-                  <div>
-                    <strong>Manual de consulta jurídica</strong>
-                    <small class="sub-line">Biblioteca interna</small>
-                  </div>
-                </div>
-              </td>
-              <td><span class="role-pill libro-pill">Libro</span></td>
-              <td>General</td>
-              <td>2024</td>
-              <td>—</td>
-              <td>Sin archivo</td>
-              <td>12/05/2026</td>
-              <td><span class="status off"><i></i>Archivado</span></td>
-              <td>
-                <div class="row-actions">
-                  <button class="icon-action view" type="button">Ver</button>
-                  <button class="icon-action edit" type="button">Editar</button>
-                  <button class="icon-action download" type="button">Descargar</button>
+                  <button
+                    class="icon-action view"
+                    type="button"
+                    (click)="verDetalle(item)">
+                    Ver
+                  </button>
+                  <button
+                    class="icon-action download"
+                    type="button"
+                    (click)="descargar(item)">
+                    Descargar
+                  </button>
                 </div>
               </td>
             </tr>
@@ -293,118 +185,318 @@
         </table>
       </div>
     </section>
-
-    <!-- RECURSOS DESTACADOS -->
+    <!-- ====================================================== -->
+    <!-- RECURSOS DESTACADOS (DINÁMICOS) -->
+    <!-- ====================================================== -->
     <section class="featured-section">
-
       <div class="section-heading">
         <div>
           <span class="panel-kicker">Vista rápida</span>
           <h2>Recursos destacados</h2>
           <p>Tarjetas visuales para identificar rápidamente el tipo de material.</p>
         </div>
-
         <span class="panel-number">02</span>
       </div>
-
       <div class="cards-grid">
-
-        <article class="recurso-card">
+        <!-- Renderizado dinámico según los datos filtrados -->
+        <article class="recurso-card" *ngFor="let item of recursosFiltrados">
           <div class="card-top">
-            <span class="card-icon jurisprudencia">⚖</span>
-            <span class="status"><i></i>Activo</span>
+            <span class="card-icon" [ngClass]="item.tipo.toLowerCase()">
+              <ng-container [ngSwitch]="item.tipo">
+                <span *ngSwitchCase="'Jurisprudencia'">⚖</span>
+                <span *ngSwitchCase="'Doctrina'">📚</span>
+                <span *ngSwitchCase="'Plantilla'">▤</span>
+                <span *ngSwitchCase="'Legislación'">📜</span>
+                <span *ngSwitchCase="'Contrato'">📝</span>
+                <span *ngSwitchDefault>📄</span>
+              </ng-container>
+            </span>
+            <span class="status" [class.off]="item.estado === 'Archivado'">
+              <i></i>{{ item.estado }}
+            </span>
           </div>
-
           <strong class="card-titulo">
-            Jurisprudencia sobre obligación alimentaria
+            {{ item.titulo }}
           </strong>
-
           <span class="card-autor">
-            Recurso jurídico interno
+            {{ item.subtituloDescripcion }}
           </span>
-
           <div class="card-tags">
-            <span class="role-pill">Jurisprudencia</span>
-            <span class="role-pill">Derecho Civil</span>
-            <span class="role-pill">2026</span>
+            <span class="role-pill">{{ item.tipo }}</span>
+            <span class="role-pill">{{ item.categoria }}</span>
+            <span class="role-pill">{{ item.anio }}</span>
           </div>
-
           <span class="card-exp">
-            EXP. 01452-2026
+            {{ item.expedienteCodigo }}
           </span>
-
           <div class="card-acciones">
-            <button class="icon-action view" type="button">Vista previa</button>
-            <button class="icon-action download" type="button">Descargar</button>
+            <button
+              class="icon-action view"
+              type="button"
+              (click)="verDetalle(item)">
+              Vista previa
+            </button>
+            <button
+              class="icon-action download"
+              type="button"
+              (click)="descargar(item)">
+              Descargar
+            </button>
           </div>
         </article>
+        <!-- Mensaje si la búsqueda no arroja resultados -->
+        <div class="no-results" *ngIf="recursosFiltrados.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #64748b;">
+          <p>No se encontraron recursos destacados que coincidan con los criterios de búsqueda.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
 
-
-        <article class="recurso-card">
-          <div class="card-top">
-            <span class="card-icon doctrina">📚</span>
-            <span class="status"><i></i>Activo</span>
-          </div>
-
-          <strong class="card-titulo">
-            Doctrina sobre responsabilidad civil
-          </strong>
-
-          <span class="card-autor">
-            Material doctrinario
-          </span>
-
-          <div class="card-tags">
-            <span class="role-pill">Doctrina</span>
-            <span class="role-pill">Derecho Civil</span>
-            <span class="role-pill">2025</span>
-          </div>
-
-          <span class="card-exp">
-            EXP. 02388-2025
-          </span>
-
-          <div class="card-acciones">
-            <button class="icon-action view" type="button">Vista previa</button>
-            <button class="icon-action download" type="button">Descargar</button>
-          </div>
-        </article>
-
-
-        <article class="recurso-card">
-          <div class="card-top">
-            <span class="card-icon plantilla">▤</span>
-            <span class="status"><i></i>Activo</span>
-          </div>
-
-          <strong class="card-titulo">
-            Plantilla de escrito judicial
-          </strong>
-
-          <span class="card-autor">
-            Documento reutilizable
-          </span>
-
-          <div class="card-tags">
-            <span class="role-pill">Plantilla</span>
-            <span class="role-pill">Procesal</span>
-            <span class="role-pill">2026</span>
-          </div>
-
-          <span class="card-exp">
-            EXP. 03321-2024
-          </span>
-
-          <div class="card-acciones">
-            <button class="icon-action view" type="button">Vista previa</button>
-            <button class="icon-action download" type="button">Descargar</button>
-          </div>
-        </article>
-
+<!-- ====================================================== -->
+<!-- MODAL PARA AGREGAR RECURSO -->
+<!-- ====================================================== -->
+<div class="modal-overlay" *ngIf="mostrarModalCrear">
+  <div class="modal-content modal-crear">
+    <!-- CABECERA DEL MODAL -->
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Biblioteca Jurídica</span>
+        <h3>Agregar nuevo recurso</h3>
+        <p>Registra un nuevo material para la biblioteca jurídica.</p>
+      </div>
+      <button
+        type="button"
+        class="modal-close"
+        (click)="cerrarModales()"
+        aria-label="Cerrar">
+        ×
+      </button>
+    </div>
+    <!-- FORMULARIO -->
+    <form (ngSubmit)="guardarNuevoRecurso()">
+      <!-- TÍTULO -->
+      <div class="form-group">
+        <label for="titulo">
+          Título <span>*</span>
+        </label>
+        <input
+          id="titulo"
+          type="text"
+          [(ngModel)]="nuevoRecurso.titulo"
+          name="titulo"
+          placeholder="Ej. Jurisprudencia sobre obligación alimentaria"
+          required>
+      </div>
+      <!-- SUBTÍTULO / DESCRIPCIÓN -->
+      <div class="form-group">
+        <label for="subtituloDescripcion">
+          Subtítulo / Descripción
+        </label>
+        <textarea
+          id="subtituloDescripcion"
+          [(ngModel)]="nuevoRecurso.subtituloDescripcion"
+          name="subtituloDescripcion"
+          placeholder="Ingresa una breve descripción del recurso..."
+          rows="3">
+        </textarea>
       </div>
 
-    </section>
+    <!-- TIPO -->
+    <div class="form-group">
+      <label for="tipo">Tipo <span style="color: red;">*</span></label>
+      <select
+        id="tipo"
+        [(ngModel)]="nuevoRecurso.tipo"
+        name="tipo"
+        required>
+        <option value="" disabled selected>-- Selecciona un tipo --</option>
+        <option value="Jurisprudencia">Jurisprudencia</option>
+        <option value="Legislación">Legislación</option>
+        <option value="Doctrina">Doctrina</option>
+        <option value="Contrato">Contrato</option>
+        <option value="Modelo">Modelo</option>
+        <option value="Plantilla">Plantilla</option>
+        <option value="Formato">Formato</option>
+      <option value="Libro">Libro</option>
+    </select>
+  </div>
 
-  </main>
+    <!-- CATEGORÍA -->
+    <div class="form-group">
+      <label for="categoria">Categoría <span style="color: red;">*</span></label>
+      <select
+        id="categoria"
+        [(ngModel)]="nuevoRecurso.categoria"
+        name="categoria"
+        required>
+          <option value="" disabled selected>-- Selecciona una categoría --</option>
+          <option value="Derecho Civil">Derecho Civil</option>
+          <option value="Derecho Penal">Derecho Penal</option>
+          <option value="Derecho Laboral">Derecho Laboral</option>
+          <option value="Derecho Constitucional">Derecho Constitucional</option>
+          <option value="Derecho Tributario">Derecho Tributario</option>
+          <option value="Derecho Social">Derecho Social</option>
+          <option value="Derecho Migratorio">Derecho Migratorio</option>
+          <option value="Derecho Administrativo">Derecho Administrativo</option>
+          <option value="Procesal">Procesal</option>
+          <option value="General">General</option>
+      </select>
+    </div>
+    
+      <!-- ARCHIVO -->
+      <div class="form-group">
+        <label>Documento</label>
+        <!-- INPUT REAL OCULTO -->
+        <input
+          #archivoInput
+          type="file"
+          class="file-input-hidden"
+          (change)="seleccionarArchivo($event)"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+        
+        <!-- CAJA PARA SUBIR ARCHIVO -->
+        <div
+          class="upload-box"
+          [class.has-file]="archivoSeleccionado">
+          <div class="upload-icon">↑</div>
+          <div
+            class="upload-info"
+            *ngIf="!archivoSeleccionado">
+            <strong>Selecciona un documento</strong>
+            <span>PDF, Word, Excel, PowerPoint o TXT</span>
+          </div>
+          <!-- ARCHIVO SELECCIONADO -->
+          <div
+            class="selected-file"
+            *ngIf="archivoSeleccionado">
+            <div class="file-icon">📄</div>
+            <div class="file-details">
+              <strong>{{ archivoSeleccionado.name }}</strong>
+              <span>{{ obtenerTamanoArchivo(archivoSeleccionado.size) }}</span>
+            </div>
+            <button
+              type="button"
+              class="remove-file"
+              (click)="quitarArchivo()"
+              title="Quitar archivo">
+              ×
+            </button>
+          </div>
+          <!-- BOTÓN SELECCIONAR -->
+          <button
+            *ngIf="!archivoSeleccionado"
+            type="button"
+            class="btn-select-file"
+            (click)="archivoInput.click()">
+            Seleccionar archivo
+          </button>
+          <!-- CAMBIAR ARCHIVO -->
+          <button
+            *ngIf="archivoSeleccionado"
+            type="button"
+            class="btn-change-file"
+            (click)="archivoInput.click()">
+            Cambiar archivo
+          </button>
+        </div>
+      </div>
+      <!-- INFORMACIÓN -->
+      <div class="upload-hint">
+        <span>ⓘ</span>
+        <p>El documento seleccionado se asociará al recurso jurídico.</p>
+      </div>
+      <!-- BOTONES -->
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="cerrarModales()">
+          Cancelar
+        </button>
+        <button
+          type="submit"
+          class="btn-save">
+          <span>✓</span>
+          Guardar recurso
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
+<!-- ====================================================== -->
+<!-- MODAL DETALLE / VER -->
+<!-- ====================================================== -->
+<div
+  class="modal-overlay"
+  *ngIf="mostrarModalDetalle && recursoDetalle">
+  <div class="modal-content modal-detalle">
+    <!-- CABECERA -->
+    <div class="modal-header">
+      <div>
+        <span class="modal-kicker">Biblioteca Jurídica</span>
+        <h3>Detalle del recurso</h3>
+      </div>
+      <button
+        type="button"
+        class="modal-close"
+        (click)="cerrarModales()"
+        aria-label="Cerrar">
+        ×
+      </button>
+    </div>
+    <!-- INFORMACIÓN -->
+    <div class="detail-list">
+      <div class="detail-item">
+        <span>Título</span>
+        <strong>{{ recursoDetalle.titulo }}</strong>
+      </div>
+      <div class="detail-item">
+        <span>Tipo</span>
+        <strong>{{ recursoDetalle.tipo }}</strong>
+      </div>
+      <div class="detail-item">
+        <span>Categoría</span>
+        <strong>{{ recursoDetalle.categoria }}</strong>
+      </div>
+      <div class="detail-item">
+        <span>Expediente</span>
+        <strong>{{ recursoDetalle.expedienteCodigo }}</strong>
+      </div>
+      <div class="detail-item">
+        <span>Archivo</span>
+        <strong>{{ recursoDetalle.nombreArchivo || 'Sin archivo' }}</strong>
+      </div>
+    </div>
+    <!-- BOTONES ÚNICAMENTE VISTA PREVIA, DESCARGAR Y ELIMINAR -->
+    <div class="modal-actions">
+      <!-- Ver vista previa -->
+      <button
+        *ngIf="recursoDetalle.nombreArchivo"
+        type="button"
+        class="btn-save"
+        style="background-color: #0ea5e9;"
+        (click)="verVistaPrevia(recursoDetalle)">
+        👁 Ver vista previa
+      </button>
+
+      <!-- Descargar -->
+      <button
+        type="button"
+        class="btn-save"
+        (click)="descargar(recursoDetalle)">
+        ↓ Descargar
+      </button>
+
+      <!-- Eliminar con relleno rojo -->
+      <button 
+        type="button" 
+        class="btn-save"
+        style="background-color: #dc3545;"
+        (click)="eliminar(recursoDetalle)">
+        🗑 Eliminar
+      </button>
+    </div>
+  </div>
 </div>
