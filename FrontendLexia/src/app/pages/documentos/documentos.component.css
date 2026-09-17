@@ -858,313 +858,6 @@ select {
 
 
 /* =========================================================
-   PARTE INFERIOR
-========================================================= */
-
-.bottom-grid {
-  display: grid;
-
-  grid-template-columns:
-    1.15fr
-    .85fr;
-
-  gap: 14px;
-
-  margin-top: 14px;
-}
-
-
-.section-header {
-  min-height: 43px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 7px;
-
-  padding:
-    9px
-    14px;
-
-  border-bottom:
-    1px solid #edf0f4;
-}
-
-
-.section-icon {
-  color: #67399c;
-
-  font-size: 12px;
-}
-
-
-.section-header h3 {
-  margin: 0;
-
-  color: #292f3a;
-
-  font-size: 9.5px;
-}
-
-
-/* =========================================================
-   ACTIVIDAD
-========================================================= */
-
-.activity-list {
-  padding:
-    4px
-    14px
-    11px;
-}
-
-
-.activity-item {
-  min-height: 49px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 9px;
-
-  border-bottom:
-    1px solid #f0f1f3;
-}
-
-
-.activity-item:last-child {
-  border-bottom: 0;
-}
-
-
-.activity-avatar {
-  width: 29px;
-  height: 29px;
-
-  display: grid;
-
-  place-items: center;
-
-  flex:
-    0
-    0
-    29px;
-
-  border-radius: 50%;
-
-  background: #e9e4f2;
-
-  color: #624a7d;
-
-  font-size: 6.5px;
-
-  font-weight: 700;
-}
-
-
-.activity-item > div {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-
-.activity-item strong {
-  color: #404753;
-
-  font-size: 7.5px;
-}
-
-
-.activity-item span {
-  color: #979da8;
-
-  font-size: 6.5px;
-}
-
-
-/* =========================================================
-   ALMACENAMIENTO
-========================================================= */
-
-.storage-content {
-  padding:
-    12px
-    14px
-    15px;
-}
-
-
-.storage-number strong {
-  display: block;
-
-  color: #262d38;
-
-  font-size: 19px;
-}
-
-
-.storage-number span {
-  color: #9299a4;
-
-  font-size: 7px;
-}
-
-
-.storage-progress {
-  height: 8px;
-
-  overflow: hidden;
-
-  margin:
-    12px
-    0
-    5px;
-
-  border-radius: 8px;
-
-  background: #ebecef;
-}
-
-
-.storage-progress span {
-  width: 68%;
-  height: 100%;
-
-  display: block;
-
-  border-radius: 8px;
-
-  background:
-    linear-gradient(
-      90deg,
-      #7650dc,
-      #6234c0
-    );
-}
-
-
-.storage-summary {
-  display: flex;
-
-  justify-content: space-between;
-
-  color: #9299a4;
-
-  font-size: 6px;
-}
-
-
-.storage-types {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 7px;
-
-  margin-top: 13px;
-}
-
-
-.storage-types > div {
-  display: grid;
-
-  grid-template-columns:
-    9px
-    1fr
-    auto;
-
-  align-items: center;
-
-  gap: 5px;
-
-  color: #626a76;
-
-  font-size: 7px;
-}
-
-
-.storage-dot {
-  width: 7px;
-  height: 7px;
-
-  display: block;
-
-  border-radius: 50%;
-}
-
-
-.pdf-dot {
-  background: #cb4c4c;
-}
-
-
-.word-dot {
-  background: #4b78c2;
-}
-
-
-.other-dot {
-  background: #7550bc;
-}
-
-
-/* =========================================================
-   PANEL DERECHO
-========================================================= */
-
-.detail-header {
-  min-height: 62px;
-
-  display: flex;
-
-  align-items: flex-start;
-  justify-content: space-between;
-
-  gap: 10px;
-
-  padding: 14px;
-
-  border-bottom:
-    1px solid #e8ebef;
-}
-
-
-.detail-header h2 {
-  margin: 0;
-
-  color: #202733;
-
-  font-size: 12px;
-}
-
-
-.detail-header button {
-  width: 25px;
-  height: 25px;
-
-  border: 0;
-
-  background: transparent;
-
-  color: #626a76;
-
-  font-size: 18px;
-
-  cursor: pointer;
-}
-
-
-.detail-content {
-  padding: 14px;
-}
-
-
-/* =========================================================
    PREVISUALIZACIÓN
 ========================================================= */
 
@@ -1184,28 +877,6 @@ select {
     1px solid #ebedf0;
 
   text-align: center;
-}
-
-
-.preview-file {
-  width: 58px;
-  height: 68px;
-
-  display: grid;
-
-  place-items: center;
-
-  margin-bottom: 10px;
-
-  border-radius: 7px;
-
-  background: #fbe6e6;
-
-  color: #c63f3f;
-
-  font-size: 10px;
-
-  font-weight: 800;
 }
 
 
@@ -1237,54 +908,6 @@ select {
 
 
 /* =========================================================
-   BOTONES DETALLE
-========================================================= */
-
-.detail-buttons {
-  display: grid;
-
-  grid-template-columns:
-    1fr
-    1fr;
-
-  gap: 7px;
-
-  padding:
-    12px
-    0;
-}
-
-
-.detail-buttons button {
-  height: 31px;
-
-  border:
-    1px solid #dddfe5;
-
-  border-radius: 5px;
-
-  background: #ffffff;
-
-  color: #593672;
-
-  font-size: 7px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-}
-
-
-.detail-buttons .open-button {
-  border-color: #7441cc;
-
-  background: #7441cc;
-
-  color: #ffffff;
-}
-
-
-/* =========================================================
    SECCIONES DETALLE
 ========================================================= */
 
@@ -1305,213 +928,6 @@ select {
 }
 
 
-.detail-row {
-  min-height: 30px;
-
-  display: flex;
-
-  align-items: center;
-
-  justify-content: space-between;
-
-  border-bottom:
-    1px solid #f0f1f3;
-}
-
-
-.detail-row span {
-  color: #858c98;
-
-  font-size: 7px;
-}
-
-
-.detail-row strong {
-  color: #3d4450;
-
-  font-size: 7px;
-}
-
-
-/* =========================================================
-   VINCULACIÓN
-========================================================= */
-
-.relation-card {
-  min-height: 39px;
-
-  display: flex;
-
-  flex-direction: column;
-
-  justify-content: center;
-
-  gap: 2px;
-
-  padding:
-    6px
-    8px;
-
-  margin-bottom: 6px;
-
-  border:
-    1px solid #eceef2;
-
-  border-radius: 6px;
-
-  background: #fafbfc;
-}
-
-
-.relation-card span {
-  color: #999faa;
-
-  font-size: 6px;
-}
-
-
-.relation-card strong {
-  color: #4e365c;
-
-  font-size: 7.5px;
-}
-
-
-/* =========================================================
-   RESPONSABLE
-========================================================= */
-
-.responsible-card {
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-}
-
-
-.responsible-avatar {
-  width: 31px;
-  height: 31px;
-
-  display: grid;
-
-  place-items: center;
-
-  flex:
-    0
-    0
-    31px;
-
-  border-radius: 50%;
-
-  background: #e8e2ec;
-
-  color: #634c70;
-
-  font-size: 6.5px;
-
-  font-weight: 700;
-}
-
-
-.responsible-card > div {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-
-.responsible-card strong {
-  color: #3e4551;
-
-  font-size: 7.5px;
-}
-
-
-.responsible-card span {
-  color: #979da7;
-
-  font-size: 6px;
-}
-
-
-/* =========================================================
-   DESCRIPCIÓN
-========================================================= */
-
-.description {
-  margin: 0;
-
-  padding: 8px;
-
-  border-radius: 6px;
-
-  background: #f8f8fa;
-
-  color: #68707c;
-
-  font-size: 7px;
-
-  line-height: 1.45;
-}
-
-
-/* =========================================================
-   HISTORIAL
-========================================================= */
-
-.history-item {
-  min-height: 38px;
-
-  display: flex;
-
-  align-items: center;
-
-  gap: 8px;
-}
-
-
-.history-dot {
-  width: 7px;
-  height: 7px;
-
-  flex:
-    0
-    0
-    7px;
-
-  border-radius: 50%;
-
-  background: #7044c5;
-}
-
-
-.history-item > div {
-  display: flex;
-
-  flex-direction: column;
-
-  gap: 2px;
-}
-
-
-.history-item strong {
-  color: #444b57;
-
-  font-size: 7px;
-}
-
-
-.history-item span {
-  color: #9ba1ab;
-
-  font-size: 6px;
-}
-
-
 /* =========================================================
    RESPONSIVE
 ========================================================= */
@@ -1524,9 +940,7 @@ select {
 
   .detail-panel {
     display: none;
-  }
-
-}
+  }}
 
 
 @media (max-width: 1100px) {
@@ -1544,13 +958,7 @@ select {
 
   .clear-button {
     display: none;
-  }
-
-  .bottom-grid {
-    grid-template-columns: 1fr;
-  }
-
-}
+  }}
 
 
 @media (max-width: 850px) {
@@ -1565,9 +973,7 @@ select {
     flex-direction: column;
 
     align-items: flex-start;
-  }
-
-}
+  }}
 
 
 @media (max-width: 650px) {
@@ -1579,9 +985,7 @@ select {
 
   .btn-primary {
     width: 100%;
-  }
-
-}
+  }}
 /* =========================================================
    DOCUMENTOS DINAMICOS / MODALES
 ========================================================= */
@@ -1717,43 +1121,6 @@ select {
   color: #89919f;
   font-size: 11px;
 }
-
-.action-menu { position: relative; }
-.action-menu summary {
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  cursor: pointer;
-  list-style: none;
-  color: #596273;
-}
-.action-menu summary::-webkit-details-marker { display: none; }
-.action-menu-list {
-  position: absolute;
-  right: 0;
-  top: 31px;
-  z-index: 30;
-  width: 175px;
-  padding: 6px;
-  border: 1px solid #e1e5ec;
-  border-radius: 8px;
-  background: white;
-  box-shadow: 0 15px 35px rgba(15, 23, 42, .16);
-}
-.action-menu-list button {
-  width: 100%;
-  height: auto !important;
-  padding: 8px 9px;
-  justify-content: flex-start !important;
-  border: 0 !important;
-  background: transparent !important;
-  color: #394150 !important;
-  text-align: left;
-  font-size: 10px !important;
-}
-.action-menu-list button:hover { background: #f6f2fd !important; }
 .action-menu-list .danger-link { color: #b42318 !important; }
 
 .recent-card { margin-top: 14px; }
@@ -1912,48 +1279,6 @@ button:disabled { opacity: .58; cursor: not-allowed; }
 .document-preview table { width: 100%; border-collapse: collapse; }
 .document-preview td, .document-preview th { border: 1px solid #bbb; padding: 6px; }
 
-.editor-card { width: min(1100px, 97vw); height: 94vh; display: flex; flex-direction: column; overflow: hidden; }
-.editor-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  padding: 9px 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f8f9fb;
-}
-.editor-toolbar button {
-  min-width: 34px;
-  height: 32px;
-  padding: 0 9px;
-  border: 1px solid #dfe3ea;
-  border-radius: 5px;
-  background: #fff;
-  color: #343c49;
-  cursor: pointer;
-  font-size: 10px;
-}
-.editor-toolbar button:hover { border-color: #aa8edc; background: #f6f2fc; }
-.toolbar-separator { width: 1px; height: 28px; margin: 2px 5px; background: #d9dde4; }
-.word-editor {
-  flex: 1;
-  width: min(800px, calc(100% - 50px));
-  min-height: 0;
-  overflow: auto;
-  margin: 20px auto;
-  padding: 65px 72px;
-  border: 1px solid #dfe3e8;
-  background: #fff;
-  color: #111827;
-  outline: none;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 14px;
-  line-height: 1.65;
-  box-shadow: 0 4px 18px rgba(15, 23, 42, .08);
-}
-.word-editor table { width: 100%; border-collapse: collapse; }
-.word-editor td, .word-editor th { border: 1px solid #aaa; padding: 6px; }
-.editor-note { padding: 0 20px 12px; }
-
 .version-list, .trash-list { display: grid; gap: 9px; padding: 16px 20px 20px; }
 .version-item {
   display: grid;
@@ -2011,8 +1336,7 @@ button:disabled { opacity: .58; cursor: not-allowed; }
 }
 
 @media (max-width: 1200px) {
-  .advanced-filters { grid-template-columns: repeat(3, 1fr); }
-}
+  .advanced-filters { grid-template-columns: repeat(3, 1fr); }}
 
 @media (max-width: 800px) {
   .advanced-filters, .form-grid { grid-template-columns: 1fr; }
@@ -2020,8 +1344,7 @@ button:disabled { opacity: .58; cursor: not-allowed; }
   .trash-item { grid-template-columns: 42px 1fr; }
   .trash-days, .trash-actions { grid-column: 2; align-items: flex-start; }
   .word-editor, .document-preview { width: calc(100% - 24px); padding: 34px 26px; }
-  .modal-backdrop { padding: 10px; }
-}
+  .modal-backdrop { padding: 10px; }}
 
 /* =========================================================
    AJUSTES DE UX — MENSAJES, ESPACIADO Y LEGIBILIDAD
@@ -2310,27 +1633,9 @@ button:disabled {
   font-size: 11px;
 }
 
-.action-menu-list {
-  width: 190px;
-}
-
-.action-menu-list button {
-  padding: 9px 10px;
-  font-size: 10px !important;
-}
-
 /* Recientes */
 .recent-card {
   margin-top: 18px;
-}
-
-.section-header {
-  min-height: 50px;
-  padding: 11px 16px;
-}
-
-.section-header h3 {
-  font-size: 11px;
 }
 
 .recent-item {
@@ -2366,28 +1671,8 @@ button:disabled {
   overflow-y: auto;
 }
 
-.detail-header {
-  min-height: 70px;
-  padding: 16px;
-}
-
-.detail-header h2 {
-  font-size: 14px;
-}
-
-.detail-content {
-  padding: 16px;
-}
-
 .document-preview {
   padding: 10px 5px 18px;
-}
-
-.preview-file {
-  width: 64px;
-  height: 72px;
-  margin-bottom: 12px;
-  font-size: 10px;
 }
 
 .document-preview h3 {
@@ -2423,10 +1708,6 @@ button:disabled {
 .detail-section h4 {
   margin-bottom: 10px;
   font-size: 10px;
-}
-
-.detail-row {
-  min-height: 34px;
 }
 
 .detail-row span,
@@ -2501,8 +1782,7 @@ button:disabled {
   .main-content {
     padding-left: 24px;
     padding-right: 24px;
-  }
-}
+  }}
 
 @media (max-width: 1180px) {
   .documentos-layout {
@@ -2511,8 +1791,7 @@ button:disabled {
 
   .detail-panel {
     display: none;
-  }
-}
+  }}
 
 @media (max-width: 850px) {
   .feedback-stack {
@@ -2523,8 +1802,7 @@ button:disabled {
 
   .main-content {
     padding: 24px 18px 34px;
-  }
-}
+  }}
 
 /* =========================================================
    V4 — PANEL DERECHO: DISEÑO CLARO + MEJOR CENTRADO
@@ -2764,8 +2042,7 @@ button:disabled {
   .detail-panel .detail-title {
     padding-left: 14px;
     padding-right: 14px;
-  }
-}
+  }}
 /* Visor: feedback inmediato al primer clic */
 .viewer-loading {
   min-height: 320px;
@@ -2802,442 +2079,13 @@ button:disabled {
   to { transform: rotate(360deg); }
 }
 
-/* =========================================================
-   EDITOR DOCUMENTAL V8 — ASPECTO WORD / A4
-   ========================================================= */
-
-.editor-card {
-  width: min(1240px, 98vw);
-  height: 96vh;
-  max-height: 96vh;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.editor-modal-header {
-  flex: 0 0 auto;
-  padding: 14px 18px;
-}
-
-.editor-modal-header h2 {
-  font-size: 19px;
-}
-
-.editor-modal-header p {
-  font-size: 10px;
-}
-
-.editor-toolbar-shell {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 7px;
-  padding: 9px 12px;
-  border-bottom: 1px solid #dfe3ea;
-  background: #f7f8fb;
-  box-shadow: 0 2px 7px rgba(15, 23, 42, .035);
-  z-index: 5;
-}
-
-.editor-toolbar-group {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.editor-toolbar-selects {
-  gap: 6px;
-}
-
-.editor-toolbar-shell select,
-.editor-toolbar-shell button,
-.editor-color-control {
-  height: 34px;
-  border: 1px solid #d9dee7;
-  border-radius: 6px;
-  background: #fff;
-  color: #30394a;
-  font-size: 10px;
-}
-
-.editor-toolbar-shell select {
-  min-width: 105px;
-  padding: 0 27px 0 9px;
-  outline: none;
-}
-
-.editor-toolbar-shell select:nth-child(2) {
-  min-width: 145px;
-}
-
-.editor-toolbar-shell .editor-size-select {
-  min-width: 78px;
-}
-
-.editor-toolbar-shell button {
-  min-width: 34px;
-  padding: 0 9px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.editor-toolbar-shell button:hover:not(:disabled),
-.editor-toolbar-shell select:hover:not(:disabled),
-.editor-color-control:hover {
-  border-color: #a5b4fc;
-  background: #f8f8ff;
-  color: #4f46e5;
-}
-
-.editor-toolbar-shell button:active:not(:disabled) {
-  background: #eef2ff;
-}
-
-.editor-toolbar-shell .toolbar-separator {
-  width: 1px;
-  height: 25px;
-  margin: 0 2px;
-  background: #d8dde6;
-}
-
-.editor-color-control {
-  width: 36px;
-  display: grid;
-  place-items: center;
-  position: relative;
-  cursor: pointer;
-  font-weight: 700;
-}
-
-.editor-color-control span {
-  line-height: 1;
-  border-bottom: 3px solid var(--editor-color, #111827);
-}
-
-.editor-color-control input {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.editor-document-area {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  padding: 26px 16px 42px;
-  background:
-    linear-gradient(#edf0f5, #edf0f5) padding-box;
-}
-
-.word-editor {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: visible;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: #111827;
-  outline: none;
-  font-family: Arial, sans-serif;
-  font-size: 11pt;
-  line-height: 1.5;
-}
-
-.word-editor .lexia-page {
-  width: 794px;
-  min-height: 1123px;
-  margin: 0 auto 28px;
-  padding: 94px 113px;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #dfe3e8;
-  background: #fff;
-  box-shadow:
-    0 3px 8px rgba(15, 23, 42, .08),
-    0 14px 34px rgba(15, 23, 42, .08);
-}
-
-.word-editor .lexia-page:last-child {
-  margin-bottom: 0;
-}
-
-.word-editor .lexia-page::after {
-  content: attr(data-page);
-  position: absolute;
-  right: 15px;
-  bottom: 12px;
-  color: #c2c8d1;
-  font: 9px 'Segoe UI', sans-serif;
-  pointer-events: none;
-}
-
-.word-editor p {
-  margin: 0 0 8pt;
-  min-height: 1em;
-}
-
-.word-editor h1,
-.word-editor h2,
-.word-editor h3 {
-  font-family: inherit;
-  color: inherit;
-}
-
-.word-editor h1 {
-  margin: 14pt 0 10pt;
-  font-size: 18pt;
-}
-
-.word-editor h2 {
-  margin: 12pt 0 8pt;
-  font-size: 15pt;
-}
-
-.word-editor h3 {
-  margin: 10pt 0 7pt;
-  font-size: 13pt;
-}
-
-.word-editor .lexia-document-image,
-.word-editor img {
-  display: block;
-  max-width: 100%;
-  height: auto !important;
-  margin: 10px auto;
-  object-fit: contain;
-}
-
-.word-editor .lexia-doc-table,
-.word-editor table {
-  width: 100%;
-  margin: 10px 0;
-  border-collapse: collapse;
-}
-
-.word-editor .lexia-doc-table td,
-.word-editor .lexia-doc-table th,
-.word-editor table td,
-.word-editor table th {
-  min-width: 30px;
-  padding: 6px 7px;
-  border: 1px solid #9ca3af;
-  vertical-align: top;
-}
-
-.word-editor .lexia-doc-table p,
-.word-editor table p {
-  margin: 0;
-}
-
-.editor-loading-state,
-.editor-error-state {
-  width: min(520px, calc(100% - 30px));
-  min-height: 210px;
-  margin: 70px auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  padding: 28px;
-  border: 1px solid #dde2ea;
-  border-radius: 12px;
-  background: #fff;
-  text-align: center;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, .07);
-}
-
-.editor-loading-state strong,
-.editor-error-state strong {
-  color: #273044;
-  font-size: 13px;
-}
-
-.editor-loading-state span,
-.editor-error-state span {
-  max-width: 430px;
-  color: #8992a0;
-  font-size: 10px;
-  line-height: 1.5;
-}
-
-.editor-error-state {
-  border-color: #fecaca;
-  background: #fffafa;
-}
-
-.editor-error-state strong {
-  color: #b42318;
-}
-
-.editor-spinner {
-  width: 31px;
-  height: 31px;
-  margin-bottom: 4px;
-  border: 3px solid #e4e7ff;
-  border-top-color: #6366f1;
-  border-radius: 50%;
-  animation: lexia-editor-spin .75s linear infinite;
-}
-
 @keyframes lexia-editor-spin {
   to { transform: rotate(360deg); }
-}
-
-.editor-note {
-  flex: 0 0 auto;
-  padding: 10px 16px 12px;
-  border-top: 1px solid #e7eaf0;
-  background: #fff;
-}
-
-.editor-note label {
-  gap: 5px;
-}
-
-.editor-note label > span {
-  font-size: 9px;
-}
-
-.editor-note input {
-  min-height: 40px;
-  font-size: 10px;
-}
-
-.editor-footer {
-  flex: 0 0 auto;
-  justify-content: space-between;
-  align-items: center;
-  min-height: 64px;
-  padding: 10px 16px;
-}
-
-.editor-save-help {
-  color: #8c94a1;
-  font-size: 9px;
-}
-
-.editor-footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 9px;
 }
 
 .editor-footer-actions .btn-light,
 .editor-footer-actions .btn-primary {
   min-height: 40px;
-}
-
-@media (max-width: 950px) {
-  .editor-card {
-    width: 99vw;
-    height: 98vh;
-    max-height: 98vh;
-  }
-
-  .editor-toolbar-shell {
-    gap: 5px;
-  }
-
-  .editor-toolbar-shell .toolbar-separator {
-    display: none;
-  }
-
-  .word-editor .lexia-page {
-    width: calc(100% - 22px);
-    min-height: 900px;
-    padding: 58px 50px;
-  }
-
-  .editor-save-help {
-    display: none;
-  }
-}
-
-@media (max-width: 650px) {
-  .editor-toolbar-selects {
-    width: 100%;
-  }
-
-  .editor-toolbar-shell select,
-  .editor-toolbar-shell select:nth-child(2) {
-    min-width: 0;
-    flex: 1;
-  }
-
-  .word-editor .lexia-page {
-    width: calc(100% - 12px);
-    min-height: 760px;
-    padding: 38px 28px;
-  }
-}
-
-/* =========================================================
-   EDITOR V9 — PDF EDITABLE SIN BLOQUEOS
-   ========================================================= */
-.editor-pdf-notice {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
-  border-bottom: 1px solid #dfe4ff;
-  background: #f7f8ff;
-  color: #475569;
-}
-
-.editor-pdf-notice-icon {
-  min-width: 36px;
-  height: 27px;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 8px;
-  font-weight: 800;
-}
-
-.editor-pdf-notice > div {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.editor-pdf-notice strong {
-  color: #3730a3;
-  font-size: 9.5px;
-}
-
-.editor-pdf-notice small {
-  color: #778196;
-  font-size: 8px;
-  line-height: 1.35;
-}
-
-.word-editor,
-.word-editor * {
-  -webkit-user-select: text;
-  user-select: text;
-}
-
-.word-editor .lexia-pdf-editable-page {
-  cursor: text;
-  overflow: visible;
-}
-
-.word-editor .lexia-pdf-editable-page p,
-.word-editor .lexia-pdf-editable-page span {
-  cursor: text;
-  pointer-events: auto;
 }
 
 /* Restaurar una versión anterior conserva el historial creando una nueva versión vigente. */
@@ -3563,8 +2411,7 @@ button:disabled {
     padding: 14px 16px 16px;
   }
   .restore-version-confirm { grid-row: 1; }
-  .restore-version-cancel { grid-row: 2; }
-}
+  .restore-version-cancel { grid-row: 2; }}
 
 
 /* =========================================================
@@ -4031,5 +2878,4 @@ button:disabled {
     padding: 14px 16px 16px;
   }
   .document-confirm-submit { grid-row: 1; }
-  .document-confirm-cancel { grid-row: 2; }
-}
+  .document-confirm-cancel { grid-row: 2; }}
