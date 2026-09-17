@@ -118,7 +118,12 @@ INSERT INTO permisos (id, codigo, modulo, descripcion) VALUES
 (27, 'DASHBOARD_LEER',         'DASHBOARD',   'Ver el panel principal'),
 -- Los dos permisos del flujo de aprobacion del calendario judicial
 (28, 'CALENDARIO_PROPONER',    'CALENDARIO',  'Registrar feriados y suspensiones de plazos (quedan PROPUESTO)'),
-(29, 'CALENDARIO_APROBAR',     'CALENDARIO',  'Aprobar o rechazar entradas del calendario judicial');
+(29, 'CALENDARIO_APROBAR',     'CALENDARIO',  'Aprobar o rechazar entradas del calendario judicial'),
+-- Biblioteca juridica. Repetidos desde V10 a proposito: esta semilla hace
+-- TRUNCATE de `permisos` y corre DESPUES de las migraciones, asi que sin estas
+-- dos lineas los permisos de V10 desaparecerian en desarrollo.
+(30, 'BIBLIOTECA_LEER',        'BIBLIOTECA',  'Consultar y descargar material de la biblioteca juridica'),
+(31, 'BIBLIOTECA_GESTIONAR',   'BIBLIOTECA',  'Cargar, editar y eliminar material de la biblioteca juridica');
 
 -- ROLES_PERMISOS
 INSERT INTO roles_permisos (rol_id, permiso_id) SELECT 1, id FROM permisos;   -- Administrador: todo
@@ -138,6 +143,17 @@ INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        --
 (7,1),(7,2),(7,19),(7,27);
 INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Cliente (portal)
 (8,4),(8,16),(8,18);
+
+-- Biblioteca juridica (V10). En bloque aparte para no reescribir las filas de
+-- arriba. El rol 1 ya los tiene por el SELECT del Administrador.
+-- Lectura: los siete roles internos. El portal del cliente queda fuera a
+-- proposito — la biblioteca es material de trabajo del estudio, no del caso.
+INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
+(2,30),(3,30),(4,30),(5,30),(6,30),(7,30);
+-- Gestion: Socio y Abogado. Un asistente consulta plantillas, pero decidir que
+-- entra a la biblioteca del estudio es criterio profesional.
+INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
+(2,31),(3,31);
 
 -- =============================================================================
 -- USUARIOS — nombres del prototipo, para que las demos coincidan

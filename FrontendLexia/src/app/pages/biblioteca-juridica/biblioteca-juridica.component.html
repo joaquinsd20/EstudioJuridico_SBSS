@@ -62,38 +62,38 @@
           [(ngModel)]="filtros.tipo"
           (change)="aplicarFiltros()">
           <option value="">Todos los tipos</option>
-          <option value="Jurisprudencia">Jurisprudencia</option>
-          <option value="Legislación">Legislación</option>
-          <option value="Doctrina">Doctrina</option>
-          <option value="Contrato">Contrato</option>
-          <option value="Modelo">Modelo</option>
-          <option value="Plantilla">Plantilla</option>
-          <option value="Formato">Formato</option>
-          <option value="Libro">Libro</option>
+          <option value="JURISPRUDENCIA">Jurisprudencia</option>
+          <option value="LEGISLACION">Legislación</option>
+          <option value="DOCTRINA">Doctrina</option>
+          <option value="CONTRATO">Contrato</option>
+          <option value="MODELO">Modelo</option>
+          <option value="PLANTILLA">Plantilla</option>
+          <option value="FORMATO">Formato</option>
+          <option value="LIBRO">Libro</option>
         </select>
         <select
           aria-label="Filtrar por categoría"
           [(ngModel)]="filtros.categoria"
           (change)="aplicarFiltros()">
           <option value="">Todas las categorías</option>
-          <option value="Derecho Civil">Derecho Civil</option>
-          <option value="Derecho Penal">Derecho Penal</option>
-          <option value="Derecho Laboral">Derecho Laboral</option>
-          <option value="Derecho Constitucional">Derecho Constitucional</option>
-          <option value="Derecho Tributario">Derecho Tributario</option>
-          <option value="Derecho Social">Derecho Social</option>
-          <option value="Derecho Migratorio">Derecho Migratorio</option>
-          <option value="Derecho Administrativo">Derecho Administrativo</option>
-          <option value="Procesal">Procesal</option>
-          <option value="General">General</option>
+          <option value="DERECHO_CIVIL">Derecho Civil</option>
+          <option value="DERECHO_PENAL">Derecho Penal</option>
+          <option value="DERECHO_LABORAL">Derecho Laboral</option>
+          <option value="DERECHO_CONSTITUCIONAL">Derecho Constitucional</option>
+          <option value="DERECHO_TRIBUTARIO">Derecho Tributario</option>
+          <option value="DERECHO_SOCIAL">Derecho Social</option>
+          <option value="DERECHO_MIGRATORIO">Derecho Migratorio</option>
+          <option value="DERECHO_ADMINISTRATIVO">Derecho Administrativo</option>
+          <option value="PROCESAL">Procesal</option>
+          <option value="GENERAL">General</option>
         </select>
         <select
           aria-label="Filtrar por estado"
           [(ngModel)]="filtros.estado"
           (change)="aplicarFiltros()">
           <option value="">Todos los estados</option>
-          <option value="Activo">Activo</option>
-          <option value="Archivado">Archivado</option>
+          <option value="ACTIVO">Activo</option>
+          <option value="ARCHIVADO">Archivado</option>
         </select>
       </div>
       <div class="stats-mini">
@@ -136,11 +136,11 @@
               </td>
               <td>
                 <span class="role-pill">
-                  {{ item.tipo }}
+                  {{ etiquetaTipo(item.tipo) }}
                 </span>
               </td>
               <td>
-                {{ item.categoria }}
+                {{ etiquetaCategoria(item.categoria) }}
               </td>
               <td>
                 {{ item.anio }}
@@ -154,14 +154,14 @@
                 {{ item.nombreArchivo || 'Sin archivo' }}
               </td>
               <td>
-                {{ item.fechaRegistro }}
+                {{ item.fechaCreacion }}
               </td>
               <td>
                 <span
                   class="status"
-                  [class.off]="item.estado === 'Archivado'">
+                  [class.off]="item.estado === 'ARCHIVADO'">
                   <i></i>
-                  {{ item.estado }}
+                  {{ etiquetaEstado(item.estado) }}
                 </span>
               </td>
               <td>
@@ -203,16 +203,16 @@
           <div class="card-top">
             <span class="card-icon" [ngClass]="item.tipo.toLowerCase()">
               <ng-container [ngSwitch]="item.tipo">
-                <span *ngSwitchCase="'Jurisprudencia'">⚖</span>
-                <span *ngSwitchCase="'Doctrina'">📚</span>
-                <span *ngSwitchCase="'Plantilla'">▤</span>
-                <span *ngSwitchCase="'Legislación'">📜</span>
-                <span *ngSwitchCase="'Contrato'">📝</span>
+                <span *ngSwitchCase="'JURISPRUDENCIA'">⚖</span>
+                <span *ngSwitchCase="'DOCTRINA'">📚</span>
+                <span *ngSwitchCase="'PLANTILLA'">▤</span>
+                <span *ngSwitchCase="'LEGISLACION'">📜</span>
+                <span *ngSwitchCase="'CONTRATO'">📝</span>
                 <span *ngSwitchDefault>📄</span>
               </ng-container>
             </span>
-            <span class="status" [class.off]="item.estado === 'Archivado'">
-              <i></i>{{ item.estado }}
+            <span class="status" [class.off]="item.estado === 'ARCHIVADO'">
+              <i></i>{{ etiquetaEstado(item.estado) }}
             </span>
           </div>
           <strong class="card-titulo">
@@ -222,8 +222,8 @@
             {{ item.subtituloDescripcion }}
           </span>
           <div class="card-tags">
-            <span class="role-pill">{{ item.tipo }}</span>
-            <span class="role-pill">{{ item.categoria }}</span>
+            <span class="role-pill">{{ etiquetaTipo(item.tipo) }}</span>
+            <span class="role-pill">{{ etiquetaCategoria(item.categoria) }}</span>
             <span class="role-pill">{{ item.anio }}</span>
           </div>
           <span class="card-exp">
@@ -311,14 +311,14 @@
         name="tipo"
         required>
         <option value="" disabled selected>-- Selecciona un tipo --</option>
-        <option value="Jurisprudencia">Jurisprudencia</option>
-        <option value="Legislación">Legislación</option>
-        <option value="Doctrina">Doctrina</option>
-        <option value="Contrato">Contrato</option>
-        <option value="Modelo">Modelo</option>
-        <option value="Plantilla">Plantilla</option>
-        <option value="Formato">Formato</option>
-      <option value="Libro">Libro</option>
+        <option value="JURISPRUDENCIA">Jurisprudencia</option>
+        <option value="LEGISLACION">Legislación</option>
+        <option value="DOCTRINA">Doctrina</option>
+        <option value="CONTRATO">Contrato</option>
+        <option value="MODELO">Modelo</option>
+        <option value="PLANTILLA">Plantilla</option>
+        <option value="FORMATO">Formato</option>
+      <option value="LIBRO">Libro</option>
     </select>
   </div>
 
@@ -331,16 +331,16 @@
         name="categoria"
         required>
           <option value="" disabled selected>-- Selecciona una categoría --</option>
-          <option value="Derecho Civil">Derecho Civil</option>
-          <option value="Derecho Penal">Derecho Penal</option>
-          <option value="Derecho Laboral">Derecho Laboral</option>
-          <option value="Derecho Constitucional">Derecho Constitucional</option>
-          <option value="Derecho Tributario">Derecho Tributario</option>
-          <option value="Derecho Social">Derecho Social</option>
-          <option value="Derecho Migratorio">Derecho Migratorio</option>
-          <option value="Derecho Administrativo">Derecho Administrativo</option>
-          <option value="Procesal">Procesal</option>
-          <option value="General">General</option>
+          <option value="DERECHO_CIVIL">Derecho Civil</option>
+          <option value="DERECHO_PENAL">Derecho Penal</option>
+          <option value="DERECHO_LABORAL">Derecho Laboral</option>
+          <option value="DERECHO_CONSTITUCIONAL">Derecho Constitucional</option>
+          <option value="DERECHO_TRIBUTARIO">Derecho Tributario</option>
+          <option value="DERECHO_SOCIAL">Derecho Social</option>
+          <option value="DERECHO_MIGRATORIO">Derecho Migratorio</option>
+          <option value="DERECHO_ADMINISTRATIVO">Derecho Administrativo</option>
+          <option value="PROCESAL">Procesal</option>
+          <option value="GENERAL">General</option>
       </select>
     </div>
     
