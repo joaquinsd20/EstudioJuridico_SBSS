@@ -33,6 +33,17 @@ public class UsuarioPrincipal implements UserDetails {
     private final Long id;
     private final String uuid;
     private final Integer estudioId;
+
+    /**
+     * Solo tiene valor cuando tipoUsuario = CLIENTE: es el cliente del portal
+     * al que pertenece este usuario. Junto con tipoUsuario es lo que permite
+     * acotar el portal a los expedientes de SU cliente y no a los de todo el
+     * estudio. Sale del Usuario ya cargado, sin consulta extra.
+     */
+    private final Long clienteId;
+
+    /** INTERNO (personal del estudio) o CLIENTE (portal). */
+    private final String tipoUsuario;
     private final String email;
     private final String passwordHash;
     private final String nombreCompleto;
@@ -44,6 +55,8 @@ public class UsuarioPrincipal implements UserDetails {
         this.id = usuario.getId();
         this.uuid = usuario.getUuidPublico();
         this.estudioId = usuario.getEstudio().getId();
+        this.clienteId = usuario.getClienteId();
+        this.tipoUsuario = usuario.getTipoUsuario();
         this.email = usuario.getEmail();
         this.passwordHash = usuario.getPasswordHash();
         this.nombreCompleto = usuario.getNombreCompleto();
@@ -51,6 +64,15 @@ public class UsuarioPrincipal implements UserDetails {
                 && "ACTIVO".equals(usuario.getEstado());
         this.noBloqueado = !"BLOQUEADO".equals(usuario.getEstado());
         this.authorities = authorities;
+    }
+
+    /**
+     * True si es un usuario del portal del cliente. Lo decide tipoUsuario y no
+     * el rol: el rol es configurable desde Configuracion, el tipo es un hecho
+     * estructural de la fila.
+     */
+    public boolean esPortalCliente() {
+        return "CLIENTE".equals(tipoUsuario);
     }
 
     public static UsuarioPrincipal desde(Usuario usuario) {

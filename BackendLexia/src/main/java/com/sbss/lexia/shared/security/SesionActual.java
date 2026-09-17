@@ -30,6 +30,28 @@ public final class SesionActual {
         return principal().getId();
     }
 
+    /**
+     * True si quien consulta es un usuario del portal del cliente. Los modulos
+     * que exponen informacion del expediente deben acotar su consulta a los
+     * expedientes de SU cliente — ver clienteId.
+     */
+    public static boolean esPortalCliente() {
+        return principal().esPortalCliente();
+    }
+
+    /**
+     * El cliente al que pertenece el usuario del portal, o null si es personal
+     * del estudio.
+     *
+     * Ojo al usarlo en una consulta: si un usuario de portal quedara mal
+     * configurado (tipoUsuario = CLIENTE pero cliente_id nulo), comparar contra
+     * NULL en SQL no casa con ninguna fila y no ve nada. Falla cerrado a
+     * proposito; lo contrario seria que lo viera todo.
+     */
+    public static Long clienteId() {
+        return principal().getClienteId();
+    }
+
     public static String uuid() {
         return principal().getUuid();
     }

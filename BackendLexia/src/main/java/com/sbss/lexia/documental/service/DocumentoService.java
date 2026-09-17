@@ -581,7 +581,25 @@ public class DocumentoService {
         documentoRepository.flush();
     }
 
+    /**
+     * Unico punto por el que todas las operaciones resuelven un uuid a su
+     * entidad: editar, subir version, restaurar, papelera, borrar, descargar.
+     *
+     * findByUuidPublicoAndActivoTrue es una consulta JPA que no sabe nada de
+     * estudios ni del portal del cliente, asi que por si sola aceptaria el uuid
+     * de un documento ajeno. Se comprueba primero la visibilidad con la
+     * consulta acotada — donde vive esa regla, en un solo sitio — y recien
+     * despues se carga la entidad. Cuesta una consulta extra por operacion de
+     * escritura, a cambio de no duplicar las reglas de visibilidad en dos
+     * lenguajes distintos (SQL y JPA), que es como terminan divergiendo.
+     *
+     * No distingue "no existe" de "no es tuyo": las dos salen 404. Un 403
+     * confirmaria que el documento existe en otro estudio.
+     */
     private Documento obtenerEntidad(String uuid) {
+        if (consultaRepository.obtenerPorUuid(uuid) == null) {
+            throw noEncontrado();
+        }
         return documentoRepository.findByUuidPublicoAndActivoTrue(uuid).orElseThrow(this::noEncontrado);
     }
 
