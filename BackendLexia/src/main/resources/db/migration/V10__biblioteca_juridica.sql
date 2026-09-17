@@ -14,7 +14,7 @@
 -- a ningun caso.
 -- =============================================================================
 
-CREATE TABLE recursos_juridicos (
+CREATE TABLE IF NOT EXISTS recursos_juridicos (
     id                      BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     uuid_publico            CHAR(36)        NOT NULL DEFAULT (UUID()),
     estudio_id              INT UNSIGNED    NOT NULL,
@@ -76,26 +76,48 @@ CREATE TABLE recursos_juridicos (
 -- -----------------------------------------------------------------------------
 -- Permisos del modulo
 -- -----------------------------------------------------------------------------
--- OJO: estos INSERT se repiten en R__seed_desarrollo.sql a proposito, no por
+-- OJO 1: estos INSERT se repiten en R__seed_desarrollo.sql a proposito, no por
 -- descuido. La semilla hace TRUNCATE de `permisos` y `roles_permisos` antes de
 -- recargar, y las repetibles corren DESPUES de las versionadas — asi que en
--- desarrollo la semilla borraria lo que se inserte solo aqui. En produccion la
--- semilla no corre (el perfil prod no incluye db/seed), asi que sin estas
--- lineas los permisos no existirian nunca alli.
-INSERT INTO permisos (id, codigo, modulo, descripcion) VALUES
+-- desarrollo la semilla borraria lo que se inserte solo aqui.
+--
+-- OJO 2 (esto tumbo el arranque de todo el equipo): `roles` se puebla UNICAMENTE
+-- en la semilla repetible, que Flyway corre DESPUES de todas las versionadas.
+-- En una base recien creada, cuando llega V10 la tabla `roles` esta VACIA, asi
+-- que un INSERT en `roles_permisos` con rol_id literal revienta contra
+-- fk_roles_permisos_rol. No se vio antes porque en las maquinas donde ya habia
+-- arrancado el backend los roles existian de un arranque anterior.
+--
+-- Por eso los permisos se enlazan con INSERT ... SELECT contra `roles`: si el
+-- rol todavia no existe no se inserta nada y la migracion no falla; la semilla
+-- lo repone acto seguido. Ademas se emparejan por `codigo` y no por id, que es
+-- la regla 8 de CLAUDE.md (la autoridad viene de `roles.codigo`, nunca del
+-- nombre ni de un id posicional).
+--
+-- Los INSERT son re-ejecutables (IGNORE) porque a quien le fallo esta migracion
+-- le quedaron ya insertadas las filas de `permisos`: Flyway no envuelve el
+-- script en una transaccion en MySQL, asi que lo anterior al fallo persiste.
+INSERT IGNORE INTO permisos (id, codigo, modulo, descripcion) VALUES
 (30, 'BIBLIOTECA_LEER',      'BIBLIOTECA', 'Consultar y descargar material de la biblioteca juridica'),
 (31, 'BIBLIOTECA_GESTIONAR', 'BIBLIOTECA', 'Cargar, editar y eliminar material de la biblioteca juridica');
 
 -- Lectura: los siete roles internos. El rol CLIENTE (portal) queda fuera a
 -- proposito: la biblioteca es material de trabajo del estudio, no del caso del
 -- cliente.
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
-(1,30),(2,30),(3,30),(4,30),(5,30),(6,30),(7,30);
+INSERT IGNORE INTO roles_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+  FROM roles r
+  JOIN permisos p ON p.codigo = 'BIBLIOTECA_LEER'
+ WHERE r.codigo IN ('ADMINISTRADOR','SOCIO','ABOGADO','ABOGADO_AUXILIAR',
+                    'ASISTENTE_LEGAL','CONTABILIDAD','RECEPCIONISTA');
 
 -- Gestion: Administrador, Socio y Abogado. Un asistente consulta plantillas,
 -- pero decidir que entra a la biblioteca del estudio es criterio profesional.
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
-(1,31),(2,31),(3,31);
+INSERT IGNORE INTO roles_permisos (rol_id, permiso_id)
+SELECT r.id, p.id
+  FROM roles r
+  JOIN permisos p ON p.codigo = 'BIBLIOTECA_GESTIONAR'
+ WHERE r.codigo IN ('ADMINISTRADOR','SOCIO','ABOGADO');
 
 -- =============================================================================
 -- VERIFICACION
