@@ -2,6 +2,7 @@ package com.sbss.lexia.shared.config;
 
 import com.sbss.lexia.seguridad.service.UsuarioDetailsService;
 import com.sbss.lexia.shared.security.ApiAccessDeniedHandler;
+import com.sbss.lexia.shared.security.CambioPasswordObligatorioFilter;
 import com.sbss.lexia.shared.security.JwtAuthenticationEntryPoint;
 import com.sbss.lexia.shared.security.JwtAuthenticationFilter;
 import com.sbss.lexia.shared.security.JwtService;
@@ -95,6 +96,9 @@ public class SecurityConfig {
                 .addFilterBefore(
                         new JwtAuthenticationFilter(jwtService, usuarioDetailsService),
                         UsernamePasswordAuthenticationFilter.class)
+                // Despues del JWT: necesita al usuario ya autenticado para leer
+                // su bandera debe_cambiar_password.
+                .addFilterAfter(new CambioPasswordObligatorioFilter(), JwtAuthenticationFilter.class)
                 .build();
     }
 }

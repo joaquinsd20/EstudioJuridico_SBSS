@@ -13,9 +13,20 @@ import { AuthService } from '../services/auth.service';
  * seguridad: quien manipule el localStorage vera la pantalla, pero la API le
  * respondera 401 y el interceptor lo devolvera al login.
  */
-export const authGuard: CanActivateFn = () => {
+export const authGuard: CanActivateFn = (route) => {
   const auth = inject(AuthService);
   const router = inject(Router);
 
-  return auth.estaAutenticado() ? true : router.createUrlTree(['/login']);
+  if (!auth.estaAutenticado()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  // Con contrasena temporal solo se puede ir a cambiarla. El backend ya bloquea
+  // todo lo demas con 403; esto evita pintar pantallas que no podrian cargar
+  // nada.
+  if (auth.debeCambiarPassword() && route.routeConfig?.path !== 'cambiar-password') {
+    return router.createUrlTree(['/cambiar-password']);
+  }
+
+  return true;
 };

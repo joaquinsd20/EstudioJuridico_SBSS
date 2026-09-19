@@ -1,5 +1,6 @@
 package com.sbss.lexia.seguridad.service;
 
+import com.sbss.lexia.seguridad.dto.CambiarPasswordRequest;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
 import com.sbss.lexia.seguridad.dto.LoginResponse;
 import com.sbss.lexia.seguridad.dto.UsuarioAutenticadoDto;
@@ -8,7 +9,9 @@ import com.sbss.lexia.seguridad.entity.Rol;
 import com.sbss.lexia.seguridad.entity.Usuario;
 import com.sbss.lexia.seguridad.repository.UsuarioRepository;
 import com.sbss.lexia.seguridad.security.UsuarioPrincipal;
+import com.sbss.lexia.shared.exception.PasswordInvalidaException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +19,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +32,7 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final IntentosFallidosService intentosFallidosService;
     private final com.sbss.lexia.shared.security.JwtService jwtService;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public LoginResponse login(LoginRequest peticion) {
@@ -58,6 +63,51 @@ public class AuthService {
 
         return new LoginResponse(
                 jwtService.generar(principal),
+                "Bearer",
+                jwtService.getExpiracionSegundos(),
+                aDto(usuario));
+    }
+
+    /**
+     * El usuario cambia su propia contrasena.
+     *
+     * Devuelve un token NUEVO, igual que el login: al guardar la fecha del cambio,
+     * todos los tokens anteriores (incluido el que trajo esta peticion) dejan de
+     * valer, asi que el usuario sigue dentro y el resto de sesiones se cierran.
+     *
+     * Una contrasena actual incorrecta cuenta como intento fallido de login. Si
+     * no contara, quien encuentre una sesion abierta podria probar contrasenas
+     * aqui sin limite y sin que el bloqueo por intentos lo detuviera.
+     */
+    @Transactional
+    public LoginResponse cambiarPassword(String email, CambiarPasswordRequest peticion) {
+        Usuario usuario = usuarioRepository.findByEmailConRoles(email)
+                .orElseThrow(() -> new IllegalStateException("Usuario autenticado sin registro"));
+
+        if (!passwordEncoder.matches(peticion.passwordActual(), usuario.getPasswordHash())) {
+            intentosFallidosService.registrarIntentoFallido(email);
+            throw new PasswordInvalidaException("PASSWORD_ACTUAL_INCORRECTA",
+                    "La contrasena actual no es correcta");
+        }
+
+        PoliticaPassword.validar(peticion.passwordNueva(), usuario.getEmail());
+
+        if (passwordEncoder.matches(peticion.passwordNueva(), usuario.getPasswordHash())) {
+            throw new PasswordInvalidaException("PASSWORD_REPETIDA",
+                    "La contrasena nueva debe ser distinta de la actual");
+        }
+
+        usuario.setPasswordHash(passwordEncoder.encode(peticion.passwordNueva()));
+        usuario.setDebeCambiarPassword(false);
+        usuario.setIntentosFallidos((short) 0);
+        // Truncada al segundo porque es la "version" que viaja en el token. MySQL
+        // REDONDEA (no trunca) las fracciones al guardar DATETIME(3): sin truncar,
+        // .9996 se guardaria como el segundo siguiente y la version releida de la
+        // base no coincidiria con la del token recien emitido.
+        usuario.setFechaCambioPassword(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS));
+
+        return new LoginResponse(
+                jwtService.generar(UsuarioPrincipal.desde(usuario)),
                 "Bearer",
                 jwtService.getExpiracionSegundos(),
                 aDto(usuario));

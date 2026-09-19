@@ -214,3 +214,18 @@
   border-radius: 5px;
   background: #334155;
 }
+
+.password-link {
+  display: block;
+  margin-bottom: 8px;
+  text-align: center;
+  font-size: 13px;
+  color: #cbd5e1;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.password-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}

@@ -1,5 +1,6 @@
 package com.sbss.lexia.shared.security;
 
+import com.sbss.lexia.seguridad.security.UsuarioPrincipal;
 import com.sbss.lexia.seguridad.service.UsuarioDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -50,11 +51,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String email = jwtService.emailDelToken(cabecera.substring(PREFIJO.length()));
-        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        JwtService.TokenLeido token = jwtService.leer(cabecera.substring(PREFIJO.length()));
+        if (token != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             try {
-                var usuario = usuarioDetailsService.loadUserByUsername(email);
-                if (usuario.isEnabled() && usuario.isAccountNonLocked()) {
+                UsuarioPrincipal usuario = usuarioDetailsService.loadUserByUsername(token.email());
+                // La version de contrasena del token debe ser la vigente: si el
+                // usuario la cambio despues de emitirlo, esta sesion ya no vale (V13).
+                if (usuario.isEnabled() && usuario.isAccountNonLocked()
+                        && token.versionPassword() == JwtService.versionPassword(usuario)) {
                     var auth = new UsernamePasswordAuthenticationToken(
                             usuario, null, usuario.getAuthorities());
                     auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
