@@ -57,7 +57,21 @@ public class ExpedienteService {
 
     @Transactional(readOnly = true)
     public Catalogos catalogos() {
-        return repository.catalogos(SesionActual.estudioId());
+        Catalogos c = repository.catalogos(SesionActual.estudioId());
+        if (puedeEditar()) {
+            return c;
+        }
+        // Este endpoint solo exige EXPEDIENTE_LEER, que tambien tiene el rol
+        // CLIENTE del portal. Clientes (con DNI/RUC), contrapartes y personal
+        // solo los necesita el formulario de alta/edicion: a quien no puede
+        // usarlo se le devuelven vacios. Estados, materias, especialidades y
+        // organos se mantienen porque los filtros del listado los usan.
+        return new Catalogos(List.of(), c.especialidades(), c.materias(), c.organos(),
+                c.estados(), List.of(), List.of());
+    }
+
+    private boolean puedeEditar() {
+        return tieneAutoridad("EXPEDIENTE_CREAR") || tieneAutoridad("EXPEDIENTE_EDITAR");
     }
 
     @Transactional
