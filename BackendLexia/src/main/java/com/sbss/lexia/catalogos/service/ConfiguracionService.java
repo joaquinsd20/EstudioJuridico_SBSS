@@ -33,4 +33,13 @@ public class ConfiguracionService {
                 })
                 .orElse(valorPorDefecto);
     }
+
+    /** Valor de texto, sin espacios. Cadena vacia cuenta como ausente. */
+    @Transactional(readOnly = true)
+    public String obtenerTexto(Integer estudioId, String clave, String valorPorDefecto) {
+        return configuracionRepository.findByEstudioIdAndClave(estudioId, clave)
+                .map(c -> c.getValor() == null ? null : c.getValor().trim())
+                .filter(valor -> !valor.isEmpty())
+                .orElse(valorPorDefecto);
+    }
 }
