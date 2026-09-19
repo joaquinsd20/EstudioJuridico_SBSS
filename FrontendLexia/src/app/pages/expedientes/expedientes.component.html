@@ -1,1812 +1,747 @@
 <div class="layout-wrapper">
-
-  <!-- ===================================================== -->
-  <!-- PANEL REUTILIZABLE -->
-  <!-- ===================================================== -->
-
   <app-panel></app-panel>
 
-
-  <!-- ===================================================== -->
-  <!-- CONTENIDO PRINCIPAL -->
-  <!-- ===================================================== -->
-
   <main class="main-content">
-
-
-    <!-- =================================================== -->
-    <!-- CABECERA -->
-    <!-- =================================================== -->
-
     <header class="expedientes-header">
-
       <div>
-
-        <h1>
-          Gestión de Expedientes Jurídicos
-        </h1>
-
-        <p>
-          Consulta y administra los expedientes jurídicos
-          registrados en el estudio.
-        </p>
-
+        <h1>Gestión de Expedientes Jurídicos</h1>
+        <p>Consulta, registra y administra la ficha, responsables y trazabilidad completa de cada expediente.</p>
       </div>
 
-
-      <button
-        type="button"
-        class="btn-primary"
-      >
-        <span class="plus">
-          +
-        </span>
-
+      <button type="button" class="btn-primary" (click)="nuevoExpediente()">
+        <span class="plus">+</span>
         Nuevo Expediente
       </button>
-
     </header>
 
-
-    <!-- =================================================== -->
-    <!-- TARJETAS RESUMEN -->
-    <!-- =================================================== -->
+    @if (error) {
+      <div class="feedback error-feedback">
+        <span>{{ error }}</span>
+        <div class="feedback-actions">
+          <button type="button" class="feedback-retry" (click)="reintentarCarga()">Reintentar</button>
+          <button type="button" (click)="error = ''">×</button>
+        </div>
+      </div>
+    }
+    @if (mensaje) {
+      <div class="feedback success-feedback">
+        <span>{{ mensaje }}</span>
+        <button type="button" (click)="mensaje = ''">×</button>
+      </div>
+    }
 
     <section class="stats-grid">
-
-
-      <!-- TOTAL -->
-
       <article class="stat-card">
-
-        <div class="stat-icon purple">
-          ▤
-        </div>
-
+        <div class="stat-icon purple">▤</div>
         <div class="stat-information">
-
-          <span>
-            Total expedientes
-          </span>
-
-          <strong>
-            28
-          </strong>
-
-          <small>
-            Registrados en el sistema
-          </small>
-
+          <span>Total expedientes</span>
+          <strong>{{ resumen.total }}</strong>
+          <small>Registrados y visibles para tu usuario</small>
         </div>
-
       </article>
 
-
-      <!-- ACTIVOS -->
-
       <article class="stat-card">
-
-        <div class="stat-icon green">
-          ✓
-        </div>
-
+        <div class="stat-icon green">✓</div>
         <div class="stat-information">
-
-          <span>
-            Expedientes activos
-          </span>
-
-          <strong>
-            18
-          </strong>
-
-          <small>
-            64% del total
-          </small>
-
+          <span>Expedientes activos</span>
+          <strong>{{ resumen.activos }}</strong>
+          <small>{{ porcentajeActivos() }}% del total</small>
         </div>
-
       </article>
 
-
-      <!-- TRÁMITE -->
-
       <article class="stat-card">
-
-        <div class="stat-icon blue">
-          ◷
-        </div>
-
+        <div class="stat-icon blue">◷</div>
         <div class="stat-information">
-
-          <span>
-            En trámite
-          </span>
-
-          <strong>
-            6
-          </strong>
-
-          <small>
-            Procesos en seguimiento
-          </small>
-
+          <span>En trámite</span>
+          <strong>{{ resumen.enTramite }}</strong>
+          <small>Procesos actualmente en seguimiento</small>
         </div>
-
       </article>
 
-
-      <!-- CRÍTICOS -->
-
       <article class="stat-card">
-
-        <div class="stat-icon red">
-          !
-        </div>
-
+        <div class="stat-icon red">!</div>
         <div class="stat-information">
-
-          <span>
-            Atención prioritaria
-          </span>
-
-          <strong>
-            3
-          </strong>
-
-          <small>
-            Requieren revisión
-          </small>
-
+          <span>Riesgo crítico</span>
+          <strong>{{ resumen.criticos }}</strong>
+          <small>Requieren atención prioritaria</small>
         </div>
-
       </article>
-
     </section>
-
-
-    <!-- =================================================== -->
-    <!-- FILTROS VISUALES -->
-    <!-- =================================================== -->
 
     <section class="filters-card">
-
-
-      <!-- NÚMERO -->
-
       <div class="search-control">
-
-        <span class="search-icon">
-          ⌕
-        </span>
-
+        <span class="search-icon">⌕</span>
         <input
           type="text"
-          placeholder="N.º de expediente"
-        >
-
+          [(ngModel)]="filtros.texto"
+          (input)="aplicarFiltrosConEspera()"
+          placeholder="Código o N.º de expediente">
       </div>
 
-
-      <!-- CLIENTE -->
-
       <div class="filter-control">
-
         <input
           type="text"
-          placeholder="Cliente"
-        >
-
+          [(ngModel)]="filtros.cliente"
+          (input)="aplicarFiltrosConEspera()"
+          placeholder="Cliente">
       </div>
 
-
-      <!-- ESTADO -->
-
       <div class="filter-control">
-
-        <select>
-
-          <option>
-            Todos los estados
-          </option>
-
-          <option>
-            Activo
-          </option>
-
-          <option>
-            En trámite
-          </option>
-
-          <option>
-            Suspendido
-          </option>
-
-          <option>
-            Archivado
-          </option>
-
+        <select [(ngModel)]="filtros.estado" (change)="aplicarFiltros()">
+          <option value="">Todos los estados</option>
+          @for (estado of catalogos.estados; track estado.id) {
+            <option [value]="estado.codigo">{{ estado.nombre }}</option>
+          }
         </select>
-
       </div>
 
-
-      <!-- MATERIA -->
-
       <div class="filter-control">
-
-        <select>
-
-          <option>
-            Todas las materias
-          </option>
-
-          <option>
-            Civil
-          </option>
-
-          <option>
-            Familia
-          </option>
-
-          <option>
-            Laboral
-          </option>
-
-          <option>
-            Penal
-          </option>
-
+        <select [(ngModel)]="filtros.materiaId" (change)="aplicarFiltros()">
+          <option [ngValue]="null">Todas las materias</option>
+          @for (materia of catalogos.materias; track materia.id) {
+            <option [ngValue]="materia.id">{{ materia.nombre }}</option>
+          }
         </select>
-
       </div>
 
-
-      <!-- JUZGADO -->
-
       <div class="filter-control">
-
         <input
           type="text"
-          placeholder="Juzgado"
-        >
-
+          [(ngModel)]="filtros.organo"
+          (input)="aplicarFiltrosConEspera()"
+          placeholder="Juzgado / órgano / entidad">
       </div>
 
-
-      <!-- LIMPIAR -->
-
-      <button
-        type="button"
-        class="clear-button"
-      >
-        ×
-      </button>
-
+      <button type="button" class="clear-button" title="Limpiar filtros" (click)="limpiarFiltros()">×</button>
     </section>
 
-
-    <!-- =================================================== -->
-    <!-- LAYOUT -->
-    <!-- =================================================== -->
-
     <div class="expedientes-layout">
-
-
-      <!-- ================================================= -->
-      <!-- COLUMNA IZQUIERDA -->
-      <!-- ================================================= -->
-
       <div class="expedientes-left">
-
-
-        <!-- =============================================== -->
-        <!-- TABLA -->
-        <!-- =============================================== -->
-
         <section class="card table-card">
-
-
           <div class="table-header">
-
             <div>
-
-              <h2>
-                Expedientes Activos
-              </h2>
-
-              <span>
-                6 expedientes mostrados
-              </span>
-
+              <h2>Expedientes</h2>
+              <span>{{ expedientes.length }} expediente(s) mostrado(s)</span>
             </div>
-
-
-            <div class="table-tools">
-
-              <button type="button">
-                ↕ Ordenar
-              </button>
-
-              <button type="button">
-                ⌁ Filtrar
-              </button>
-
-            </div>
-
+            @if (cargando) {
+              <span class="loading-inline">Cargando...</span>
+            }
           </div>
-
 
           <div class="table-wrapper">
-
             <table class="expedientes-table">
-
-
               <thead>
-
                 <tr>
-
-                  <th>
-                    Expediente
-                  </th>
-
-                  <th>
-                    Cliente
-                  </th>
-
-                  <th>
-                    Materia
-                  </th>
-
-                  <th>
-                    Juzgado
-                  </th>
-
-                  <th>
-                    Responsable
-                  </th>
-
-                  <th>
-                    Estado
-                  </th>
-
-                  <th>
-                    Acciones
-                  </th>
-
+                  <th>Expediente</th>
+                  <th>Cliente</th>
+                  <th>Materia</th>
+                  <th>Órgano / Juzgado</th>
+                  <th>Responsable</th>
+                  <th>Riesgo</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
                 </tr>
-
               </thead>
 
-
               <tbody>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 1 -->
-                <!-- ======================================= -->
-
-                <tr class="selected-row">
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
+                @for (expediente of expedientes; track expediente.uuid) {
+                  <tr
+                    [class.selected-row]="esSeleccionado(expediente.uuid)"
+                    (click)="seleccionar(expediente)">
+                    <td>
+                      <div class="expediente-cell">
+                        <div class="exp-icon">▤</div>
+                        <div>
+                          <strong>{{ expediente.codigoInterno }}</strong>
+                          <span>{{ expediente.numeroExpediente || 'Sin número externo' }}</span>
+                        </div>
                       </div>
+                    </td>
 
-                      <div>
-
-                        <strong>
-                          EXP. 01452-2026
-                        </strong>
-
-                        <span>
-                          01452-2026-0-1601-JR-FT-02
-                        </span>
-
+                    <td>
+                      <div class="client-cell">
+                        <span class="client-avatar">{{ iniciales(expediente.clienteNombre) }}</span>
+                        <div>
+                          <strong>{{ expediente.clienteNombre }}</strong>
+                          <span>{{ expediente.clienteDocumento }}</span>
+                        </div>
                       </div>
+                    </td>
 
-                    </div>
+                    <td>
+                      <span class="matter-badge civil">{{ expediente.materia }}</span>
+                      <small class="table-secondary">{{ expediente.especialidad }}</small>
+                    </td>
 
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        MF
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          María Fernández López
-                        </strong>
-
-                        <span>
-                          DNI 45876231
-                        </span>
-
+                    <td>
+                      <div class="court-cell">
+                        <strong>{{ expediente.organo }}</strong>
+                        <span>{{ expediente.distritoJudicial || '—' }}</span>
                       </div>
+                    </td>
 
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge family">
-                      Alimentos
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        2.º Juzgado de Familia
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        CM
-                      </span>
-
-                      <strong>
-                        Carlos Mendoza
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 2 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
+                    <td>
+                      <div class="responsible-cell">
+                        <span class="responsible-avatar">{{ iniciales(expediente.responsable) }}</span>
+                        <strong>{{ expediente.responsable }}</strong>
                       </div>
+                    </td>
 
-                      <div>
+                    <td>
+                      <span class="risk-badge" [class.risk-critical]="expediente.nivelRiesgo === 'CRITICO'"
+                            [class.risk-high]="expediente.nivelRiesgo === 'ALTO'"
+                            [class.risk-medium]="expediente.nivelRiesgo === 'MEDIO'"
+                            [class.risk-low]="expediente.nivelRiesgo === 'BAJO'">
+                        {{ expediente.nivelRiesgo }}
+                      </span>
+                    </td>
 
-                        <strong>
-                          EXP. 02388-2025
-                        </strong>
+                    <td>
+                      <span
+                        class="status dynamic-status"
+                        [style.color]="expediente.estadoColor"
+                        [style.border-color]="expediente.estadoColor">
+                        {{ expediente.estadoNombre }}
+                      </span>
+                    </td>
 
-                        <span>
-                          02388-2025-0-1601-JR-CI-05
-                        </span>
-
+                    <td>
+                      <div class="actions">
+                        <button type="button" title="Ver" (click)="$event.stopPropagation(); abrirDesdeLista(expediente)">◉</button>
+                        <button type="button" title="Editar" (click)="$event.stopPropagation(); editarDesdeLista(expediente)">✎</button>
                       </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        JL
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          Juan López Ramírez
-                        </strong>
-
-                        <span>
-                          DNI 70214569
-                        </span>
-
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8">
+                      <div class="empty-state">
+                        <strong>No se encontraron expedientes</strong>
+                        <span>Prueba limpiando o modificando los filtros.</span>
                       </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge civil">
-                      Civil
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        5.º Juzgado Civil
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        AM
-                      </span>
-
-                      <strong>
-                        Ana Morales
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status process">
-                      En trámite
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 3 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          EXP. 00521-2026
-                        </strong>
-
-                        <span>
-                          00521-2026-0-1601-JR-FC-01
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        SF
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          Sofía Fernández
-                        </strong>
-
-                        <span>
-                          DNI 43125698
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge family">
-                      Tenencia
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        1.º Juzgado de Familia
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        LT
-                      </span>
-
-                      <strong>
-                        Luis Torres
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 4 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          EXP. 03321-2025
-                        </strong>
-
-                        <span>
-                          03321-2025-0-1601-JR-LA-03
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        CR
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          Carlos Ramírez Torres
-                        </strong>
-
-                        <span>
-                          DNI 70214569
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge labor">
-                      Laboral
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        3.º Juzgado Laboral
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        CM
-                      </span>
-
-                      <strong>
-                        Carlos Mendoza
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status process">
-                      En trámite
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 5 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          EXP. 07745-2026
-                        </strong>
-
-                        <span>
-                          07745-2026-0-1601-JR-PE-04
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar">
-                        LM
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          Lucía Mendoza Ruiz
-                        </strong>
-
-                        <span>
-                          DNI 48362174
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge criminal">
-                      Penal
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        4.º Juzgado Penal
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        AM
-                      </span>
-
-                      <strong>
-                        Ana Morales
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status suspended">
-                      Suspendido
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ======================================= -->
-                <!-- EXPEDIENTE 6 -->
-                <!-- ======================================= -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="expediente-cell">
-
-                      <div class="exp-icon">
-                        ▤
-                      </div>
-
-                      <div>
-
-                        <strong>
-                          EXP. 08124-2024
-                        </strong>
-
-                        <span>
-                          08124-2024-0-1601-JR-CI-06
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <span class="client-avatar company">
-                        CA
-                      </span>
-
-                      <div>
-
-                        <strong>
-                          Constructora Andina S.A.C.
-                        </strong>
-
-                        <span>
-                          RUC 10458963217
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="matter-badge civil">
-                      Civil
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="court-cell">
-
-                      <strong>
-                        6.º Juzgado Civil
-                      </strong>
-
-                      <span>
-                        Lima
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="responsible-cell">
-
-                      <span class="responsible-avatar">
-                        LT
-                      </span>
-
-                      <strong>
-                        Luis Torres
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status archived">
-                      Archivado
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
+                    </td>
+                  </tr>
+                }
               </tbody>
-
             </table>
-
           </div>
-
         </section>
-
-
-        <!-- =============================================== -->
-        <!-- INFORMACIÓN INFERIOR -->
-        <!-- =============================================== -->
 
         <section class="bottom-grid">
-
-
-          <!-- ============================================= -->
-          <!-- RESUMEN -->
-          <!-- ============================================= -->
-
-          <article class="card chart-card">
-
-
+          <article class="card chart-card status-catalog-card">
             <div class="chart-header">
-
-              <span class="chart-icon">
-                ◷
-              </span>
-
-              <h3>
-                Estado General de Expedientes
-              </h3>
-
+              <span class="chart-icon">◫</span>
+              <h3>Estados configurables</h3>
             </div>
-
-
-            <div class="summary-content">
-
-
-              <div class="donut-chart">
-
-                <div class="donut-center">
-
-                  <strong>
-                    28
-                  </strong>
-
-                  <span>
-                    Total
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="chart-legend">
-
-
-                <div>
-
-                  <span>
-
-                    <i class="legend-dot purple-dot"></i>
-
-                    Activos
-
-                  </span>
-
-                  <strong>
-                    18
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-
-                    <i class="legend-dot blue-dot"></i>
-
-                    En trámite
-
-                  </span>
-
-                  <strong>
-                    6
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-
-                    <i class="legend-dot orange-dot"></i>
-
-                    Suspendidos
-
-                  </span>
-
-                  <strong>
-                    1
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-
-                    <i class="legend-dot green-dot"></i>
-
-                    Archivados
-
-                  </span>
-
-                  <strong>
-                    3
-                  </strong>
-
-                </div>
-
-              </div>
-
-
+            <div class="status-catalog">
+              @for (estado of catalogos.estados; track estado.id) {
+                <span [style.border-color]="estado.color" [style.color]="estado.color">
+                  <i [style.background]="estado.color"></i>{{ estado.nombre }}
+                </span>
+              }
             </div>
-
           </article>
 
-
-          <!-- ============================================= -->
-          <!-- MATERIA -->
-          <!-- ============================================= -->
-
-          <article class="card chart-card">
-
-
+          <article class="card chart-card requirement-card">
             <div class="chart-header">
-
-              <span class="chart-icon">
-                ▥
-              </span>
-
-              <h3>
-                Expedientes por Materia
-              </h3>
-
+              <span class="chart-icon">◎</span>
+              <h3>Trazabilidad del expediente</h3>
             </div>
-
-
-            <div class="bar-chart">
-
-
-              <div class="bar-item">
-
-                <strong>
-                  10
-                </strong>
-
-                <div class="bar civil-bar"></div>
-
-                <span>
-                  Civil
-                </span>
-
-              </div>
-
-
-              <div class="bar-item">
-
-                <strong>
-                  7
-                </strong>
-
-                <div class="bar family-bar"></div>
-
-                <span>
-                  Familia
-                </span>
-
-              </div>
-
-
-              <div class="bar-item">
-
-                <strong>
-                  5
-                </strong>
-
-                <div class="bar labor-bar"></div>
-
-                <span>
-                  Laboral
-                </span>
-
-              </div>
-
-
-              <div class="bar-item">
-
-                <strong>
-                  4
-                </strong>
-
-                <div class="bar criminal-bar"></div>
-
-                <span>
-                  Penal
-                </span>
-
-              </div>
-
-
-              <div class="bar-item">
-
-                <strong>
-                  2
-                </strong>
-
-                <div class="bar other-bar"></div>
-
-                <span>
-                  Otros
-                </span>
-
-              </div>
-
-
+            <div class="requirement-content">
+              <strong>Línea de tiempo integrada</strong>
+              <p>Hechos, documentos, resoluciones, notificaciones, audiencias, tareas, plazos, llamadas, reuniones y cambios de responsable.</p>
             </div>
-
           </article>
-
         </section>
-
       </div>
 
-
-      <!-- ================================================= -->
-      <!-- PANEL DERECHO -->
-      <!-- ================================================= -->
-
       <aside class="detail-panel">
-
-
-        <!-- HEADER -->
-
         <div class="detail-header">
-
-          <h2>
-            Detalle del Expediente Seleccionado
-          </h2>
-
-          <button type="button">
-            ×
-          </button>
-
+          <h2>Detalle del Expediente Seleccionado</h2>
+          @if (seleccionado) {
+            <button type="button" title="Editar expediente" [disabled]="cargandoDetalle" (click)="editarExpediente()">✎</button>
+          }
         </div>
-
 
         <div class="detail-content">
-
-
-          <!-- ============================================= -->
-          <!-- TÍTULO -->
-          <!-- ============================================= -->
-
-          <div class="detail-title">
-
-            <div class="detail-exp-icon">
-              ▤
-            </div>
-
-            <div>
-
-              <h3>
-                EXP. 01452-2026
-              </h3>
-
-              <span>
-                01452-2026-0-1601-JR-FT-02
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- ESTADO -->
-          <!-- ============================================= -->
-
-          <div class="detail-status-row">
-
-            <span>
-              Estado
-            </span>
-
-            <strong class="detail-status">
-              Activo
-            </strong>
-
-          </div>
-
-
-          <!-- ============================================= -->
-          <!-- CLIENTE -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Cliente
-            </h4>
-
-
-            <div class="detail-client">
-
-              <span class="detail-client-avatar">
-                MF
-              </span>
-
+          @if (seleccionado) {
+            <!-- Igual que Documentos: la selección se muestra inmediatamente
+                 con la información que ya llegó en el listado. -->
+            <div class="detail-title">
+              <div class="detail-exp-icon">▤</div>
               <div>
-
-                <strong>
-                  María Fernández López
-                </strong>
-
-                <span>
-                  DNI 45876231
-                </span>
-
+                <h3>{{ seleccionado.codigoInterno }}</h3>
+                <span>{{ seleccionado.numeroExpediente || 'Sin número externo' }}</span>
               </div>
-
             </div>
 
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- INFORMACIÓN -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Información del Expediente
-            </h4>
-
-
-            <div class="information-row">
-
-              <span>
-                Materia
-              </span>
-
-              <strong>
-                Alimentos
+            <div class="detail-status-row">
+              <span>Estado</span>
+              <strong class="detail-status" [style.color]="seleccionado.estadoColor">
+                {{ seleccionado.estadoNombre }}
               </strong>
-
             </div>
 
+            <section class="detail-section">
+              <h4>Cliente</h4>
+              <div class="detail-client">
+                <span class="detail-client-avatar">{{ iniciales(seleccionado.clienteNombre) }}</span>
+                <div>
+                  <strong>{{ seleccionado.clienteNombre }}</strong>
+                  <span>{{ seleccionado.clienteDocumento }}</span>
+                </div>
+              </div>
+            </section>
 
-            <div class="information-row">
+            <section class="detail-section">
+              <h4>Información del Expediente</h4>
+              <div class="information-row"><span>Especialidad</span><strong>{{ seleccionado.especialidad || '—' }}</strong></div>
+              <div class="information-row"><span>Materia</span><strong>{{ seleccionado.materia || '—' }}</strong></div>
+              <div class="information-row"><span>Etapa</span><strong>{{ detalle?.etapaProcesal || '—' }}</strong></div>
+              <div class="information-row"><span>Órgano / Juzgado</span><strong>{{ seleccionado.organo || '—' }}</strong></div>
+              <div class="information-row"><span>Riesgo</span><strong>{{ seleccionado.nivelRiesgo }}</strong></div>
+              <div class="information-row"><span>Cuantía</span><strong>{{ moneda(seleccionado.cuantia, seleccionado.moneda) }}</strong></div>
+              <div class="information-row"><span>Fecha de inicio</span><strong>{{ fecha(seleccionado.fechaInicio) }}</strong></div>
+            </section>
 
-              <span>
-                Juzgado
+            @if (cargandoDetalle) {
+              <div class="detail-loading compact-loading">Completando ficha...</div>
+            } @else if (errorDetalle) {
+              <div class="inline-warning">
+                <span>La información principal está disponible. No se pudo completar la ficha: {{ errorDetalle }}</span>
+                <button type="button" (click)="reintentarDetalle()">Reintentar</button>
+              </div>
+            }
+
+            <section class="detail-section">
+              <h4>Responsables</h4>
+              @if (detalle && detalle.equipo.length) {
+                @for (miembro of detalle.equipo; track miembro.usuarioId) {
+                  <div class="lawyer-detail team-member">
+                    <span class="lawyer-avatar">{{ iniciales(miembro.nombre) }}</span>
+                    <div>
+                      <strong>{{ miembro.nombre }}</strong>
+                      <span>{{ miembro.rol }}</span>
+                    </div>
+                  </div>
+                }
+              } @else {
+                <div class="lawyer-detail team-member">
+                  <span class="lawyer-avatar">{{ iniciales(seleccionado.responsable) }}</span>
+                  <div>
+                    <strong>{{ seleccionado.responsable }}</strong>
+                    <span>Responsable principal</span>
+                  </div>
+                </div>
+              }
+            </section>
+
+            <section class="detail-section">
+              <div class="section-title-row">
+                <h4>Línea de tiempo</h4>
+                <span class="counter">{{ lineaTiempo.length }}</span>
+              </div>
+
+              @if (cargandoLineaTiempo) {
+                <span class="muted-text">Cargando línea de tiempo...</span>
+              } @else if (errorLineaTiempo) {
+                <div class="inline-warning">
+                  <span>{{ errorLineaTiempo }}</span>
+                  <button type="button" (click)="reintentarDetalle()">Reintentar</button>
+                </div>
+              } @else {
+                @for (evento of eventosPanel(); track evento.clave) {
+                  <div class="event-item timeline-mini-item">
+                    <div class="event-icon" [ngClass]="claseEvento(evento.tipo)">{{ iconoEvento(evento.tipo) }}</div>
+                    <div>
+                      <strong>{{ evento.titulo }}</strong>
+                      <span>{{ evento.tipo }} · {{ fecha(evento.fechaHora, true) }}</span>
+                    </div>
+                  </div>
+                } @empty {
+                  <span class="muted-text">Este expediente todavía no tiene eventos registrados.</span>
+                }
+              }
+            </section>
+
+            <section class="detail-section">
+              <div class="section-title-row">
+                <h4>Documentos recientes</h4>
+                <span class="counter">{{ documentosRecientes().length }}</span>
+              </div>
+              @for (documento of documentosRecientes(); track documento.clave) {
+                <div class="document-item">
+                  <span class="document-icon">{{ documento.tipo === 'RESOLUCION' ? 'RES' : 'PDF' }}</span>
+                  <div>
+                    <strong>{{ documento.titulo }}</strong>
+                    <span>{{ fecha(documento.fechaHora) }}</span>
+                  </div>
+                  <span class="download-icon">›</span>
+                </div>
+              } @empty {
+                <span class="muted-text">Sin documentos relacionados.</span>
+              }
+            </section>
+
+            <button type="button" class="detail-main-button" (click)="abrirDetalleCompleto()">
+              Ver expediente completo
+            </button>
+          } @else {
+            <div class="detail-empty">
+              <strong>Selecciona un expediente</strong>
+              <span>La ficha y la línea de tiempo aparecerán aquí.</span>
+            </div>
+          }
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+@if (modalDetalle && seleccionado) {
+  <div class="modal-overlay" (mousedown)="cerrarDetalleCompleto()">
+    <section class="expediente-modal detail-modal" (mousedown)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <span class="modal-kicker">Ficha del expediente</span>
+          <h2>{{ seleccionado.codigoInterno }}</h2>
+          <p>{{ seleccionado.numeroExpediente || 'Sin número externo' }}</p>
+        </div>
+        <div class="modal-actions">
+          <button type="button" class="secondary-button" (click)="editarExpediente(); cerrarDetalleCompleto()">✎ Editar</button>
+          <button type="button" class="modal-close" (click)="cerrarDetalleCompleto()">×</button>
+        </div>
+      </header>
+
+      @if (cargandoDetalle) {
+        <div class="modal-state-message">
+          <strong>Cargando ficha completa...</strong>
+          <span>La información principal ya está disponible en el panel lateral.</span>
+        </div>
+      } @else if (errorDetalle) {
+        <div class="modal-state-message error-state">
+          <strong>No se pudo cargar la ficha completa</strong>
+          <span>{{ errorDetalle }}</span>
+          <button type="button" class="secondary-button" (click)="reintentarDetalle()">Reintentar</button>
+        </div>
+      } @else if (detalle) {
+      <div class="full-detail-grid">
+        <div class="full-detail-main">
+          <section class="detail-card-block">
+            <div class="block-title">
+              <h3>Datos generales</h3>
+              <span class="status-large" [style.color]="detalle.estadoColor" [style.border-color]="detalle.estadoColor">
+                {{ detalle.estadoNombre }}
               </span>
-
-              <strong>
-                2.º Juzgado de Familia
-              </strong>
-
             </div>
-
-
-            <div class="information-row">
-
-              <span>
-                Distrito Judicial
-              </span>
-
-              <strong>
-                Lima
-              </strong>
-
+            <div class="data-grid">
+              <div><span>Cliente</span><strong>{{ detalle.clienteNombre }}</strong><small>{{ detalle.clienteDocumento }}</small></div>
+              <div><span>Contraparte</span><strong>{{ detalle.contrapartes[0]?.nombre || 'Sin contraparte' }}</strong><small>{{ detalle.contrapartes[0]?.detalle || '' }}</small></div>
+              <div><span>Especialidad</span><strong>{{ detalle.especialidad }}</strong></div>
+              <div><span>Materia</span><strong>{{ detalle.materia || '—' }}</strong></div>
+              <div><span>Órgano / Juzgado / Entidad</span><strong>{{ detalle.organo || '—' }}</strong><small>{{ detalle.distritoJudicial || '' }}</small></div>
+              <div><span>Etapa</span><strong>{{ detalle.etapaProcesal || '—' }}</strong></div>
+              <div><span>Instancia</span><strong>{{ detalle.instancia || '—' }}</strong></div>
+              <div><span>Riesgo</span><strong>{{ detalle.nivelRiesgo }}</strong></div>
+              <div><span>Cuantía</span><strong>{{ moneda(detalle.cuantia, detalle.moneda) }}</strong></div>
+              <div><span>Inicio</span><strong>{{ fecha(detalle.fechaInicio) }}</strong></div>
+              <div><span>Ingreso al estudio</span><strong>{{ fecha(detalle.fechaIngresoEstudio) }}</strong></div>
+              <div><span>Cierre</span><strong>{{ fecha(detalle.fechaCierre) }}</strong></div>
             </div>
-
-
-            <div class="information-row">
-
-              <span>
-                Fecha de inicio
-              </span>
-
-              <strong>
-                15/02/2026
-              </strong>
-
-            </div>
-
+            @if (detalle.resumen) {
+              <div class="case-summary">
+                <span>Resumen</span>
+                <p>{{ detalle.resumen }}</p>
+              </div>
+            }
           </section>
 
-
-          <!-- ============================================= -->
-          <!-- RESPONSABLE -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <h4>
-              Abogado Responsable
-            </h4>
-
-
-            <div class="lawyer-detail">
-
-              <span class="lawyer-avatar">
-                CM
-              </span>
-
-              <div>
-
-                <strong>
-                  Carlos Mendoza Rojas
-                </strong>
-
-                <span>
-                  Abogado responsable
-                </span>
-
-              </div>
-
+          <section class="detail-card-block">
+            <div class="block-title">
+              <h3>Línea de tiempo completa</h3>
+              <span>{{ lineaTiempo.length }} evento(s)</span>
             </div>
 
+            <div class="timeline-full">
+              @if (cargandoLineaTiempo) {
+                <div class="detail-loading">Cargando línea de tiempo...</div>
+              } @else if (errorLineaTiempo) {
+                <div class="inline-warning">
+                  <span>{{ errorLineaTiempo }}</span>
+                  <button type="button" (click)="reintentarDetalle()">Reintentar</button>
+                </div>
+              } @else {
+              @for (evento of lineaTiempo; track evento.clave) {
+                <article class="timeline-entry">
+                  <div class="timeline-marker" [ngClass]="claseEvento(evento.tipo)">{{ iconoEvento(evento.tipo) }}</div>
+                  <div class="timeline-body">
+                    <div class="timeline-entry-head">
+                      <div>
+                        <span class="timeline-type">{{ evento.tipo.replace('_', ' ') }}</span>
+                        <h4>{{ evento.titulo }}</h4>
+                      </div>
+                      <time>{{ fecha(evento.fechaHora, true) }}</time>
+                    </div>
+                    @if (evento.descripcion) { <p>{{ evento.descripcion }}</p> }
+                    <div class="timeline-meta">
+                      <span>Usuario: {{ evento.usuario || 'Sistema' }}</span>
+                      @if (evento.documentoUuid) { <span class="relation-chip">Documento relacionado</span> }
+                      @if (evento.plazoUuid) { <span class="relation-chip">Plazo relacionado</span> }
+                      @if (evento.tareaUuid) { <span class="relation-chip">Tarea relacionada</span> }
+                    </div>
+                  </div>
+                </article>
+              } @empty {
+                <div class="empty-state"><strong>Sin eventos</strong><span>Aún no existe actividad para este expediente.</span></div>
+              }
+              }
+            </div>
           </section>
-
-
-          <!-- ============================================= -->
-          <!-- PRÓXIMAS ACTUACIONES -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <div class="section-title-row">
-
-              <h4>
-                Próximas Actuaciones
-              </h4>
-
-              <span class="counter">
-                3
-              </span>
-
-            </div>
-
-
-            <div class="event-item">
-
-              <div class="event-icon purple-event">
-                ▦
-              </div>
-
-              <div>
-
-                <strong>
-                  Audiencia
-                </strong>
-
-                <span>
-                  10/06/2026 · 09:00 AM
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="event-item">
-
-              <div class="event-icon orange-event">
-                ◷
-              </div>
-
-              <div>
-
-                <strong>
-                  Presentación de escrito
-                </strong>
-
-                <span>
-                  12/06/2026
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="event-item">
-
-              <div class="event-icon red-event">
-                !
-              </div>
-
-              <div>
-
-                <strong>
-                  Vencimiento de plazo
-                </strong>
-
-                <span>
-                  15/06/2026
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- DOCUMENTOS -->
-          <!-- ============================================= -->
-
-          <section class="detail-section">
-
-            <div class="section-title-row">
-
-              <h4>
-                Documentos Recientes
-              </h4>
-
-              <span class="counter">
-                3
-              </span>
-
-            </div>
-
-
-            <div class="document-item">
-
-              <span class="document-icon">
-                PDF
-              </span>
-
-              <div>
-
-                <strong>
-                  Demanda de Alimentos
-                </strong>
-
-                <span>
-                  28/05/2026
-                </span>
-
-              </div>
-
-              <span class="download-icon">
-                ↓
-              </span>
-
-            </div>
-
-
-            <div class="document-item">
-
-              <span class="document-icon">
-                PDF
-              </span>
-
-              <div>
-
-                <strong>
-                  Resolución N.° 006
-                </strong>
-
-                <span>
-                  28/05/2026
-                </span>
-
-              </div>
-
-              <span class="download-icon">
-                ↓
-              </span>
-
-            </div>
-
-
-            <div class="document-item">
-
-              <span class="document-icon word">
-                DOC
-              </span>
-
-              <div>
-
-                <strong>
-                  Escrito Complementario
-                </strong>
-
-                <span>
-                  25/05/2026
-                </span>
-
-              </div>
-
-              <span class="download-icon">
-                ↓
-              </span>
-
-            </div>
-
-          </section>
-
-
-          <!-- ============================================= -->
-          <!-- BOTÓN VISUAL -->
-          <!-- ============================================= -->
-
-          <button
-            type="button"
-            class="detail-main-button"
-          >
-            Ver expediente completo
-          </button>
-
-
         </div>
 
-      </aside>
+        <aside class="full-detail-side">
+          <section class="detail-card-block">
+            <h3>Equipo responsable</h3>
+            <div class="people-list">
+              @for (miembro of detalle.equipo; track miembro.usuarioId) {
+                <div class="person-row">
+                  <span>{{ iniciales(miembro.nombre) }}</span>
+                  <div><strong>{{ miembro.nombre }}</strong><small>{{ miembro.rol }}</small></div>
+                </div>
+              }
+            </div>
+          </section>
 
-    </div>
+          <section class="detail-card-block">
+            <h3>Contrapartes</h3>
+            <div class="people-list">
+              @for (contraparte of detalle.contrapartes; track contraparte.id) {
+                <div class="person-row neutral-avatar">
+                  <span>{{ iniciales(contraparte.nombre) }}</span>
+                  <div><strong>{{ contraparte.nombre }}</strong><small>{{ contraparte.detalle }}</small></div>
+                </div>
+              } @empty {
+                <p class="muted-text">No hay contrapartes asociadas.</p>
+              }
+            </div>
+          </section>
 
-  </main>
+          <section class="detail-card-block quick-info">
+            <h3>Fechas clave</h3>
+            <div><span>Última actuación</span><strong>{{ fecha(detalle.fechaUltimaActuacion, true) }}</strong></div>
+            <div><span>Resultado</span><strong>{{ detalle.resultado || 'Pendiente' }}</strong></div>
+            <div><span>Confidencial</span><strong>{{ detalle.confidencial ? 'Sí' : 'No' }}</strong></div>
+          </section>
+        </aside>
+      </div>
+      }
+    </section>
+  </div>
+}
 
-</div>
+@if (modalFormulario) {
+  <div class="modal-overlay form-overlay" (mousedown)="cerrarFormulario()">
+    <section class="expediente-modal form-modal" (mousedown)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div>
+          <span class="modal-kicker">{{ editandoUuid ? 'Modificar ficha' : 'Nuevo registro' }}</span>
+          <h2>{{ editandoUuid ? 'Editar expediente' : 'Registrar expediente' }}</h2>
+          <p>Los campos con * son obligatorios.</p>
+        </div>
+        <button type="button" class="modal-close" [disabled]="guardando" (click)="cerrarFormulario()">×</button>
+      </header>
+
+      <div class="form-scroll">
+        <div class="form-section-title">Identificación y partes</div>
+        <div class="form-grid">
+          <label>
+            <span>N.º de expediente</span>
+            <input [(ngModel)]="formulario.numeroExpediente" placeholder="Ej. 01452-2026-0-1601-JR-FC-03">
+          </label>
+          <label>
+            <span>Año *</span>
+            <input type="number" [(ngModel)]="formulario.anio" min="2000" max="2100">
+          </label>
+          <label class="span-2">
+            <span>Cliente *</span>
+            <select [(ngModel)]="formulario.clienteId">
+              <option [ngValue]="null">Seleccionar cliente</option>
+              @for (cliente of catalogos.clientes; track cliente.id) {
+                <option [ngValue]="cliente.id">{{ cliente.nombre }} · {{ cliente.detalle }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <div class="form-section-title">Clasificación</div>
+        <div class="form-grid">
+          <label>
+            <span>Especialidad *</span>
+            <select [(ngModel)]="formulario.especialidadId" (change)="onEspecialidadChange()">
+              <option [ngValue]="null">Seleccionar</option>
+              @for (especialidad of catalogos.especialidades; track especialidad.id) {
+                <option [ngValue]="especialidad.id">{{ especialidad.nombre }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Materia</span>
+            <select [(ngModel)]="formulario.materiaId">
+              <option [ngValue]="null">Sin materia</option>
+              @for (materia of materiasFormulario(); track materia.id) {
+                <option [ngValue]="materia.id">{{ materia.nombre }}</option>
+              }
+            </select>
+          </label>
+          <label class="span-2">
+            <span>Órgano / Juzgado / Entidad</span>
+            <select [(ngModel)]="formulario.organoId">
+              <option [ngValue]="null">Sin órgano asignado</option>
+              @for (organo of catalogos.organos; track organo.id) {
+                <option [ngValue]="organo.id">{{ organo.nombre }} · {{ organo.detalle }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Etapa procesal</span>
+            <input [(ngModel)]="formulario.etapaProcesal" placeholder="Ej. Postulatoria">
+          </label>
+          <label>
+            <span>Instancia</span>
+            <select [(ngModel)]="formulario.instancia">
+              <option [ngValue]="null">Sin definir</option>
+              <option value="PRIMERA">Primera</option>
+              <option value="SEGUNDA">Segunda</option>
+              <option value="CASACION">Casación</option>
+              <option value="ADMINISTRATIVA">Administrativa</option>
+              <option value="ARBITRAL">Arbitral</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-section-title">Estado, riesgo y cuantía</div>
+        <div class="form-grid">
+          <label>
+            <span>Estado *</span>
+            <select [(ngModel)]="formulario.estadoId">
+              <option [ngValue]="null">Seleccionar</option>
+              @for (estado of catalogos.estados; track estado.id) {
+                <option [ngValue]="estado.id">{{ estado.nombre }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Riesgo *</span>
+            <select [(ngModel)]="formulario.nivelRiesgo">
+              <option value="BAJO">Bajo</option>
+              <option value="MEDIO">Medio</option>
+              <option value="ALTO">Alto</option>
+              <option value="CRITICO">Crítico</option>
+            </select>
+          </label>
+          <label>
+            <span>Cuantía</span>
+            <input type="number" min="0" step="0.01" [(ngModel)]="formulario.cuantia" placeholder="0.00">
+          </label>
+          <label>
+            <span>Moneda</span>
+            <select [(ngModel)]="formulario.moneda">
+              <option value="PEN">PEN - Soles</option>
+              <option value="USD">USD - Dólares</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="form-section-title">Responsables</div>
+        <div class="form-grid">
+          <label>
+            <span>Abogado responsable *</span>
+            <select [(ngModel)]="formulario.abogadoResponsableId">
+              <option [ngValue]="null">Seleccionar responsable</option>
+              @for (usuario of catalogos.usuarios; track usuario.id) {
+                <option [ngValue]="usuario.id">{{ usuario.nombre }}</option>
+              }
+            </select>
+          </label>
+          <label>
+            <span>Socio supervisor</span>
+            <select [(ngModel)]="formulario.socioSupervisorId">
+              <option [ngValue]="null">Sin supervisor</option>
+              @for (usuario of catalogos.usuarios; track usuario.id) {
+                <option [ngValue]="usuario.id">{{ usuario.nombre }}</option>
+              }
+            </select>
+          </label>
+        </div>
+        <div class="checkbox-panel">
+          <strong>Equipo de apoyo</strong>
+          <div class="checkbox-grid">
+            @for (usuario of catalogos.usuarios; track usuario.id) {
+              @if (usuario.id !== formulario.abogadoResponsableId) {
+                <label class="check-option">
+                  <input type="checkbox" [checked]="contiene(formulario.equipoIds, usuario.id)"
+                    (change)="toggleEquipo(usuario.id, $any($event.target).checked)">
+                  <span>{{ usuario.nombre }}</span>
+                </label>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="form-section-title">Contrapartes</div>
+        <div class="checkbox-panel">
+          <div class="checkbox-grid">
+            @for (contraparte of catalogos.contrapartes; track contraparte.id) {
+              <label class="check-option">
+                <input type="checkbox" [checked]="contiene(formulario.contraparteIds, contraparte.id)"
+                  (change)="toggleContraparte(contraparte.id, $any($event.target).checked)">
+                <span>{{ contraparte.nombre }}</span>
+              </label>
+            } @empty {
+              <span class="muted-text">No hay contrapartes registradas.</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-section-title">Fechas clave</div>
+        <div class="form-grid">
+          <label><span>Fecha de inicio *</span><input type="date" [(ngModel)]="formulario.fechaInicio"></label>
+          <label><span>Ingreso al estudio</span><input type="date" [(ngModel)]="formulario.fechaIngresoEstudio"></label>
+          <label><span>Fecha de cierre</span><input type="date" [(ngModel)]="formulario.fechaCierre"></label>
+          <label>
+            <span>Resultado</span>
+            <select [(ngModel)]="formulario.resultado">
+              <option [ngValue]="null">Sin resultado</option>
+              <option value="GANADO">Ganado</option>
+              <option value="PERDIDO">Perdido</option>
+              <option value="CONCILIADO">Conciliado</option>
+              <option value="DESISTIDO">Desistido</option>
+              <option value="ARCHIVADO">Archivado</option>
+              <option value="DERIVADO">Derivado</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="textarea-label">
+          <span>Resumen del expediente</span>
+          <textarea rows="4" [(ngModel)]="formulario.resumen" placeholder="Describe brevemente el caso..."></textarea>
+        </label>
+
+        <label class="confidential-toggle">
+          <input type="checkbox" [(ngModel)]="formulario.confidencial">
+          <span>
+            <strong>Expediente confidencial</strong>
+            <small>Solo usuarios autorizados podrán acceder a su contenido.</small>
+          </span>
+        </label>
+      </div>
+
+      <footer class="modal-footer">
+        <button type="button" class="secondary-button" [disabled]="guardando" (click)="cerrarFormulario()">Cancelar</button>
+        <button type="button" class="btn-primary form-save" [disabled]="guardando" (click)="guardarExpediente()">
+          {{ guardando ? 'Guardando...' : (editandoUuid ? 'Guardar cambios' : 'Registrar expediente') }}
+        </button>
+      </footer>
+    </section>
+  </div>
+}
