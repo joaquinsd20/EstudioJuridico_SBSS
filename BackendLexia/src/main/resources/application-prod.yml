@@ -9,6 +9,15 @@
 #   DB_URL       jdbc:mysql://servidor:3306/lexia_db?useUnicode=true&characterEncoding=UTF-8&connectionTimeZone=America/Lima
 #   DB_USERNAME  usuario de aplicacion (NO root)
 #   DB_PASSWORD  su contrasena
+#
+# Solo en el PRIMER arranque (base sin ningun estudio). Crean "Estudio SBSS",
+# sus catalogos por defecto y el Administrador; despues se ignoran y conviene
+# retirar la contrasena del entorno:
+#   LEXIA_ESTUDIO_RUC      RUC del estudio, 11 digitos
+#   LEXIA_ADMIN_EMAIL      correo del Administrador; su dominio pasa a ser el
+#                          dominio_correo_interno del estudio
+#   LEXIA_ADMIN_PASSWORD   minimo 12 caracteres
+#   LEXIA_ADMIN_NOMBRES / LEXIA_ADMIN_APELLIDOS   opcionales
 # =============================================================================
 spring:
   datasource:
