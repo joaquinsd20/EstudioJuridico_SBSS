@@ -40,6 +40,9 @@ public interface ClienteRepository
 
     Optional<Cliente> findByUuidPublicoAndEstudioId(String uuidPublico, Integer estudioId);
 
+    Optional<Cliente> findByEstudioIdAndTipoDocumentoAndNumeroDocumento(
+            Integer estudioId, String tipoDocumento, String numeroDocumento);
+
     /**
      * Cuenta expedientes por cliente, para los ids de UNA pagina. Nativa a
      * proposito: la entidad Expediente todavia no existe en el backend. Se

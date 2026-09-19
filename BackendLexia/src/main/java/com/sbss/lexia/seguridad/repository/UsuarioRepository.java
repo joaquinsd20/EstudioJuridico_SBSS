@@ -38,5 +38,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     /** Busqueda por el identificador que expone la API. El id BIGINT no sale. */
     Optional<Usuario> findByUuidPublico(String uuidPublico);
 
+    Optional<Usuario> findByUuidPublicoAndEstudio_IdAndActivoTrue(String uuidPublico, Integer estudioId);
+
     boolean existsByEmail(String email);
 }

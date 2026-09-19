@@ -1,1409 +1,178 @@
 <div class="layout-wrapper">
-
-  <!-- ================================================ -->
-  <!-- PANEL REUTILIZABLE -->
-  <!-- ================================================ -->
-
   <app-panel></app-panel>
 
-
-  <!-- ================================================ -->
-  <!-- CONTENIDO CLIENTES -->
-  <!-- ================================================ -->
-
   <main class="main-content">
+    <div class="toast error" *ngIf="error">{{ error }}</div>
+    <div class="toast success" *ngIf="exito">{{ exito }}</div>
 
-
-    <!-- ============================================== -->
-    <!-- ENCABEZADO -->
-    <!-- ============================================== -->
-
-    <header class="clientes-header">
-
+    <header class="page-header">
       <div>
-
-        <h1>
-          Gestión Integral de Clientes
-        </h1>
-
-        <p>
-          Consulta y administra la información general de tus clientes.
-        </p>
-
+        <h1>Gestión Integral de Clientes</h1>
+        <p>Registro, ficha del cliente y revisión de conflictos de intereses.</p>
       </div>
-
-
-      <button
-        class="btn-primary"
-        type="button"
-      >
-        <span class="plus">
-          +
-        </span>
-
-        Nuevo Cliente
-      </button>
-
+      <div class="header-actions">
+        <button class="btn secondary" type="button" *ngIf="auth.tienePermiso('CLIENTE_CREAR')" (click)="abrirVerificador()">⚠ Verificar conflicto</button>
+        <button class="btn primary" type="button" *ngIf="auth.tienePermiso('CLIENTE_CREAR')" (click)="abrirNuevo()">＋ Nuevo Cliente</button>
+      </div>
     </header>
 
-
-    <!-- ============================================== -->
-    <!-- INDICADORES -->
-    <!-- ============================================== -->
-
     <section class="stats-grid">
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon purple">
-          👥
-        </div>
-
-        <div class="stat-info">
-
-          <span>
-            Total de clientes
-          </span>
-
-          <strong>
-            128
-          </strong>
-
-          <small>
-            Registrados en el sistema
-          </small>
-
-        </div>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon green">
-          ✓
-        </div>
-
-        <div class="stat-info">
-
-          <span>
-            Clientes activos
-          </span>
-
-          <strong>
-            96
-          </strong>
-
-          <small>
-            75% del total
-          </small>
-
-        </div>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon blue">
-          ▤
-        </div>
-
-        <div class="stat-info">
-
-          <span>
-            Con expedientes
-          </span>
-
-          <strong>
-            72
-          </strong>
-
-          <small>
-            Clientes con casos activos
-          </small>
-
-        </div>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <div class="stat-icon orange">
-          ◷
-        </div>
-
-        <div class="stat-info">
-
-          <span>
-            Nuevos este mes
-          </span>
-
-          <strong>
-            12
-          </strong>
-
-          <small>
-            +8% respecto al mes anterior
-          </small>
-
-        </div>
-
-      </article>
-
+      <article class="stat-card"><span class="stat-icon purple">👥</span><div><small>Total de clientes</small><strong>{{ resumen.total }}</strong><span>Registrados en el estudio</span></div></article>
+      <article class="stat-card"><span class="stat-icon green">✓</span><div><small>Clientes activos</small><strong>{{ resumen.activos }}</strong><span>Atención vigente</span></div></article>
+      <article class="stat-card"><span class="stat-icon blue">▤</span><div><small>Con expedientes</small><strong>{{ resumen.conExpedientes }}</strong><span>Con casos vinculados</span></div></article>
+      <article class="stat-card"><span class="stat-icon orange">◷</span><div><small>Nuevos este mes</small><strong>{{ resumen.nuevosEsteMes }}</strong><span>Altas recientes</span></div></article>
     </section>
-
-
-    <!-- ============================================== -->
-    <!-- FILTROS VISUALES -->
-    <!-- ============================================== -->
 
     <section class="filters-card">
-
-
-      <div class="filter-input search-input">
-
-        <span class="search-icon">
-          ⌕
-        </span>
-
-        <input
-          type="text"
-          placeholder="DNI / RUC"
-        >
-
-      </div>
-
-
-      <div class="filter-input">
-
-        <input
-          type="text"
-          placeholder="Nombre / Razón Social"
-        >
-
-      </div>
-
-
+      <label><span>DNI / RUC</span><input [(ngModel)]="filtros.documento" (keyup.enter)="buscar()" placeholder="Buscar documento"></label>
+      <label><span>Nombre / Razón Social</span><input [(ngModel)]="filtros.nombre" (keyup.enter)="buscar()" placeholder="Buscar cliente"></label>
       <div class="filter-block">
-
-        <span class="filter-title">
-          Tipo de Cliente
-        </span>
-
+        <span>Tipo de cliente</span>
         <div class="toggle-group">
-
-          <button
-            type="button"
-            class="toggle-button active"
-          >
-            Todos
-          </button>
-
-          <button
-            type="button"
-            class="toggle-button"
-          >
-            Natural
-          </button>
-
-          <button
-            type="button"
-            class="toggle-button"
-          >
-            Jurídica
-          </button>
-
+          <button [class.active]="!filtros.tipoPersona" (click)="filtrarTipo('')">Todos</button>
+          <button [class.active]="filtros.tipoPersona === 'NATURAL'" (click)="filtrarTipo('NATURAL')">Natural</button>
+          <button [class.active]="filtros.tipoPersona === 'JURIDICA'" (click)="filtrarTipo('JURIDICA')">Jurídica</button>
+          <button [class.active]="filtros.tipoPersona === 'ENTIDAD_PUBLICA'" (click)="filtrarTipo('ENTIDAD_PUBLICA')">Pública</button>
         </div>
-
       </div>
-
-
-      <div class="filter-block">
-
-        <span class="filter-title">
-          Estado
-        </span>
-
-        <select>
-          <option>
-            Todos
-          </option>
-
-          <option>
-            Activo
-          </option>
-
-          <option>
-            Inactivo
-          </option>
-        </select>
-
-      </div>
-
-
-      <button
-        type="button"
-        class="clear-button"
-      >
-        ×
-      </button>
-
+      <label><span>Estado</span><select [(ngModel)]="filtros.estado" (change)="buscar()"><option value="">Todos</option><option value="PROSPECTO">Potencial</option><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option><option value="ANTIGUO">Antiguo</option></select></label>
+      <button class="icon-clear" title="Limpiar filtros" (click)="limpiarFiltros()">×</button>
     </section>
 
-
-    <!-- ============================================== -->
-    <!-- CONTENIDO PRINCIPAL -->
-    <!-- ============================================== -->
-
-    <div class="clientes-layout">
-
-
-      <!-- ============================================ -->
-      <!-- ZONA IZQUIERDA -->
-      <!-- ============================================ -->
-
-      <div class="clientes-left">
-
-
-        <!-- ========================================== -->
-        <!-- TABLA -->
-        <!-- ========================================== -->
-
-        <section class="card clientes-table-card">
-
-
-          <div class="card-header">
-
-            <div>
-
-              <h2>
-                Lista de Clientes
-              </h2>
-
-              <span>
-                6 registros encontrados
-              </span>
-
-            </div>
-
-
-            <button
-              type="button"
-              class="secondary-button"
-            >
-              + Nuevo Cliente
-            </button>
-
-          </div>
-
-
-          <div class="table-wrapper">
-
-            <table class="clientes-table">
-
-
-              <thead>
-
-                <tr>
-
-                  <th>
-                    DNI / RUC
-                  </th>
-
-                  <th>
-                    Cliente
-                  </th>
-
-                  <th>
-                    Tipo
-                  </th>
-
-                  <th>
-                    Expedientes
-                  </th>
-
-                  <th>
-                    Estado
-                  </th>
-
-                  <th>
-                    Acciones
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-
-                <!-- CLIENTE 1 -->
-
-                <tr class="selected-row">
-
-                  <td>
-                    <strong>
-                      45876231
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar">
-                        MF
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          María Fernández López
-                        </strong>
-
-                        <span>
-                          maria.fernandez@email.com
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge natural">
-                      P. Natural
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        3
-                      </strong>
-
-                      <span>
-                        casos
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active-status">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- CLIENTE 2 -->
-
-                <tr>
-
-                  <td>
-                    <strong>
-                      10458963217
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar company">
-                        CA
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          Constructora Andina S.A.C.
-                        </strong>
-
-                        <span>
-                          legal@andina.com.pe
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge juridica">
-                      P. Jurídica
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        2
-                      </strong>
-
-                      <span>
-                        casos
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active-status">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- CLIENTE 3 -->
-
-                <tr>
-
-                  <td>
-                    <strong>
-                      70214569
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar">
-                        CR
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          Carlos Ramírez Torres
-                        </strong>
-
-                        <span>
-                          carlos.ramirez@email.com
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge natural">
-                      P. Natural
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        1
-                      </strong>
-
-                      <span>
-                        caso
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active-status">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- CLIENTE 4 -->
-
-                <tr>
-
-                  <td>
-                    <strong>
-                      20608741258
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar company">
-                        IN
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          Inversiones del Norte E.I.R.L.
-                        </strong>
-
-                        <span>
-                          administracion@inversionesnorte.pe
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge juridica">
-                      P. Jurídica
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        4
-                      </strong>
-
-                      <span>
-                        casos
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active-status">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- CLIENTE 5 -->
-
-                <tr>
-
-                  <td>
-                    <strong>
-                      43125698
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar">
-                        LM
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          Lucía Mendoza Ruiz
-                        </strong>
-
-                        <span>
-                          lucia.mendoza@email.com
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge natural">
-                      P. Natural
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        0
-                      </strong>
-
-                      <span>
-                        casos
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status inactive-status">
-                      Inactivo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- CLIENTE 6 -->
-
-                <tr>
-
-                  <td>
-                    <strong>
-                      20145698732
-                    </strong>
-                  </td>
-
-
-                  <td>
-
-                    <div class="client-cell">
-
-                      <div class="client-avatar company">
-                        SJ
-                      </div>
-
-                      <div class="client-information">
-
-                        <strong>
-                          Servicios Jurídicos Norte S.A.C.
-                        </strong>
-
-                        <span>
-                          contacto@serviciosnorte.pe
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="type-badge juridica">
-                      P. Jurídica
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-number">
-
-                      <strong>
-                        2
-                      </strong>
-
-                      <span>
-                        casos
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status active-status">
-                      Activo
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="actions">
-
-                      <button type="button">
-                        ◉
-                      </button>
-
-                      <button type="button">
-                        ✎
-                      </button>
-
-                      <button type="button">
-                        •••
-                      </button>
-
-                    </div>
-
-                  </td>
-
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </section>
-
-
-        <!-- ========================================== -->
-        <!-- GRÁFICOS -->
-        <!-- ========================================== -->
-
-        <section class="charts-grid">
-
-
-          <!-- DONUT -->
-
-          <article class="card chart-card">
-
-            <div class="chart-header">
-
-              <span class="chart-icon">
-                ◷
-              </span>
-
-              <h3>
-                Resumen de Clientes por Estado
-              </h3>
-
-            </div>
-
-
-            <div class="donut-container">
-
-              <div class="donut-chart">
-
-                <div class="donut-hole">
-
-                  <strong>
-                    128
-                  </strong>
-
-                  <span>
-                    Total
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="chart-legend">
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-dot green-dot"></i>
-                    Activos
-                  </span>
-
-                  <strong>
-                    96
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-dot purple-dot"></i>
-                    Persona Natural
-                  </span>
-
-                  <strong>
-                    78
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-dot blue-dot"></i>
-                    Persona Jurídica
-                  </span>
-
-                  <strong>
-                    38
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-dot red-dot"></i>
-                    Inactivos
-                  </span>
-
-                  <strong>
-                    12
-                  </strong>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </article>
-
-
-          <!-- EVOLUCIÓN -->
-
-          <article class="card chart-card">
-
-            <div class="chart-header">
-
-              <span class="chart-icon">
-                ↗
-              </span>
-
-              <h3>
-                Evolución de Nuevos Clientes
-              </h3>
-
-            </div>
-
-
-            <div class="line-chart">
-
-              <div class="chart-y">
-
-                <span>20</span>
-                <span>15</span>
-                <span>10</span>
-                <span>5</span>
-                <span>0</span>
-
-              </div>
-
-
-              <div class="line-area">
-
-                <svg
-                  viewBox="0 0 500 170"
-                  preserveAspectRatio="none"
-                >
-
-                  <defs>
-
-                    <linearGradient
-                      id="clientesGradient"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="1"
-                    >
-
-                      <stop
-                        offset="0%"
-                        stop-color="#6366f1"
-                        stop-opacity=".25"
-                      />
-
-                      <stop
-                        offset="100%"
-                        stop-color="#6366f1"
-                        stop-opacity="0"
-                      />
-
-                    </linearGradient>
-
-                  </defs>
-
-
-                  <path
-                    d="
-                      M0 135
-                      C40 120, 65 90, 100 97
-                      C145 108, 165 70, 210 77
-                      C255 85, 280 42, 325 55
-                      C370 70, 410 43, 500 17
-                      L500 170
-                      L0 170 Z
-                    "
-                    fill="url(#clientesGradient)"
-                  />
-
-
-                  <path
-                    d="
-                      M0 135
-                      C40 120, 65 90, 100 97
-                      C145 108, 165 70, 210 77
-                      C255 85, 280 42, 325 55
-                      C370 70, 410 43, 500 17
-                    "
-                    fill="none"
-                    stroke="#5b3bc4"
-                    stroke-width="3"
-                  />
-
-                </svg>
-
-
-                <div class="months">
-
-                  <span>Ene</span>
-                  <span>Mar</span>
-                  <span>May</span>
-                  <span>Jul</span>
-                  <span>Sep</span>
-                  <span>Nov</span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </article>
-
-        </section>
-
-      </div>
-
-
-      <!-- ============================================ -->
-      <!-- PANEL DERECHO -->
-      <!-- ============================================ -->
+    <div class="content-grid">
+      <section class="card table-card">
+        <div class="card-header">
+          <div><h2>Lista de Clientes</h2><span>{{ totalElementos }} registros encontrados</span></div>
+          <button class="btn small primary" *ngIf="auth.tienePermiso('CLIENTE_CREAR')" (click)="abrirNuevo()">＋ Nuevo Cliente</button>
+        </div>
+
+        <div class="loading" *ngIf="cargando">Cargando clientes...</div>
+        <div class="table-wrapper" *ngIf="!cargando">
+          <table>
+            <thead><tr><th>DNI / RUC</th><th>Cliente</th><th>Tipo</th><th>Expedientes</th><th>Estado</th><th>Responsable</th><th>Acciones</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let c of clientes" [class.selected]="seleccionado?.uuid === c.uuid" (click)="seleccionar(c)">
+                <td><strong>{{ c.numeroDocumento }}</strong><small>{{ c.tipoDocumento }}</small></td>
+                <td><div class="client-cell"><span class="avatar">{{ iniciales(c.nombre) }}</span><div><strong>{{ c.nombre }}</strong><small>{{ c.email || c.telefonoPrincipal || 'Sin contacto registrado' }}</small></div></div></td>
+                <td><span class="badge type">{{ nombreTipo(c.tipoPersona) }}</span></td>
+                <td><strong>{{ c.totalExpedientes }}</strong> <small>casos</small></td>
+                <td><span class="badge status" [class.active]="c.estado === 'ACTIVO'" [class.prospect]="c.estado === 'PROSPECTO'" [class.inactive]="c.estado === 'INACTIVO' || c.estado === 'ANTIGUO'">{{ nombreEstado(c.estado) }}</span></td>
+                <td>{{ c.abogadoResponsable || 'Sin asignar' }}</td>
+                <td><div class="row-actions"><button title="Ver ficha" (click)="$event.stopPropagation(); seleccionar(c)">◉</button><button *ngIf="auth.tienePermiso('CLIENTE_EDITAR')" title="Editar" (click)="$event.stopPropagation(); abrirEditarCliente(c)">✎</button></div></td>
+              </tr>
+              <tr *ngIf="!clientes.length"><td colspan="7" class="empty">No hay clientes con los filtros seleccionados.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pagination" *ngIf="totalPaginas > 1">
+          <button (click)="cambiarPagina(-1)" [disabled]="pagina === 0">‹ Anterior</button>
+          <span>Página {{ pagina + 1 }} de {{ totalPaginas }}</span>
+          <button (click)="cambiarPagina(1)" [disabled]="pagina + 1 >= totalPaginas">Siguiente ›</button>
+        </div>
+      </section>
 
       <aside class="detail-panel">
+        <div class="detail-header"><h2>Ficha del cliente</h2><button *ngIf="ficha" (click)="limpiarSeleccion()">×</button></div>
+        <div class="loading" *ngIf="cargandoFicha">Cargando ficha...</div>
+        <div class="empty-detail" *ngIf="!ficha && !cargandoFicha">Selecciona un cliente para ver su información.</div>
 
+        <div class="detail-content" *ngIf="ficha && !cargandoFicha">
+          <div class="profile"><span class="profile-avatar">{{ iniciales(ficha.cliente.nombre) }}</span><div><h3>{{ ficha.cliente.nombre }}</h3><span>{{ nombreTipo(ficha.cliente.tipoPersona) }}</span></div></div>
+          <div class="detail-toolbar">
+            <button class="btn small secondary" *ngIf="auth.tienePermiso('CLIENTE_EDITAR')" (click)="abrirEditar()">Editar ficha</button>
+            <button class="btn small primary" *ngIf="auth.tienePermiso('CLIENTE_EDITAR')" (click)="abrirComunicacion()">＋ Comunicación</button>
+          </div>
 
-        <div class="detail-header">
+          <section class="detail-section">
+            <h4>Identificación y contacto</h4>
+            <div class="kv"><span>{{ ficha.cliente.tipoDocumento }}</span><strong>{{ ficha.cliente.numeroDocumento }}</strong></div>
+            <div class="kv"><span>Estado</span><strong>{{ nombreEstado(ficha.cliente.estado) }}</strong></div>
+            <div class="kv"><span>Teléfono</span><strong>{{ ficha.cliente.telefonoPrincipal || '—' }}</strong></div>
+            <div class="kv"><span>Correo</span><strong>{{ ficha.cliente.email || '—' }}</strong></div>
+            <div class="kv"><span>Domicilio</span><strong>{{ ficha.cliente.direccion || '—' }}</strong></div>
+            <div class="kv"><span>Ubicación</span><strong>{{ ubicacionCliente() }}</strong></div>
+          </section>
 
-          <h2>
-            Detalles del Cliente Seleccionado
-          </h2>
+          <section class="detail-section">
+            <div class="section-title"><h4>Representantes / contactos autorizados</h4><span>{{ ficha.contactos.length }}</span></div>
+            <div class="mini-card" *ngFor="let c of ficha.contactos"><strong>{{ c.nombreCompleto }}</strong><span>{{ c.cargo || 'Contacto' }}</span><small>{{ c.numeroDocumento || 'Sin documento' }} · {{ c.telefono || c.email || 'Sin contacto' }}</small><em *ngIf="c.representanteLegal">Representante legal</em></div>
+            <p class="muted" *ngIf="!ficha.contactos.length">Sin contactos registrados.</p>
+          </section>
 
-          <button type="button">
-            ×
-          </button>
+          <section class="detail-section">
+            <div class="section-title"><h4>Personas / empresas vinculadas</h4><span>{{ ficha.vinculados.length }}</span></div>
+            <div class="mini-card" *ngFor="let v of ficha.vinculados"><strong>{{ v.nombre }}</strong><span>{{ v.relacion || nombreTipo(v.tipoPersona) }}</span><small>{{ v.numeroDocumento || 'Sin documento' }}</small></div>
+            <p class="muted" *ngIf="!ficha.vinculados.length">Sin vinculados registrados.</p>
+          </section>
 
+          <section class="detail-section">
+            <div class="section-title"><h4>Expedientes</h4><span>{{ ficha.expedientes.length }}</span></div>
+            <div class="case-card" *ngFor="let e of ficha.expedientes"><div><strong>{{ e.codigoInterno }}</strong><span>{{ e.numeroExpediente || 'Sin número judicial' }}</span></div><div><b>{{ e.materia }}</b><small>{{ e.estado }}</small></div></div>
+            <p class="muted" *ngIf="!ficha.expedientes.length">El cliente todavía no tiene expedientes.</p>
+          </section>
+
+          <section class="detail-section">
+            <h4>Situación financiera</h4>
+            <div class="finance-box"><strong>{{ ficha.cliente.situacionFinanciera || 'Sin evaluación' }}</strong><span>Clasificación registrada en la ficha</span></div>
+          </section>
+
+          <section class="detail-section">
+            <div class="section-title"><h4>Comunicaciones</h4><span>{{ ficha.comunicaciones.length }}</span></div>
+            <div class="timeline-item" *ngFor="let x of ficha.comunicaciones"><span class="timeline-icon">{{ x.tipo === 'LLAMADA' ? '☎' : x.tipo === 'EMAIL' ? '✉' : x.tipo === 'WHATSAPP' ? '◉' : '◇' }}</span><div><strong>{{ x.asunto }}</strong><span>{{ x.tipo }} · {{ x.fecha | date:'dd/MM/yyyy HH:mm' }}</span><small>{{ x.detalle || x.canal || '' }}</small></div></div>
+            <p class="muted" *ngIf="!ficha.comunicaciones.length">Sin comunicaciones registradas.</p>
+          </section>
+
+          <section class="detail-section" *ngIf="ficha.cliente.observaciones"><h4>Observaciones</h4><p class="observations">{{ ficha.cliente.observaciones }}</p></section>
         </div>
-
-
-        <div class="detail-content">
-
-
-          <!-- PERFIL -->
-
-          <div class="profile">
-
-            <div class="profile-avatar">
-              MF
-            </div>
-
-            <div>
-
-              <h3>
-                María Fernández López
-              </h3>
-
-              <span>
-                Persona Natural
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <!-- DATOS -->
-
-          <div class="detail-row">
-
-            <span>
-              DNI
-            </span>
-
-            <strong>
-              45876231
-            </strong>
-
-          </div>
-
-
-          <div class="detail-row">
-
-            <span>
-              Estado
-            </span>
-
-            <strong class="client-active">
-              Activo
-            </strong>
-
-          </div>
-
-
-          <!-- CONTACTO -->
-
-          <section class="detail-section">
-
-            <h4>
-              Información de Contacto
-            </h4>
-
-
-            <div class="contact-item">
-
-              <div class="contact-icon">
-                ☎
-              </div>
-
-              <div>
-
-                <small>
-                  Teléfono
-                </small>
-
-                <strong>
-                  +51 987 654 321
-                </strong>
-
-              </div>
-
-            </div>
-
-
-            <div class="contact-item">
-
-              <div class="contact-icon">
-                ✉
-              </div>
-
-              <div>
-
-                <small>
-                  Correo electrónico
-                </small>
-
-                <strong>
-                  maria.fernandez@email.com
-                </strong>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <!-- EXPEDIENTES -->
-
-          <section class="detail-section">
-
-            <div class="section-title">
-
-              <h4>
-                Expedientes Activos
-              </h4>
-
-              <span class="counter">
-                2
-              </span>
-
-            </div>
-
-
-            <div class="expediente-card">
-
-              <div>
-
-                <strong>
-                  EXP. 01452-2026
-                </strong>
-
-                <span>
-                  Expediente vinculado
-                </span>
-
-              </div>
-
-              <span class="matter-badge">
-                Alimentos
-              </span>
-
-            </div>
-
-
-            <div class="expediente-card">
-
-              <div>
-
-                <strong>
-                  EXP. 00521-2026
-                </strong>
-
-                <span>
-                  Expediente vinculado
-                </span>
-
-              </div>
-
-              <span class="matter-badge">
-                Tenencia
-              </span>
-
-            </div>
-
-          </section>
-
-
-          <!-- ACTIVIDAD -->
-
-          <section class="detail-section">
-
-            <h4>
-              Actividad Reciente
-            </h4>
-
-
-            <div class="activity-item">
-
-              <div class="activity-icon">
-                ▤
-              </div>
-
-              <div>
-
-                <strong>
-                  Ficha del cliente actualizada
-                </strong>
-
-                <span>
-                  Hace 2 días
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="activity-item">
-
-              <div class="activity-icon">
-                ◇
-              </div>
-
-              <div>
-
-                <strong>
-                  Documento de vinculación
-                </strong>
-
-                <span>
-                  Hace 5 días
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="activity-item">
-
-              <div class="activity-icon">
-                ☎
-              </div>
-
-              <div>
-
-                <strong>
-                  Contacto telefónico registrado
-                </strong>
-
-                <span>
-                  Hace 1 semana
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-        </div>
-
       </aside>
-
     </div>
-
   </main>
+</div>
 
+<!-- MODAL CLIENTE -->
+<div class="modal-backdrop" *ngIf="modalCliente">
+  <section class="modal large">
+    <header><div><h2>{{ modoEdicion ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2><p>{{ modoEdicion ? 'Actualiza la ficha y relaciones del cliente.' : 'El sistema verificará conflictos antes de registrar.' }}</p></div><button (click)="cerrarCliente()">×</button></header>
+    <div class="modal-body">
+      <div class="form-section"><h3>1. Identificación</h3><div class="form-grid cols-3">
+        <label><span>Tipo de persona *</span><select [(ngModel)]="form.tipoPersona"><option value="NATURAL">Persona Natural</option><option value="JURIDICA">Persona Jurídica</option><option value="ENTIDAD_PUBLICA">Entidad Pública</option></select></label>
+        <label><span>Tipo documento *</span><select [(ngModel)]="form.tipoDocumento"><option>DNI</option><option>RUC</option><option>CE</option><option>PASAPORTE</option><option>PARTIDA_REGISTRAL</option></select></label>
+        <label><span>Número *</span><input [(ngModel)]="form.numeroDocumento"></label>
+      </div>
+      <div class="form-grid cols-3" *ngIf="form.tipoPersona === 'NATURAL'"><label><span>Nombres *</span><input [(ngModel)]="form.nombres"></label><label><span>Apellido paterno *</span><input [(ngModel)]="form.apellidoPaterno"></label><label><span>Apellido materno</span><input [(ngModel)]="form.apellidoMaterno"></label></div>
+      <div class="form-grid cols-2" *ngIf="form.tipoPersona !== 'NATURAL'"><label><span>Razón social *</span><input [(ngModel)]="form.razonSocial"></label><label><span>Nombre comercial</span><input [(ngModel)]="form.nombreComercial"></label></div></div>
+
+      <div class="form-section"><h3>2. Contacto y domicilio</h3><div class="form-grid cols-3"><label><span>Correo</span><input type="email" [(ngModel)]="form.email"></label><label><span>Teléfono principal</span><input [(ngModel)]="form.telefonoPrincipal"></label><label><span>Teléfono secundario</span><input [(ngModel)]="form.telefonoSecundario"></label></div><div class="form-grid cols-4"><label class="span-2"><span>Dirección</span><input [(ngModel)]="form.direccion"></label><label><span>Distrito</span><input [(ngModel)]="form.distrito"></label><label><span>Provincia</span><input [(ngModel)]="form.provincia"></label><label><span>Departamento</span><input [(ngModel)]="form.departamento"></label></div></div>
+
+      <div class="form-section"><div class="section-row"><h3>3. Representantes / contactos autorizados</h3><button class="btn tiny secondary" (click)="agregarContacto()">＋ Agregar</button></div><div class="repeat-card" *ngFor="let c of form.contactos; let i = index"><button class="remove" (click)="quitarContacto(i)">×</button><div class="form-grid cols-4"><label class="span-2"><span>Nombre completo *</span><input [(ngModel)]="c.nombreCompleto"></label><label><span>Documento</span><select [(ngModel)]="c.tipoDocumento"><option value="DNI">DNI</option><option value="CE">CE</option><option value="PASAPORTE">Pasaporte</option></select></label><label><span>Número</span><input [(ngModel)]="c.numeroDocumento"></label><label><span>Cargo / relación</span><input [(ngModel)]="c.cargo"></label><label><span>Teléfono</span><input [(ngModel)]="c.telefono"></label><label><span>Email</span><input [(ngModel)]="c.email"></label><label><span>N.º poder</span><input [(ngModel)]="c.numeroPoder"></label></div><div class="checks"><label><input type="checkbox" [(ngModel)]="c.representanteLegal"> Representante legal</label><label><input type="checkbox" [(ngModel)]="c.puedeRecibirDocumentos"> Autorizado a recibir documentos</label></div></div><p class="muted" *ngIf="!form.contactos.length">Puedes agregar representantes, apoderados o contactos autorizados.</p></div>
+
+      <div class="form-section"><div class="section-row"><h3>4. Personas / empresas vinculadas</h3><button class="btn tiny secondary" (click)="agregarVinculado()">＋ Agregar</button></div><div class="repeat-card" *ngFor="let v of form.vinculados; let i = index"><button class="remove" (click)="quitarVinculado(i)">×</button><div class="form-grid cols-4"><label><span>Tipo</span><select [(ngModel)]="v.tipoPersona"><option value="NATURAL">Natural</option><option value="JURIDICA">Jurídica</option><option value="ENTIDAD_PUBLICA">Entidad Pública</option></select></label><label class="span-2"><span>Nombre / razón social *</span><input [(ngModel)]="v.nombre"></label><label><span>Relación</span><input [(ngModel)]="v.relacion" placeholder="Familiar, grupo económico..."></label><label><span>Tipo documento</span><select [(ngModel)]="v.tipoDocumento"><option value="DNI">DNI</option><option value="RUC">RUC</option><option value="CE">CE</option><option value="PASAPORTE">Pasaporte</option><option value="PARTIDA_REGISTRAL">Partida registral</option></select></label><label><span>Número</span><input [(ngModel)]="v.numeroDocumento"></label><label class="span-2"><span>Observaciones</span><input [(ngModel)]="v.observaciones"></label></div></div><p class="muted" *ngIf="!form.vinculados.length">Estas relaciones también se cruzarán al verificar conflictos.</p></div>
+
+      <div class="form-section"><h3>5. Gestión y situación financiera</h3><div class="form-grid cols-4"><label><span>Estado *</span><select [(ngModel)]="form.estado"><option value="PROSPECTO">Cliente potencial</option><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option><option value="ANTIGUO">Antiguo</option></select></label><label><span>Situación financiera</span><select [(ngModel)]="form.situacionFinanciera"><option value="">Sin evaluar</option><option value="SOLIDA">Sólida</option><option value="ESTABLE">Estable</option><option value="REGULAR">Regular</option><option value="RIESGO">Riesgo</option><option value="MOROSA">Morosa</option></select></label><label><span>Origen de captación</span><input [(ngModel)]="form.origenCaptacion"></label><label><span>Abogado responsable</span><select [(ngModel)]="form.abogadoResponsableUuid"><option value="">Sin asignar</option><option *ngFor="let a of abogados" [value]="a.uuid">{{ a.nombre }}</option></select></label></div><label class="full"><span>Observaciones</span><textarea [(ngModel)]="form.observaciones" rows="3"></textarea></label></div>
+    </div>
+    <footer><button class="btn secondary" (click)="cerrarCliente()">Cancelar</button><button class="btn primary" [disabled]="guardando" (click)="guardarCliente()">{{ guardando ? 'Procesando...' : (modoEdicion ? 'Guardar cambios' : 'Verificar y registrar') }}</button></footer>
+  </section>
+</div>
+
+<!-- MODAL CONFLICTO -->
+<div class="modal-backdrop" *ngIf="modalConflicto">
+  <section class="modal conflict-modal">
+    <header><div><h2>Verificación de conflicto de intereses</h2><p>Busca coincidencias con clientes, representantes, contrapartes y vinculados.</p></div><button (click)="cancelarConflicto()">×</button></header>
+    <div class="modal-body">
+      <div class="conflict-search" *ngIf="!creacionPendiente"><input [(ngModel)]="conflictoManual.nombre" placeholder="Nombre o razón social"><input [(ngModel)]="conflictoManual.numeroDocumento" placeholder="DNI / RUC"><button class="btn primary" [disabled]="guardando" (click)="verificarManual()">Verificar</button></div>
+      <div class="alert conflict" *ngIf="conflicto?.posibleConflicto">⚠ Se encontraron {{ conflicto?.totalCoincidencias }} coincidencia(s). Revisa antes de continuar.</div>
+      <div class="alert clear" *ngIf="conflicto && !conflicto.posibleConflicto">✓ No se encontraron coincidencias con la información consultada.</div>
+      <div class="conflict-list" *ngIf="conflicto?.coincidencias?.length"><article *ngFor="let c of conflicto?.coincidencias"><div class="conflict-top"><strong>{{ c.nombre }}</strong><span [class.exact]="c.tipoCoincidencia === 'DOCUMENTO_EXACTO'">{{ c.tipoCoincidencia === 'DOCUMENTO_EXACTO' ? 'Documento exacto' : 'Nombre relacionado' }}</span></div><p>{{ origenConflicto(c) }} · {{ c.relacion }}</p><small>{{ c.documento || 'Sin documento' }} · búsqueda: {{ c.terminoBuscado }}</small></article></div>
+    </div>
+    <footer><button class="btn secondary" (click)="cancelarConflicto()">{{ creacionPendiente ? 'Volver y revisar' : 'Cerrar' }}</button><button class="btn danger" *ngIf="creacionPendiente" (click)="confirmarCreacionConConflicto()">Registrar de todas formas</button></footer>
+  </section>
+</div>
+
+<!-- MODAL COMUNICACIÓN -->
+<div class="modal-backdrop" *ngIf="modalComunicacion">
+  <section class="modal small-modal">
+    <header><div><h2>Registrar comunicación</h2><p>{{ ficha?.cliente?.nombre }}</p></div><button (click)="modalComunicacion = false">×</button></header>
+    <div class="modal-body"><div class="form-grid cols-2"><label><span>Tipo *</span><select [(ngModel)]="comunicacion.tipo"><option value="LLAMADA">Llamada</option><option value="EMAIL">Email</option><option value="WHATSAPP">WhatsApp</option><option value="REUNION">Reunión</option><option value="OTRO">Otro</option></select></label><label><span>Canal</span><input [(ngModel)]="comunicacion.canal"></label><label class="span-2"><span>Asunto *</span><input [(ngModel)]="comunicacion.asunto"></label><label class="span-2"><span>Detalle</span><textarea rows="4" [(ngModel)]="comunicacion.detalle"></textarea></label></div></div>
+    <footer><button class="btn secondary" (click)="modalComunicacion = false">Cancelar</button><button class="btn primary" [disabled]="guardando" (click)="guardarComunicacion()">Guardar comunicación</button></footer>
+  </section>
 </div>
