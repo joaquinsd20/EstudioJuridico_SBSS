@@ -1,5 +1,10 @@
 -- =============================================================================
--- LEXIA — V12: ficha ampliada de clientes y apoyo al conflicto de intereses
+-- LEXIA — V14: ficha ampliada de clientes y apoyo al conflicto de intereses
+-- =============================================================================
+-- Renumerada de V12 a V14: mientras esta migracion estaba en curso se mergearon
+-- V12 (roles y permisos) y V13 (cambio de contrasena). Dos migraciones con la
+-- misma version hacen que Flyway aborte el arranque, y git no lo detecta porque
+-- los archivos se llaman distinto.
 -- =============================================================================
 -- V3 ya contiene clientes, representantes/contactos y contrapartes. Esta
 -- migración agrega las relaciones (personas/empresas vinculadas) y un historial
