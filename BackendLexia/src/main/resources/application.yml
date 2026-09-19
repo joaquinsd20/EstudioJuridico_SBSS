@@ -44,6 +44,16 @@ server:
   port: ${SERVER_PORT:8080}
 
 lexia:
+  # Primer estudio y su Administrador. Solo se leen si la tabla `estudios` esta
+  # VACIA (instalacion nueva de produccion); con datos, se ignoran. En desarrollo
+  # la semilla siempre crea un estudio, asi que aqui no hacen falta.
+  # Ver shared/bootstrap/InicializadorEstudio.
+  inicializacion:
+    admin-email: ${LEXIA_ADMIN_EMAIL:}
+    admin-password: ${LEXIA_ADMIN_PASSWORD:}
+    admin-nombres: ${LEXIA_ADMIN_NOMBRES:Administrador}
+    admin-apellidos: ${LEXIA_ADMIN_APELLIDOS:del sistema}
+    estudio-ruc: ${LEXIA_ESTUDIO_RUC:}
   jwt:
     # 8 horas: cubre una jornada de trabajo sin obligar a reautenticarse a media
     # audiencia. El secreto se define por perfil.

@@ -55,11 +55,8 @@ TRUNCATE TABLE estados_expediente;
 TRUNCATE TABLE organos_jurisdiccionales;
 TRUNCATE TABLE materias;
 TRUNCATE TABLE especialidades;
-TRUNCATE TABLE roles_permisos;
 TRUNCATE TABLE usuarios_roles;
 TRUNCATE TABLE usuarios;
-TRUNCATE TABLE permisos;
-TRUNCATE TABLE roles;
 TRUNCATE TABLE estudios;
 SET FOREIGN_KEY_CHECKS = 1;
 
@@ -71,118 +68,44 @@ INSERT INTO estudios (id, razon_social, nombre_comercial, ruc, direccion, telefo
    'Av. Larco 1234, Urb. Los Jardines, Trujillo', '044-201548', 'contacto@lexia.com');
 
 -- =============================================================================
--- ROLES — los 7 del §3 del PDF + RECEPCIONISTA
--- codigo INMUTABLE (lo usa @PreAuthorize) / nombre editable (solo se muestra)
--- nivel_acceso: numero ALTO = MAS acceso
--- =============================================================================
-INSERT INTO roles (id, codigo, nombre, descripcion, nivel_acceso, es_sistema) VALUES
-(1, 'ADMINISTRADOR',    'Administrador',    'Acceso total: configuracion, usuarios, permisos, seguridad, respaldos', 100, 1),
-(2, 'SOCIO',            'Socio / Director', 'Supervision general, plazos criticos, aprobaciones, finanzas',           80, 1),
-(3, 'ABOGADO',          'Abogado',          'Expedientes asignados, actuaciones, tareas, documentos y agenda',        60, 1),
-(4, 'ABOGADO_AUXILIAR', 'Abogado auxiliar', 'Solo expedientes autorizados. Sin finanzas ni confidenciales',           40, 1),
-(5, 'ASISTENTE_LEGAL',  'Asistente legal',  'Documentos, notificaciones, agenda, tareas y soporte',                   30, 1),
-(6, 'CONTABILIDAD',     'Contabilidad',     'Honorarios y pagos. Sin contenido juridico reservado',                   30, 1),
-(7, 'RECEPCIONISTA',    'Recepcionista',    'Registro de clientes potenciales y recepcion de documentos',             20, 0),
-(8, 'CLIENTE',          'Cliente (portal)', 'Estado de su expediente, documentos autorizados y proximas actuaciones', 10, 1);
-
--- =============================================================================
--- PERMISOS
--- =============================================================================
-INSERT INTO permisos (id, codigo, modulo, descripcion) VALUES
-( 1, 'CLIENTE_LEER',           'CLIENTES',    'Consultar lista y ficha de clientes'),
-( 2, 'CLIENTE_CREAR',          'CLIENTES',    'Registrar clientes y verificar conflicto de intereses'),
-( 3, 'CLIENTE_EDITAR',         'CLIENTES',    'Modificar datos de clientes'),
-( 4, 'EXPEDIENTE_LEER',        'EXPEDIENTES', 'Consultar expedientes asignados'),
-( 5, 'EXPEDIENTE_CREAR',       'EXPEDIENTES', 'Aperturar expedientes'),
-( 6, 'EXPEDIENTE_EDITAR',      'EXPEDIENTES', 'Modificar la ficha del expediente'),
-( 7, 'EXPEDIENTE_CONFIDENCIAL','EXPEDIENTES', 'Acceder a expedientes marcados como confidenciales'),
-( 8, 'ACTUACION_LEER',         'ACTUACIONES', 'Consultar actuaciones'),
-( 9, 'ACTUACION_CREAR',        'ACTUACIONES', 'Registrar actuaciones'),
-(10, 'PLAZO_LEER',             'PLAZOS',      'Consultar plazos'),
-(11, 'PLAZO_CREAR',            'PLAZOS',      'Registrar y calcular plazos'),
-(12, 'PLAZO_APROBAR',          'PLAZOS',      'Aprobar un plazo listo para presentar'),
-(13, 'TAREA_LEER',             'TAREAS',      'Consultar el tablero de tareas'),
-(14, 'TAREA_CREAR',            'TAREAS',      'Crear y asignar tareas'),
-(15, 'TAREA_APROBAR',          'TAREAS',      'Aprobar tareas en revision'),
-(16, 'DOCUMENTO_LEER',         'DOCUMENTOS',  'Consultar documentos del expediente'),
-(17, 'DOCUMENTO_CREAR',        'DOCUMENTOS',  'Cargar documentos y versiones'),
-(18, 'DOCUMENTO_DESCARGAR',    'DOCUMENTOS',  'Descargar documentos'),
-(19, 'AGENDA_LEER',            'AGENDA',      'Consultar la agenda'),
-(20, 'AGENDA_CREAR',           'AGENDA',      'Programar eventos y audiencias'),
-(21, 'REPORTE_LEER',           'REPORTES',    'Generar y ver reportes'),
-(22, 'REPORTE_EXPORTAR',       'REPORTES',    'Exportar reportes a Excel o PDF'),
-(23, 'USUARIO_GESTIONAR',      'SEGURIDAD',   'Crear y administrar usuarios'),
-(24, 'ROL_GESTIONAR',          'SEGURIDAD',   'Definir roles y permisos'),
-(25, 'AUDITORIA_LEER',         'SEGURIDAD',   'Consultar el registro de auditoria'),
-(26, 'CONFIGURACION_EDITAR',   'SEGURIDAD',   'Modificar la configuracion del sistema'),
-(27, 'DASHBOARD_LEER',         'DASHBOARD',   'Ver el panel principal'),
--- Los dos permisos del flujo de aprobacion del calendario judicial
-(28, 'CALENDARIO_PROPONER',    'CALENDARIO',  'Registrar feriados y suspensiones de plazos (quedan PROPUESTO)'),
-(29, 'CALENDARIO_APROBAR',     'CALENDARIO',  'Aprobar o rechazar entradas del calendario judicial'),
--- Biblioteca juridica. Repetidos desde V10 a proposito: esta semilla hace
--- TRUNCATE de `permisos` y corre DESPUES de las migraciones, asi que sin estas
--- dos lineas los permisos de V10 desaparecerian en desarrollo.
-(30, 'BIBLIOTECA_LEER',        'BIBLIOTECA',  'Consultar y descargar material de la biblioteca juridica'),
-(31, 'BIBLIOTECA_GESTIONAR',   'BIBLIOTECA',  'Cargar, editar y eliminar material de la biblioteca juridica');
-
--- ROLES_PERMISOS
-INSERT INTO roles_permisos (rol_id, permiso_id) SELECT 1, id FROM permisos;   -- Administrador: todo
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Socio / Director
-(2,1),(2,2),(2,3),(2,4),(2,5),(2,6),(2,7),(2,8),(2,9),(2,10),(2,11),(2,12),(2,13),(2,14),(2,15),
-(2,16),(2,17),(2,18),(2,19),(2,20),(2,21),(2,22),(2,25),(2,27),(2,28),(2,29);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Abogado
-(3,1),(3,2),(3,3),(3,4),(3,5),(3,6),(3,8),(3,9),(3,10),(3,11),(3,13),(3,14),(3,15),
-(3,16),(3,17),(3,18),(3,19),(3,20),(3,21),(3,27),(3,28);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Abogado auxiliar
-(4,1),(4,4),(4,8),(4,9),(4,10),(4,11),(4,13),(4,14),(4,16),(4,17),(4,19),(4,27),(4,28);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Asistente legal
-(5,1),(5,4),(5,8),(5,13),(5,14),(5,16),(5,17),(5,18),(5,19),(5,20),(5,27),(5,28);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Contabilidad
-(6,1),(6,4),(6,21),(6,22),(6,27);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Recepcionista
-(7,1),(7,2),(7,19),(7,27);
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES                        -- Cliente (portal)
-(8,4),(8,16),(8,18);
-
--- Biblioteca juridica (V10). En bloque aparte para no reescribir las filas de
--- arriba. El rol 1 ya los tiene por el SELECT del Administrador.
--- Lectura: los siete roles internos. El portal del cliente queda fuera a
--- proposito — la biblioteca es material de trabajo del estudio, no del caso.
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
-(2,30),(3,30),(4,30),(5,30),(6,30),(7,30);
--- Gestion: Socio y Abogado. Un asistente consulta plantillas, pero decidir que
--- entra a la biblioteca del estudio es criterio profesional.
-INSERT INTO roles_permisos (rol_id, permiso_id) VALUES
-(2,31),(3,31);
+-- ROLES, PERMISOS Y SU MATRIZ: ya NO viven aqui.
+-- Pasaron a V12__roles_y_permisos_del_sistema.sql, porque produccion (que no
+-- carga esta semilla) los necesita igual. Por eso tampoco se truncan arriba:
+-- esta semilla ya no es su duena. Un permiso nuevo va SOLO en una migracion.
+-- Los usuarios de abajo se asignan a los roles por id (1..8), que V12 fija.
 
 -- =============================================================================
 -- USUARIOS — nombres del prototipo, para que las demos coincidan
 -- password_hash: BCrypt cost 12 de la contrasena de DESARROLLO 'Lexia.Dev.2026',
--- igual para los 11 usuarios. Sirve para probar el login en local; todos tienen
--- debe_cambiar_password = 1. Esta semilla no corre en produccion: el perfil prod
+-- igual para los 11 usuarios. Sirve para probar el login en local.
+-- debe_cambiar_password = 0 salvo Lucia (usuario 10), que queda en 1 A PROPOSITO
+-- para probar el flujo de cambio obligatorio: el backend bloquea todo lo demas
+-- hasta que la cambie (CambioPasswordObligatorioFilter). Si los demas tuvieran 1,
+-- cada base nueva obligaria al equipo a cambiar 10 contrasenas y romperia las
+-- pruebas de integracion. Esta semilla no corre en produccion: el perfil prod
 -- no incluye db/seed en flyway.locations.
 -- =============================================================================
 INSERT INTO usuarios (id, estudio_id, tipo_usuario, codigo_usuario, nombres, apellidos,
                       tipo_documento, numero_documento, email, password_hash, telefono,
                       cargo, numero_colegiatura, estado, debe_cambiar_password) VALUES
 ( 1,1,'INTERNO','U-0001','Sofia',     'Ramirez Delgado', 'DNI','44112233','sofia.ramirez@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949112233','Socia principal','CAL-45821','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949112233','Socia principal','CAL-45821','ACTIVO',0),
 ( 2,1,'INTERNO','U-0002','Ana',       'Morales Vega',    'DNI','44223344','ana.morales@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949223344','Abogada','CAL-51203','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949223344','Abogada','CAL-51203','ACTIVO',0),
 ( 3,1,'INTERNO','U-0003','Luis',      'Torres Quiroz',   'DNI','44334455','luis.torres@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949334455','Abogado','CAL-49877','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949334455','Abogado','CAL-49877','ACTIVO',0),
 ( 4,1,'INTERNO','U-0004','Maria',     'Lopez Sanchez',   'DNI','44445566','maria.lopez@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949445566','Abogada auxiliar','CAL-58990','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949445566','Abogada auxiliar','CAL-58990','ACTIVO',0),
 ( 5,1,'INTERNO','U-0005','Ana Maria', 'Fernandez Salas', 'DNI','44556677','anamaria.fernandez@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949556677','Abogada','CAL-47310','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949556677','Abogada','CAL-47310','ACTIVO',0),
 ( 6,1,'INTERNO','U-0006','Juan',      'Perez Rojas',     'DNI','44667788','juan.perez@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949667788','Abogado','CAL-46002','ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949667788','Abogado','CAL-46002','ACTIVO',0),
 ( 7,1,'INTERNO','U-0007','Carlos',    'Mendoza Rios',    'DNI','44778899','carlos.mendoza@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949778899','Administrador de sistemas',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949778899','Administrador de sistemas',NULL,'ACTIVO',0),
 ( 8,1,'INTERNO','U-0008','Rosa',      'Jimenez Vargas',  'DNI','44889900','rosa.jimenez@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949889900','Asistente legal',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949889900','Asistente legal',NULL,'ACTIVO',0),
 ( 9,1,'INTERNO','U-0009','Roberto',   'Diaz Camacho',    'DNI','44990011','roberto.diaz@lexia.com',
-    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949990011','Contador',NULL,'ACTIVO',1),
+    '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949990011','Contador',NULL,'ACTIVO',0),
 (10,1,'INTERNO','U-0010','Lucia',     'Castillo Reyes',  'DNI','44001122','lucia.castillo@lexia.com',
     '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','949001122','Recepcionista',NULL,'ACTIVO',1);
 
@@ -367,7 +290,7 @@ INSERT INTO clientes (id, estudio_id, tipo_persona, tipo_documento, numero_docum
 INSERT INTO usuarios (id, estudio_id, tipo_usuario, nombres, apellidos, email, password_hash,
                       estado, cliente_id, debe_cambiar_password) VALUES
 (11,1,'CLIENTE','Ana Maria','Fernandez Salas','anamaria.fsalas@correo.com',
-   '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','ACTIVO',1,1);
+   '$2a$12$6kg/Qlbe39nKhdxrNi4BAe7N7URnAFo7xnwucHXE2.kaetLjOimLK','ACTIVO',1,0);
 INSERT INTO usuarios_roles (usuario_id, rol_id) VALUES (11,8);
 
 INSERT INTO cliente_contactos (cliente_id, nombre_completo, tipo_documento, numero_documento, cargo,

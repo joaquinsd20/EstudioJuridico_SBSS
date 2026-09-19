@@ -37,7 +37,10 @@ export class LoginComponent {
     this.error.set(null);
 
     this.auth.login(this.formulario.getRawValue()).subscribe({
-      next: () => this.router.navigate(['/dashboard']),
+      // Con contrasena temporal (alta nueva o restablecida) lo primero es
+      // cambiarla: el backend no deja hacer nada mas hasta entonces.
+      next: respuesta => this.router.navigate(
+        [respuesta.usuario.debeCambiarPassword ? '/cambiar-password' : '/dashboard']),
       error: (respuesta: HttpErrorResponse) => {
         this.cargando.set(false);
         this.error.set(this.mensajeDeError(respuesta));

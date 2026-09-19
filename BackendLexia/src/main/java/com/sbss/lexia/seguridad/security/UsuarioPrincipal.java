@@ -1,6 +1,8 @@
 package com.sbss.lexia.seguridad.security;
 
 import com.sbss.lexia.seguridad.entity.Usuario;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +51,10 @@ public class UsuarioPrincipal implements UserDetails {
     private final String nombreCompleto;
     private final boolean habilitado;
     private final boolean noBloqueado;
+    /** Mientras sea true, solo puede consultar /auth/yo y cambiar su contrasena. */
+    private final boolean debeCambiarPassword;
+    /** Version vigente de la contrasena (ver JwtService). Null = nunca se cambio. */
+    private final Instant fechaCambioPassword;
     private final Collection<GrantedAuthority> authorities;
 
     private UsuarioPrincipal(Usuario usuario, Collection<GrantedAuthority> authorities) {
@@ -63,6 +69,11 @@ public class UsuarioPrincipal implements UserDetails {
         this.habilitado = Boolean.TRUE.equals(usuario.getActivo())
                 && "ACTIVO".equals(usuario.getEstado());
         this.noBloqueado = !"BLOQUEADO".equals(usuario.getEstado());
+        this.debeCambiarPassword = Boolean.TRUE.equals(usuario.getDebeCambiarPassword());
+        // LocalDateTime.now() se escribe y se relee con la zona de la JVM, asi
+        // que se convierte con esa misma zona para compararla con el `iat`.
+        this.fechaCambioPassword = usuario.getFechaCambioPassword() == null ? null
+                : usuario.getFechaCambioPassword().atZone(ZoneId.systemDefault()).toInstant();
         this.authorities = authorities;
     }
 

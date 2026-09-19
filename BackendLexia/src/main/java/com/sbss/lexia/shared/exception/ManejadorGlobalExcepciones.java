@@ -129,6 +129,12 @@ public class ManejadorGlobalExcepciones {
      * mas alla de lo que cubre @Valid — p.ej. un campo de ?sort= que existe en
      * la entidad pero no esta en la lista blanca de ordenamientos permitidos.
      */
+    /** 400 con el codigo concreto del problema, para pintarlo bajo el campo correcto. */
+    @ExceptionHandler(PasswordInvalidaException.class)
+    public ResponseEntity<ErrorRespuesta> passwordInvalida(PasswordInvalidaException e) {
+        return ResponseEntity.badRequest().body(ErrorRespuesta.de(400, e.getCodigo(), e.getMessage()));
+    }
+
     @ExceptionHandler(ParametroInvalidoException.class)
     public ResponseEntity<ErrorRespuesta> parametroInvalido(ParametroInvalidoException e) {
         return ResponseEntity.badRequest().body(ErrorRespuesta.de(400,

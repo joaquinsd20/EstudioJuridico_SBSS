@@ -53,21 +53,47 @@ public class JwtService {
                 .subject(usuario.getUuid())
                 .claim("email", usuario.getEmail())
                 .claim("authorities", authorities)
+                .claim(CLAIM_VERSION_PASSWORD, versionPassword(usuario))
                 .issuedAt(Date.from(ahora))
                 .expiration(Date.from(ahora.plusSeconds(expiracionSegundos)))
                 .signWith(clave)
                 .compact();
     }
 
-    /** Devuelve el correo del token, o null si la firma o la vigencia no son validas. */
-    public String emailDelToken(String token) {
+    /**
+     * Version de la contrasena con la que se emitio el token: el instante del
+     * ultimo cambio en segundos, o 0 si nunca se cambio. Al cambiarla, la
+     * version de la base avanza y todo token con la anterior deja de valer.
+     * Comparar por igualdad es exacto; comparar la fecha de emision contra la
+     * del cambio dejaria vivo cualquier token emitido en ese mismo segundo.
+     */
+    static final String CLAIM_VERSION_PASSWORD = "pv";
+
+    public static long versionPassword(UsuarioPrincipal usuario) {
+        Instant cambio = usuario.getFechaCambioPassword();
+        return cambio == null ? 0L : cambio.getEpochSecond();
+    }
+
+    /** Correo y version de contrasena de un token valido. */
+    public record TokenLeido(String email, long versionPassword) {
+    }
+
+    /** Lee el token, o devuelve null si la firma o la vigencia no son validas. */
+    public TokenLeido leer(String token) {
         try {
             Claims claims = Jwts.parser()
                     .verifyWith(clave)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-            return claims.get("email", String.class);
+            String email = claims.get("email", String.class);
+            if (email == null) {
+                return null;
+            }
+            // Un token emitido antes de V13 no trae la version: cuenta como 0,
+            // que solo es valida mientras el usuario no haya cambiado la clave.
+            Number version = claims.get(CLAIM_VERSION_PASSWORD, Number.class);
+            return new TokenLeido(email, version == null ? 0L : version.longValue());
         } catch (JwtException | IllegalArgumentException e) {
             return null;
         }
