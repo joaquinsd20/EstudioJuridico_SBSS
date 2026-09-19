@@ -31,6 +31,12 @@ export interface UsuarioAutenticado {
   nivelAcceso: number;
 }
 
+/** Cambio de la propia contrasena. La confirmacion se valida solo aqui. */
+export interface CambiarPasswordRequest {
+  passwordActual: string;
+  passwordNueva: string;
+}
+
 export interface LoginResponse {
   token: string;
   tipo: string;

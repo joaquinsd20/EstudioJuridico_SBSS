@@ -27,6 +27,21 @@ export const routes: Routes = [
 
 
   /* =======================================================
+     CAMBIAR CONTRASEÑA
+     Obligatoria mientras la contrasena sea temporal; voluntaria
+     desde el panel lateral. authGuard deja pasar solo aqui.
+  ======================================================= */
+
+  {
+    path: 'cambiar-password',
+    loadComponent: () =>
+      import('./pages/cambiar-password/cambiar-password.component')
+        .then(m => m.CambiarPasswordComponent),
+    canActivate: [authGuard]
+  },
+
+
+  /* =======================================================
      DASHBOARD
   ======================================================= */
 

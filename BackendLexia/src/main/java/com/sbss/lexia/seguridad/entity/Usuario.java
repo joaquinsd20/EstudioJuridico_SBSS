@@ -142,6 +142,10 @@ public class Usuario extends EntidadAuditable {
     @Column(name = "debe_cambiar_password", nullable = false)
     private Boolean debeCambiarPassword = true;
 
+    /** Version de la contrasena: los tokens con otra version dejan de valer (V13). */
+    @Column(name = "fecha_cambio_password")
+    private LocalDateTime fechaCambioPassword;
+
     /**
      * Enlace al cliente para el portal, solo cuando tipoUsuario = CLIENTE. Se
      * mapea como id y no como relacion: la entidad Cliente aun no existe y la FK

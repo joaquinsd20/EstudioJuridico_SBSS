@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { LoginRequest, LoginResponse, UsuarioAutenticado } from '../models/auth.models';
+import { CambiarPasswordRequest, LoginRequest, LoginResponse, UsuarioAutenticado } from '../models/auth.models';
 
 /**
  * Sesion del usuario: iniciar sesion, guardarla y cerrarla.
@@ -33,9 +33,26 @@ export class AuthService {
 
   readonly autenticado = computed(() => this._usuario() !== null);
 
+  /** True mientras la contrasena sea temporal: el backend bloquea todo lo demas. */
+  readonly debeCambiarPassword = computed(() => this._usuario()?.debeCambiarPassword ?? false);
+
   login(credenciales: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credenciales)
+      .pipe(tap(respuesta => this.guardarSesion(respuesta)));
+  }
+
+  /**
+   * Cambia la contrasena del usuario en sesion.
+   *
+   * El backend responde con un token NUEVO: al cambiarla, todos los anteriores
+   * (incluido el que se esta usando) dejan de valer. Por eso se guarda la
+   * respuesta igual que en el login; si no, la siguiente peticion daria 401 y
+   * el interceptor lo sacaria de la aplicacion justo despues de cambiarla.
+   */
+  cambiarPassword(peticion: CambiarPasswordRequest): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${environment.apiUrl}/auth/cambiar-password`, peticion)
       .pipe(tap(respuesta => this.guardarSesion(respuesta)));
   }
 

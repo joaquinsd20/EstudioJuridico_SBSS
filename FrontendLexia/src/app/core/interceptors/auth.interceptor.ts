@@ -32,6 +32,13 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         router.navigate(['/login']);
       }
 
+      // La contrasena es temporal y el guard no lo sabia (p.ej. una sesion
+      // guardada antes de esta version): el backend no deja hacer nada mas
+      // hasta cambiarla, asi que se lleva al usuario a esa pantalla.
+      if (error.status === 403 && error.error?.codigo === 'PASSWORD_CAMBIO_OBLIGATORIO') {
+        router.navigate(['/cambiar-password']);
+      }
+
       return throwError(() => error);
     })
   );

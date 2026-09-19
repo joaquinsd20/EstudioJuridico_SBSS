@@ -1,5 +1,6 @@
 package com.sbss.lexia.seguridad.controller;
 
+import com.sbss.lexia.seguridad.dto.CambiarPasswordRequest;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
 import com.sbss.lexia.seguridad.dto.LoginResponse;
 import com.sbss.lexia.seguridad.dto.UsuarioAutenticadoDto;
@@ -25,6 +26,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest peticion) {
         return ResponseEntity.ok(authService.login(peticion));
+    }
+
+    /**
+     * Cambia la contrasena del propio usuario y devuelve un token nuevo: el
+     * anterior, como cualquier otro emitido antes del cambio, deja de valer.
+     * Es de las pocas rutas permitidas mientras debe_cambiar_password = 1.
+     */
+    @PostMapping("/cambiar-password")
+    public ResponseEntity<LoginResponse> cambiarPassword(
+            @AuthenticationPrincipal UsuarioPrincipal usuario,
+            @Valid @RequestBody CambiarPasswordRequest peticion) {
+        return ResponseEntity.ok(authService.cambiarPassword(usuario.getEmail(), peticion));
     }
 
     /**
