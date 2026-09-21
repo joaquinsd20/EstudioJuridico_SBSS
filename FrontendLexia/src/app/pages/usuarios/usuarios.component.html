@@ -1,985 +1,369 @@
 <div class="layout-wrapper">
 
-  <!-- PANEL REUTILIZABLE -->
   <app-panel></app-panel>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
 
-    <!-- CABECERA -->
     <header class="page-header">
-
       <div>
         <span class="eyebrow">Administración</span>
-
-        <h1>
-          Gestión de usuarios
-        </h1>
-
-        <p>
-          Registra, consulta y administra visualmente a los usuarios internos de LEXIA.
-        </p>
+        <h1>Gestión de usuarios</h1>
+        <p>Registra y administra al personal del estudio y sus permisos.</p>
       </div>
 
-      <button
-        class="btn-primary"
-        type="button"
-      >
-        <span class="plus">+</span>
-        Nuevo usuario
-      </button>
-
+      @if (!sinPermiso()) {
+        <button class="btn-primary" type="button" (click)="nuevo()">
+          <span class="plus">+</span>
+          Nuevo usuario
+        </button>
+      }
     </header>
 
 
-    <!-- ESTADÍSTICAS -->
-    <section class="stats-grid">
+    @if (sinPermiso()) {
 
-      <article class="stat-card">
-        <span class="stat-label">
-          Total usuarios
-        </span>
+      <section class="panel aviso-vacio">
+        <h2>No tienes acceso a esta sección</h2>
+        <p>La gestión de usuarios está reservada al Administrador y al Socio.</p>
+      </section>
 
-        <strong>
-          8
-        </strong>
+    } @else {
 
-        <small>
-          Registros en el sistema
-        </small>
-      </article>
-
-
-      <article class="stat-card">
-        <span class="stat-label">
-          Activos
-        </span>
-
-        <strong>
-          7
-        </strong>
-
-        <small>
-          Con acceso habilitado
-        </small>
-      </article>
+      @if (errorPagina()) {
+        <div class="alerta" role="alert">
+          {{ errorPagina() }}
+          <button type="button" class="alerta-cerrar" (click)="errorPagina.set(null)" aria-label="Cerrar">×</button>
+        </div>
+      }
 
 
-      <article class="stat-card">
-        <span class="stat-label">
-          Inactivos
-        </span>
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="stat-label">Total usuarios</span>
+          <strong>{{ totales().total }}</strong>
+          <small>Personal del estudio</small>
+        </article>
 
-        <strong>
-          1
-        </strong>
+        <article class="stat-card">
+          <span class="stat-label">Activos</span>
+          <strong>{{ totales().activos }}</strong>
+          <small>Con acceso habilitado</small>
+        </article>
 
-        <small>
-          Sin acceso al sistema
-        </small>
-      </article>
+        <article class="stat-card">
+          <span class="stat-label">Inactivos</span>
+          <strong>{{ totales().inactivos }}</strong>
+          <small>Sin acceso al sistema</small>
+        </article>
 
-
-      <article class="stat-card">
-        <span class="stat-label">
-          Dominio corporativo
-        </span>
-
-        <strong class="domain-stat">
-          @lexia.com
-        </strong>
-
-        <small>
-          Único dominio permitido
-        </small>
-      </article>
-
-    </section>
+        <article class="stat-card">
+          <span class="stat-label">Bloqueados</span>
+          <strong [class.texto-alerta]="totales().bloqueados > 0">{{ totales().bloqueados }}</strong>
+          <small>Por intentos fallidos</small>
+        </article>
+      </section>
 
 
-    <!-- PANEL DE USUARIOS -->
-    <section class="panel">
+      <section class="panel">
 
-      <div class="panel-header">
-
-        <div>
-          <h2>
-            Usuarios registrados
-          </h2>
-
-          <p>
-            8 usuarios encontrados
-          </p>
+        <div class="panel-header">
+          <div>
+            <h2>Usuarios registrados</h2>
+            <p>{{ usuarios().length }} usuario(s) encontrado(s)</p>
+          </div>
         </div>
 
-      </div>
+        <div class="filters">
+          <div class="search-box">
+            <span>⌕</span>
+            <input
+              type="search"
+              placeholder="Buscar por nombre, correo o código"
+              [(ngModel)]="texto"
+              (ngModelChange)="buscar()"
+            >
+          </div>
 
+          <select aria-label="Filtrar por rol" [(ngModel)]="rol" (ngModelChange)="buscar()">
+            <option value="">Todos los roles</option>
+            @for (r of rolesAsignables(); track r.codigo) {
+              <option [value]="r.codigo">{{ r.nombre }}</option>
+            }
+          </select>
 
-      <!-- FILTROS SOLO VISUALES -->
-      <div class="filters">
-
-        <div class="search-box">
-          <span>⌕</span>
-
-          <input
-            type="search"
-            placeholder="Buscar por código, DNI, nombre, correo o teléfono"
-          >
+          <select aria-label="Filtrar por estado" [(ngModel)]="estado" (ngModelChange)="buscar()">
+            <option value="">Todos los estados</option>
+            <option value="ACTIVOS">Activos</option>
+            <option value="INACTIVOS">Inactivos</option>
+            <option value="BLOQUEADOS">Bloqueados</option>
+          </select>
         </div>
 
-
-        <select aria-label="Filtrar por rol">
-
-          <option>
-            Todos los roles
-          </option>
-
-          <option>
-            Administrador
-          </option>
-
-          <option>
-            Abogado
-          </option>
-
-          <option>
-            Asistente
-          </option>
-
-          <option>
-            Recepción
-          </option>
-
-        </select>
-
-
-        <select aria-label="Filtrar por estado">
-
-          <option>
-            Todos los estados
-          </option>
-
-          <option>
-            Activos
-          </option>
-
-          <option>
-            Inactivos
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <!-- TABLA -->
-      <div class="table-wrap">
-
-        <table>
-
-          <thead>
-            <tr>
-              <th>Código</th>
-              <th>Usuario</th>
-              <th>DNI</th>
-              <th>Contacto</th>
-              <th>Rol</th>
-              <th>Salario</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-
-          <tbody>
-
-            <!-- USUARIO 1 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-001
-                </strong>
-
-                <small class="date-small">
-                  10/01/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    CM
-                  </div>
-
-                  <div>
-                    <strong>
-                      Carlos Mendoza Rojas
-                    </strong>
-
-                    <small>
-                      carlos.mendoza@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                45876231
-              </td>
-
-
-              <td>
-                <span>
-                  +51 987 654 321
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 987 654 321
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Administrador
-                </span>
-              </td>
-
-
-              <td>
-                S/ 4,500.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button
-                    class="icon-action view"
-                    type="button"
-                  >
-                    Ver
-                  </button>
-
-                  <button
-                    class="icon-action edit"
-                    type="button"
-                  >
-                    Editar
-                  </button>
-
-                  <button
-                    class="icon-action cv"
-                    type="button"
-                  >
-                    CV
-                  </button>
-
-                  <button
-                    class="icon-action delete"
-                    type="button"
-                  >
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 2 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-002
-                </strong>
-
-                <small class="date-small">
-                  15/01/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    AF
-                  </div>
-
-                  <div>
-                    <strong>
-                      Ana María Fernández
-                    </strong>
-
-                    <small>
-                      ana.fernandez@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                70214569
-              </td>
-
-
-              <td>
-                <span>
-                  +51 956 231 478
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 956 231 478
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Abogado
-                </span>
-              </td>
-
-
-              <td>
-                S/ 3,800.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 3 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-003
-                </strong>
-
-                <small class="date-small">
-                  22/01/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    LT
-                  </div>
-
-                  <div>
-                    <strong>
-                      Luis Torres Salazar
-                    </strong>
-
-                    <small>
-                      luis.torres@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                43125698
-              </td>
-
-
-              <td>
-                <span>
-                  +51 978 541 236
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 978 541 236
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Abogado
-                </span>
-              </td>
-
-
-              <td>
-                S/ 3,600.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 4 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-004
-                </strong>
-
-                <small class="date-small">
-                  05/02/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    AM
-                  </div>
-
-                  <div>
-                    <strong>
-                      Ana Morales Vega
-                    </strong>
-
-                    <small>
-                      ana.morales@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                48362174
-              </td>
-
-
-              <td>
-                <span>
-                  +51 944 365 821
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 944 365 821
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Asistente
-                </span>
-              </td>
-
-
-              <td>
-                S/ 2,400.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 5 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-005
-                </strong>
-
-                <small class="date-small">
-                  16/02/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    SR
-                  </div>
-
-                  <div>
-                    <strong>
-                      Sofía Ramírez Díaz
-                    </strong>
-
-                    <small>
-                      sofia.ramirez@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                72541863
-              </td>
-
-
-              <td>
-                <span>
-                  +51 966 721 345
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 966 721 345
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Recepción
-                </span>
-              </td>
-
-
-              <td>
-                S/ 1,900.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 6 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-006
-                </strong>
-
-                <small class="date-small">
-                  01/03/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    JR
-                  </div>
-
-                  <div>
-                    <strong>
-                      Jorge Ruiz Campos
-                    </strong>
-
-                    <small>
-                      jorge.ruiz@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                76451238
-              </td>
-
-
-              <td>
-                <span>
-                  +51 955 482 136
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 955 482 136
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Asistente
-                </span>
-              </td>
-
-
-              <td>
-                S/ 2,300.00
-              </td>
-
-
-              <td>
-                <span class="status off">
-                  <i></i>
-                  Inactivo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action restore" type="button">
-                    Reactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 7 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-007
-                </strong>
-
-                <small class="date-small">
-                  18/03/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    DV
-                  </div>
-
-                  <div>
-                    <strong>
-                      Daniela Vargas León
-                    </strong>
-
-                    <small>
-                      daniela.vargas@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                71236548
-              </td>
-
-
-              <td>
-                <span>
-                  +51 922 617 354
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 922 617 354
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Abogado
-                </span>
-              </td>
-
-
-              <td>
-                S/ 3,500.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-
-            <!-- USUARIO 8 -->
-            <tr>
-
-              <td>
-                <strong class="code">
-                  USR-008
-                </strong>
-
-                <small class="date-small">
-                  03/04/2026
-                </small>
-              </td>
-
-
-              <td>
-                <div class="person-cell">
-
-                  <div class="mini-avatar">
-                    MP
-                  </div>
-
-                  <div>
-                    <strong>
-                      Miguel Pérez Silva
-                    </strong>
-
-                    <small>
-                      miguel.perez@lexia.com
-                    </small>
-                  </div>
-
-                </div>
-              </td>
-
-
-              <td>
-                74125896
-              </td>
-
-
-              <td>
-                <span>
-                  +51 933 258 741
-                </span>
-
-                <small class="contact-small">
-                  WhatsApp: +51 933 258 741
-                </small>
-              </td>
-
-
-              <td>
-                <span class="role-pill">
-                  Abogado
-                </span>
-              </td>
-
-
-              <td>
-                S/ 3,700.00
-              </td>
-
-
-              <td>
-                <span class="status">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-
-              <td>
-                <div class="row-actions">
-
-                  <button class="icon-action view" type="button">
-                    Ver
-                  </button>
-
-                  <button class="icon-action edit" type="button">
-                    Editar
-                  </button>
-
-                  <button class="icon-action cv" type="button">
-                    CV
-                  </button>
-
-                  <button class="icon-action delete" type="button">
-                    Desactivar
-                  </button>
-
-                </div>
-              </td>
-
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Usuario</th>
+                <th>Cargo</th>
+                <th>Roles</th>
+                <th>Último acceso</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              @for (u of usuarios(); track u.uuidPublico) {
+                <tr [class.fila-inactiva]="!u.activo">
+                  <td><strong class="code">{{ u.codigoUsuario ?? '—' }}</strong></td>
+
+                  <td>
+                    <div class="person-cell">
+                      <div class="mini-avatar">{{ iniciales(u.nombreCompleto) }}</div>
+                      <div>
+                        <strong>{{ u.nombreCompleto }}</strong>
+                        <small>{{ u.email }}</small>
+                      </div>
+                    </div>
+                  </td>
+
+                  <td>{{ u.cargo ?? '—' }}</td>
+
+                  <td>
+                    <div class="roles-cell">
+                      @for (r of u.roles; track r) {
+                        <span class="role-pill">{{ nombreRol(r) }}</span>
+                      }
+                    </div>
+                  </td>
+
+                  <td>
+                    @if (u.ultimoAcceso) {
+                      {{ u.ultimoAcceso | date: 'dd/MM/yyyy HH:mm' }}
+                    } @else {
+                      <span class="texto-suave">Nunca</span>
+                    }
+                  </td>
+
+                  <td>
+                    <span class="status {{ estadoVisible(u).clase }}">
+                      <i></i>{{ estadoVisible(u).texto }}
+                    </span>
+                    @if (u.debeCambiarPassword && u.activo) {
+                      <small class="etiqueta-temporal">Contraseña temporal</small>
+                    }
+                  </td>
+
+                  <td>
+                    <div class="row-actions">
+                      <button class="icon-action view" type="button" (click)="ver(u)">Ver</button>
+                      <button class="icon-action edit" type="button" (click)="editar(u.uuidPublico)">Editar</button>
+
+                      @if (u.estado === 'BLOQUEADO') {
+                        <button class="icon-action restore" type="button" (click)="desbloquear(u)">Desbloquear</button>
+                      }
+
+                      @if (u.activo) {
+                        <button class="icon-action view" type="button" (click)="pedirRestablecer(u)">Restablecer</button>
+                        @if (u.uuidPublico !== miUuid()) {
+                          <button class="icon-action delete" type="button" (click)="pedirDesactivar(u)">Desactivar</button>
+                        }
+                      } @else {
+                        <button class="icon-action restore" type="button" (click)="activar(u)">Activar</button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="celda-vacia">
+                    {{ cargando() ? 'Cargando…' : 'No hay usuarios que coincidan con el filtro.' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
   </main>
-
 </div>
+
+
+<!-- ================= FICHA ================= -->
+@if (detalle(); as d) {
+  <div class="modal-fondo" (click)="cerrarDetalle()">
+    <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+
+      <header class="modal-cabecera">
+        <div>
+          <span class="eyebrow">{{ d.codigoUsuario }}</span>
+          <h2>{{ d.nombres }} {{ d.apellidos }}</h2>
+          <p>{{ d.email }}</p>
+        </div>
+        <button type="button" class="modal-cerrar" (click)="cerrarDetalle()" aria-label="Cerrar">×</button>
+      </header>
+
+      <dl class="ficha">
+        <div><dt>Cargo</dt><dd>{{ d.cargo ?? '—' }}</dd></div>
+        <div><dt>Teléfono</dt><dd>{{ d.telefono ?? '—' }}</dd></div>
+        <div><dt>Documento</dt><dd>{{ d.tipoDocumento ? d.tipoDocumento + ' ' + d.numeroDocumento : '—' }}</dd></div>
+        <div><dt>Colegiatura</dt><dd>{{ d.numeroColegiatura ?? '—' }}</dd></div>
+        <div><dt>Alta</dt><dd>{{ d.fechaCreacion | date: 'dd/MM/yyyy' }}</dd></div>
+        <div><dt>Último acceso</dt><dd>{{ d.ultimoAcceso ? (d.ultimoAcceso | date: 'dd/MM/yyyy HH:mm') : 'Nunca' }}</dd></div>
+        <div class="ancho"><dt>Roles</dt>
+          <dd class="roles-cell">
+            @for (r of d.roles; track r) { <span class="role-pill">{{ nombreRol(r) }}</span> }
+          </dd>
+        </div>
+      </dl>
+
+      <h3 class="subtitulo">Responsable de</h3>
+      <ul class="carga">
+        <li [class.pesa]="d.cargaTrabajo.expedientes > 0"><strong>{{ d.cargaTrabajo.expedientes }}</strong> expedientes</li>
+        <li [class.pesa]="d.cargaTrabajo.plazosAbiertos > 0"><strong>{{ d.cargaTrabajo.plazosAbiertos }}</strong> plazos abiertos</li>
+        <li [class.pesa]="d.cargaTrabajo.tareasAbiertas > 0"><strong>{{ d.cargaTrabajo.tareasAbiertas }}</strong> tareas abiertas</li>
+        <li><strong>{{ d.cargaTrabajo.eventosAgenda }}</strong> eventos próximos</li>
+        <li><strong>{{ d.cargaTrabajo.versionesDocumento }}</strong> versiones de documento</li>
+      </ul>
+
+      @if (bloqueaBaja(d) && d.activo) {
+        <p class="nota">
+          No se puede desactivar mientras tenga expedientes, plazos o tareas abiertas:
+          quedarían a nombre de una cuenta que ya nadie revisa. Hay que reasignarlos primero.
+        </p>
+      }
+
+      <footer class="modal-pie">
+        <button type="button" class="btn-secundario" (click)="cerrarDetalle()">Cerrar</button>
+        <button type="button" class="btn-primary" (click)="editar(d.uuidPublico)">Editar</button>
+      </footer>
+    </div>
+  </div>
+}
+
+
+<!-- ================= ALTA / EDICIÓN ================= -->
+@if (formularioAbierto()) {
+  <div class="modal-fondo">
+    <form class="modal" role="dialog" aria-modal="true" (ngSubmit)="guardar()">
+
+      <header class="modal-cabecera">
+        <div>
+          <h2>{{ editando() ? 'Editar usuario' : 'Nuevo usuario' }}</h2>
+          <p>{{ editando() ? 'Los cambios de rol se aplican en su siguiente acción.' : 'Se generará una contraseña temporal para el primer ingreso.' }}</p>
+        </div>
+        <button type="button" class="modal-cerrar" (click)="cerrarFormulario()" aria-label="Cerrar">×</button>
+      </header>
+
+      <div class="campos">
+        <label>Nombres *
+          <input name="nombres" [(ngModel)]="formulario.nombres" maxlength="100" required>
+        </label>
+        <label>Apellidos *
+          <input name="apellidos" [(ngModel)]="formulario.apellidos" maxlength="100" required>
+        </label>
+        <label class="ancho">Correo *
+          <input name="email" type="email" [(ngModel)]="formulario.email" maxlength="150"
+                 [readonly]="!!editando()" [class.solo-lectura]="!!editando()" required>
+          @if (editando()) {
+            <small>El correo es el usuario del login y no se puede cambiar.</small>
+          } @else {
+            <small>Debe ser del dominio del estudio.</small>
+          }
+        </label>
+        <label>Cargo
+          <input name="cargo" [(ngModel)]="formulario.cargo" maxlength="100">
+        </label>
+        <label>Teléfono
+          <input name="telefono" [(ngModel)]="formulario.telefono" maxlength="20">
+        </label>
+        <label>Tipo de documento
+          <select name="tipoDocumento" [(ngModel)]="formulario.tipoDocumento">
+            <option value="">—</option>
+            <option value="DNI">DNI</option>
+            <option value="CE">Carné de extranjería</option>
+            <option value="PASAPORTE">Pasaporte</option>
+          </select>
+        </label>
+        <label>Número de documento
+          <input name="numeroDocumento" [(ngModel)]="formulario.numeroDocumento" maxlength="20">
+        </label>
+        <label class="ancho">N.º de colegiatura
+          <input name="numeroColegiatura" [(ngModel)]="formulario.numeroColegiatura" maxlength="30">
+        </label>
+      </div>
+
+      <fieldset class="roles">
+        <legend>Roles *</legend>
+        @for (r of rolesAsignables(); track r.codigo) {
+          <label class="rol-opcion">
+            <input type="checkbox" [checked]="tieneRol(r.codigo)" (change)="alternarRol(r.codigo)">
+            {{ r.nombre }}
+          </label>
+        }
+      </fieldset>
+
+      @if (errorFormulario()) {
+        <div class="alerta" role="alert">{{ errorFormulario() }}</div>
+      }
+
+      <footer class="modal-pie">
+        <button type="button" class="btn-secundario" (click)="cerrarFormulario()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando…' : (editando() ? 'Guardar cambios' : 'Crear usuario') }}
+        </button>
+      </footer>
+    </form>
+  </div>
+}
+
+
+<!-- ================= CONTRASEÑA TEMPORAL (se muestra una vez) ================= -->
+@if (credencial(); as c) {
+  <div class="modal-fondo">
+    <div class="modal modal-chico" role="dialog" aria-modal="true">
+      <header class="modal-cabecera">
+        <div>
+          <h2>Contraseña temporal</h2>
+          <p>{{ c.email }}</p>
+        </div>
+      </header>
+
+      <div class="credencial">
+        <code>{{ c.passwordTemporal }}</code>
+        <button type="button" class="icon-action edit" (click)="copiarCredencial()">
+          {{ copiado() ? 'Copiada' : 'Copiar' }}
+        </button>
+      </div>
+
+      <p class="nota">
+        {{ c.mensaje }} Esta es la única vez que se muestra: al cerrar esta ventana no podrá recuperarse.
+      </p>
+
+      <footer class="modal-pie">
+        <button type="button" class="btn-primary" (click)="cerrarCredencial()">Ya la entregué</button>
+      </footer>
+    </div>
+  </div>
+}
+
+
+<!-- ================= CONFIRMACIÓN ================= -->
+@if (confirmacion(); as conf) {
+  <div class="modal-fondo">
+    <div class="modal modal-chico" role="alertdialog" aria-modal="true">
+      <header class="modal-cabecera">
+        <h2>{{ conf.titulo }}</h2>
+      </header>
+      <p class="texto-confirmacion">{{ conf.mensaje }}</p>
+      <footer class="modal-pie">
+        <button type="button" class="btn-secundario" (click)="cancelarConfirmacion()">Cancelar</button>
+        <button type="button" class="btn-primary" [class.btn-peligro]="conf.peligrosa" (click)="confirmar()">
+          {{ conf.boton }}
+        </button>
+      </footer>
+    </div>
+  </div>
+}

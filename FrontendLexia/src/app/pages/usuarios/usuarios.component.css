@@ -543,10 +543,6 @@ tbody tr:hover {
   color: #4f46e5;
 }
 
-.icon-action.cv {
-  color: #0369a1;
-}
-
 .icon-action.delete {
   color: #be123c;
 }
@@ -633,4 +629,304 @@ tbody tr:hover {
     grid-column: span 1;
   }
 
+}
+
+/* =========================================================
+   ESTADOS Y CELDAS (pantalla conectada)
+========================================================= */
+
+.status.warn {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.etiqueta-temporal {
+  display: block;
+  margin-top: 4px;
+  color: #b45309;
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+.roles-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.fila-inactiva td {
+  opacity: 0.6;
+}
+
+.texto-suave,
+.celda-vacia {
+  color: #94a3b8;
+}
+
+.celda-vacia {
+  padding: 28px;
+  text-align: center;
+}
+
+.texto-alerta {
+  color: #c2410c;
+}
+
+.aviso-vacio {
+  padding: 32px;
+  text-align: center;
+}
+
+.alerta {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 11px 36px 11px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #fef2f2;
+  color: #b91c1c;
+  font-size: 13px;
+}
+
+.alerta-cerrar {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+
+/* =========================================================
+   MODALES
+========================================================= */
+
+.modal-fondo {
+  position: fixed;
+  inset: 0;
+  /* Igual que los modales de clientes: por encima del panel lateral (100). */
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.modal {
+  width: min(640px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  padding: 22px 24px;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+}
+
+.modal-chico {
+  width: min(440px, 100%);
+}
+
+.modal-cabecera {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.modal-cabecera h2 {
+  margin: 2px 0;
+  font-size: 18px;
+}
+
+.modal-cabecera p {
+  margin: 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.modal-cerrar {
+  align-self: flex-start;
+  border: 0;
+  background: none;
+  color: #94a3b8;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.modal-pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.btn-secundario {
+  padding: 10px 16px;
+  border: 1px solid #dbe1ea;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.btn-peligro {
+  background: #be123c;
+  box-shadow: none;
+}
+
+.btn-peligro:hover {
+  background: #9f1239;
+}
+
+
+/* =========================================================
+   FICHA Y FORMULARIO
+========================================================= */
+
+.ficha,
+.campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 16px;
+  margin: 0;
+}
+
+.ficha .ancho,
+.campos .ancho {
+  grid-column: 1 / -1;
+}
+
+.ficha dt {
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 700;
+}
+
+.ficha dd {
+  margin: 2px 0 0;
+  font-size: 13.5px;
+}
+
+.subtitulo {
+  margin: 20px 0 8px;
+  font-size: 14px;
+}
+
+.carga {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.carga li {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+}
+
+.carga li.pesa {
+  background: #fff7ed;
+  color: #c2410c;
+}
+
+.nota,
+.texto-confirmacion {
+  margin: 14px 0 0;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.campos label,
+.roles legend {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.campos input,
+.campos select {
+  padding: 9px 11px;
+  border: 1px solid #dbe1ea;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 400;
+}
+
+.campos input:focus,
+.campos select:focus {
+  outline: none;
+  border-color: #6366f1;
+}
+
+.campos small {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.solo-lectura {
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border: 1px solid #e7eaf0;
+  border-radius: 10px;
+}
+
+.rol-opcion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.credencial {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px;
+  border: 1px dashed #6366f1;
+  border-radius: 10px;
+  background: #eef2ff;
+}
+
+.credencial code {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  word-break: break-all;
+}
+
+@media (max-width: 640px) {
+  .ficha,
+  .campos {
+    grid-template-columns: 1fr;
+  }
 }

@@ -24,6 +24,10 @@ export class PanelComponent {
   /** Usuario en sesion, para pintar nombre/rol reales en el sidebar. */
   readonly usuario = this.auth.usuario;
 
+  /** Depende del signal del usuario, asi que se actualiza al cambiar la sesion. */
+  readonly puedeGestionarUsuarios = computed(
+    () => this.usuario()?.permisos.includes('USUARIO_GESTIONAR') ?? false);
+
   /** Iniciales para el avatar: primera letra del nombre y del primer apellido. */
   readonly iniciales = computed(() => {
     const nombre = this.usuario()?.nombreCompleto?.trim();
