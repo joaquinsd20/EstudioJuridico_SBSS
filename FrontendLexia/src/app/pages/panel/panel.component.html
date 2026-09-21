@@ -154,14 +154,17 @@
       </li>
 
 
-      <!-- USUARIOS -->
-      <li
-        class="menu-item"
-        routerLink="/usuarios"
-        routerLinkActive="active"
-      >
-        Usuarios
-      </li>
+      <!-- USUARIOS: solo quien puede administrarlos. El backend lo exige
+           igual; esto evita llevar a los demas a una pantalla sin acceso. -->
+      @if (puedeGestionarUsuarios()) {
+        <li
+          class="menu-item"
+          routerLink="/usuarios"
+          routerLinkActive="active"
+        >
+          Usuarios
+        </li>
+      }
 
 
       <!-- CONFIGURACIÓN -->
