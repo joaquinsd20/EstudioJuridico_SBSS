@@ -1,1504 +1,211 @@
 <div class="layout-wrapper">
-
-  <!-- ===================================================== -->
-  <!-- PANEL REUTILIZABLE -->
-  <!-- ===================================================== -->
-
   <app-panel></app-panel>
 
-
-  <!-- ===================================================== -->
-  <!-- CONTENIDO PRINCIPAL -->
-  <!-- ===================================================== -->
-
   <main class="main-content">
-
-
-    <!-- =================================================== -->
-    <!-- TÍTULO -->
-    <!-- =================================================== -->
-
-    <header class="actuaciones-header">
-
-      <h1>
-        Gestión Integral de Actuaciones
-      </h1>
-
-      <p>
-        Consulta y organiza las actuaciones realizadas en los expedientes jurídicos.
-      </p>
-
+    <header class="page-header">
+      <div>
+        <h1>Gestión Integral de Actuaciones</h1>
+        <p>Registra lo ocurrido en cada expediente y genera el seguimiento jurídico desde un solo punto.</p>
+      </div>
+      @if (auth.tienePermiso('ACTUACION_CREAR')) {
+        <button type="button" class="btn-primary" (click)="abrirNueva()"><span>+</span> Nueva actuación</button>
+      }
     </header>
 
-
-    <!-- =================================================== -->
-    <!-- FILTROS SOLO VISUALES -->
-    <!-- =================================================== -->
-
-    <section class="filters-card">
-
-
-      <div class="filter-control">
-
-        <select>
-
-          <option>
-            Tipo de Actuación
-          </option>
-
-          <option>
-            Redacción de Escrito
-          </option>
-
-          <option>
-            Presentación Demanda
-          </option>
-
-          <option>
-            Audiencia
-          </option>
-
-          <option>
-            Presentación de Escrito
-          </option>
-
-          <option>
-            Reunión
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <div class="filter-control">
-
-        <input
-          type="text"
-          placeholder="Cliente"
-        >
-
-      </div>
-
-
-      <div class="filter-control">
-
-        <input
-          type="text"
-          placeholder="Expediente"
-        >
-
-      </div>
-
-
-      <div class="filter-control">
-
-        <select>
-
-          <option>
-            Estado
-          </option>
-
-          <option>
-            En Trámite
-          </option>
-
-          <option>
-            Completado
-          </option>
-
-          <option>
-            Pendiente
-          </option>
-
-        </select>
-
-      </div>
-
-
-      <button
-        type="button"
-        class="clear-filter"
-        title="Limpiar filtros"
-      >
-        ×
-      </button>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- LAYOUT PRINCIPAL -->
-    <!-- =================================================== -->
-
-    <div class="actuaciones-layout">
-
-
-      <!-- ================================================= -->
-      <!-- COLUMNA IZQUIERDA -->
-      <!-- ================================================= -->
-
-      <div class="actuaciones-left">
-
-
-        <!-- =============================================== -->
-        <!-- TABLA -->
-        <!-- =============================================== -->
-
-        <section class="actuaciones-card table-card">
-
-
-          <div class="table-header">
-
-            <div>
-
-              <h2>
-                Últimas Actuaciones Registradas
-              </h2>
-
-              <span>
-                7 actuaciones encontradas
-              </span>
-
-            </div>
-
-          </div>
-
-
-          <div class="table-wrapper">
-
-            <table class="actuaciones-table">
-
-
-              <thead>
-
-                <tr>
-
-                  <th>
-                    Fecha/Hora
-                  </th>
-
-                  <th>
-                    Tipo de Actuación
-                  </th>
-
-                  <th>
-                    Expediente / Caso
-                  </th>
-
-                  <th>
-                    Asunto / Tarea
-                  </th>
-
-                  <th>
-                    Abogado Responsable
-                  </th>
-
-                  <th>
-                    Estado
-                  </th>
-
-                </tr>
-
-              </thead>
-
-
-              <tbody>
-
-
-                <!-- ACTUACIÓN 1 -->
-
-                <tr class="selected-row">
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        06/02/2024
-                      </strong>
-
-                      <span>
-                        12:00
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon">
-                        ▤
-                      </span>
-
-                      <strong>
-                        Redacción de Escrito
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Fernández
-                      </strong>
-
-                      <span>
-                        EXP. 01452
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Redacción de Escrito en Caso Fernández
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge processing">
-                      En Trámite
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 2 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        09/02/2024
-                      </strong>
-
-                      <span>
-                        17:30
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon">
-                        ▤
-                      </span>
-
-                      <strong>
-                        Presentación Demanda
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Ramírez
-                      </strong>
-
-                      <span>
-                        EXP. 00521
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Presentación Demanda
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge completed">
-                      Completado
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 3 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        13/02/2024
-                      </strong>
-
-                      <span>
-                        18:30
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon">
-                        ▤
-                      </span>
-
-                      <strong>
-                        Presentación Demanda
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Ramírez
-                      </strong>
-
-                      <span>
-                        EXP. 00521
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Presentación de Demanda en vía Escrito
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge pending">
-                      Pendiente
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 4 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        16/02/2024
-                      </strong>
-
-                      <span>
-                        17:30
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon audiencia">
-                        ▣
-                      </span>
-
-                      <strong>
-                        Audiencia Testimonial
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Torres
-                      </strong>
-
-                      <span>
-                        EXP. 00332
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Audiencia Testimonial - Caso Torres
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge pending">
-                      Pendiente
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 5 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        20/02/2024
-                      </strong>
-
-                      <span>
-                        10:00
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon audiencia">
-                        ▣
-                      </span>
-
-                      <strong>
-                        Audiencia
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Fernández
-                      </strong>
-
-                      <span>
-                        EXP. 01452
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Audiencia de conciliación
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge processing">
-                      En Trámite
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 6 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        22/02/2024
-                      </strong>
-
-                      <span>
-                        09:15
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon">
-                        ▤
-                      </span>
-
-                      <strong>
-                        Presentación de Escrito
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso López
-                      </strong>
-
-                      <span>
-                        EXP. 02388
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Presentación de escrito complementario
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        LT
-                      </span>
-
-                      <strong>
-                        Luis Torres
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge completed">
-                      Completado
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-                <!-- ACTUACIÓN 7 -->
-
-                <tr>
-
-                  <td>
-
-                    <div class="date-cell">
-
-                      <strong>
-                        24/02/2024
-                      </strong>
-
-                      <span>
-                        15:00
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="type-cell">
-
-                      <span class="actuacion-icon">
-                        ▤
-                      </span>
-
-                      <strong>
-                        Reunión con Cliente
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="case-cell">
-
-                      <strong>
-                        Caso Morales
-                      </strong>
-
-                      <span>
-                        EXP. 03321
-                      </span>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="subject-text">
-                      Revisión de estrategia del expediente
-                    </span>
-
-                  </td>
-
-
-                  <td>
-
-                    <div class="lawyer-cell">
-
-                      <span class="lawyer-avatar">
-                        AF
-                      </span>
-
-                      <strong>
-                        Ana María Fernández
-                      </strong>
-
-                    </div>
-
-                  </td>
-
-
-                  <td>
-
-                    <span class="status-badge pending">
-                      Pendiente
-                    </span>
-
-                  </td>
-
-                </tr>
-
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </section>
-
-
-        <!-- ================================================= -->
-        <!-- GRÁFICOS -->
-        <!-- ================================================= -->
-
-        <div class="bottom-grid">
-
-
-          <!-- DONUT -->
-
-          <section class="actuaciones-card chart-card">
-
-            <div class="chart-header">
-
-              <span>
-                ▣
-              </span>
-
-              <h3>
-                Distribución de Tiempo por Actividad
-              </h3>
-
-            </div>
-
-
-            <div class="donut-wrapper">
-
-
-              <div class="activity-donut">
-
-                <div class="donut-center">
-
-                  <strong>
-                    100%
-                  </strong>
-
-                  <span>
-                    Actividad
-                  </span>
-
-                </div>
-
-              </div>
-
-
-              <div class="activity-legend">
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-circle green"></i>
-                    Actuaciones
-                  </span>
-
-                  <strong>
-                    25%
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-circle red"></i>
-                    Reuniones de Clientes
-                  </span>
-
-                  <strong>
-                    20%
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-circle orange"></i>
-                    Escritos y Tareas
-                  </span>
-
-                  <strong>
-                    25%
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-circle gray"></i>
-                    Prospecto
-                  </span>
-
-                  <strong>
-                    15%
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    <i class="legend-circle purple"></i>
-                    Atención
-                  </span>
-
-                  <strong>
-                    15%
-                  </strong>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <!-- GRÁFICO DE LÍNEA -->
-
-          <section class="actuaciones-card chart-card">
-
-            <div class="chart-header">
-
-              <span>
-                ↗
-              </span>
-
-              <h3>
-                Evolución de Eventos Semanales
-              </h3>
-
-            </div>
-
-
-            <div class="line-chart-container">
-
-
-              <div class="chart-y">
-
-                <span>12</span>
-                <span>10</span>
-                <span>8</span>
-                <span>6</span>
-                <span>4</span>
-                <span>2</span>
-                <span>0</span>
-
-              </div>
-
-
-              <div class="line-chart-area">
-
-                <svg
-                  viewBox="0 0 500 190"
-                  preserveAspectRatio="none"
-                >
-
-                  <defs>
-
-                    <linearGradient
-                      id="actuacionesGradient"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="1"
-                    >
-
-                      <stop
-                        offset="0%"
-                        stop-color="#7643d5"
-                        stop-opacity=".28"
-                      ></stop>
-
-                      <stop
-                        offset="100%"
-                        stop-color="#7643d5"
-                        stop-opacity="0"
-                      ></stop>
-
-                    </linearGradient>
-
-                  </defs>
-
-
-                  <path
-                    d="
-                      M0 155
-                      C45 95, 75 80, 120 88
-                      C165 95, 180 130, 220 126
-                      C260 122, 260 45, 315 44
-                      C365 42, 375 45, 405 83
-                      C435 120, 470 88, 500 45
-                      L500 190
-                      L0 190 Z
-                    "
-                    fill="url(#actuacionesGradient)"
-                  ></path>
-
-
-                  <path
-                    d="
-                      M0 155
-                      C45 95, 75 80, 120 88
-                      C165 95, 180 130, 220 126
-                      C260 122, 260 45, 315 44
-                      C365 42, 375 45, 405 83
-                      C435 120, 470 88, 500 45
-                    "
-                    fill="none"
-                    stroke="#5e367b"
-                    stroke-width="3"
-                  ></path>
-
-                </svg>
-
-
-                <div class="chart-months">
-
-                  <span>Ene</span>
-                  <span>Feb</span>
-                  <span>Mar</span>
-                  <span>Abr</span>
-                  <span>May</span>
-                  <span>Jun</span>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-        </div>
-
-      </div>
-
-
-      <!-- ================================================= -->
-      <!-- TAREAS PENDIENTES -->
-      <!-- ================================================= -->
-
-      <aside class="tasks-panel">
-
-
-        <div class="tasks-header">
-
-          <h3>
-            Vista Previa de Tareas Pendientes
-          </h3>
-
-        </div>
-
-
-        <div class="task-item">
-
-          <strong>
-            Actuaciones de Escrito en casos urgentes
-          </strong>
-
-          <span>
-            EXP. 01452-2026
-          </span>
-
-          <small class="urgent">
-            Urgente
-          </small>
-
-        </div>
-
-
-        <div class="task-item">
-
-          <strong>
-            Presentación Demanda en Demanda
-          </strong>
-
-          <span>
-            EXP. 02388-2025
-          </span>
-
-          <small class="urgent">
-            Urgente
-          </small>
-
-        </div>
-
-
-        <div class="task-item">
-
-          <strong>
-            Audiencia Testimonial en la semana
-          </strong>
-
-          <span>
-            EXP. 03321-2025
-          </span>
-
-          <small>
-            Pendiente
-          </small>
-
-        </div>
-
-      </aside>
-
-
-      <!-- ================================================= -->
-      <!-- DETALLE SOLO VISUAL -->
-      <!-- ================================================= -->
-
-      <aside class="detail-panel">
-
-
-        <div class="detail-header">
-
-          <h2>
-            Detalles del Evento Seleccionado
-          </h2>
-
-          <button type="button">
-            ×
-          </button>
-
-        </div>
-
-
-        <div class="detail-content">
-
-
-          <!-- TÍTULO -->
-
-          <div class="detail-title">
-
-            <h3>
-              Redacción de Escrito: Caso Fernández
-            </h3>
-
-            <span>
-              EXP. 01452
-            </span>
-
-          </div>
-
-
-          <!-- HORA -->
-
-          <div class="detail-info-row">
-
-            <span class="detail-icon">
-              ◷
-            </span>
-
-            <div>
-
-              <small>
-                Fecha / Hora
-              </small>
-
-              <strong>
-                06/02/2024 - 12:00
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <!-- PARTICIPANTES -->
-
-          <section class="detail-section">
-
-            <h4>
-              Participantes
-            </h4>
-
-
-            <div class="participant">
-
-              <span class="participant-avatar">
-                F
-              </span>
-
-              <div>
-
-                <strong>
-                  Fernández
-                </strong>
-
-                <span>
-                  Cliente
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div class="participant">
-
-              <span class="participant-avatar lawyer">
-                AF
-              </span>
-
-              <div>
-
-                <strong>
-                  Ana María Fernández
-                </strong>
-
-                <span>
-                  Abogado responsable
-                </span>
-
-              </div>
-
-            </div>
-
-          </section>
-
-
-          <!-- LUGAR -->
-
-          <div class="detail-info-row">
-
-            <span class="detail-icon">
-              ◉
-            </span>
-
-            <div>
-
-              <small>
-                Lugar
-              </small>
-
-              <strong>
-                Estudio Jurídico LEXIA
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <!-- EXPEDIENTE -->
-
-          <div class="detail-info-row">
-
-            <span class="detail-icon">
-              ◇
-            </span>
-
-            <div>
-
-              <small>
-                Expediente
-              </small>
-
-              <strong>
-                EXP. 01452
-              </strong>
-
-            </div>
-
-          </div>
-
-
-          <!-- DESCRIPCIÓN -->
-
-          <section class="detail-section">
-
-            <h4>
-              Detalle de la Actuación
-            </h4>
-
-            <p class="actuacion-description">
-              Redacción y revisión de escrito correspondiente al expediente.
-            </p>
-
-          </section>
-
-
-          <!-- EVENTOS PRÓXIMOS -->
-
-          <section class="detail-section">
-
-            <h4>
-              Eventos Próximos de la Semana
-            </h4>
-
-
-            <div class="upcoming-item">
-
-              <strong>
-                EXP. 01452-2026
-              </strong>
-
-              <span class="upcoming-tag green">
-                Alimentos
-              </span>
-
-              <span>
-                •••
-              </span>
-
-            </div>
-
-
-            <div class="upcoming-item">
-
-              <strong>
-                EXP. 02388-2025
-              </strong>
-
-              <span class="upcoming-tag green">
-                Daños
-              </span>
-
-              <span>
-                •••
-              </span>
-
-            </div>
-
-
-            <div class="upcoming-item">
-
-              <strong>
-                EXP. 03321-2024
-              </strong>
-
-              <span class="upcoming-tag orange">
-                En Trámite
-              </span>
-
-              <span>
-                •••
-              </span>
-
-            </div>
-
-          </section>
-
-
-          <!-- ALERTA -->
-
-          <section class="detail-section">
-
-            <h4>
-              Alertas de Plazos Críticos
-            </h4>
-
-            <div class="deadline-alert">
-
-              <strong>
-                EXP. 00521-2024
-              </strong>
-
-              <span>
-                Vence mañana
-              </span>
-
-            </div>
-
-          </section>
-
-
-          <!-- DOCUMENTOS -->
-
-          <section class="detail-section">
-
-            <h4>
-              Notas y Contactos Recientes
-            </h4>
-
-
-            <div class="document-item">
-
-              <span>
-                ▤
-              </span>
-
-              <strong>
-                Documento de descarga...
-              </strong>
-
-              <span>
-                ↓
-              </span>
-
-            </div>
-
-
-            <div class="document-item">
-
-              <span>
-                ▤
-              </span>
-
-              <strong>
-                Documento del expediente...
-              </strong>
-
-              <span>
-                ↓
-              </span>
-
-            </div>
-
-
-            <div class="document-item">
-
-              <span>
-                ▤
-              </span>
-
-              <strong>
-                Documento reciente 1
-              </strong>
-
-              <span>
-                ↓
-              </span>
-
-            </div>
-
-          </section>
-
-        </div>
-
-      </aside>
-
+    <div class="feedback-stack" aria-live="polite">
+      @if (error) {
+        <div class="alert error"><b>!</b><span>{{ error }}</span><button type="button" (click)="error=''">×</button></div>
+      }
+      @if (exito) {
+        <div class="alert success"><b>✓</b><span>{{ exito }}</span><button type="button" (click)="exito=''">×</button></div>
+      }
     </div>
 
-  </main>
+    <section class="stats-grid">
+      <article class="stat-card"><div class="stat-icon purple">▤</div><div><span>Total actuaciones</span><strong>{{ resumen.total }}</strong><small>Registros activos</small></div></article>
+      <article class="stat-card"><div class="stat-icon orange">◷</div><div><span>En seguimiento</span><strong>{{ resumen.pendientes + resumen.enTramite }}</strong><small>Pendientes + en trámite</small></div></article>
+      <article class="stat-card"><div class="stat-icon green">✓</div><div><span>Completadas</span><strong>{{ resumen.completadas }}</strong><small>Actuaciones cerradas</small></div></article>
+      <article class="stat-card"><div class="stat-icon blue">⏱</div><div><span>Tiempo facturable</span><strong>{{ horas(resumen.minutosFacturables) }}</strong><small>{{ dinero(resumen.costoTotal) }} en costos</small></div></article>
+    </section>
 
+    <section class="filters-card">
+      <div class="search-control"><span>⌕</span><input type="text" [(ngModel)]="filtros.texto" (keyup.enter)="buscar()" placeholder="Buscar asunto, expediente, cliente o responsable..."></div>
+      <div class="filter-control">
+        <select [(ngModel)]="filtros.tipoId" (change)="buscar()">
+          <option [ngValue]="null">Todos los tipos</option>
+          @for (t of catalogos.tiposActuacion; track t.id) { <option [ngValue]="t.id">{{ t.nombre }}</option> }
+        </select>
+      </div>
+      <div class="filter-control">
+        <select [(ngModel)]="filtros.estado" (change)="buscar()">
+          <option value="">Todos los estados</option>
+          @for (e of estados; track e) { <option [value]="e">{{ etiqueta(e) }}</option> }
+        </select>
+      </div>
+      <button type="button" class="clear-button" title="Limpiar filtros" (click)="limpiarFiltros()">×</button>
+    </section>
+
+    <section class="advanced-bar">
+      <button type="button" (click)="mostrarFiltrosAvanzados=!mostrarFiltrosAvanzados">{{ mostrarFiltrosAvanzados ? 'Ocultar filtros' : 'Más filtros' }}</button>
+      <button type="button" (click)="cargarTodo()">Actualizar resultados</button>
+    </section>
+
+    @if (mostrarFiltrosAvanzados) {
+      <section class="advanced-filters">
+        <label><span>Expediente</span><select [(ngModel)]="filtros.expedienteId" (change)="buscar()"><option [ngValue]="null">Todos</option>@for (e of catalogos.expedientes; track e.id) {<option [ngValue]="e.id">{{ e.codigo }} — {{ e.clienteNombre }}</option>}</select></label>
+        <label><span>Responsable</span><select [(ngModel)]="filtros.responsableId" (change)="buscar()"><option [ngValue]="null">Todos</option>@for (u of catalogos.usuarios; track u.id) {<option [ngValue]="u.id">{{ u.nombre }}</option>}</select></label>
+        <label><span>Desde</span><input type="date" [(ngModel)]="filtros.fechaDesde" (change)="buscar()"></label>
+        <label><span>Hasta</span><input type="date" [(ngModel)]="filtros.fechaHasta" (change)="buscar()"></label>
+      </section>
+    }
+
+    <div class="workspace">
+      <section class="card list-card">
+        <div class="card-header"><div><h2>Actuaciones registradas</h2><span>{{ actuaciones.length }} resultado(s)</span></div>@if(cargando){<small>Cargando...</small>}</div>
+        <div class="table-wrapper">
+          <table>
+            <thead><tr><th>Fecha</th><th>Actuación</th><th>Expediente / Cliente</th><th>Responsable</th><th>Seguimiento</th><th>Estado</th></tr></thead>
+            <tbody>
+              @for (a of actuaciones; track a.uuid) {
+                <tr (click)="seleccionar(a)" [class.selected]="seleccionado?.uuid===a.uuid">
+                  <td><div class="date-cell"><strong>{{ a.fechaHora | date:'dd/MM/yyyy' }}</strong><span>{{ a.fechaHora | date:'HH:mm' }}</span></div></td>
+                  <td><div class="type-cell"><span class="type-icon">{{ a.categoria==='AUDIENCIA' ? '⚖' : a.categoria==='COMUNICACION' ? '☎' : '▤' }}</span><div><strong>{{ a.tipoNombre }}</strong><span>{{ a.asunto }}</span></div></div></td>
+                  <td><div class="case-cell"><strong>{{ a.expedienteCodigo }}</strong><span>{{ a.clienteNombre }}</span></div></td>
+                  <td><div class="person"><span>{{ iniciales(a.responsable) }}</span><b>{{ a.responsable }}</b></div></td>
+                  <td><div class="relations"><span title="Tareas">✓ {{ a.tareas }}</span><span title="Plazos">◷ {{ a.plazos }}</span><span title="Documentos">▤ {{ a.documentos }}</span><span title="Agenda">□ {{ a.eventos }}</span></div></td>
+                  <td><span class="status" [class.pending]="a.estado==='PENDIENTE'" [class.progress]="a.estado==='EN_TRAMITE'" [class.done]="a.estado==='COMPLETADO'" [class.cancelled]="a.estado==='CANCELADO'">{{ etiqueta(a.estado) }}</span></td>
+                </tr>
+              } @empty {
+                <tr><td colspan="6" class="empty">No se encontraron actuaciones con los filtros seleccionados.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <aside class="card detail-card">
+        @if (cargandoDetalle) {
+          <div class="detail-empty"><div class="spinner"></div><strong>Cargando actuación...</strong></div>
+        } @else if (detalle) {
+          <div class="detail-header">
+            <div class="detail-icon">▤</div>
+            <div><span>{{ detalle.actuacion.expedienteCodigo }}</span><h2>{{ detalle.actuacion.asunto }}</h2><p>{{ detalle.actuacion.tipoNombre }}</p></div>
+          </div>
+
+          <div class="detail-meta">
+            <div><span>Fecha</span><strong>{{ detalle.actuacion.fechaHora | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+            <div><span>Responsable</span><strong>{{ detalle.actuacion.responsable }}</strong></div>
+            <div><span>Tiempo</span><strong>{{ horas(detalle.actuacion.tiempoMinutos) }}</strong></div>
+            <div><span>Costo</span><strong>{{ dinero(detalle.actuacion.costo, detalle.actuacion.moneda) }}</strong></div>
+          </div>
+
+          <section class="detail-section"><h3>Descripción</h3><p>{{ detalle.descripcion || 'Sin descripción registrada.' }}</p></section>
+          <section class="detail-section"><h3>Resultado</h3><p>{{ detalle.actuacion.resultado || 'Sin resultado registrado todavía.' }}</p></section>
+          <section class="detail-section next"><h3>Próxima acción</h3><p>{{ detalle.actuacion.proximaAccion || 'No se indicó una próxima acción.' }}</p></section>
+
+          <section class="detail-section generated">
+            <h3>Seguimiento generado</h3>
+            @for (p of detalle.plazos; track p.uuid) {
+              <article class="generated-item"><span class="mini-icon red">◷</span><div><strong>Plazo · {{ p.descripcion }}</strong><small>Vence {{ p.fechaVencimiento | date:'dd/MM/yyyy' }} · {{ etiqueta(p.nivelRiesgo) }}</small></div></article>
+            }
+            @for (t of detalle.tareas; track t.uuid) {
+              <article class="generated-item"><span class="mini-icon purple">✓</span><div><strong>Tarea · {{ t.titulo }}</strong><small>{{ t.responsable }} · {{ t.fechaLimite | date:'dd/MM/yyyy HH:mm' }}</small></div></article>
+            }
+            @for (ev of detalle.eventos; track ev.uuid) {
+              <article class="generated-item"><span class="mini-icon blue">□</span><div><strong>Agenda · {{ ev.titulo }}</strong><small>{{ ev.fechaInicio | date:'dd/MM/yyyy HH:mm' }} · {{ etiqueta(ev.modalidad) }}</small></div></article>
+            }
+            @for (d of detalle.documentos; track d.uuid) {
+              <article class="generated-item"><span class="mini-icon gray">▤</span><div><strong>Documento · {{ d.nombre }}</strong><small>{{ d.nombreArchivo || 'Pendiente de cargar archivo' }} · {{ etiqueta(d.estado) }}</small></div></article>
+            }
+            @for (a of detalle.alertas; track a.id) {
+              <article class="generated-item"><span class="mini-icon amber">!</span><div><strong>Alerta · {{ etiqueta(a.tipo) }}</strong><small>{{ a.fechaProgramada | date:'dd/MM/yyyy HH:mm' }} · {{ a.mensaje }}</small></div></article>
+            }
+            @if (!detalle.plazos.length && !detalle.tareas.length && !detalle.eventos.length && !detalle.documentos.length && !detalle.alertas.length) {
+              <p class="no-generated">Esta actuación no generó elementos de seguimiento.</p>
+            }
+          </section>
+        } @else {
+          <div class="detail-empty"><div class="empty-icon">▤</div><strong>Selecciona una actuación</strong><span>Aquí verás descripción, resultado y todo el seguimiento relacionado.</span></div>
+        }
+      </aside>
+    </div>
+  </main>
 </div>
+
+@if (modalNueva) {
+  <div class="modal-backdrop" (click)="cerrarNueva()">
+    <section class="modal-card" (click)="$event.stopPropagation()">
+      <header class="modal-header">
+        <div><h2>Registrar actuación</h2><p>La actuación queda vinculada al expediente y puede generar seguimiento automáticamente.</p></div>
+        <button type="button" (click)="cerrarNueva()">×</button>
+      </header>
+
+      <div class="modal-body">
+        <section class="form-section">
+          <div class="section-title"><span>1</span><div><h3>Datos de la actuación</h3><p>Información mínima de lo ocurrido.</p></div></div>
+          <div class="form-grid">
+            <label class="span-2"><span>Expediente *</span><select [(ngModel)]="form.expedienteId" (change)="cambiarExpediente()"><option [ngValue]="null">Seleccionar expediente</option>@for(e of catalogos.expedientes; track e.id){<option [ngValue]="e.id">{{ e.codigo }} — {{ e.clienteNombre }}</option>}</select></label>
+            <label><span>Tipo *</span><select [(ngModel)]="form.tipoActuacionId" (change)="cambiarTipoActuacion()"><option [ngValue]="null">Seleccionar tipo</option>@for(t of catalogos.tiposActuacion; track t.id){<option [ngValue]="t.id">{{ t.nombre }}</option>}</select></label>
+            <label><span>Fecha y hora *</span><input type="datetime-local" [(ngModel)]="form.fechaHora"></label>
+            <label><span>Responsable *</span><select [(ngModel)]="form.responsableId"><option [ngValue]="null">Seleccionar</option>@for(u of catalogos.usuarios; track u.id){<option [ngValue]="u.id">{{ u.nombre }}</option>}</select></label>
+            <label><span>Estado</span><select [(ngModel)]="form.estado">@for(e of estados; track e){<option [value]="e">{{ etiqueta(e) }}</option>}</select></label>
+            <label class="span-2"><span>Asunto / actuación *</span><input type="text" [(ngModel)]="form.asunto" maxlength="200" placeholder="Ej. Contestación de demanda presentada"></label>
+            <label class="span-2"><span>Descripción</span><textarea rows="3" [(ngModel)]="form.descripcion" placeholder="Detalla qué ocurrió, qué se presentó o qué se recibió..."></textarea></label>
+            <label class="span-2"><span>Resultado</span><textarea rows="2" [(ngModel)]="form.resultado" placeholder="Ej. Escrito presentado y cargo recibido"></textarea></label>
+            <label class="span-2"><span>Próxima acción</span><input type="text" [(ngModel)]="form.proximaAccion" maxlength="250" placeholder="Ej. Revisar resolución y preparar apelación"></label>
+            <label><span>Tiempo (minutos)</span><input type="number" min="0" [(ngModel)]="form.tiempoMinutos"></label>
+            <label><span>Costo</span><div class="money-input"><select [(ngModel)]="form.moneda"><option value="PEN">PEN</option><option value="USD">USD</option></select><input type="number" min="0" step="0.01" [(ngModel)]="form.costo"></div></label>
+            <label class="check-field"><input type="checkbox" [(ngModel)]="form.facturable"><span>Tiempo facturable</span></label>
+            <label><span>Documento existente</span><select [(ngModel)]="form.documentoExistenteId" [disabled]="!form.expedienteId"><option [ngValue]="null">Ninguno</option>@for(d of documentosDisponibles; track d.id){<option [ngValue]="d.id">{{ d.nombre }}{{ d.archivo ? ' — '+d.archivo : '' }}</option>}</select></label>
+          </div>
+        </section>
+
+        <section class="form-section automation-section">
+          <div class="section-title"><span>2</span><div><h3>Automatización y seguimiento</h3><p>Según el tipo elegido, LEXIA activa los elementos que deben generarse.</p></div></div>
+
+          <article class="automation-card" [class.active]="form.tarea.generar">
+            <label class="automation-toggle"><input type="checkbox" [(ngModel)]="form.tarea.generar" [disabled]="!!tipoSeleccionado?.generaTarea"><div><strong>Generar tarea</strong><small>@if(tipoSeleccionado?.generaTarea){Requerida por este tipo de actuación}@else{Opcional}</small></div></label>
+            @if (form.tarea.generar) {
+              <div class="form-grid compact"><label class="span-2"><span>Título</span><input [(ngModel)]="form.tarea.titulo" placeholder="Se usará la próxima acción si lo dejas vacío"></label><label><span>Prioridad</span><select [(ngModel)]="form.tarea.prioridad">@for(p of prioridades; track p){<option [value]="p">{{ etiqueta(p) }}</option>}</select></label><label><span>Fecha límite</span><input type="datetime-local" [(ngModel)]="form.tarea.fechaLimite"></label><label><span>Supervisor</span><select [(ngModel)]="form.tarea.supervisorId"><option [ngValue]="null">Sin supervisor</option>@for(u of catalogos.usuarios; track u.id){<option [ngValue]="u.id">{{ u.nombre }}</option>}</select></label><label><span>Tiempo estimado (min)</span><input type="number" min="1" [(ngModel)]="form.tarea.tiempoEstimadoMinutos"></label></div>
+            }
+          </article>
+
+          <article class="automation-card" [class.active]="form.plazo.generar">
+            <label class="automation-toggle"><input type="checkbox" [(ngModel)]="form.plazo.generar" [disabled]="!!tipoSeleccionado?.generaPlazo"><div><strong>Generar plazo + alertas</strong><small>@if(tipoSeleccionado?.generaPlazo){Requerido por este tipo de actuación}@else{Opcional}</small></div></label>
+            @if (form.plazo.generar) {
+              <div class="form-grid compact">
+                <label class="span-2"><span>Tipo de plazo *</span><select [(ngModel)]="form.plazo.tipoPlazoId" (change)="cambiarTipoPlazo()"><option [ngValue]="null">Seleccionar</option>@for(p of catalogos.tiposPlazo; track p.id){<option [ngValue]="p.id">{{ p.nombre }}</option>}</select></label>
+                <label><span>Fecha de notificación</span><input type="date" [(ngModel)]="form.plazo.fechaNotificacion"></label>
+                <label><span>Días *</span><input type="number" min="1" [(ngModel)]="form.plazo.diasPlazo"></label>
+                <label><span>Cómputo</span><select [(ngModel)]="form.plazo.tipoComputo"><option value="HABILES">Días hábiles</option><option value="CALENDARIO">Días calendario</option></select></label>
+                <label><span>Riesgo</span><select [(ngModel)]="form.plazo.nivelRiesgo"><option value="BAJO">Bajo</option><option value="MEDIO">Medio</option><option value="ALTO">Alto</option><option value="CRITICO">Crítico</option></select></label>
+                <label><span>Revisor</span><select [(ngModel)]="form.plazo.revisorId"><option [ngValue]="null">Sin revisor</option>@for(u of catalogos.usuarios; track u.id){<option [ngValue]="u.id">{{ u.nombre }}</option>}</select></label>
+                <label class="span-2"><span>Actuación requerida</span><input [(ngModel)]="form.plazo.actuacionRequerida" placeholder="Ej. Presentar recurso de apelación"></label>
+                <label class="check-field span-2"><input type="checkbox" [(ngModel)]="form.plazo.requiereRevisionProfesional"><span>El cálculo requiere revisión profesional</span></label>
+                @if(form.plazo.requiereRevisionProfesional){<label class="span-2"><span>Motivo de revisión *</span><input [(ngModel)]="form.plazo.motivoRevision" maxlength="250" placeholder="Ej. Fecha de notificación observada o suspensión especial"></label>}
+                <div class="info-note span-2">El vencimiento se calcula al guardar con el calendario judicial. Las alertas configuradas del estudio se crean automáticamente.</div>
+              </div>
+            }
+          </article>
+
+          <article class="automation-card" [class.active]="form.evento.generar">
+            <label class="automation-toggle"><input type="checkbox" [(ngModel)]="form.evento.generar" [disabled]="!!tipoSeleccionado?.generaEventoAgenda"><div><strong>Crear evento de agenda</strong><small>@if(tipoSeleccionado?.generaEventoAgenda){Requerido por este tipo de actuación}@else{Opcional}</small></div></label>
+            @if(form.evento.generar){<div class="form-grid compact"><label><span>Tipo</span><select [(ngModel)]="form.evento.tipo">@for(t of tiposEvento; track t){<option [value]="t">{{ etiqueta(t) }}</option>}</select></label><label><span>Modalidad</span><select [(ngModel)]="form.evento.modalidad"><option value="PRESENCIAL">Presencial</option><option value="VIRTUAL">Virtual</option><option value="HIBRIDA">Híbrida</option></select></label><label class="span-2"><span>Título</span><input [(ngModel)]="form.evento.titulo"></label><label><span>Inicio</span><input type="datetime-local" [(ngModel)]="form.evento.fechaInicio"></label><label><span>Fin</span><input type="datetime-local" [(ngModel)]="form.evento.fechaFin"></label><label><span>Ubicación</span><input [(ngModel)]="form.evento.ubicacion"></label><label><span>Enlace virtual</span><input [(ngModel)]="form.evento.enlaceVirtual"></label></div>}
+          </article>
+
+          <article class="automation-card" [class.active]="form.documentoPendiente.generar">
+            <label class="automation-toggle"><input type="checkbox" [(ngModel)]="form.documentoPendiente.generar" [disabled]="!!tipoSeleccionado?.requiereDocumento"><div><strong>Crear documento pendiente</strong><small>@if(tipoSeleccionado?.requiereDocumento){Requerido por este tipo de actuación}@else{Opcional}</small></div></label>
+            @if(form.documentoPendiente.generar){<div class="form-grid compact"><label class="span-2"><span>Nombre</span><input [(ngModel)]="form.documentoPendiente.nombre" placeholder="Se generará un borrador sin archivo"></label><label><span>Categoría</span><select [(ngModel)]="form.documentoPendiente.categoria">@for(c of categoriasDocumento; track c){<option [value]="c">{{ etiqueta(c) }}</option>}</select></label><label class="check-field"><input type="checkbox" [(ngModel)]="form.documentoPendiente.confidencial"><span>Confidencial</span></label><div class="info-note span-2">El registro aparecerá en Panel Documentos como <b>Borrador / Sin archivo vigente</b>, listo para cargar su primera versión.</div></div>}
+          </article>
+
+          <article class="automation-card" [class.active]="form.alerta.generar">
+            <label class="automation-toggle"><input type="checkbox" [(ngModel)]="form.alerta.generar"><div><strong>Alerta adicional</strong><small>Opcional, aparte de las alertas automáticas de plazo</small></div></label>
+            @if(form.alerta.generar){<div class="form-grid compact"><label><span>Fecha y hora *</span><input type="datetime-local" [(ngModel)]="form.alerta.fechaProgramada"></label><label><span>Severidad</span><select [(ngModel)]="form.alerta.severidad"><option value="BAJA">Baja</option><option value="MEDIA">Media</option><option value="ALTA">Alta</option><option value="CRITICA">Crítica</option></select></label><label class="span-2"><span>Mensaje</span><input [(ngModel)]="form.alerta.mensaje" maxlength="255" placeholder="Ej. Verificar cargo de presentación"></label></div>}
+          </article>
+        </section>
+      </div>
+
+      <footer class="modal-footer"><button type="button" class="btn-light" (click)="cerrarNueva()">Cancelar</button><button type="button" class="btn-primary" [disabled]="guardando" (click)="guardar()">{{ guardando ? 'Registrando...' : 'Registrar actuación' }}</button></footer>
+    </section>
+  </div>
+}
