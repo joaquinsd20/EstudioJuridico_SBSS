@@ -1,6 +1,13 @@
 package com.sbss.lexia.usuarios.repository;
 
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.CandidatoReasignacion;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaTrabajo;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ClienteCarga;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.EquipoCarga;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ExpedienteCarga;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.PlazoCarga;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.TareaCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
@@ -141,12 +148,212 @@ public class UsuarioGestionRepositoryJdbc {
                   (SELECT COUNT(*) FROM tareas t
                     WHERE t.usuario_responsable_id = :id
                       AND t.estado NOT IN ('COMPLETADA','CANCELADA'))                            AS tareas,
+                  (SELECT COUNT(*) FROM clientes c
+                    WHERE c.abogado_responsable_id = :id AND c.activo = 1)                       AS clientes,
+                  (SELECT COUNT(*) FROM expediente_equipo eq JOIN expedientes e ON e.id = eq.expediente_id
+                    WHERE eq.usuario_id = :id AND eq.activo = 1 AND e.activo = 1
+                      AND eq.rol_en_expediente <> 'RESPONSABLE')                                 AS equipos,
                   (SELECT COUNT(*) FROM evento_participantes ep JOIN eventos_agenda ev ON ev.id = ep.evento_id
                     WHERE ep.usuario_id = :id AND ev.fecha_inicio >= NOW(3))                     AS eventos,
                   (SELECT COUNT(*) FROM documento_versiones dv WHERE dv.usuario_carga_id = :id)  AS versiones
                 """, p, (rs, n) -> new CargaTrabajo(
                 rs.getInt("expedientes"), rs.getInt("plazos"), rs.getInt("tareas"),
+                rs.getInt("clientes"), rs.getInt("equipos"),
                 rs.getInt("eventos"), rs.getInt("versiones")));
+    }
+
+    // =========================================================================
+    // Reasignacion de trabajo
+    // =========================================================================
+
+    /** Roles que pueden llevar expedientes y clientes (igual que el selector de clientes). */
+    public static final List<String> ROLES_ABOGADO =
+            List.of("ADMINISTRADOR", "SOCIO", "ABOGADO", "ABOGADO_AUXILIAR");
+
+    // Con espacios a ambos lados: los text blocks recortan el espacio final del
+    // fragmento anterior, y sin ellos quedaria "ANDp.estado".
+    private static final String PLAZO_ABIERTO = " p.estado NOT IN ('CUMPLIDO','CANCELADO') ";
+    private static final String TAREA_ABIERTA = " t.estado NOT IN ('COMPLETADA','CANCELADA') ";
+
+    public CargaDetallada cargaDetallada(Long id, Integer estudioId) {
+        Map<String, Object> p = Map.of("id", id, "estudioId", estudioId);
+
+        List<ExpedienteCarga> expedientes = jdbc.query("""
+                SELECT e.uuid_publico, COALESCE(e.numero_expediente, e.codigo_interno) codigo,
+                       c.nombre_busqueda cliente, e.es_confidencial
+                  FROM expedientes e JOIN clientes c ON c.id = e.cliente_id
+                 WHERE e.abogado_responsable_id = :id AND e.activo = 1 AND e.estudio_id = :estudioId
+                 ORDER BY codigo
+                """, p, (rs, n) -> new ExpedienteCarga(rs.getString(1), rs.getString(2),
+                rs.getString(3), rs.getBoolean(4)));
+
+        List<PlazoCarga> plazos = jdbc.query("""
+                SELECT p.descripcion, p.fecha_vencimiento, p.estado, e.codigo_interno
+                  FROM plazos p JOIN expedientes e ON e.id = p.expediente_id
+                 WHERE p.usuario_responsable_id = :id AND e.estudio_id = :estudioId AND """ + PLAZO_ABIERTO + """
+                 ORDER BY p.fecha_vencimiento
+                """, p, (rs, n) -> new PlazoCarga(rs.getString(1), rs.getDate(2).toLocalDate(),
+                rs.getString(3), rs.getString(4)));
+
+        List<TareaCarga> tareas = jdbc.query("""
+                SELECT t.titulo, t.estado, t.fecha_limite, e.codigo_interno
+                  FROM tareas t JOIN expedientes e ON e.id = t.expediente_id
+                 WHERE t.usuario_responsable_id = :id AND e.estudio_id = :estudioId AND """ + TAREA_ABIERTA + """
+                 ORDER BY t.fecha_limite
+                """, p, (rs, n) -> new TareaCarga(rs.getString(1), rs.getString(2),
+                fecha(rs, "fecha_limite"), rs.getString(4)));
+
+        List<ClienteCarga> clientes = jdbc.query("""
+                SELECT uuid_publico, nombre_busqueda FROM clientes
+                 WHERE abogado_responsable_id = :id AND activo = 1 AND estudio_id = :estudioId
+                 ORDER BY nombre_busqueda
+                """, p, (rs, n) -> new ClienteCarga(rs.getString(1), rs.getString(2)));
+
+        List<EquipoCarga> equipos = jdbc.query("""
+                SELECT e.codigo_interno, eq.rol_en_expediente
+                  FROM expediente_equipo eq JOIN expedientes e ON e.id = eq.expediente_id
+                 WHERE eq.usuario_id = :id AND eq.activo = 1 AND e.activo = 1
+                   AND eq.rol_en_expediente <> 'RESPONSABLE' AND e.estudio_id = :estudioId
+                 ORDER BY e.codigo_interno
+                """, p, (rs, n) -> new EquipoCarga(rs.getString(1), rs.getString(2)));
+
+        return new CargaDetallada(expedientes, plazos, tareas, clientes, equipos, candidatos(estudioId, id));
+    }
+
+    /** Personal activo del estudio que puede recibir trabajo, sin contar al que se va. */
+    public List<CandidatoReasignacion> candidatos(Integer estudioId, Long excluirId) {
+        return jdbc.query("""
+                SELECT u.uuid_publico, u.nombre_completo, u.cargo,
+                       MAX(r.codigo IN (:rolesAbogado)) es_abogado
+                  FROM usuarios u
+                  JOIN usuarios_roles ur ON ur.usuario_id = u.id
+                  JOIN roles r ON r.id = ur.rol_id
+                 WHERE u.estudio_id = :estudioId AND u.id <> :excluir
+                   AND u.tipo_usuario = 'INTERNO' AND u.activo = 1 AND u.estado = 'ACTIVO'
+                 GROUP BY u.id
+                 ORDER BY u.nombre_completo
+                """, new MapSqlParameterSource()
+                .addValue("estudioId", estudioId)
+                .addValue("excluir", excluirId)
+                .addValue("rolesAbogado", ROLES_ABOGADO),
+                (rs, n) -> new CandidatoReasignacion(rs.getString(1), rs.getString(2), rs.getString(3),
+                        rs.getBoolean(4)));
+    }
+
+    /** Ids de los expedientes activos de los que es responsable. */
+    public List<Long> expedientesComoResponsable(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT e.id FROM expedientes e
+                 WHERE e.abogado_responsable_id = :id AND e.activo = 1 AND e.estudio_id = :estudioId
+                """, Map.of("id", id, "estudioId", estudioId), (rs, n) -> rs.getLong(1));
+    }
+
+    /**
+     * Plazos abiertos a su nombre, con quien es HOY responsable de su expediente.
+     * Se llama despues de mover los expedientes, asi que ese responsable ya es el
+     * nuevo: el plazo sigue a su expediente.
+     */
+    public List<long[]> plazosAbiertos(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT p.id, p.expediente_id, e.abogado_responsable_id
+                  FROM plazos p JOIN expedientes e ON e.id = p.expediente_id
+                 WHERE p.usuario_responsable_id = :id AND e.estudio_id = :estudioId AND """ + PLAZO_ABIERTO,
+                Map.of("id", id, "estudioId", estudioId),
+                (rs, n) -> new long[] {rs.getLong(1), rs.getLong(2), rs.getLong(3)});
+    }
+
+    /**
+     * Cambia el responsable del plazo y le lleva sus alertas TODAVIA PROGRAMADAS.
+     * Sin lo segundo, el aviso de vencimiento le llegaria a quien ya no esta.
+     * Las ENVIADAS y LEIDAS son historia y se quedan como estan.
+     *
+     * @return cuantas alertas se movieron.
+     */
+    public int moverPlazo(Long plazoId, Long destinoId) {
+        jdbc.update("UPDATE plazos SET usuario_responsable_id = :destino WHERE id = :id",
+                Map.of("destino", destinoId, "id", plazoId));
+        return jdbc.update("""
+                UPDATE alertas SET usuario_destino_id = :destino
+                 WHERE plazo_id = :id AND estado = 'PROGRAMADA'
+                """, Map.of("destino", destinoId, "id", plazoId));
+    }
+
+    /** Tareas abiertas a su nombre: [id, expediente_id]. */
+    public List<long[]> tareasAbiertas(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT t.id, t.expediente_id
+                  FROM tareas t JOIN expedientes e ON e.id = t.expediente_id
+                 WHERE t.usuario_responsable_id = :id AND e.estudio_id = :estudioId AND """ + TAREA_ABIERTA,
+                Map.of("id", id, "estudioId", estudioId), (rs, n) -> new long[] {rs.getLong(1), rs.getLong(2)});
+    }
+
+    public void moverTarea(Long tareaId, Long destinoId) {
+        jdbc.update("UPDATE tareas SET usuario_responsable_id = :destino WHERE id = :id",
+                Map.of("destino", destinoId, "id", tareaId));
+    }
+
+    public List<Long> clientesComoResponsable(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT id FROM clientes
+                 WHERE abogado_responsable_id = :id AND activo = 1 AND estudio_id = :estudioId
+                """, Map.of("id", id, "estudioId", estudioId), (rs, n) -> rs.getLong(1));
+    }
+
+    public void moverCliente(Long clienteId, Long destinoId, Long autorId) {
+        jdbc.update("""
+                UPDATE clientes SET abogado_responsable_id = :destino, usuario_modificacion_id = :autor
+                 WHERE id = :id
+                """, Map.of("destino", destinoId, "autor", autorId, "id", clienteId));
+    }
+
+    /** Expedientes donde esta en el equipo con un rol distinto de RESPONSABLE. */
+    public List<Long> expedientesComoApoyo(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT eq.expediente_id
+                  FROM expediente_equipo eq JOIN expedientes e ON e.id = eq.expediente_id
+                 WHERE eq.usuario_id = :id AND eq.activo = 1 AND e.activo = 1
+                   AND eq.rol_en_expediente <> 'RESPONSABLE' AND e.estudio_id = :estudioId
+                """, Map.of("id", id, "estudioId", estudioId), (rs, n) -> rs.getLong(1));
+    }
+
+    /** Traza de cada movimiento en `auditoria`. `expedienteId` puede ser null (clientes). */
+    public void auditar(Integer estudioId, Long autorId, String entidad, Long registroId,
+                        Long expedienteId, String descripcion) {
+        jdbc.update("""
+                INSERT INTO auditoria
+                    (estudio_id, usuario_id, entidad, registro_id, expediente_id, accion, descripcion, exito)
+                VALUES (:estudioId, :autor, :entidad, :registro, :expediente, 'ACTUALIZAR', :descripcion, 1)
+                """, new MapSqlParameterSource()
+                .addValue("estudioId", estudioId)
+                .addValue("autor", autorId)
+                .addValue("entidad", entidad)
+                .addValue("registro", registroId)
+                .addValue("expediente", expedienteId)
+                .addValue("descripcion", descripcion.length() > 500 ? descripcion.substring(0, 500) : descripcion));
+    }
+
+    /** Destino valido: del estudio, interno, activo. Devuelve su id o null. */
+    public Long destinoActivo(String uuid, Integer estudioId) {
+        List<Long> ids = jdbc.query("""
+                SELECT id FROM usuarios
+                 WHERE uuid_publico = :uuid AND estudio_id = :estudioId AND tipo_usuario = 'INTERNO'
+                   AND activo = 1 AND estado = 'ACTIVO'
+                """, Map.of("uuid", uuid, "estudioId", estudioId), (rs, n) -> rs.getLong(1));
+        return ids.isEmpty() ? null : ids.get(0);
+    }
+
+    public boolean esAbogado(Long usuarioId) {
+        Integer n = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM usuarios_roles ur JOIN roles r ON r.id = ur.rol_id
+                 WHERE ur.usuario_id = :id AND r.codigo IN (:roles)
+                """, new MapSqlParameterSource().addValue("id", usuarioId).addValue("roles", ROLES_ABOGADO),
+                Integer.class);
+        return n != null && n > 0;
+    }
+
+    public String nombreDe(Long id) {
+        return jdbc.queryForObject("SELECT nombre_completo FROM usuarios WHERE id = :id",
+                Map.of("id", id), String.class);
     }
 
     /** Roles asignables. El del portal se marca para que la UI no lo ofrezca aqui. */

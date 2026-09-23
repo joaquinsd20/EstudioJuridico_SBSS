@@ -57,21 +57,72 @@ public final class UsuarioDtos {
     /**
      * Lo que quedaria a nombre de alguien al desactivarlo.
      *
-     * Las tres primeras BLOQUEAN la baja: son compromisos vivos con un
-     * responsable NOT NULL, y dejarlos a nombre de una cuenta inactiva es
-     * exactamente como se pierde un plazo. Las dos ultimas son historicas y
-     * solo se informan.
+     * Las cinco primeras BLOQUEAN la baja: son compromisos vivos. Dejarlos a
+     * nombre de una cuenta inactiva es exactamente como se pierde un plazo, o
+     * como un cliente se queda con un abogado que ya no existe. Eventos y
+     * versiones de documento son historia y solo se informan.
      */
     public record CargaTrabajo(
             int expedientes,
             int plazosAbiertos,
             int tareasAbiertas,
+            int clientes,
+            int equiposApoyo,
             int eventosAgenda,
             int versionesDocumento) {
 
         public boolean bloqueaBaja() {
-            return expedientes > 0 || plazosAbiertos > 0 || tareasAbiertas > 0;
+            return expedientes > 0 || plazosAbiertos > 0 || tareasAbiertas > 0
+                    || clientes > 0 || equiposApoyo > 0;
         }
+    }
+
+    // ---- Reasignacion de trabajo ------------------------------------------------
+
+    public record ExpedienteCarga(String uuidPublico, String codigo, String cliente, boolean confidencial) {
+    }
+
+    public record PlazoCarga(String descripcion, java.time.LocalDate vencimiento, String estado,
+                             String expedienteCodigo) {
+    }
+
+    public record TareaCarga(String titulo, String estado, LocalDateTime fechaLimite, String expedienteCodigo) {
+    }
+
+    public record ClienteCarga(String uuidPublico, String nombre) {
+    }
+
+    public record EquipoCarga(String expedienteCodigo, String rol) {
+    }
+
+    /**
+     * Quien puede recibir el trabajo. `esAbogado` decide si puede tomar
+     * expedientes y clientes: mismo criterio que el selector de abogados del
+     * modulo de clientes (Administrador, Socio, Abogado, Abogado auxiliar).
+     */
+    public record CandidatoReasignacion(String uuidPublico, String nombreCompleto, String cargo, boolean esAbogado) {
+    }
+
+    /** Lo concreto que hay que mover, y a quien se le puede dar. */
+    public record CargaDetallada(
+            List<ExpedienteCarga> expedientes,
+            List<PlazoCarga> plazos,
+            List<TareaCarga> tareas,
+            List<ClienteCarga> clientes,
+            List<EquipoCarga> equipos,
+            List<CandidatoReasignacion> candidatos) {
+    }
+
+    /**
+     * Un destino por categoria. Los plazos NO tienen destino propio: siguen al
+     * nuevo responsable de su expediente. El apoyo en equipos no se traspasa:
+     * se retira. Un destino solo es obligatorio si hay algo de esa categoria.
+     */
+    public record ReasignarRequest(String expedientesA, String tareasA, String clientesA) {
+    }
+
+    public record ResultadoReasignacion(
+            int expedientes, int plazos, int alertas, int tareas, int clientes, int equiposRetirados) {
     }
 
     /** Un rol asignable, para el selector del formulario. */

@@ -1,7 +1,10 @@
 package com.sbss.lexia.usuarios.controller;
 
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CredencialTemporal;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.GuardarUsuarioRequest;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ReasignarRequest;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResultadoReasignacion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
@@ -97,6 +100,23 @@ public class UsuarioController {
     public ResponseEntity<Void> desbloquear(@PathVariable String uuid) {
         usuarioService.desbloquear(uuid);
         return ResponseEntity.noContent().build();
+    }
+
+    /** Lo concreto que tiene a su nombre y los candidatos a recibirlo. */
+    @GetMapping("/{uuid}/carga")
+    @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
+    public CargaDetallada carga(@PathVariable String uuid) {
+        return usuarioService.cargaDetallada(uuid);
+    }
+
+    /**
+     * Traspasa su trabajo vivo (expedientes, plazos, tareas, clientes) y lo retira
+     * de los equipos. Es lo que hay que hacer antes de poder darlo de baja.
+     */
+    @PostMapping("/{uuid}/reasignar")
+    @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
+    public ResultadoReasignacion reasignar(@PathVariable String uuid, @RequestBody ReasignarRequest peticion) {
+        return usuarioService.reasignar(uuid, peticion);
     }
 
     /** Contrasena temporal nueva. Cierra las sesiones abiertas de esa persona. */

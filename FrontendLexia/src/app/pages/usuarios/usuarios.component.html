@@ -224,19 +224,24 @@
         <li [class.pesa]="d.cargaTrabajo.expedientes > 0"><strong>{{ d.cargaTrabajo.expedientes }}</strong> expedientes</li>
         <li [class.pesa]="d.cargaTrabajo.plazosAbiertos > 0"><strong>{{ d.cargaTrabajo.plazosAbiertos }}</strong> plazos abiertos</li>
         <li [class.pesa]="d.cargaTrabajo.tareasAbiertas > 0"><strong>{{ d.cargaTrabajo.tareasAbiertas }}</strong> tareas abiertas</li>
+        <li [class.pesa]="d.cargaTrabajo.clientes > 0"><strong>{{ d.cargaTrabajo.clientes }}</strong> clientes</li>
+        <li [class.pesa]="d.cargaTrabajo.equiposApoyo > 0">apoyo en <strong>{{ d.cargaTrabajo.equiposApoyo }}</strong> equipos</li>
         <li><strong>{{ d.cargaTrabajo.eventosAgenda }}</strong> eventos próximos</li>
         <li><strong>{{ d.cargaTrabajo.versionesDocumento }}</strong> versiones de documento</li>
       </ul>
 
       @if (bloqueaBaja(d) && d.activo) {
         <p class="nota">
-          No se puede desactivar mientras tenga expedientes, plazos o tareas abiertas:
-          quedarían a nombre de una cuenta que ya nadie revisa. Hay que reasignarlos primero.
+          No se puede desactivar mientras tenga expedientes, plazos, tareas, clientes o apoyo
+          en equipos: quedarían a nombre de una cuenta que ya nadie revisa. Hay que reasignarlos primero.
         </p>
       }
 
       <footer class="modal-pie">
         <button type="button" class="btn-secundario" (click)="cerrarDetalle()">Cerrar</button>
+        @if (bloqueaBaja(d)) {
+          <button type="button" class="btn-secundario" (click)="abrirReasignacion(d)">Reasignar trabajo</button>
+        }
         <button type="button" class="btn-primary" (click)="editar(d.uuidPublico)">Editar</button>
       </footer>
     </div>
@@ -316,6 +321,143 @@
         </button>
       </footer>
     </form>
+  </div>
+}
+
+
+<!-- ================= REASIGNAR TRABAJO ================= -->
+@if (reasignando(); as r) {
+  <div class="modal-fondo">
+    <div class="modal" role="dialog" aria-modal="true">
+
+      <header class="modal-cabecera">
+        <div>
+          <h2>Reasignar el trabajo de {{ r.nombre }}</h2>
+          <p>Todo se mueve de una vez: si algo falla, no se mueve nada.</p>
+        </div>
+        <button type="button" class="modal-cerrar" (click)="cerrarReasignacion()" aria-label="Cerrar">×</button>
+      </header>
+
+      @if (resultado(); as res) {
+
+        <ul class="carga">
+          <li><strong>{{ res.expedientes }}</strong> expedientes</li>
+          <li><strong>{{ res.plazos }}</strong> plazos</li>
+          <li><strong>{{ res.alertas }}</strong> alertas programadas</li>
+          <li><strong>{{ res.tareas }}</strong> tareas</li>
+          <li><strong>{{ res.clientes }}</strong> clientes</li>
+          <li>retirado de <strong>{{ res.equiposRetirados }}</strong> equipos</li>
+        </ul>
+        <p class="nota">Reasignado. Los cambios de responsable ya aparecen en la línea de tiempo de cada expediente.</p>
+        <footer class="modal-pie">
+          <button type="button" class="btn-primary" (click)="cerrarReasignacion()">Volver a su ficha</button>
+        </footer>
+
+      } @else if (carga(); as c) {
+
+        @if (nada()) {
+          <p class="nota">No tiene trabajo vivo a su nombre: ya se puede dar de baja.</p>
+        }
+
+        @if (c.expedientes.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Expedientes ({{ c.expedientes.length }})</h3>
+            <ul class="lista-carga">
+              @for (e of c.expedientes; track e.uuidPublico) {
+                <li>{{ e.codigo }} · {{ e.cliente }} @if (e.confidencial) { <span class="etiqueta-temporal">Confidencial</span> }</li>
+              }
+            </ul>
+            <label class="destino">Pasan a
+              <select [(ngModel)]="destinos.expedientesA">
+                <option [ngValue]="null">Elige un abogado…</option>
+                @for (a of abogados(); track a.uuidPublico) {
+                  <option [ngValue]="a.uuidPublico">{{ a.nombreCompleto }}{{ a.cargo ? ' — ' + a.cargo : '' }}</option>
+                }
+              </select>
+            </label>
+          </section>
+        }
+
+        @if (c.plazos.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Plazos abiertos ({{ c.plazos.length }})</h3>
+            <ul class="lista-carga">
+              @for (p of c.plazos; track $index) {
+                <li>{{ p.vencimiento | date: 'dd/MM/yyyy' }} · {{ p.descripcion }} ({{ p.expedienteCodigo }})</li>
+              }
+            </ul>
+            <small class="texto-suave">Cada plazo pasa al responsable de su expediente, con sus alertas pendientes.</small>
+          </section>
+        }
+
+        @if (c.tareas.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Tareas abiertas ({{ c.tareas.length }})</h3>
+            <ul class="lista-carga">
+              @for (t of c.tareas; track $index) {
+                <li>{{ t.titulo }} ({{ t.expedienteCodigo }})</li>
+              }
+            </ul>
+            <label class="destino">Pasan a
+              <select [(ngModel)]="destinos.tareasA">
+                <option [ngValue]="null">Elige a alguien…</option>
+                @for (a of c.candidatos; track a.uuidPublico) {
+                  <option [ngValue]="a.uuidPublico">{{ a.nombreCompleto }}{{ a.cargo ? ' — ' + a.cargo : '' }}</option>
+                }
+              </select>
+            </label>
+          </section>
+        }
+
+        @if (c.clientes.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Clientes a su cargo ({{ c.clientes.length }})</h3>
+            <ul class="lista-carga">
+              @for (cl of c.clientes; track cl.uuidPublico) { <li>{{ cl.nombre }}</li> }
+            </ul>
+            <label class="destino">Pasan a
+              <select [(ngModel)]="destinos.clientesA">
+                <option [ngValue]="null">Elige un abogado…</option>
+                @for (a of abogados(); track a.uuidPublico) {
+                  <option [ngValue]="a.uuidPublico">{{ a.nombreCompleto }}{{ a.cargo ? ' — ' + a.cargo : '' }}</option>
+                }
+              </select>
+            </label>
+          </section>
+        }
+
+        @if (c.equipos.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Apoyo en equipos ({{ c.equipos.length }})</h3>
+            <ul class="lista-carga">
+              @for (q of c.equipos; track $index) { <li>{{ q.expedienteCodigo }} · {{ q.rol }}</li> }
+            </ul>
+            <small class="texto-suave">Se le retira de estos equipos; su responsable decide si suma a otra persona.</small>
+          </section>
+        }
+
+        @if (errorReasignacion()) {
+          <div class="alerta" role="alert">{{ errorReasignacion() }}</div>
+        }
+
+        <footer class="modal-pie">
+          <button type="button" class="btn-secundario" (click)="cerrarReasignacion()">Cancelar</button>
+          @if (!nada()) {
+            <button type="button" class="btn-primary" [disabled]="faltaDestino() || reasignandoEnCurso()"
+                    (click)="confirmarReasignacion()">
+              {{ reasignandoEnCurso() ? 'Reasignando…' : 'Reasignar' }}
+            </button>
+          }
+        </footer>
+
+      } @else {
+        @if (errorReasignacion()) {
+          <div class="alerta" role="alert">{{ errorReasignacion() }}</div>
+        } @else {
+          <p class="nota">Cargando su trabajo…</p>
+        }
+      }
+    </div>
   </div>
 }
 

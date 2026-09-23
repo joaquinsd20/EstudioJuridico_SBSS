@@ -826,7 +826,13 @@ public class ExpedienteRepositoryJdbc {
         if (!verTodos) {
             sql.append(" AND (e.abogado_responsable_id = :usuarioId OR eq.usuario_id IS NOT NULL)");
         }
-        if (!verConfidenciales) {
+        // RF-02: los confidenciales se ocultan a los roles operativos "salvo
+        // asignacion explicita". Sin verTodos, la consulta ya se limita a los
+        // expedientes donde la persona es responsable o esta en el equipo, asi que
+        // ahi el filtro solo servia para ocultarle su propio caso (EXP-0088 de la
+        // semilla: su responsable recibia 404 al abrirlo). Se aplica solo al ver
+        // todo el estudio.
+        if (verTodos && !verConfidenciales) {
             sql.append(" AND e.es_confidencial = 0");
         }
 
@@ -868,8 +874,9 @@ public class ExpedienteRepositoryJdbc {
         Long responsableId = fila.responsableId();
         boolean confidencial = fila.confidencial();
 
-        if (confidencial && !verConfidenciales) return null;
-        if (verTodos || responsableId.equals(usuarioId)) return expedienteId;
+        // Ver el comentario de idsVisibles: estar asignado basta (RF-02).
+        if (responsableId.equals(usuarioId)) return expedienteId;
+        if (verTodos) return confidencial && !verConfidenciales ? null : expedienteId;
 
         Integer miembro = jdbc.queryForObject("""
                 SELECT COUNT(*)
@@ -884,6 +891,87 @@ public class ExpedienteRepositoryJdbc {
                 Integer.class);
 
         return miembro != null && miembro > 0 ? expedienteId : null;
+    }
+
+    /**
+     * Cambia el responsable de un expediente desde FUERA de la edicion (la usa la
+     * reasignacion de trabajo del modulo de usuarios).
+     *
+     * Hace lo mismo que la edicion en lo que toca al responsable: actualiza la
+     * columna, deja al nuevo como RESPONSABLE en expediente_equipo, retira al
+     * anterior del equipo y registra `expediente_responsable` en auditoria, que
+     * es lo que pinta la linea de tiempo. A diferencia de la edicion, NO toca al
+     * resto del equipo ni las contrapartes: los demas miembros conservan su rol.
+     *
+     * @return false si el expediente no existe en ese estudio.
+     */
+    public boolean cambiarResponsable(Integer estudioId, Long expedienteId, Long nuevoResponsableId,
+                                      Long usuarioAccionId) {
+        List<Long> actuales = jdbc.query("""
+                SELECT abogado_responsable_id FROM expedientes
+                 WHERE id = :id AND estudio_id = :estudioId
+                   FOR UPDATE
+                """, Map.of("id", expedienteId, "estudioId", estudioId),
+                (rs, n) -> rs.getLong(1));
+        if (actuales.isEmpty()) return false;
+
+        Long anteriorId = actuales.getFirst();
+        if (anteriorId.equals(nuevoResponsableId)) return true;
+
+        jdbc.update("""
+                UPDATE expedientes
+                   SET abogado_responsable_id = :nuevo, usuario_modificacion_id = :accion
+                 WHERE id = :id
+                """, new MapSqlParameterSource()
+                .addValue("nuevo", nuevoResponsableId)
+                .addValue("accion", usuarioAccionId)
+                .addValue("id", expedienteId));
+
+        jdbc.update("""
+                UPDATE expediente_equipo SET activo = 0, fecha_desasignacion = NOW(3)
+                 WHERE expediente_id = :id AND usuario_id = :anterior AND activo = 1
+                """, Map.of("id", expedienteId, "anterior", anteriorId));
+
+        jdbc.update("""
+                INSERT INTO expediente_equipo
+                    (expediente_id, usuario_id, rol_en_expediente, puede_editar,
+                     fecha_asignacion, usuario_asignacion_id, activo)
+                VALUES (:id, :nuevo, 'RESPONSABLE', 1, NOW(3), :accion, 1)
+                ON DUPLICATE KEY UPDATE
+                    rol_en_expediente = 'RESPONSABLE',
+                    puede_editar = 1,
+                    fecha_asignacion = IF(activo = 0, NOW(3), fecha_asignacion),
+                    fecha_desasignacion = NULL,
+                    usuario_asignacion_id = :accion,
+                    activo = 1
+                """, Map.of("id", expedienteId, "nuevo", nuevoResponsableId, "accion", usuarioAccionId));
+
+        registrarAuditoriaEquipo(estudioId, expedienteId, usuarioAccionId,
+                "expediente_responsable", "ACTUALIZAR",
+                "Responsable anterior: " + nombreUsuario(anteriorId)
+                        + ". Nuevo responsable: " + nombreUsuario(nuevoResponsableId) + ".");
+        return true;
+    }
+
+    /**
+     * Retira a alguien del equipo de un expediente (cualquier rol salvo
+     * RESPONSABLE, que se cambia con cambiarResponsable) y lo registra en la
+     * linea de tiempo. Devuelve cuantas filas retiro.
+     */
+    public int retirarDelEquipo(Integer estudioId, Long expedienteId, Long usuarioId, Long usuarioAccionId) {
+        int filas = jdbc.update("""
+                UPDATE expediente_equipo eq
+                  JOIN expedientes e ON e.id = eq.expediente_id AND e.estudio_id = :estudioId
+                   SET eq.activo = 0, eq.fecha_desasignacion = NOW(3)
+                 WHERE eq.expediente_id = :id AND eq.usuario_id = :usuarioId
+                   AND eq.activo = 1 AND eq.rol_en_expediente <> 'RESPONSABLE'
+                """, Map.of("estudioId", estudioId, "id", expedienteId, "usuarioId", usuarioId));
+        if (filas > 0) {
+            registrarAuditoriaEquipo(estudioId, expedienteId, usuarioAccionId,
+                    "expediente_equipo", "ELIMINAR",
+                    nombreUsuario(usuarioId) + " fue retirado del equipo del expediente.");
+        }
+        return filas;
     }
 
     private MapSqlParameterSource parametrosGuardar(Integer estudioId, Long usuarioId, String codigo, GuardarRequest r) {

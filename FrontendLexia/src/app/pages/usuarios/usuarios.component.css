@@ -169,11 +169,6 @@
   font-weight: 700;
 }
 
-.domain-stat {
-  color: #4f46e5;
-
-  font-size: 19px !important;
-}
 
 
 /* =========================================================
@@ -375,8 +370,6 @@ tbody tr:hover {
   white-space: nowrap;
 }
 
-.date-small,
-.contact-small,
 .person-cell small {
   display: block;
 
@@ -864,7 +857,8 @@ tbody tr:hover {
 }
 
 .campos input,
-.campos select {
+.campos select,
+.destino select {
   padding: 9px 11px;
   border: 1px solid #dbe1ea;
   border-radius: 8px;
@@ -929,4 +923,38 @@ tbody tr:hover {
   .campos {
     grid-template-columns: 1fr;
   }
+}
+
+/* =========================================================
+   REASIGNACION
+========================================================= */
+
+.bloque-reasignar {
+  padding: 12px 0;
+  border-top: 1px solid #eef1f5;
+}
+
+.bloque-reasignar .subtitulo {
+  margin-top: 0;
+}
+
+.lista-carga {
+  margin: 0 0 10px;
+  padding-left: 18px;
+  color: #475569;
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+.destino {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #334155;
+  font-size: 12.5px;
+  font-weight: 700;
+}
+
+.destino select {
+  flex: 1;
 }
