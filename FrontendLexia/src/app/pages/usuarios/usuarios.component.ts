@@ -5,8 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import { ErrorRespuesta } from '../../core/models/auth.models';
 import {
-  CredencialTemporal, FiltroEstadoUsuario, GuardarUsuario, RolOpcion,
-  UsuarioDetalle, UsuarioLista
+  CargaDetallada, CredencialTemporal, FiltroEstadoUsuario, GuardarUsuario, ReasignarRequest,
+  ResultadoReasignacion, RolOpcion, UsuarioDetalle, UsuarioLista
 } from '../../core/models/usuario.models';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
@@ -76,6 +76,16 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   readonly copiado = signal(false);
   readonly confirmacion = signal<Confirmacion | null>(null);
   formulario: GuardarUsuario = formularioVacio();
+
+  // ---- reasignacion --------------------------------------------------------
+  /** Usuario cuyo trabajo se esta reasignando (se guarda para recargar su ficha). */
+  readonly reasignando = signal<{ uuid: string; nombre: string } | null>(null);
+  readonly carga = signal<CargaDetallada | null>(null);
+  readonly reasignandoEnCurso = signal(false);
+  readonly errorReasignacion = signal<string | null>(null);
+  readonly resultado = signal<ResultadoReasignacion | null>(null);
+  destinos: ReasignarRequest = { expedientesA: null, tareasA: null, clientesA: null };
+  readonly abogados = computed(() => (this.carga()?.candidatos ?? []).filter(c => c.esAbogado));
 
   // ---- derivados -----------------------------------------------------------
   readonly rolesAsignables = computed(() => this.roles().filter(r => !r.esPortalCliente));
@@ -160,7 +170,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   bloqueaBaja(d: UsuarioDetalle): boolean {
     const c = d.cargaTrabajo;
-    return c.expedientes > 0 || c.plazosAbiertos > 0 || c.tareasAbiertas > 0;
+    return c.expedientes > 0 || c.plazosAbiertos > 0 || c.tareasAbiertas > 0
+      || c.clientes > 0 || c.equiposApoyo > 0;
   }
 
   // ---- ver -----------------------------------------------------------------
@@ -323,6 +334,66 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   private alFallarAccion(e: HttpErrorResponse): void {
     this.confirmacion.set(null);
     this.errorPagina.set(this.mensaje(e, 'No se pudo completar la acción.'));
+  }
+
+  // ---- reasignacion de trabajo ---------------------------------------------
+
+  abrirReasignacion(d: UsuarioDetalle): void {
+    this.reasignando.set({ uuid: d.uuidPublico, nombre: `${d.nombres} ${d.apellidos}` });
+    this.destinos = { expedientesA: null, tareasA: null, clientesA: null };
+    this.carga.set(null);
+    this.resultado.set(null);
+    this.errorReasignacion.set(null);
+    this.detalle.set(null);
+    this.service.carga(d.uuidPublico).subscribe({
+      next: c => this.carga.set(c),
+      error: (e: HttpErrorResponse) => this.errorReasignacion.set(this.mensaje(e, 'No se pudo cargar su trabajo.'))
+    });
+  }
+
+  /** Lo que falta elegir, para no dejar enviar una reasignacion incompleta. */
+  faltaDestino(): boolean {
+    const c = this.carga();
+    if (!c) return true;
+    return (c.expedientes.length > 0 && !this.destinos.expedientesA)
+      || (c.tareas.length > 0 && !this.destinos.tareasA)
+      || (c.clientes.length > 0 && !this.destinos.clientesA);
+  }
+
+  nada(): boolean {
+    const c = this.carga();
+    return !!c && !c.expedientes.length && !c.plazos.length && !c.tareas.length
+      && !c.clientes.length && !c.equipos.length;
+  }
+
+  confirmarReasignacion(): void {
+    const r = this.reasignando();
+    if (!r || this.faltaDestino()) return;
+    this.reasignandoEnCurso.set(true);
+    this.errorReasignacion.set(null);
+    this.service.reasignar(r.uuid, this.destinos).subscribe({
+      next: resultado => {
+        this.reasignandoEnCurso.set(false);
+        this.resultado.set(resultado);
+        this.recargar();
+      },
+      error: (e: HttpErrorResponse) => {
+        this.reasignandoEnCurso.set(false);
+        this.errorReasignacion.set(this.mensaje(e, 'No se pudo reasignar. No se movió nada.'));
+      }
+    });
+  }
+
+  /** Al terminar vuelve a su ficha, donde ya puede darse de baja. */
+  cerrarReasignacion(): void {
+    const r = this.reasignando();
+    const hubo = !!this.resultado();
+    this.reasignando.set(null);
+    this.carga.set(null);
+    this.resultado.set(null);
+    if (r && hubo) {
+      this.service.detalle(r.uuid).subscribe({ next: d => this.detalle.set(d) });
+    }
   }
 
   // ---- credencial temporal -------------------------------------------------

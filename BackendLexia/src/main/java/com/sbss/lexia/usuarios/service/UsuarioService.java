@@ -1,12 +1,16 @@
 package com.sbss.lexia.usuarios.service;
 
 import com.sbss.lexia.catalogos.service.ConfiguracionService;
+import com.sbss.lexia.expedientes.repository.ExpedienteRepositoryJdbc;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaTrabajo;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CredencialTemporal;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.GuardarUsuarioRequest;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ReasignarRequest;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResultadoReasignacion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
@@ -44,6 +48,8 @@ public class UsuarioService {
     private static final SecureRandom ALEATORIO = new SecureRandom();
 
     private final UsuarioGestionRepositoryJdbc repository;
+    /** Para cambiar responsables con la misma logica y auditoria que la edicion. */
+    private final ExpedienteRepositoryJdbc expedienteRepository;
     private final ConfiguracionService configuracionService;
     private final PasswordEncoder passwordEncoder;
 
@@ -167,6 +173,125 @@ public class UsuarioService {
     }
 
     // -------------------------------------------------------------------------
+    // Reasignacion de trabajo
+    // -------------------------------------------------------------------------
+
+    /** Lo concreto que tiene a su nombre y a quien se le puede traspasar. */
+    @Transactional(readOnly = true)
+    public CargaDetallada cargaDetallada(String uuid) {
+        Integer estudioId = SesionActual.estudioId();
+        return repository.cargaDetallada(exigirId(uuid, estudioId), estudioId);
+    }
+
+    /**
+     * Traspasa el trabajo vivo de una persona, en UNA transaccion: o se mueve
+     * todo o no se mueve nada. Orden deliberado:
+     *
+     * 1. Expedientes: con la logica del modulo de expedientes, para que el
+     *    cambio quede en la linea de tiempo y el equipo quede coherente.
+     * 2. Plazos: siguen al responsable de su expediente, que tras el paso 1 ya
+     *    es el nuevo. Se llevan sus alertas todavia programadas.
+     * 3. Tareas y clientes: a su destino.
+     * 4. Apoyo en otros equipos: se retira (no se traspasa: el equipo lo decide
+     *    el responsable de cada expediente).
+     *
+     * Despues de esto la carga que bloquea la baja queda en cero.
+     */
+    @Transactional
+    public ResultadoReasignacion reasignar(String uuid, ReasignarRequest peticion) {
+        Integer estudioId = SesionActual.estudioId();
+        Long autorId = SesionActual.usuarioId();
+        Long origenId = exigirId(uuid, estudioId);
+        String origen = repository.nombreDe(origenId);
+
+        List<Long> expedientes = repository.expedientesComoResponsable(origenId, estudioId);
+        List<long[]> tareas = repository.tareasAbiertas(origenId, estudioId);
+        List<Long> clientes = repository.clientesComoResponsable(origenId, estudioId);
+
+        Long expedientesA = expedientes.isEmpty() ? null
+                : destino(peticion.expedientesA(), "expedientes", origenId, estudioId, true);
+        Long tareasA = tareas.isEmpty() ? null
+                : destino(peticion.tareasA(), "tareas", origenId, estudioId, false);
+        Long clientesA = clientes.isEmpty() ? null
+                : destino(peticion.clientesA(), "clientes", origenId, estudioId, true);
+
+        // 1. Expedientes
+        for (Long expedienteId : expedientes) {
+            expedienteRepository.cambiarResponsable(estudioId, expedienteId, expedientesA, autorId);
+        }
+
+        // 2. Plazos: al responsable ACTUAL de su expediente
+        int plazos = 0;
+        int alertas = 0;
+        for (long[] plazo : repository.plazosAbiertos(origenId, estudioId)) {
+            long plazoId = plazo[0];
+            long expedienteId = plazo[1];
+            long responsableExpediente = plazo[2];
+            // Si el expediente sigue a su nombre (p.ej. esta archivado y no entro
+            // en el paso 1), el plazo va al destino de los expedientes.
+            Long destino = responsableExpediente != origenId ? responsableExpediente : expedientesA;
+            if (destino == null) {
+                throw new ParametroInvalidoException("Hay plazos en expedientes que siguen a nombre de "
+                        + origen + ": indica a quien pasan sus expedientes");
+            }
+            alertas += repository.moverPlazo(plazoId, destino);
+            repository.auditar(estudioId, autorId, "plazos", plazoId, expedienteId,
+                    "Plazo reasignado de " + origen + " a " + repository.nombreDe(destino) + ".");
+            plazos++;
+        }
+
+        // 3. Tareas y clientes
+        for (long[] tarea : tareas) {
+            repository.moverTarea(tarea[0], tareasA);
+            repository.auditar(estudioId, autorId, "tareas", tarea[0], tarea[1],
+                    "Tarea reasignada de " + origen + " a " + repository.nombreDe(tareasA) + ".");
+        }
+        for (Long clienteId : clientes) {
+            repository.moverCliente(clienteId, clientesA, autorId);
+            repository.auditar(estudioId, autorId, "clientes", clienteId, null,
+                    "Abogado responsable cambiado de " + origen + " a " + repository.nombreDe(clientesA) + ".");
+        }
+
+        // 4. Apoyo en otros equipos
+        int equipos = 0;
+        for (Long expedienteId : repository.expedientesComoApoyo(origenId, estudioId)) {
+            equipos += expedienteRepository.retirarDelEquipo(estudioId, expedienteId, origenId, autorId);
+        }
+
+        ResultadoReasignacion resultado = new ResultadoReasignacion(
+                expedientes.size(), plazos, alertas, tareas.size(), clientes.size(), equipos);
+        repository.auditar(estudioId, autorId, "usuarios", origenId, null,
+                "Reasignacion del trabajo de " + origen + ": " + resultado.expedientes() + " expediente(s), "
+                        + plazos + " plazo(s), " + tareas.size() + " tarea(s), " + clientes.size()
+                        + " cliente(s); retirado de " + equipos + " equipo(s).");
+        return resultado;
+    }
+
+    /**
+     * Resuelve y valida un destino. Obligatorio solo si hay trabajo de esa
+     * categoria. Debe ser del mismo estudio, interno, activo y distinto del que
+     * se va; para expedientes y clientes, ademas, con rol de abogado.
+     */
+    private Long destino(String uuid, String categoria, Long origenId, Integer estudioId, boolean exigeAbogado) {
+        if (uuid == null || uuid.isBlank()) {
+            throw new ParametroInvalidoException("Indica a quien pasan los " + categoria);
+        }
+        Long id = repository.destinoActivo(uuid, estudioId);
+        if (id == null) {
+            throw new ParametroInvalidoException("El destino de los " + categoria
+                    + " no existe en el estudio o no esta activo");
+        }
+        if (id.equals(origenId)) {
+            throw new ParametroInvalidoException("Los " + categoria + " no pueden reasignarse a la misma persona");
+        }
+        if (exigeAbogado && !repository.esAbogado(id)) {
+            throw new ParametroInvalidoException("Los " + categoria
+                    + " solo pueden pasar a alguien con rol de abogado, socio o administrador");
+        }
+        return id;
+    }
+
+    // -------------------------------------------------------------------------
 
     private Long exigirId(String uuid, Integer estudioId) {
         Long id = repository.idDe(uuid, estudioId);
@@ -224,6 +349,8 @@ public class UsuarioService {
         if (c.expedientes() > 0) texto.append(c.expedientes()).append(" expediente(s), ");
         if (c.plazosAbiertos() > 0) texto.append(c.plazosAbiertos()).append(" plazo(s) abierto(s), ");
         if (c.tareasAbiertas() > 0) texto.append(c.tareasAbiertas()).append(" tarea(s) abierta(s), ");
+        if (c.clientes() > 0) texto.append(c.clientes()).append(" cliente(s), ");
+        if (c.equiposApoyo() > 0) texto.append("apoyo en ").append(c.equiposApoyo()).append(" equipo(s), ");
         return texto.substring(0, texto.length() - 2);
     }
 
