@@ -1,709 +1,613 @@
 <div class="layout-wrapper">
-
-  <!-- PANEL REUTILIZABLE -->
   <app-panel></app-panel>
 
-  <!-- CONTENIDO -->
   <main class="main-content">
-
-    <!-- ENCABEZADO -->
     <header class="agenda-header">
       <div>
-        <h1>Gestión Integral de Agenda</h1>
-        <p>Organiza audiencias, reuniones, actuaciones y plazos jurídicos.</p>
+        <div class="eyebrow">LEXIA · CONTROL DE COMPROMISOS</div>
+        <h1>Agenda jurídica</h1>
+        <p>Audiencias, reuniones, llamadas, videoconferencias, presentaciones, vencimientos, diligencias y revisiones.</p>
       </div>
+      <button *ngIf="puedeGestionar" type="button" class="primary-button" (click)="abrirNuevo()">
+        <span>＋</span> Nuevo evento
+      </button>
     </header>
 
-    <!-- LAYOUT -->
-    <div class="agenda-main-layout">
-
-      <!-- ZONA CENTRAL -->
-      <div class="agenda-center">
-
-        <!-- CALENDARIO -->
-        <section class="agenda-card calendar-card">
-
-          <div class="calendar-toolbar">
-
-            <select class="calendar-select">
-              <option>Caso</option>
-              <option>Abogado</option>
-              <option>Materia</option>
-            </select>
-
-            <div class="month-navigation">
-              <button type="button">‹</button>
-              <button type="button">›</button>
-              <h2>Noviembre 2024</h2>
-            </div>
-
-            <div class="calendar-actions">
-              <button type="button" title="Buscar">⌕</button>
-              <button type="button" title="Calendario">▦</button>
-              <button type="button" title="Configuración">⚙</button>
-
-              <select>
-                <option>Todos</option>
-                <option>Audiencias</option>
-                <option>Reuniones</option>
-                <option>Plazos</option>
-              </select>
-            </div>
-
-          </div>
-
-          <div class="calendar-grid">
-
-            <div class="calendar-day-name">Lun</div>
-            <div class="calendar-day-name">Mar</div>
-            <div class="calendar-day-name">Mié</div>
-            <div class="calendar-day-name">Jue</div>
-            <div class="calendar-day-name">Vie</div>
-            <div class="calendar-day-name">Sáb</div>
-            <div class="calendar-day-name">Dom</div>
-
-            <!-- SEMANA 1 -->
-            <div class="calendar-cell">
-              <span class="day-number">1</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">2</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">3</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">4</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">5</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión con cliente
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">6</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">7</span>
-              <div class="events-list"></div>
-            </div>
-
-            <!-- SEMANA 2 -->
-            <div class="calendar-cell">
-              <span class="day-number">8</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">9</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">10</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">11</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">12</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">13</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">14</span>
-              <div class="events-list"></div>
-            </div>
-
-            <!-- SEMANA 3 -->
-            <div class="calendar-cell">
-              <span class="day-number">15</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">16</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">17</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">18</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">19</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">20</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">21</span>
-              <div class="events-list"></div>
-            </div>
-
-            <!-- SEMANA 4 -->
-            <div class="calendar-cell">
-              <span class="day-number">22</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">23</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">24</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">25</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-reunion">
-                  Reunión
-                </button>
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">26</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-plazo">
-                  Plazo
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">27</span>
-              <div class="events-list">
-                <button type="button" class="calendar-event evento-audiencia">
-                  Audiencia
-                </button>
-              </div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">28</span>
-              <div class="events-list"></div>
-            </div>
-
-            <!-- SEMANA 5 -->
-            <div class="calendar-cell">
-              <span class="day-number">29</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell">
-              <span class="day-number">30</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell other-month">
-              <span class="day-number">1</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell other-month">
-              <span class="day-number">2</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell other-month">
-              <span class="day-number">3</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell other-month">
-              <span class="day-number">4</span>
-              <div class="events-list"></div>
-            </div>
-
-            <div class="calendar-cell other-month">
-              <span class="day-number">5</span>
-              <div class="events-list"></div>
-            </div>
-
-          </div>
-
-        </section>
-
-        <!-- GRÁFICOS -->
-        <div class="agenda-bottom-grid">
-
-          <section class="agenda-card chart-card">
-
-            <div class="chart-header">
-              <span>▣</span>
-              <h3>Distribución de Tiempo por Actividad</h3>
-            </div>
-
-            <div class="donut-wrapper">
-
-              <div class="agenda-donut">
-                <div class="donut-center">
-                  <strong>100%</strong>
-                  <span>Agenda</span>
-                </div>
-              </div>
-
-              <div class="activity-legend">
-
-                <div>
-                  <span>
-                    <i class="legend-circle green"></i>
-                    Audiencias
-                  </span>
-                  <strong>25%</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <i class="legend-circle red"></i>
-                    Reuniones
-                  </span>
-                  <strong>30%</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <i class="legend-circle orange"></i>
-                    Plazos
-                  </span>
-                  <strong>15%</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <i class="legend-circle gray"></i>
-                    Actuaciones
-                  </span>
-                  <strong>15%</strong>
-                </div>
-
-                <div>
-                  <span>
-                    <i class="legend-circle purple"></i>
-                    Otros
-                  </span>
-                  <strong>15%</strong>
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-          <section class="agenda-card chart-card">
-
-            <div class="chart-header">
-              <span>↗</span>
-              <h3>Evolución de Eventos Semanales</h3>
-            </div>
-
-            <div class="line-chart-container">
-
-              <div class="chart-y">
-                <span>12</span>
-                <span>10</span>
-                <span>8</span>
-                <span>6</span>
-                <span>4</span>
-                <span>2</span>
-                <span>0</span>
-              </div>
-
-              <div class="chart-line-area">
-
-                <svg
-                  viewBox="0 0 500 190"
-                  preserveAspectRatio="none"
-                >
-
-                  <defs>
-                    <linearGradient
-                      id="agendaGradient"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stop-color="#7643d5"
-                        stop-opacity=".28"
-                      ></stop>
-
-                      <stop
-                        offset="100%"
-                        stop-color="#7643d5"
-                        stop-opacity="0"
-                      ></stop>
-                    </linearGradient>
-                  </defs>
-
-                  <path
-                    d="
-                      M0 155
-                      C45 95, 75 80, 120 88
-                      C165 95, 180 130, 220 126
-                      C260 122, 260 45, 315 44
-                      C365 42, 375 45, 405 83
-                      C435 120, 470 88, 500 45
-                      L500 190
-                      L0 190
-                      Z
-                    "
-                    fill="url(#agendaGradient)"
-                  ></path>
-
-                  <path
-                    d="
-                      M0 155
-                      C45 95, 75 80, 120 88
-                      C165 95, 180 130, 220 126
-                      C260 122, 260 45, 315 44
-                      C365 42, 375 45, 405 83
-                      C435 120, 470 88, 500 45
-                    "
-                    fill="none"
-                    stroke="#5e367b"
-                    stroke-width="3"
-                  ></path>
-
-                </svg>
-
-                <div class="chart-months">
-                  <span>Ene</span>
-                  <span>Feb</span>
-                  <span>Mar</span>
-                  <span>Abr</span>
-                  <span>May</span>
-                  <span>Jun</span>
-                </div>
-
-              </div>
-
-            </div>
-
-          </section>
-
-        </div>
-
+    <div *ngIf="error" class="toast toast-error">{{ error }}</div>
+    <div *ngIf="exito" class="toast toast-success">{{ exito }}</div>
+
+    <section class="summary-grid">
+      <article class="summary-card">
+        <div class="summary-icon today">01</div>
+        <div><span>Eventos de hoy</span><strong>{{ resumen.eventosHoy }}</strong></div>
+      </article>
+      <article class="summary-card">
+        <div class="summary-icon week">7d</div>
+        <div><span>Próximos 7 días</span><strong>{{ resumen.proximosSieteDias }}</strong></div>
+      </article>
+      <article class="summary-card">
+        <div class="summary-icon audience">A</div>
+        <div><span>Audiencias del mes</span><strong>{{ resumen.audienciasMes }}</strong></div>
+      </article>
+      <article class="summary-card">
+        <div class="summary-icon verify">!</div>
+        <div><span>Por verificar (mes)</span><strong>{{ resumen.pendientesVerificacion }}</strong></div>
+      </article>
+      <article class="summary-card">
+        <div class="summary-icon total">Σ</div>
+        <div><span>Total del mes</span><strong>{{ resumen.totalMes }}</strong></div>
+      </article>
+    </section>
+
+    <section class="agenda-card filters-card">
+      <div class="filter-search">
+        <span class="search-symbol">⌕</span>
+        <input
+          [(ngModel)]="filtroTexto"
+          (keyup.enter)="aplicarFiltros()"
+          placeholder="Buscar por título, descripción, ubicación, expediente o cliente..."
+        />
       </div>
 
-      <!-- TIPOS DE EVENTOS -->
-      <aside class="event-types-panel">
+      <select [(ngModel)]="filtroExpediente" (change)="aplicarFiltros()">
+        <option [ngValue]="null">Todos los expedientes</option>
+        <option *ngFor="let e of catalogos.expedientes" [ngValue]="e.id">
+          {{ e.codigo }} · {{ e.clienteNombre }}
+        </option>
+      </select>
 
-        <div class="event-types-header">
-          <h3>Tipos de evento</h3>
+      <select [(ngModel)]="filtroParticipante" (change)="aplicarFiltros()">
+        <option [ngValue]="null">Todos los participantes</option>
+        <option *ngFor="let u of catalogos.usuarios" [ngValue]="u.id">{{ u.nombre }}</option>
+      </select>
+
+      <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
+        <option value="">Todos los estados</option>
+        <option *ngFor="let e of estados" [value]="e">{{ etiquetaEstado(e) }}</option>
+      </select>
+
+      <button type="button" class="secondary-button" (click)="aplicarFiltros()">Buscar</button>
+      <button type="button" class="ghost-button" (click)="limpiarFiltros()">Limpiar</button>
+    </section>
+
+    <div class="agenda-main-layout">
+      <section class="agenda-card calendar-card">
+        <div class="calendar-toolbar">
+          <div class="view-switcher">
+            <button type="button" [class.active]="vista === 'DIA'" (click)="cambiarVista('DIA')">Día</button>
+            <button type="button" [class.active]="vista === 'SEMANA'" (click)="cambiarVista('SEMANA')">Semana</button>
+            <button type="button" [class.active]="vista === 'MES'" (click)="cambiarVista('MES')">Mes</button>
+          </div>
+
+          <div class="period-navigation">
+            <button type="button" class="nav-arrow" title="Anterior" (click)="periodoAnterior()">‹</button>
+            <button type="button" class="today-button" (click)="irHoy()">Hoy</button>
+            <button type="button" class="nav-arrow" title="Siguiente" (click)="periodoSiguiente()">›</button>
+            <h2>{{ tituloPeriodo }}</h2>
+          </div>
+
+          <div class="loading-indicator" [class.visible]="cargando">
+            <span></span> Actualizando
+          </div>
         </div>
 
-        <button
-          type="button"
-          class="add-event-button"
-        >
-          ＋ Nuevo evento
-        </button>
+        <ng-container *ngIf="vista !== 'DIA'; else vistaDia">
+          <div class="calendar-grid day-headings">
+            <div *ngFor="let nombre of diasSemana" class="calendar-day-name">{{ nombre }}</div>
+          </div>
 
-        <div class="event-type-item audiencia">
-          Audiencias
-        </div>
+          <div class="calendar-grid body-grid" [class.week-view]="vista === 'SEMANA'">
+            <div
+              *ngFor="let dia of dias"
+              class="calendar-cell"
+              [class.other-month]="!dia.mesActual"
+              [class.today]="dia.hoy"
+              (dblclick)="abrirNuevoEnDia(dia)"
+            >
+              <div class="day-header">
+                <button type="button" class="day-number" [class.today-number]="dia.hoy" (click)="abrirNuevoEnDia(dia)">
+                  {{ dia.numero }}
+                </button>
+                <span *ngIf="eventosDelDia(dia).length" class="day-count">{{ eventosDelDia(dia).length }}</span>
+              </div>
 
-        <div class="event-type-item actuacion">
-          Actuaciones
-        </div>
+              <div class="events-list">
+                <button
+                  *ngFor="let evento of eventosDelDia(dia)"
+                  type="button"
+                  class="calendar-event"
+                  [class.cancelled]="evento.estado === 'CANCELADO'"
+                  [style.border-left-color]="evento.colorHex || '#64748B'"
+                  (click)="abrirDetalle(evento.uuid)"
+                  [title]="evento.titulo"
+                >
+                  <span class="event-time">{{ evento.todoElDia ? 'Todo el día' : formatoHora(evento.fechaInicio) }}</span>
+                  <span class="event-title">{{ evento.titulo }}</span>
+                  <span *ngIf="evento.requiereVerificacion" class="verify-dot" title="Pendiente de verificación">!</span>
+                </button>
+              </div>
 
-        <div class="event-type-item reunion">
-          Reuniones con Clientes
-        </div>
+              <button *ngIf="puedeGestionar" type="button" class="cell-add" (click)="abrirNuevoEnDia(dia)">＋</button>
+            </div>
+          </div>
+        </ng-container>
 
-        <div class="event-type-item plazo">
-          Plazos
-        </div>
+        <ng-template #vistaDia>
+          <div class="day-view">
+            <div class="day-view-header">
+              <div>
+                <span class="day-view-date">{{ tituloPeriodo }}</span>
+                <strong>{{ eventosDelDiaActual.length }} evento{{ eventosDelDiaActual.length === 1 ? '' : 's' }}</strong>
+              </div>
+              <button *ngIf="puedeGestionar" type="button" class="secondary-button" (click)="abrirNuevo(fechaReferencia)">＋ Agregar</button>
+            </div>
 
-        <div class="event-type-item consulta">
-          Consultas
-        </div>
+            <div *ngIf="!eventosDelDiaActual.length" class="empty-state">
+              <div class="empty-icon">▦</div>
+              <strong>No hay eventos para este día</strong>
+              <span>Puedes registrar un evento o cambiar de fecha.</span>
+            </div>
 
-      </aside>
+            <button
+              *ngFor="let evento of eventosDelDiaActual"
+              type="button"
+              class="day-event-row"
+              [class.cancelled]="evento.estado === 'CANCELADO'"
+              (click)="abrirDetalle(evento.uuid)"
+            >
+              <div class="day-event-time">
+                <strong>{{ evento.todoElDia ? 'Todo el día' : formatoHora(evento.fechaInicio) }}</strong>
+                <span *ngIf="!evento.todoElDia">{{ formatoHora(evento.fechaFin) }}</span>
+              </div>
+              <span class="type-line" [style.background]="evento.colorHex || '#64748B'"></span>
+              <div class="day-event-info">
+                <div class="event-row-title">
+                  <strong>{{ evento.titulo }}</strong>
+                  <span class="status-pill" [attr.data-status]="evento.estado">{{ etiquetaEstado(evento.estado) }}</span>
+                  <span *ngIf="evento.requiereVerificacion" class="verification-pill">Por verificar</span>
+                </div>
+                <span>{{ etiquetaTipo(evento.tipo) }} · {{ expedienteTexto(evento) }}</span>
+                <small>{{ evento.ubicacion || evento.enlaceVirtual || etiquetaModalidad(evento.modalidad) }}</small>
+              </div>
+            </button>
+          </div>
+        </ng-template>
+      </section>
 
-      <!-- DETALLE SOLO VISUAL -->
-      <aside class="event-detail-panel">
+      <aside class="agenda-side-column">
+        <section class="agenda-card event-types-panel">
+          <div class="side-title">
+            <div>
+              <span>Clasificación</span>
+              <h3>Tipos de evento</h3>
+            </div>
+            <button *ngIf="filtroTipo" type="button" class="clear-mini" (click)="filtrarTipo('')">Todos</button>
+          </div>
 
-        <div class="detail-header">
-
-          <h2>
-            Detalles del Evento Seleccionado
-          </h2>
-
-          <button type="button">
-            ×
+          <button
+            *ngFor="let tipo of tipos"
+            type="button"
+            class="event-type-item"
+            [class.active]="filtroTipo === tipo.codigo"
+            (click)="filtrarTipo(tipo.codigo)"
+          >
+            <span class="type-dot" [class]="'type-dot ' + tipo.clase"></span>
+            <span>{{ tipo.etiqueta }}</span>
+            <strong>{{ cantidadTipo(tipo.codigo) }}</strong>
           </button>
+        </section>
 
-        </div>
-
-        <div class="detail-content">
-
-          <div class="detail-event-title">
-
-            <h3>
-              Audiencia
-            </h3>
-
-            <span>
-              EXP. 01452-2026
-            </span>
-
-          </div>
-
-          <div class="detail-time">
-
-            <span class="detail-icon">
-              ◷
-            </span>
-
+        <section class="agenda-card upcoming-panel">
+          <div class="side-title">
             <div>
-              <small>Horario</small>
-              <strong>09:00 AM</strong>
+              <span>Seguimiento</span>
+              <h3>Próximos eventos</h3>
             </div>
-
           </div>
 
-          <section class="detail-section">
+          <div *ngIf="!eventosProximos.length" class="mini-empty">Sin eventos próximos en el rango.</div>
 
-            <h4>
-              Participantes
-            </h4>
-
-            <div class="participant">
-
-              <span class="participant-avatar">
-                A
-              </span>
-
-              <div>
-                <strong>Ana María Fernández</strong>
-                <span>Cliente / participante</span>
-              </div>
-
-            </div>
-
-            <div class="participant">
-
-              <span class="participant-avatar lawyer">
-                CM
-              </span>
-
-              <div>
-                <strong>Carlos Mendoza Rojas</strong>
-                <span>Abogado responsable</span>
-              </div>
-
-            </div>
-
-          </section>
-
-          <div class="detail-info-row">
-
-            <span class="detail-icon">
-              ◉
-            </span>
-
+          <button
+            *ngFor="let evento of eventosProximos"
+            type="button"
+            class="upcoming-item"
+            (click)="abrirDetalle(evento.uuid)"
+          >
+            <span class="upcoming-marker" [style.background]="evento.colorHex || '#64748B'"></span>
             <div>
-              <small>Lugar</small>
-              <strong>Sala Virtual - Zoom</strong>
+              <strong>{{ evento.titulo }}</strong>
+              <span>{{ formatoFechaHora(evento.fechaInicio) }}</span>
+              <small>{{ evento.expedienteCodigo || 'Interno' }}</small>
             </div>
-
-          </div>
-
-          <div class="detail-info-row">
-
-            <span class="detail-icon">
-              ◇
-            </span>
-
-            <div>
-              <small>Expediente</small>
-              <strong>EXP. 01452-2026</strong>
-            </div>
-
-          </div>
-
-          <section class="detail-section">
-
-            <h4>
-              Eventos Próximos de la Semana
-            </h4>
-
-            <div class="upcoming-item">
-              <strong>EXP. 01452-2026</strong>
-              <span class="upcoming-tag green">Alimentos</span>
-              <span>•••</span>
-            </div>
-
-            <div class="upcoming-item">
-              <strong>EXP. 02388-2025</strong>
-              <span class="upcoming-tag green">Daños</span>
-              <span>•••</span>
-            </div>
-
-            <div class="upcoming-item">
-              <strong>EXP. 03321-2024</strong>
-              <span class="upcoming-tag orange">En Trámite</span>
-              <span>•••</span>
-            </div>
-
-          </section>
-
-          <section class="detail-section">
-
-            <h4>
-              Alertas de Plazos Críticos
-            </h4>
-
-            <div class="deadline-alert">
-              <strong>EXP. 00521-2024</strong>
-              <span>Vence mañana</span>
-            </div>
-
-          </section>
-
-          <section class="detail-section">
-
-            <h4>
-              Notas y Contactos Recientes
-            </h4>
-
-            <div class="document-item">
-              <span>▤</span>
-              <strong>Documento de descarga...</strong>
-              <span>↓</span>
-            </div>
-
-            <div class="document-item">
-              <span>▤</span>
-              <strong>Ficha del expediente...</strong>
-              <span>↓</span>
-            </div>
-
-            <div class="document-item">
-              <span>▤</span>
-              <strong>Documento reciente 1</strong>
-              <span>↓</span>
-            </div>
-
-          </section>
-
-        </div>
-
+            <span *ngIf="evento.requiereVerificacion" class="verify-mini">!</span>
+          </button>
+        </section>
       </aside>
+    </div>
+  </main>
+</div>
 
+<!-- MODAL CREAR / EDITAR -->
+<div *ngIf="modalFormulario" class="modal-backdrop" (mousedown)="cerrarFormulario()">
+  <section class="modal-card form-modal" (mousedown)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div>
+        <span>{{ editandoUuid ? 'EDICIÓN DE EVENTO' : 'NUEVO EVENTO' }}</span>
+        <h2>{{ editandoUuid ? 'Actualizar evento de agenda' : 'Registrar evento en agenda' }}</h2>
+      </div>
+      <button type="button" class="modal-close" (click)="cerrarFormulario()">×</button>
+    </header>
+
+    <div class="modal-body">
+      <div *ngIf="editandoUuid" class="info-banner">
+        Las fechas no se cambian desde edición. Usa <strong>Reprogramar</strong> para conservar el historial del cambio.
+      </div>
+
+      <div class="form-grid">
+        <label class="field span-2">
+          <span>Título *</span>
+          <input [(ngModel)]="formulario.titulo" maxlength="200" placeholder="Ej. Audiencia de pruebas" />
+        </label>
+
+        <label class="field">
+          <span>Tipo *</span>
+          <select [(ngModel)]="formulario.tipo" (change)="tipoCambiado()">
+            <option *ngFor="let t of tipos" [value]="t.codigo">{{ t.etiqueta }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Expediente vinculado</span>
+          <select [(ngModel)]="formulario.expedienteId">
+            <option [ngValue]="null">Sin expediente / interno</option>
+            <option *ngFor="let e of catalogos.expedientes" [ngValue]="e.id">
+              {{ e.codigo }} · {{ e.clienteNombre }}
+            </option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Inicio *</span>
+          <input type="datetime-local" [(ngModel)]="formulario.fechaInicio" [disabled]="!!editandoUuid" />
+        </label>
+
+        <label class="field">
+          <span>Fin *</span>
+          <input type="datetime-local" [(ngModel)]="formulario.fechaFin" [disabled]="!!editandoUuid" />
+        </label>
+
+        <label class="check-field span-2">
+          <input type="checkbox" [(ngModel)]="formulario.todoElDia" />
+          <span>Evento de todo el día</span>
+        </label>
+
+        <label class="field">
+          <span>Modalidad *</span>
+          <select [(ngModel)]="formulario.modalidad">
+            <option *ngFor="let m of modalidades" [value]="m">{{ etiquetaModalidad(m) }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Recordatorio</span>
+          <select [(ngModel)]="formulario.recordatorioMinutos">
+            <option *ngFor="let r of recordatorios" [ngValue]="r.valor">{{ r.etiqueta }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Ubicación</span>
+          <input [(ngModel)]="formulario.ubicacion" maxlength="250" placeholder="Sala, juzgado, oficina..." />
+        </label>
+
+        <label class="field">
+          <span>Enlace virtual</span>
+          <input [(ngModel)]="formulario.enlaceVirtual" maxlength="500" placeholder="https://meet..." />
+        </label>
+
+        <label class="field">
+          <span>Origen de la información *</span>
+          <select [(ngModel)]="formulario.origenInformacion" (change)="origenCambiado()">
+            <option *ngFor="let o of origenes" [value]="o">{{ etiquetaOrigen(o) }}</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Color del evento</span>
+          <div class="color-field">
+            <input type="color" [(ngModel)]="formulario.colorHex" />
+            <input [(ngModel)]="formulario.colorHex" maxlength="7" />
+          </div>
+        </label>
+
+        <label class="check-field span-2 warning-check">
+          <input type="checkbox" [(ngModel)]="formulario.requiereVerificacion" />
+          <span>Marcar información como pendiente de verificación profesional</span>
+        </label>
+
+        <label *ngIf="editandoUuid" class="field">
+          <span>Estado</span>
+          <select [(ngModel)]="formulario.estado">
+            <option *ngFor="let e of estados" [value]="e">{{ etiquetaEstado(e) }}</option>
+          </select>
+        </label>
+
+        <label *ngIf="editandoUuid" class="field">
+          <span>Resultado actual</span>
+          <input [(ngModel)]="formulario.resultado" placeholder="Opcional" />
+        </label>
+
+        <label class="field span-2">
+          <span>Descripción</span>
+          <textarea [(ngModel)]="formulario.descripcion" rows="4" maxlength="10000" placeholder="Objetivo, indicaciones, información necesaria..."></textarea>
+        </label>
+      </div>
+
+      <section class="participants-box" *ngIf="catalogos.usuarios.length">
+        <div class="participants-title">
+          <div>
+            <strong>Participantes</strong>
+            <span>El creador queda registrado automáticamente como organizador.</span>
+          </div>
+          <small>{{ formulario.participanteIds.length }} seleccionado(s)</small>
+        </div>
+        <div class="participant-grid">
+          <label *ngFor="let u of catalogos.usuarios" class="participant-option">
+            <input
+              type="checkbox"
+              [checked]="participanteSeleccionado(u.id)"
+              (change)="seleccionarParticipante(u, $any($event.target).checked)"
+            />
+            <span class="avatar-small">{{ u.nombre.charAt(0) }}</span>
+            <span><strong>{{ u.nombre }}</strong><small>{{ u.cargo || 'Personal del estudio' }}</small></span>
+          </label>
+        </div>
+      </section>
     </div>
 
-  </main>
-
+    <footer class="modal-footer">
+      <button type="button" class="ghost-button" (click)="cerrarFormulario()" [disabled]="guardando">Cancelar</button>
+      <button type="button" class="primary-button" (click)="guardarEvento()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : (editandoUuid ? 'Guardar cambios' : 'Registrar evento') }}
+      </button>
+    </footer>
+  </section>
 </div>
+
+<!-- MODAL DETALLE -->
+<div *ngIf="modalDetalle && detalle" class="modal-backdrop" (mousedown)="cerrarDetalle()">
+  <section class="modal-card detail-modal" (mousedown)="$event.stopPropagation()">
+    <header class="detail-hero" [style.border-top-color]="detalle.evento.colorHex || '#64748B'">
+      <div class="detail-title-block">
+        <div class="detail-labels">
+          <span class="type-badge">{{ etiquetaTipo(detalle.evento.tipo) }}</span>
+          <span class="status-pill" [attr.data-status]="detalle.evento.estado">{{ etiquetaEstado(detalle.evento.estado) }}</span>
+          <span *ngIf="detalle.evento.requiereVerificacion" class="verification-pill">Pendiente de verificación</span>
+        </div>
+        <h2>{{ detalle.evento.titulo }}</h2>
+        <p>{{ expedienteTexto(detalle.evento) }}</p>
+      </div>
+      <button type="button" class="modal-close" (click)="cerrarDetalle()">×</button>
+    </header>
+
+    <div class="detail-body">
+      <section class="detail-main">
+        <div class="detail-data-grid">
+          <div class="detail-data">
+            <span>Inicio</span>
+            <strong>{{ formatoFechaHora(detalle.evento.fechaInicio) }}</strong>
+          </div>
+          <div class="detail-data">
+            <span>Fin</span>
+            <strong>{{ formatoFechaHora(detalle.evento.fechaFin) }}</strong>
+          </div>
+          <div class="detail-data">
+            <span>Modalidad</span>
+            <strong>{{ etiquetaModalidad(detalle.evento.modalidad) }}</strong>
+          </div>
+          <div class="detail-data">
+            <span>Recordatorio</span>
+            <strong>{{ recordatorioTexto(detalle.evento.recordatorioMinutos) }}</strong>
+          </div>
+          <div class="detail-data span-2" *ngIf="detalle.evento.ubicacion">
+            <span>Ubicación</span>
+            <strong>{{ detalle.evento.ubicacion }}</strong>
+          </div>
+          <div class="detail-data span-2" *ngIf="detalle.evento.enlaceVirtual">
+            <span>Enlace virtual</span>
+            <a [href]="detalle.evento.enlaceVirtual" target="_blank" rel="noopener noreferrer">{{ detalle.evento.enlaceVirtual }}</a>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="detalle.evento.descripcion">
+          <span class="section-kicker">Descripción</span>
+          <p>{{ detalle.evento.descripcion }}</p>
+        </div>
+
+        <div class="detail-section" *ngIf="detalle.evento.resultado">
+          <span class="section-kicker">Resultado</span>
+          <p>{{ detalle.evento.resultado }}</p>
+        </div>
+
+        <div class="detail-section">
+          <span class="section-kicker">Participantes</span>
+          <div *ngIf="!detalle.participantes.length" class="mini-empty">No hay participantes registrados.</div>
+          <div class="detail-participants">
+            <div *ngFor="let p of detalle.participantes" class="detail-participant">
+              <span class="avatar-small">{{ p.nombre.charAt(0) }}</span>
+              <div>
+                <strong>{{ p.nombre }}</strong>
+                <small>{{ p.cargo || 'Personal' }} · {{ p.tipoParticipacion === 'ORGANIZADOR' ? 'Organizador' : 'Asistente' }}</small>
+              </div>
+              <span *ngIf="p.confirmado" class="confirmed">✓</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section" *ngIf="detalle.reprogramaciones.length">
+          <span class="section-kicker">Historial de reprogramaciones</span>
+          <div class="timeline">
+            <div *ngFor="let r of detalle.reprogramaciones" class="timeline-item">
+              <span class="timeline-dot"></span>
+              <div>
+                <strong>{{ formatoFechaHora(r.fechaInicioAnterior) }} → {{ formatoFechaHora(r.fechaInicioNueva) }}</strong>
+                <p>{{ r.motivo }}</p>
+                <small>{{ r.usuario || 'Sistema' }} · {{ formatoFechaHora(r.fechaReprogramacion) }}</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="detail-aside">
+        <div class="provenance-card">
+          <span>Procedencia</span>
+          <strong>{{ etiquetaOrigen(detalle.evento.origenInformacion) }}</strong>
+          <small *ngIf="detalle.evento.requiereVerificacion">Esta información requiere verificación.</small>
+          <small *ngIf="!detalle.evento.requiereVerificacion">Información sin verificación pendiente.</small>
+        </div>
+        <div class="aside-meta">
+          <span>Creado por</span>
+          <strong>{{ detalle.evento.creador || 'Sistema' }}</strong>
+        </div>
+        <div class="aside-meta" *ngIf="detalle.evento.clienteNombre">
+          <span>Cliente</span>
+          <strong>{{ detalle.evento.clienteNombre }}</strong>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="modal-footer detail-actions" *ngIf="puedeGestionar">
+      <button type="button" class="ghost-button danger-text" (click)="abrirConfirmacionCancelacion()" [disabled]="guardando || detalle.evento.estado === 'CANCELADO'">Cancelar evento</button>
+      <div class="footer-actions-right">
+        <button type="button" class="secondary-button" (click)="editarSeleccionado()">Editar datos</button>
+        <button type="button" class="secondary-button" (click)="abrirReprogramacion()" [disabled]="detalle.evento.estado === 'CANCELADO'">Reprogramar</button>
+        <button type="button" class="primary-button" (click)="abrirResultado()" [disabled]="detalle.evento.estado === 'CANCELADO'">Registrar resultado</button>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<!-- MODAL REPROGRAMAR -->
+<div *ngIf="modalReprogramar && detalle" class="modal-backdrop modal-layer-2" (mousedown)="modalReprogramar = false">
+  <section class="modal-card small-modal" (mousedown)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div><span>REPROGRAMACIÓN</span><h2>Cambiar fecha del evento</h2></div>
+      <button type="button" class="modal-close" (click)="modalReprogramar = false">×</button>
+    </header>
+    <div class="modal-body">
+      <div class="info-banner">La fecha anterior quedará guardada en el historial del evento.</div>
+      <div class="form-grid">
+        <label class="field">
+          <span>Nuevo inicio *</span>
+          <input type="datetime-local" [(ngModel)]="reprogramacion.fechaInicio" />
+        </label>
+        <label class="field">
+          <span>Nuevo fin *</span>
+          <input type="datetime-local" [(ngModel)]="reprogramacion.fechaFin" />
+        </label>
+        <label class="field span-2">
+          <span>Recordatorio</span>
+          <select [(ngModel)]="reprogramacion.recordatorioMinutos">
+            <option *ngFor="let r of recordatorios" [ngValue]="r.valor">{{ r.etiqueta }}</option>
+          </select>
+        </label>
+        <label class="field span-2">
+          <span>Motivo de reprogramación *</span>
+          <textarea [(ngModel)]="reprogramacion.motivo" rows="4" maxlength="500" placeholder="Indica por qué se cambió la fecha..."></textarea>
+        </label>
+      </div>
+    </div>
+    <footer class="modal-footer">
+      <button type="button" class="ghost-button" (click)="modalReprogramar = false">Cerrar</button>
+      <button type="button" class="primary-button" (click)="guardarReprogramacion()" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Confirmar reprogramación' }}</button>
+    </footer>
+  </section>
+</div>
+
+<!-- MODAL RESULTADO -->
+<div *ngIf="modalResultado && detalle" class="modal-backdrop modal-layer-2" (mousedown)="modalResultado = false">
+  <section class="modal-card small-modal" (mousedown)="$event.stopPropagation()">
+    <header class="modal-header">
+      <div><span>CIERRE DEL EVENTO</span><h2>Registrar resultado</h2></div>
+      <button type="button" class="modal-close" (click)="modalResultado = false">×</button>
+    </header>
+    <div class="modal-body">
+      <label class="field">
+        <span>Resultado *</span>
+        <textarea [(ngModel)]="resultadoForm.resultado" rows="6" maxlength="10000" placeholder="Qué ocurrió, acuerdos, siguiente acción o conclusión..."></textarea>
+      </label>
+      <label class="check-field result-check">
+        <input type="checkbox" [(ngModel)]="resultadoForm.verificado" />
+        <span>La información del evento fue verificada</span>
+      </label>
+    </div>
+    <footer class="modal-footer">
+      <button type="button" class="ghost-button" (click)="modalResultado = false">Cerrar</button>
+      <button type="button" class="primary-button" (click)="guardarResultado()" [disabled]="guardando">{{ guardando ? 'Guardando...' : 'Guardar resultado y marcar realizado' }}</button>
+    </footer>
+  </section>
+</div>
+
+<!-- MODAL CONFIRMAR CANCELACIÓN -->
+<div
+  *ngIf="modalConfirmarCancelacion && detalle"
+  class="modal-backdrop modal-layer-confirm"
+  (mousedown)="cerrarConfirmacionCancelacion()"
+>
+  <section class="confirm-modal" (mousedown)="$event.stopPropagation()">
+    <button
+      type="button"
+      class="confirm-close"
+      aria-label="Cerrar"
+      (click)="cerrarConfirmacionCancelacion()"
+      [disabled]="guardando"
+    >
+      ×
+    </button>
+
+    <div class="confirm-icon danger">
+      <span>!</span>
+    </div>
+
+    <div class="confirm-content">
+      <span class="confirm-kicker">CONFIRMAR CANCELACIÓN</span>
+      <h2>¿Cancelar este evento?</h2>
+      <p>
+        El evento <strong>“{{ detalle.evento.titulo }}”</strong> cambiará al estado
+        <strong>Cancelado</strong>. El registro permanecerá en la Agenda para conservar la trazabilidad.
+      </p>
+
+      <div class="confirm-event-summary">
+        <div>
+          <span>Evento</span>
+          <strong>{{ detalle.evento.titulo }}</strong>
+        </div>
+        <div>
+          <span>Fecha</span>
+          <strong>{{ formatoFechaHora(detalle.evento.fechaInicio) }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <footer class="confirm-actions">
+      <button
+        type="button"
+        class="secondary-button"
+        (click)="cerrarConfirmacionCancelacion()"
+        [disabled]="guardando"
+      >
+        Volver
+      </button>
+      <button
+        type="button"
+        class="confirm-danger-button"
+        (click)="confirmarCancelacion()"
+        [disabled]="guardando"
+      >
+        {{ guardando ? 'Cancelando...' : 'Sí, cancelar evento' }}
+      </button>
+    </footer>
+  </section>
+</div>
+
