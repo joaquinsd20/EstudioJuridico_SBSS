@@ -2,6 +2,7 @@ package com.sbss.lexia.actuaciones.repository;
 
 import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -45,7 +46,7 @@ public class ActuacionRepositoryJdbc {
                   JOIN usuarios u ON u.id=a.usuario_responsable_id
                  WHERE a.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         if (texto != null && !texto.isBlank()) {
             sql.append(" AND LOWER(CONCAT_WS(' ',a.asunto,a.descripcion,a.resultado,a.proxima_accion,e.codigo_interno,e.numero_expediente,c.nombre_busqueda,u.nombre_completo,ta.nombre)) LIKE :texto");
             p.addValue("texto", "%" + texto.trim().toLowerCase() + "%");
@@ -74,7 +75,7 @@ public class ActuacionRepositoryJdbc {
                   JOIN expedientes e ON e.id=a.expediente_id
                  WHERE a.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         return jdbc.queryForObject(sql.toString(), p, (rs, n) -> new Resumen(
                 rs.getLong("total"), rs.getLong("pendientes"), rs.getLong("en_tramite"),
                 rs.getLong("completadas"), rs.getLong("minutos_facturables"), rs.getBigDecimal("costo_total")));
@@ -101,7 +102,7 @@ public class ActuacionRepositoryJdbc {
                   JOIN usuarios u ON u.id=a.usuario_responsable_id
                  WHERE a.uuid_publico=:uuid AND a.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         List<Map<String,Object>> rows = jdbc.queryForList(sql.toString(), p);
         if (rows.isEmpty()) return null;
         long id = ((Number) rows.getFirst().get("id")).longValue();
@@ -127,7 +128,7 @@ public class ActuacionRepositoryJdbc {
                  WHERE d.expediente_id=:expedienteId AND d.activo=1 AND d.en_papelera=0
                    AND d.actuacion_id IS NULL AND e.estudio_id=:estudioId
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         sql.append(" ORDER BY d.fecha_creacion DESC");
         return jdbc.query(sql.toString(), p, (rs,n)->new DocumentoOpcion(rs.getLong("id"),rs.getString("uuid_publico"),
                 rs.getString("nombre"),rs.getString("categoria"),rs.getString("estado"),rs.getString("nombre_archivo")));
@@ -153,7 +154,7 @@ public class ActuacionRepositoryJdbc {
     public boolean expedienteExiste(Long id) {
         MapSqlParameterSource p = base().addValue("id",id);
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM expedientes e WHERE e.id=:id AND e.activo=1 AND e.estudio_id=:estudioId");
-        aplicarPortal(sql,p);
+        aplicarVisibilidad(sql, p);
         Integer n=jdbc.queryForObject(sql.toString(),p,Integer.class); return n!=null&&n>0;
     }
 
@@ -307,7 +308,7 @@ public class ActuacionRepositoryJdbc {
                   FROM expedientes e JOIN clientes c ON c.id=e.cliente_id JOIN usuarios u ON u.id=e.abogado_responsable_id
                  WHERE e.estudio_id=:estudioId AND e.activo=1
                 """);
-        aplicarPortal(sql,p); sql.append(" ORDER BY e.codigo_interno DESC");
+        aplicarVisibilidad(sql, p); sql.append(" ORDER BY e.codigo_interno DESC");
         return jdbc.query(sql.toString(),p,(rs,n)->new ExpedienteOpcion(rs.getLong("id"),rs.getString("codigo_interno"),
                 rs.getString("numero_expediente"),rs.getString("nombre_busqueda"),rs.getLong("responsable_id"),rs.getString("responsable")));
     }
@@ -353,6 +354,15 @@ public class ActuacionRepositoryJdbc {
     private TipoPlazoOpcion mapTipoPlazo(ResultSet rs)throws SQLException{return new TipoPlazoOpcion(rs.getLong("id"),rs.getString("codigo"),rs.getString("nombre"),getInt(rs,"dias_por_defecto"),rs.getString("tipo_computo_defecto"),rs.getString("nivel_riesgo_defecto"));}
     private Long insertar(String sql,MapSqlParameterSource p){KeyHolder k=new GeneratedKeyHolder();jdbc.update(sql,p,k,new String[]{"id"});Number n=k.getKey();if(n==null)throw new IllegalStateException("No se obtuvo id generado");return n.longValue();}
     private MapSqlParameterSource base(){return new MapSqlParameterSource().addValue("estudioId",SesionActual.estudioId());}
-    private void aplicarPortal(StringBuilder sql,MapSqlParameterSource p){if(SesionActual.esPortalCliente()){sql.append(" AND e.cliente_id=:clienteId");p.addValue("clienteId",SesionActual.clienteId());}}
+    /**
+     * Acota a lo que el usuario puede ver: su estudio y, salvo Administrador o
+     * Socio, los expedientes donde es responsable o esta en el equipo. Antes
+     * solo filtraba el portal del cliente, asi que cualquiera del estudio veia
+     * las actuaciones de un expediente confidencial ajeno (RF-02).
+     */
+    private void aplicarVisibilidad(StringBuilder sql, MapSqlParameterSource p) {
+        sql.append(VisibilidadExpedientes.sql("e"));
+        p.addValues(VisibilidadExpedientes.parametros());
+    }
     private static Integer getInt(ResultSet rs,String c)throws SQLException{return rs.getObject(c)==null?null:rs.getInt(c);} private static Integer getInt(ResultSet rs,int c)throws SQLException{return rs.getObject(c)==null?null:rs.getInt(c);} private static boolean bool(Object o){return o instanceof Boolean b?b:o instanceof Number n&&n.intValue()!=0;}
 }

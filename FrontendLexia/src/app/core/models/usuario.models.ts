@@ -21,6 +21,7 @@ export interface CargaTrabajo {
   expedientes: number;
   plazosAbiertos: number;
   tareasAbiertas: number;
+  actuacionesAbiertas: number;
   clientes: number;
   equiposApoyo: number;
   eventosAgenda: number;
@@ -41,6 +42,7 @@ export interface CargaDetallada {
   expedientes: { uuidPublico: string; codigo: string; cliente: string; confidencial: boolean }[];
   plazos: { descripcion: string; vencimiento: string; estado: string; expedienteCodigo: string }[];
   tareas: { titulo: string; estado: string; fechaLimite: string | null; expedienteCodigo: string }[];
+  actuaciones: { asunto: string; estado: string; fechaHora: string; expedienteCodigo: string }[];
   clientes: { uuidPublico: string; nombre: string }[];
   equipos: { expedienteCodigo: string; rol: string }[];
   candidatos: CandidatoReasignacion[];
@@ -58,6 +60,7 @@ export interface ResultadoReasignacion {
   plazos: number;
   alertas: number;
   tareas: number;
+  actuaciones: number;
   clientes: number;
   equiposRetirados: number;
 }

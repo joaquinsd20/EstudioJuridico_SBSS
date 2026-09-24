@@ -11,6 +11,7 @@ import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
 import com.sbss.lexia.agenda.repository.AgendaRepositoryJdbc;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -220,17 +221,14 @@ public class AgendaService {
         return COLORES.getOrDefault(normalizar(tipo), "#64748B");
     }
 
+    // La regla de visibilidad vive en VisibilidadExpedientes: estaba duplicada
+    // aqui y en ExpedienteService, y cada copia acabo divergiendo.
     private boolean verTodos() {
-        return tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
+        return VisibilidadExpedientes.verTodos();
     }
 
     private boolean verConfidenciales() {
-        return tieneAutoridad("EXPEDIENTE_CONFIDENCIAL") || tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
-    }
-
-    private boolean tieneAutoridad(String codigo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.getAuthorities().stream().anyMatch(a -> codigo.equals(a.getAuthority()));
+        return VisibilidadExpedientes.verConfidenciales();
     }
 
     private static String normalizar(String v) {

@@ -181,7 +181,11 @@ INSERT INTO tipos_actuacion (id, estudio_id, codigo, nombre, categoria,
 ( 9,1,'INSPECCION_OCULAR','Inspeccion ocular','DILIGENCIA',0,1,1,1),
 (10,1,'LLAMADA','Llamada telefonica','COMUNICACION',0,0,0,0),
 (11,1,'REUNION_CLIENTE','Reunion con cliente','COMUNICACION',0,0,1,0),
-(12,1,'TRAMITE_ADMIN','Tramite administrativo','ADMINISTRATIVO',0,1,0,0);
+(12,1,'TRAMITE_ADMIN','Tramite administrativo','ADMINISTRATIVO',0,1,0,0),
+-- INFORME lo agrega V15, pero desde `estudios`, que en una base nueva todavia
+-- esta vacia cuando corre; y esta semilla trunca tipos_actuacion despues. Sin
+-- esta linea, en desarrollo el tipo no existe nunca.
+(13,1,'INFORME','Informe','ESCRITO',0,0,0,1);
 
 INSERT INTO tipos_plazo (id, estudio_id, codigo, nombre, dias_por_defecto, tipo_computo_defecto, nivel_riesgo_defecto) VALUES
 (1,1,'CONTESTACION','Contestacion de demanda',30,'HABILES','CRITICO'),

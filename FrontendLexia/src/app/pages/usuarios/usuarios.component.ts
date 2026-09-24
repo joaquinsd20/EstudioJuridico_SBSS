@@ -171,7 +171,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   bloqueaBaja(d: UsuarioDetalle): boolean {
     const c = d.cargaTrabajo;
     return c.expedientes > 0 || c.plazosAbiertos > 0 || c.tareasAbiertas > 0
-      || c.clientes > 0 || c.equiposApoyo > 0;
+      || c.actuacionesAbiertas > 0 || c.clientes > 0 || c.equiposApoyo > 0;
   }
 
   // ---- ver -----------------------------------------------------------------
@@ -363,7 +363,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   nada(): boolean {
     const c = this.carga();
     return !!c && !c.expedientes.length && !c.plazos.length && !c.tareas.length
-      && !c.clientes.length && !c.equipos.length;
+      && !c.actuaciones.length && !c.clientes.length && !c.equipos.length;
   }
 
   confirmarReasignacion(): void {

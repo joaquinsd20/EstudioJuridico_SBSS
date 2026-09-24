@@ -290,7 +290,9 @@ public class AgendaRepositoryJdbc {
         } else if (!verTodos) {
             sql.append(" AND (e.abogado_responsable_id=:usuarioId OR eq.usuario_id IS NOT NULL)");
         }
-        if (!verConfidenciales) sql.append(" AND e.es_confidencial=0");
+        if (!verConfidenciales && (verTodos || SesionActual.esPortalCliente())) {
+            sql.append(" AND e.es_confidencial=0");
+        }
         sql.append(" ORDER BY e.codigo_interno DESC");
         return jdbc.query(sql.toString(), p, (rs, n) -> new ExpedienteOpcion(
                 rs.getLong("id"), rs.getString("codigo_interno"), rs.getString("numero_expediente"),
@@ -392,7 +394,12 @@ public class AgendaRepositoryJdbc {
                     """);
             p.addValue("usuarioId", SesionActual.usuarioId());
         }
-        if (!verConfidenciales) sql.append(" AND (ev.expediente_id IS NULL OR e.es_confidencial=0)");
+        // Sin verTodos, arriba ya se limito a lo asignado: el confidencial que se
+        // tiene asignado SE VE (RF-02, "salvo asignacion explicita"). El filtro
+        // solo tiene sentido para quien ve TODO el estudio, y para el portal.
+        if (!verConfidenciales && (verTodos || SesionActual.esPortalCliente())) {
+            sql.append(" AND (ev.expediente_id IS NULL OR e.es_confidencial=0)");
+        }
     }
 
     private EventoLista mapEvento(ResultSet rs) throws SQLException {

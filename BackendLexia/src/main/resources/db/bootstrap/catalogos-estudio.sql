@@ -72,7 +72,10 @@ INSERT INTO tipos_actuacion (estudio_id, codigo, nombre, categoria,
 (@estudio_id, 'INSPECCION_OCULAR', 'Inspeccion ocular', 'DILIGENCIA', 0, 1, 1, 1),
 (@estudio_id, 'LLAMADA', 'Llamada telefonica', 'COMUNICACION', 0, 0, 0, 0),
 (@estudio_id, 'REUNION_CLIENTE', 'Reunion con cliente', 'COMUNICACION', 0, 0, 1, 0),
-(@estudio_id, 'TRAMITE_ADMIN', 'Tramite administrativo', 'ADMINISTRATIVO', 0, 1, 0, 0);
+(@estudio_id, 'TRAMITE_ADMIN', 'Tramite administrativo', 'ADMINISTRATIVO', 0, 1, 0, 0),
+-- INFORME: V15 lo inserta para los estudios que YA existen, y este script crea
+-- el estudio despues, asi que sin esta linea un estudio nuevo se queda sin el.
+(@estudio_id, 'INFORME', 'Informe', 'ESCRITO', 0, 0, 0, 1);
 
 INSERT INTO tipos_plazo (estudio_id, codigo, nombre, dias_por_defecto, tipo_computo_defecto, nivel_riesgo_defecto) VALUES
 (@estudio_id, 'CONTESTACION', 'Contestacion de demanda', 30, 'HABILES', 'CRITICO'),
