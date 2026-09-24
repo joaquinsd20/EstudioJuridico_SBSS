@@ -1,811 +1,1000 @@
 <div class="layout-wrapper">
-
-  <!-- PANEL REUTILIZABLE -->
   <app-panel></app-panel>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
-
-    <!-- CABECERA -->
     <header class="page-header">
-
       <div>
-        <span class="eyebrow">
-          Seguimiento procesal
-        </span>
-
-        <h1>
-          Monitor Judicial
-        </h1>
-
+        <span class="eyebrow">Seguimiento procesal</span>
+        <h1>Monitor Judicial</h1>
         <p>
-          Alertas y actualizaciones de expedientes judiciales en tiempo real.
+          Registra consultas, movimientos, resoluciones, documentos,
+          notificaciones y plazos de los expedientes.
         </p>
       </div>
 
-      <button
-        class="btn-primary"
-        type="button"
-      >
-        + Añadir expediente al monitor
-      </button>
-
+      @if (puedeGestionar) {
+        <button
+          class="btn-primary"
+          type="button"
+          (click)="abrirAgregar()"
+        >
+          + Añadir expediente al monitor
+        </button>
+      }
     </header>
 
+    @if (error) {
+      <div class="message error">
+        <div>
+          <strong>No se pudo completar la operación</strong>
+          <span>{{ error }}</span>
+        </div>
 
-    <!-- RESUMEN -->
+        <button
+          type="button"
+          class="message-close"
+          (click)="cerrarMensaje('error')"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+    }
+
+    @if (exito) {
+      <div class="message success">
+        <div>
+          <strong>Operación realizada</strong>
+          <span>{{ exito }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="message-close"
+          (click)="cerrarMensaje('exito')"
+          aria-label="Cerrar"
+        >
+          ×
+        </button>
+      </div>
+    }
+
     <section class="stats-grid">
-
       <article class="stat-card">
-
-        <span class="stat-label">
-          Expedientes Monitoreados
-        </span>
-
-        <strong>
-          12
-        </strong>
-
-        <small>
-          Casos en seguimiento
-        </small>
-
+        <span class="stat-label">Expedientes monitoreados</span>
+        <strong>{{ resumen.expedientesMonitoreados }}</strong>
+        <small>Casos en seguimiento</small>
       </article>
 
-
       <article class="stat-card">
-
-        <span class="stat-label">
-          Nuevos Movimientos
-        </span>
-
-        <strong>
-          8
-        </strong>
-
-        <small>
-          Detectados hoy
-        </small>
-
+        <span class="stat-label">Movimientos de hoy</span>
+        <strong>{{ resumen.movimientosHoy }}</strong>
+        <small>Registrados hoy</small>
       </article>
 
-
       <article class="stat-card">
-
-        <span class="stat-label">
-          Alertas Críticas
-        </span>
-
-        <strong class="stat-danger">
-          3
-        </strong>
-
-        <small>
-          Requieren atención
-        </small>
-
-      </article>
-
-
-      <article class="stat-card">
-
-        <span class="stat-label">
-          Audiencias Próximas
-        </span>
-
+        <span class="stat-label">Nuevas resoluciones</span>
         <strong class="stat-accent">
-          5
+          {{ resumen.nuevasResolucionesHoy }}
         </strong>
-
-        <small>
-          Programadas esta semana
-        </small>
-
+        <small>Detectadas hoy</small>
       </article>
 
+      <article class="stat-card">
+        <span class="stat-label">Pendientes de verificación</span>
+        <strong class="stat-danger">
+          {{ resumen.pendientesVerificacion }}
+        </strong>
+        <small>Requieren revisión</small>
+      </article>
     </section>
 
-
-    <!-- DISTRIBUCIÓN PRINCIPAL -->
-    <section class="monitor-layout">
-
-      <!-- COLUMNA PRINCIPAL -->
-      <div class="monitor-main">
-
-        <!-- TABLA -->
-        <section class="panel">
-
-          <div class="panel-header">
-
-            <div>
-              <span class="panel-kicker">
-                Expedientes en seguimiento
-              </span>
-
-              <h2>
-                Listado de Expedientes en Seguimiento
-              </h2>
-
-              <p>
-                Últimas notificaciones y movimientos registrados.
-              </p>
-            </div>
-
-            <span class="panel-number">
-              01
-            </span>
-
-          </div>
-
-
-          <!-- FILTROS SOLO VISUALES -->
-          <div class="filters">
-
-            <select>
-              <option>Juzgado / Sala</option>
-              <option>2° Juzgado Civil</option>
-              <option>1° Sala Penal</option>
-              <option>Sala Constitucional</option>
-            </select>
-
-
-            <div class="date-field">
-              <span>Rango de fecha</span>
-              <span class="calendar-icon">▣</span>
-            </div>
-
-
-            <select>
-              <option>Tipo de Notificación</option>
-              <option>Resolución</option>
-              <option>Auto</option>
-              <option>Sentencia</option>
-              <option>Providencia</option>
-            </select>
-
-
-            <select>
-              <option>Estado Procesal</option>
-              <option>Notificado</option>
-              <option>En trámite</option>
-              <option>Archivado</option>
-            </select>
-
-          </div>
-
-
-          <div class="table-wrap">
-
-            <table class="monitor-table">
-
-              <thead>
-                <tr>
-                  <th>Número de Expediente</th>
-                  <th>Cliente</th>
-                  <th>Juzgado / Sala</th>
-                  <th>Tipo de Movimiento / Notificación</th>
-                  <th>Fecha Movimiento</th>
-                  <th>Estado Procesal</th>
-                  <th>Abogado Asignado</th>
-                </tr>
-              </thead>
-
-
-              <tbody>
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>01452-2026</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Fernández
-                  </td>
-
-                  <td>
-                    2° Juzgado Civil
-                  </td>
-
-                  <td>
-                    Resolución N° 0021
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>01452-2026</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Fernández
-                  </td>
-
-                  <td>
-                    2° Juzgado Civil
-                  </td>
-
-                  <td>
-                    Resolución N° 0021
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>02388-2025</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Torres
-                  </td>
-
-                  <td>
-                    1° Sala Penal
-                  </td>
-
-                  <td>
-                    Auto
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>02388-2025</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Torres
-                  </td>
-
-                  <td>
-                    1° Sala Penal
-                  </td>
-
-                  <td>
-                    Sentencia
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>03321-2024</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Morales
-                  </td>
-
-                  <td>
-                    Sala Constitucional
-                  </td>
-
-                  <td>
-                    Providencia
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>03321-2024</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Morales
-                  </td>
-
-                  <td>
-                    Sala Constitucional
-                  </td>
-
-                  <td>
-                    Providencia
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge notified">
-                      Notificado
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar">JP</span>
-                      <strong>Dr. Juan Pérez</strong>
-                    </div>
-                  </td>
-                </tr>
-
-
-                <tr>
-                  <td>
-                    <div class="expediente-cell">
-                      <strong>00521-2024</strong>
-                      <span>Vinculado</span>
-                    </div>
-                  </td>
-
-                  <td>
-                    Caso Ramírez
-                  </td>
-
-                  <td>
-                    1° Sala Penal
-                  </td>
-
-                  <td>
-                    Providencia
-                  </td>
-
-                  <td>
-                    01/10/2026
-                  </td>
-
-                  <td>
-                    <span class="status-badge pending">
-                      En Trámite
-                    </span>
-                  </td>
-
-                  <td>
-                    <div class="lawyer-cell">
-                      <span class="lawyer-avatar purple">AM</span>
-                      <strong>Ana Morales</strong>
-                    </div>
-                  </td>
-                </tr>
-
-              </tbody>
-
-            </table>
-
-          </div>
-
-        </section>
-
-
-        <!-- RESUMEN INFERIOR -->
-        <section class="analytics-grid">
-
-          <!-- ALERTAS -->
-          <article class="panel analytics-card">
-
-            <div class="analytics-header">
-              <h3>Resumen de Alertas Próximas</h3>
-              <span>Plazos y audiencias vinculadas</span>
-            </div>
-
-
-            <div class="alerts-list">
-
-              <div class="alert-row">
-                <span class="alert-color critical"></span>
-
-                <div>
-                  <strong>Crítico: Caso Fernández</strong>
-                  <span>Plazo procesal por vencer</span>
-                </div>
-
-                <b>25</b>
-              </div>
-
-
-              <div class="alert-row">
-                <span class="alert-color warning"></span>
-
-                <div>
-                  <strong>Audición: Caso Fernández</strong>
-                  <span>Audiencia programada</span>
-                </div>
-
-                <b>20</b>
-              </div>
-
-
-              <div class="alert-row">
-                <span class="alert-color warning"></span>
-
-                <div>
-                  <strong>Audición: Caso Torres</strong>
-                  <span>Audiencia programada</span>
-                </div>
-
-                <b>17</b>
-              </div>
-
-            </div>
-
-          </article>
-
-
-          <!-- EVOLUCIÓN -->
-          <article class="panel analytics-card">
-
-            <div class="analytics-header">
-              <h3>Evolución de Movimientos del Mes</h3>
-              <span>Total de nuevos movimientos detectados por día.</span>
-            </div>
-
-
-            <div class="line-chart">
-
-              <div class="chart-y-axis">
-                <span>20</span>
-                <span>15</span>
-                <span>10</span>
-                <span>5</span>
-                <span>0</span>
-              </div>
-
-
-              <div class="line-chart-area">
-
-                <svg
-                  viewBox="0 0 500 170"
-                  preserveAspectRatio="none"
-                >
-
-                  <defs>
-                    <linearGradient
-                      id="monitorGradient"
-                      x1="0"
-                      x2="0"
-                      y1="0"
-                      y2="1"
-                    >
-                      <stop
-                        offset="0%"
-                        stop-color="#5b2c83"
-                        stop-opacity=".20"
-                      ></stop>
-
-                      <stop
-                        offset="100%"
-                        stop-color="#5b2c83"
-                        stop-opacity="0"
-                      ></stop>
-                    </linearGradient>
-                  </defs>
-
-                  <path
-                    d="
-                      M0 140
-                      C35 125, 65 120, 90 137
-                      C120 153, 145 71, 175 90
-                      C205 108, 230 140, 265 65
-                      C300 -5, 320 128, 365 100
-                      C405 77, 430 121, 500 42
-                      L500 170
-                      L0 170
-                      Z
-                    "
-                    fill="url(#monitorGradient)"
-                  ></path>
-
-                  <path
-                    d="
-                      M0 140
-                      C35 125, 65 120, 90 137
-                      C120 153, 145 71, 175 90
-                      C205 108, 230 140, 265 65
-                      C300 -5, 320 128, 365 100
-                      C405 77, 430 121, 500 42
-                    "
-                    fill="none"
-                    stroke="#5b2c83"
-                    stroke-width="4"
-                  ></path>
-
-                </svg>
-
-
-                <div class="chart-x-axis">
-                  <span>J</span>
-                  <span>M</span>
-                  <span>M</span>
-                  <span>J</span>
-                  <span>J</span>
-                  <span>V</span>
-                  <span>M</span>
-                  <span>D</span>
-                  <span>M</span>
-                </div>
-
-              </div>
-
-            </div>
-
-          </article>
-
-
-          <!-- JUZGADOS -->
-          <article class="panel analytics-card">
-
-            <div class="analytics-header">
-              <h3>Juzgados con Mayor Actividad</h3>
-              <span>Órganos con más movimientos de expedientes.</span>
-            </div>
-
-
-            <div class="bar-chart">
-
-              <div class="activity-bar-item">
-                <div class="activity-bar h-85"></div>
-                <span>2° Juz.</span>
-              </div>
-
-              <div class="activity-bar-item">
-                <div class="activity-bar h-55"></div>
-                <span>2° Sala</span>
-              </div>
-
-              <div class="activity-bar-item">
-                <div class="activity-bar h-35"></div>
-                <span>1° Sala</span>
-              </div>
-
-              <div class="activity-bar-item">
-                <div class="activity-bar h-18"></div>
-                <span>Juzgado</span>
-              </div>
-
-            </div>
-
-          </article>
-
-        </section>
-
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <span class="panel-kicker">
+            Expedientes en seguimiento
+          </span>
+
+          <h2>Listado del Monitor Judicial</h2>
+
+          <p>
+            Escribe en cualquiera de los filtros y los resultados
+            se actualizarán automáticamente.
+          </p>
+        </div>
       </div>
 
-
-      <!-- PANEL DERECHO -->
-      <aside class="details-column">
-
-        <section class="panel detail-panel">
-
-          <div class="detail-header">
-
-            <div>
-              <span class="panel-kicker">
-                Documento seleccionado
-              </span>
-
-              <h2>
-                Detalles del Último Movimiento en Seguimiento
-              </h2>
-            </div>
-
-            <button
-              class="close-button"
-              type="button"
+      <div class="filters-area">
+        <div class="filters-grid">
+          <label class="filter-field">
+            <span>Expediente</span>
+            <input
+              [(ngModel)]="filtro.expediente"
+              (ngModelChange)="programarFiltro()"
+              list="monitor-expedientes"
+              placeholder="Código o N.° de expediente"
             >
-              ×
+
+            <datalist id="monitor-expedientes">
+              @for (valor of expedientesSugeridos; track valor) {
+                <option [value]="valor"></option>
+              }
+            </datalist>
+          </label>
+
+          <label class="filter-field">
+            <span>Cliente</span>
+            <input
+              [(ngModel)]="filtro.cliente"
+              (ngModelChange)="programarFiltro()"
+              list="monitor-clientes"
+              placeholder="Escribe el cliente"
+            >
+
+            <datalist id="monitor-clientes">
+              @for (valor of clientesSugeridos; track valor) {
+                <option [value]="valor"></option>
+              }
+            </datalist>
+          </label>
+
+          <label class="filter-field">
+            <span>Abogado responsable</span>
+            <input
+              [(ngModel)]="filtro.abogado"
+              (ngModelChange)="programarFiltro()"
+              list="monitor-abogados"
+              placeholder="Escribe el abogado"
+            >
+
+            <datalist id="monitor-abogados">
+              @for (valor of abogadosSugeridos; track valor) {
+                <option [value]="valor"></option>
+              }
+            </datalist>
+          </label>
+
+          <label class="filter-field">
+            <span>Juzgado / Sala</span>
+            <input
+              [(ngModel)]="filtro.organo"
+              (ngModelChange)="programarFiltro()"
+              list="monitor-organos"
+              placeholder="Escribe el órgano"
+            >
+
+            <datalist id="monitor-organos">
+              @for (valor of organosSugeridos; track valor) {
+                <option [value]="valor"></option>
+              }
+            </datalist>
+          </label>
+
+          <label class="filter-field">
+            <span>Estado procesal</span>
+            <input
+              [(ngModel)]="filtro.estadoProcesal"
+              (ngModelChange)="programarFiltro()"
+              placeholder="Escribe el estado"
+            >
+          </label>
+
+          <label class="filter-field">
+            <span>Desde</span>
+            <input
+              type="date"
+              [(ngModel)]="filtro.desde"
+              (ngModelChange)="programarFiltro()"
+            >
+          </label>
+
+          <label class="filter-field">
+            <span>Hasta</span>
+            <input
+              type="date"
+              [(ngModel)]="filtro.hasta"
+              (ngModelChange)="programarFiltro()"
+            >
+          </label>
+        </div>
+
+        <div class="filter-footer">
+          <span>
+            Puedes combinar varios filtros. No necesitas presionar
+            Enter para buscar.
+          </span>
+
+          <div class="filter-actions">
+            <button
+              class="btn-secondary"
+              type="button"
+              (click)="aplicarFiltros()"
+            >
+              Filtrar
             </button>
 
+            <button
+              class="btn-ghost"
+              type="button"
+              (click)="limpiarFiltros()"
+            >
+              Limpiar filtros
+            </button>
           </div>
+        </div>
+      </div>
 
+      <div class="table-wrap">
+        <table class="monitor-table">
+          <thead>
+            <tr>
+              <th>Expediente</th>
+              <th>Cliente</th>
+              <th>Juzgado / Sala</th>
+              <th>Último movimiento</th>
+              <th>Última consulta</th>
+              <th>Estado procesal</th>
+              <th>Abogado</th>
+              <th>Verificación</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
 
-          <div class="detail-content">
+          <tbody>
+            @if (cargando) {
+              <tr>
+                <td colspan="9" class="empty-row">
+                  <div class="table-loading">
+                    <span class="spinner"></span>
+                    Cargando información...
+                  </div>
+                </td>
+              </tr>
+            } @else if (!monitoreados.length) {
+              <tr>
+                <td colspan="9" class="empty-row">
+                  No hay expedientes monitoreados con los filtros
+                  seleccionados.
+                </td>
+              </tr>
+            } @else {
+              @for (item of monitoreados; track item.uuid) {
+                <tr>
+                  <td>
+                    <div class="expediente-cell">
+                      <strong>
+                        {{
+                          item.numeroExpediente ||
+                          item.codigoInterno
+                        }}
+                      </strong>
 
-            <div class="detail-item">
+                      <span>{{ item.codigoInterno }}</span>
+                    </div>
+                  </td>
 
-              <span class="detail-icon">▤</span>
+                  <td>{{ item.cliente }}</td>
 
-              <div>
-                <small>Expediente</small>
+                  <td>
+                    {{
+                      item.organo ||
+                      'Sin órgano registrado'
+                    }}
+                  </td>
 
-                <strong>
-                  01452-2026
-                </strong>
-              </div>
+                  <td>
+                    <strong>
+                      {{
+                        item.ultimoMovimiento ||
+                        'Sin movimientos'
+                      }}
+                    </strong>
 
-            </div>
+                    <small class="subline">
+                      {{ item.movimientos }} movimiento(s)
+                    </small>
+                  </td>
 
+                  <td>
+                    {{ formatoFecha(item.ultimaConsulta) }}
+                  </td>
 
-            <div class="detail-item">
+                  <td>
+                    <span class="status-badge">
+                      {{
+                        item.estadoProcesal ||
+                        'Sin estado'
+                      }}
+                    </span>
+                  </td>
 
-              <span class="detail-icon">✎</span>
+                  <td>
+                    <div class="lawyer-cell">
+                      <span class="lawyer-avatar">
+                        {{
+                          iniciales(
+                            item.abogadoResponsable
+                          )
+                        }}
+                      </span>
 
-              <div>
-                <small>Movimiento</small>
+                      <span>
+                        {{
+                          item.abogadoResponsable ||
+                          'Sin responsable'
+                        }}
+                      </span>
+                    </div>
+                  </td>
 
-                <strong>
-                  Resolución N° 0021
-                </strong>
-              </div>
+                  <td>
+                    @if (
+                      item.pendientesVerificacion > 0
+                    ) {
+                      <span class="verification pending">
+                        {{
+                          item.pendientesVerificacion
+                        }}
+                        pendiente(s)
+                      </span>
+                    } @else {
+                      <span class="verification ok">
+                        Al día
+                      </span>
+                    }
+                  </td>
 
-            </div>
+                  <td>
+                    <div class="actions">
+                      @if (puedeGestionar) {
+                        <button
+                          type="button"
+                          class="action-main"
+                          (click)="abrirConsulta(item)"
+                        >
+                          Registrar consulta
+                        </button>
 
-
-            <div class="detail-item">
-
-              <span class="detail-icon">▣</span>
-
-              <div>
-                <small>Juzgado</small>
-
-                <strong>
-                  2° Juzgado Civil
-                </strong>
-              </div>
-
-            </div>
-
-
-            <div class="detail-item">
-
-              <span class="detail-icon">♢</span>
-
-              <div>
-                <small>Notificado a la Parte</small>
-
-                <strong>
-                  Caso Fernández - Exp. 01452
-                </strong>
-              </div>
-
-            </div>
-
-
-            <div class="summary-box">
-
-              <h3>
-                Resumen del Auto
-              </h3>
-
-              <p>
-                Se declara fundada la solicitud presentada dentro del
-                expediente y se dispone continuar con el trámite procesal
-                correspondiente, quedando las partes debidamente notificadas.
-              </p>
-
-            </div>
-
-
-            <div class="quick-actions">
-
-              <h3>
-                Acciones Rápidas
-              </h3>
-
-
-              <button type="button">
-                <span>▤</span>
-                Ver Texto Completo
-              </button>
-
-
-              <button type="button">
-                <span>✎</span>
-                Registrar Tarea
-              </button>
-
-
-              <button type="button">
-                <span>↓</span>
-                Descargar Notificación
-              </button>
-
-            </div>
-
-          </div>
-
-        </section>
-
-      </aside>
-
+                        <button
+                          type="button"
+                          class="action-danger"
+                          (click)="solicitarQuitar(item)"
+                        >
+                          Quitar
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
     </section>
 
-  </main>
+    <section class="panel history-panel">
+      <div class="panel-header">
+        <div>
+          <span class="panel-kicker">Trazabilidad</span>
 
+          <h2>Consultas y movimientos recientes</h2>
+
+          <p>
+            Cada registro conserva fecha, usuario, fuente,
+            origen y estado de verificación.
+          </p>
+        </div>
+      </div>
+
+      <div class="history-list">
+        @if (!consultas.length) {
+          <div class="empty-card">
+            Todavía no existen consultas judiciales registradas.
+          </div>
+        } @else {
+          @for (
+            consulta of consultas;
+            track consulta.uuid
+          ) {
+            <article class="history-item">
+              <div class="history-top">
+                <div>
+                  <strong>
+                    {{
+                      consulta.numeroExpediente ||
+                      consulta.codigoInterno
+                    }}
+                  </strong>
+
+                  <span>
+                    {{ consulta.cliente }} ·
+                    {{ consulta.fuentePlataforma }}
+                  </span>
+                </div>
+
+                <span class="origin">
+                  {{ consulta.origenInformacion }}
+                </span>
+              </div>
+
+              <div class="history-body">
+                <div>
+                  <b>Fecha:</b>
+                  {{
+                    formatoFecha(
+                      consulta.fechaConsulta
+                    )
+                  }}
+                </div>
+
+                <div>
+                  <b>Usuario:</b>
+                  {{ consulta.usuario }}
+                </div>
+
+                <div>
+                  <b>Movimiento:</b>
+                  {{
+                    consulta.huboMovimiento
+                      ? (
+                          consulta.tipoMovimiento ||
+                          'Movimiento detectado'
+                        )
+                      : 'Sin novedad'
+                  }}
+                </div>
+
+                @if (consulta.nuevaResolucion) {
+                  <div>
+                    <b>Resolución:</b>
+                    {{ consulta.numeroResolucion }}
+                    ·
+                    {{
+                      consulta.tipoResolucion ||
+                      'Sin tipo'
+                    }}
+                  </div>
+                }
+
+                @if (consulta.documentoDescargado) {
+                  <div>
+                    <b>Documento:</b>
+                    {{ consulta.documentoDescargado }}
+                  </div>
+                }
+
+                @if (consulta.notificacion) {
+                  <div>
+                    <b>Notificación:</b>
+                    {{ consulta.notificacion }}
+                  </div>
+                }
+
+                @if (consulta.plazo) {
+                  <div>
+                    <b>Plazo:</b>
+                    {{ consulta.plazo }}
+                  </div>
+                }
+
+                @if (consulta.observaciones) {
+                  <div class="span-full">
+                    <b>Observaciones:</b>
+                    {{ consulta.observaciones }}
+                  </div>
+                }
+              </div>
+
+              <div class="history-footer">
+                <span
+                  class="verification"
+                  [class.pending]="
+                    consulta.estadoVerificacion ===
+                    'PENDIENTE'
+                  "
+                  [class.ok]="
+                    consulta.estadoVerificacion ===
+                    'VERIFICADA'
+                  "
+                  [class.rejected]="
+                    consulta.estadoVerificacion ===
+                    'RECHAZADA'
+                  "
+                >
+                  {{ consulta.estadoVerificacion }}
+                </span>
+
+                @if (
+                  consulta.estadoVerificacion ===
+                    'PENDIENTE' &&
+                  puedeGestionar
+                ) {
+                  <div class="verify-actions">
+                    <button
+                      type="button"
+                      (click)="
+                        verificar(
+                          consulta,
+                          'VERIFICADA'
+                        )
+                      "
+                    >
+                      Verificar
+                    </button>
+
+                    <button
+                      type="button"
+                      class="reject"
+                      (click)="
+                        verificar(
+                          consulta,
+                          'RECHAZADA'
+                        )
+                      "
+                    >
+                      Rechazar
+                    </button>
+                  </div>
+                }
+              </div>
+            </article>
+          }
+        }
+      </div>
+    </section>
+  </main>
 </div>
+
+@if (modalAgregar) {
+  <div
+    class="modal-backdrop"
+    (mousedown)="cerrarModales()"
+  >
+    <section
+      class="modal-card small"
+      (mousedown)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <span class="panel-kicker">
+            Nuevo seguimiento
+          </span>
+
+          <h2>Añadir expediente al monitor</h2>
+        </div>
+
+        <button
+          type="button"
+          class="close"
+          [disabled]="guardando"
+          (click)="cerrarModales()"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="form-grid one">
+        <label class="field">
+          <span>Expediente *</span>
+
+          <select
+            [(ngModel)]="
+              agregarForm.expedienteId
+            "
+          >
+            <option [ngValue]="null">
+              Seleccione un expediente
+            </option>
+
+            @for (
+              exp of catalogos.expedientes;
+              track exp.id
+            ) {
+              <option [ngValue]="exp.id">
+                {{ exp.codigoInterno }} ·
+                {{
+                  exp.numeroExpediente ||
+                  'Sin número'
+                }}
+                · {{ exp.cliente }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Fuente / plataforma *</span>
+
+          <input
+            [(ngModel)]="
+              agregarForm.fuentePlataforma
+            "
+            maxlength="150"
+            placeholder="Ej. CEJ - Poder Judicial"
+          >
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="guardando"
+          (click)="cerrarModales()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          [disabled]="guardando"
+          (click)="guardarSeguimiento()"
+        >
+          @if (guardando) {
+            <span class="button-loading">
+              <span class="spinner light"></span>
+              Guardando...
+            </span>
+          } @else {
+            Añadir al monitor
+          }
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (modalConsulta) {
+  <div
+    class="modal-backdrop"
+    (mousedown)="cerrarModales()"
+  >
+    <section
+      class="modal-card"
+      (mousedown)="$event.stopPropagation()"
+    >
+      <div class="modal-header">
+        <div>
+          <span class="panel-kicker">
+            Registro de seguimiento
+          </span>
+
+          <h2>Registrar consulta judicial</h2>
+
+          <p>
+            {{
+              nombreExpediente(
+                consultaForm.expedienteId
+              )
+            }}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          class="close"
+          [disabled]="guardando"
+          (click)="cerrarModales()"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="form-grid">
+        <label class="field span-2">
+          <span>Fuente / plataforma *</span>
+
+          <input
+            [(ngModel)]="
+              consultaForm.fuentePlataforma
+            "
+            maxlength="150"
+            placeholder="CEJ, Casilla electrónica, Mesa de partes..."
+          >
+        </label>
+
+        <label class="check-field">
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              consultaForm.huboMovimiento
+            "
+          >
+
+          <span>Se detectó un movimiento</span>
+        </label>
+
+        <label class="field">
+          <span>Tipo de movimiento</span>
+
+          <select
+            [(ngModel)]="
+              consultaForm.tipoMovimiento
+            "
+          >
+            <option value="">
+              Seleccione
+            </option>
+
+            @for (
+              tipo of tiposMovimiento;
+              track tipo
+            ) {
+              <option [value]="tipo">
+                {{ tipo }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="check-field">
+          <input
+            type="checkbox"
+            [(ngModel)]="
+              consultaForm.nuevaResolucion
+            "
+          >
+
+          <span>Existe una nueva resolución</span>
+        </label>
+
+        @if (consultaForm.nuevaResolucion) {
+          <label class="field">
+            <span>Número de resolución *</span>
+
+            <input
+              [(ngModel)]="
+                consultaForm.numeroResolucion
+              "
+              maxlength="30"
+              placeholder="Ej. Resolución N.° 21"
+            >
+          </label>
+
+          <label class="field">
+            <span>Tipo de resolución</span>
+
+            <select
+              [(ngModel)]="
+                consultaForm.tipoResolucion
+              "
+            >
+              <option value="">
+                Seleccione
+              </option>
+
+              @for (
+                tipo of tiposResolucion;
+                track tipo
+              ) {
+                <option [value]="tipo">
+                  {{ tipo }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="field">
+            <span>Fecha de resolución</span>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                consultaForm.fechaResolucion
+              "
+            >
+          </label>
+
+          <label class="field">
+            <span>Fecha de notificación *</span>
+
+            <input
+              type="date"
+              [(ngModel)]="
+                consultaForm.fechaNotificacion
+              "
+            >
+          </label>
+        }
+
+        <label class="field">
+          <span>Documento descargado</span>
+
+          <input
+            [(ngModel)]="
+              consultaForm.documentoDescargado
+            "
+            maxlength="250"
+            placeholder="Nombre del documento"
+          >
+        </label>
+
+        <label class="field">
+          <span>Plazo detectado</span>
+
+          <input
+            [(ngModel)]="consultaForm.plazo"
+            maxlength="250"
+            placeholder="Ej. Apelar dentro de 5 días hábiles"
+          >
+        </label>
+
+        <label class="field span-2">
+          <span>Notificación</span>
+
+          <input
+            [(ngModel)]="
+              consultaForm.notificacion
+            "
+            maxlength="500"
+            placeholder="Detalle de la notificación"
+          >
+        </label>
+
+        <label class="field">
+          <span>Origen de la información *</span>
+
+          <select
+            [(ngModel)]="
+              consultaForm.origenInformacion
+            "
+          >
+            @for (
+              origen of origenes;
+              track origen
+            ) {
+              <option [value]="origen">
+                {{ origen }}
+              </option>
+            }
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Estado de verificación *</span>
+
+          <select
+            [(ngModel)]="
+              consultaForm.estadoVerificacion
+            "
+            [disabled]="
+              consultaForm.origenInformacion ===
+              'IA'
+            "
+          >
+            <option value="VERIFICADA">
+              VERIFICADA
+            </option>
+
+            <option value="PENDIENTE">
+              PENDIENTE
+            </option>
+          </select>
+        </label>
+
+        <label class="field span-2">
+          <span>Observaciones</span>
+
+          <textarea
+            [(ngModel)]="
+              consultaForm.observaciones
+            "
+            rows="4"
+            maxlength="10000"
+            placeholder="Observaciones adicionales de la consulta"
+          ></textarea>
+        </label>
+      </div>
+
+      @if (
+        consultaForm.origenInformacion === 'IA'
+      ) {
+        <div class="ia-warning">
+          La información generada por IA quedará
+          automáticamente como PENDIENTE hasta
+          revisión profesional.
+        </div>
+      }
+
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="guardando"
+          (click)="cerrarModales()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-primary"
+          [disabled]="guardando"
+          (click)="registrarConsulta()"
+        >
+          @if (guardando) {
+            <span class="button-loading">
+              <span class="spinner light"></span>
+              Guardando...
+            </span>
+          } @else {
+            Registrar consulta
+          }
+        </button>
+      </div>
+    </section>
+  </div>
+}
+
+@if (
+  modalConfirmarQuitar &&
+  itemAQuitar
+) {
+  <div
+    class="modal-backdrop"
+    (mousedown)="cancelarQuitar()"
+  >
+    <section
+      class="modal-card confirm-card"
+      (mousedown)="$event.stopPropagation()"
+    >
+      <div class="confirm-icon">
+        !
+      </div>
+
+      <div class="confirm-content">
+        <span class="panel-kicker">
+          Confirmar acción
+        </span>
+
+        <h2>
+          ¿Quitar expediente del Monitor Judicial?
+        </h2>
+
+        <p>
+          Se retirará
+          <strong>
+            {{ itemAQuitar.codigoInterno }}
+          </strong>
+          del seguimiento activo.
+        </p>
+
+        <div class="confirm-note">
+          El historial de consultas y movimientos
+          se conservará para mantener la
+          trazabilidad.
+        </div>
+      </div>
+
+      <div class="modal-actions confirm-actions">
+        <button
+          type="button"
+          class="btn-ghost"
+          [disabled]="eliminando"
+          (click)="cancelarQuitar()"
+        >
+          Cancelar
+        </button>
+
+        <button
+          type="button"
+          class="btn-danger"
+          [disabled]="eliminando"
+          (click)="confirmarQuitar()"
+        >
+          @if (eliminando) {
+            <span class="button-loading">
+              <span class="spinner light"></span>
+              Quitando...
+            </span>
+          } @else {
+            Sí, quitar expediente
+          }
+        </button>
+      </div>
+    </section>
+  </div>
+}
