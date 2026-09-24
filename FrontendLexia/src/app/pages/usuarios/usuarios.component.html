@@ -224,6 +224,7 @@
         <li [class.pesa]="d.cargaTrabajo.expedientes > 0"><strong>{{ d.cargaTrabajo.expedientes }}</strong> expedientes</li>
         <li [class.pesa]="d.cargaTrabajo.plazosAbiertos > 0"><strong>{{ d.cargaTrabajo.plazosAbiertos }}</strong> plazos abiertos</li>
         <li [class.pesa]="d.cargaTrabajo.tareasAbiertas > 0"><strong>{{ d.cargaTrabajo.tareasAbiertas }}</strong> tareas abiertas</li>
+        <li [class.pesa]="d.cargaTrabajo.actuacionesAbiertas > 0"><strong>{{ d.cargaTrabajo.actuacionesAbiertas }}</strong> actuaciones abiertas</li>
         <li [class.pesa]="d.cargaTrabajo.clientes > 0"><strong>{{ d.cargaTrabajo.clientes }}</strong> clientes</li>
         <li [class.pesa]="d.cargaTrabajo.equiposApoyo > 0">apoyo en <strong>{{ d.cargaTrabajo.equiposApoyo }}</strong> equipos</li>
         <li><strong>{{ d.cargaTrabajo.eventosAgenda }}</strong> eventos próximos</li>
@@ -345,6 +346,7 @@
           <li><strong>{{ res.plazos }}</strong> plazos</li>
           <li><strong>{{ res.alertas }}</strong> alertas programadas</li>
           <li><strong>{{ res.tareas }}</strong> tareas</li>
+          <li><strong>{{ res.actuaciones }}</strong> actuaciones</li>
           <li><strong>{{ res.clientes }}</strong> clientes</li>
           <li>retirado de <strong>{{ res.equiposRetirados }}</strong> equipos</li>
         </ul>
@@ -406,6 +408,18 @@
                 }
               </select>
             </label>
+          </section>
+        }
+
+        @if (c.actuaciones.length) {
+          <section class="bloque-reasignar">
+            <h3 class="subtitulo">Actuaciones abiertas ({{ c.actuaciones.length }})</h3>
+            <ul class="lista-carga">
+              @for (a of c.actuaciones; track $index) {
+                <li>{{ a.fechaHora | date: 'dd/MM/yyyy' }} · {{ a.asunto }} ({{ a.expedienteCodigo }})</li>
+              }
+            </ul>
+            <small class="texto-suave">Cada actuación pasa al responsable de su expediente, con sus alertas pendientes.</small>
           </section>
         }
 

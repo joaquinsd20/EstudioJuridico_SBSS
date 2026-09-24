@@ -52,6 +52,17 @@ public final class SesionActual {
         return principal().getClienteId();
     }
 
+    /**
+     * True si el usuario autenticado tiene ese rol o permiso. Estaba duplicado
+     * como metodo privado en varios services; la autoridad se decide en un solo
+     * sitio.
+     */
+    public static boolean tieneAutoridad(String codigo) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> codigo.equals(a.getAuthority()));
+    }
+
     public static String uuid() {
         return principal().getUuid();
     }

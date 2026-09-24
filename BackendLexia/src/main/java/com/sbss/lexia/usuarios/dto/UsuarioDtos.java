@@ -66,6 +66,7 @@ public final class UsuarioDtos {
             int expedientes,
             int plazosAbiertos,
             int tareasAbiertas,
+            int actuacionesAbiertas,
             int clientes,
             int equiposApoyo,
             int eventosAgenda,
@@ -73,7 +74,7 @@ public final class UsuarioDtos {
 
         public boolean bloqueaBaja() {
             return expedientes > 0 || plazosAbiertos > 0 || tareasAbiertas > 0
-                    || clientes > 0 || equiposApoyo > 0;
+                    || actuacionesAbiertas > 0 || clientes > 0 || equiposApoyo > 0;
         }
     }
 
@@ -87,6 +88,9 @@ public final class UsuarioDtos {
     }
 
     public record TareaCarga(String titulo, String estado, LocalDateTime fechaLimite, String expedienteCodigo) {
+    }
+
+    public record ActuacionCarga(String asunto, String estado, LocalDateTime fechaHora, String expedienteCodigo) {
     }
 
     public record ClienteCarga(String uuidPublico, String nombre) {
@@ -108,6 +112,7 @@ public final class UsuarioDtos {
             List<ExpedienteCarga> expedientes,
             List<PlazoCarga> plazos,
             List<TareaCarga> tareas,
+            List<ActuacionCarga> actuaciones,
             List<ClienteCarga> clientes,
             List<EquipoCarga> equipos,
             List<CandidatoReasignacion> candidatos) {
@@ -122,7 +127,8 @@ public final class UsuarioDtos {
     }
 
     public record ResultadoReasignacion(
-            int expedientes, int plazos, int alertas, int tareas, int clientes, int equiposRetirados) {
+            int expedientes, int plazos, int alertas, int tareas, int actuaciones,
+            int clientes, int equiposRetirados) {
     }
 
     /** Un rol asignable, para el selector del formulario. */

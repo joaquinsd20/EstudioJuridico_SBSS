@@ -1,5 +1,6 @@
 package com.sbss.lexia.usuarios.repository;
 
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ActuacionCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CandidatoReasignacion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaTrabajo;
@@ -148,6 +149,9 @@ public class UsuarioGestionRepositoryJdbc {
                   (SELECT COUNT(*) FROM tareas t
                     WHERE t.usuario_responsable_id = :id
                       AND t.estado NOT IN ('COMPLETADA','CANCELADA'))                            AS tareas,
+                  (SELECT COUNT(*) FROM actuaciones ac JOIN expedientes ex ON ex.id = ac.expediente_id
+                    WHERE ac.usuario_responsable_id = :id AND ac.activo = 1
+                      AND ac.estado IN ('PENDIENTE','EN_TRAMITE'))                               AS actuaciones,
                   (SELECT COUNT(*) FROM clientes c
                     WHERE c.abogado_responsable_id = :id AND c.activo = 1)                       AS clientes,
                   (SELECT COUNT(*) FROM expediente_equipo eq JOIN expedientes e ON e.id = eq.expediente_id
@@ -158,7 +162,7 @@ public class UsuarioGestionRepositoryJdbc {
                   (SELECT COUNT(*) FROM documento_versiones dv WHERE dv.usuario_carga_id = :id)  AS versiones
                 """, p, (rs, n) -> new CargaTrabajo(
                 rs.getInt("expedientes"), rs.getInt("plazos"), rs.getInt("tareas"),
-                rs.getInt("clientes"), rs.getInt("equipos"),
+                rs.getInt("actuaciones"), rs.getInt("clientes"), rs.getInt("equipos"),
                 rs.getInt("eventos"), rs.getInt("versiones")));
     }
 
@@ -203,6 +207,15 @@ public class UsuarioGestionRepositoryJdbc {
                 """, p, (rs, n) -> new TareaCarga(rs.getString(1), rs.getString(2),
                 fecha(rs, "fecha_limite"), rs.getString(4)));
 
+        List<ActuacionCarga> actuaciones = jdbc.query("""
+                SELECT ac.asunto, ac.estado, ac.fecha_hora, e.codigo_interno
+                  FROM actuaciones ac JOIN expedientes e ON e.id = ac.expediente_id
+                 WHERE ac.usuario_responsable_id = :id AND ac.activo = 1
+                   AND ac.estado IN ('PENDIENTE','EN_TRAMITE') AND e.estudio_id = :estudioId
+                 ORDER BY ac.fecha_hora
+                """, p, (rs, n) -> new ActuacionCarga(rs.getString(1), rs.getString(2),
+                fecha(rs, "fecha_hora"), rs.getString(4)));
+
         List<ClienteCarga> clientes = jdbc.query("""
                 SELECT uuid_publico, nombre_busqueda FROM clientes
                  WHERE abogado_responsable_id = :id AND activo = 1 AND estudio_id = :estudioId
@@ -217,7 +230,8 @@ public class UsuarioGestionRepositoryJdbc {
                  ORDER BY e.codigo_interno
                 """, p, (rs, n) -> new EquipoCarga(rs.getString(1), rs.getString(2)));
 
-        return new CargaDetallada(expedientes, plazos, tareas, clientes, equipos, candidatos(estudioId, id));
+        return new CargaDetallada(expedientes, plazos, tareas, actuaciones, clientes, equipos,
+                candidatos(estudioId, id));
     }
 
     /** Personal activo del estudio que puede recibir trabajo, sin contar al que se va. */
@@ -285,6 +299,37 @@ public class UsuarioGestionRepositoryJdbc {
                   FROM tareas t JOIN expedientes e ON e.id = t.expediente_id
                  WHERE t.usuario_responsable_id = :id AND e.estudio_id = :estudioId AND """ + TAREA_ABIERTA,
                 Map.of("id", id, "estudioId", estudioId), (rs, n) -> new long[] {rs.getLong(1), rs.getLong(2)});
+    }
+
+    /**
+     * Actuaciones pendientes o en tramite a su nombre: [id, expediente_id,
+     * responsable actual del expediente]. Igual que los plazos, siguen a su
+     * expediente. Las COMPLETADO y CANCELADO son historia y se quedan.
+     */
+    public List<long[]> actuacionesAbiertas(Long id, Integer estudioId) {
+        return jdbc.query("""
+                SELECT ac.id, ac.expediente_id, e.abogado_responsable_id
+                  FROM actuaciones ac JOIN expedientes e ON e.id = ac.expediente_id
+                 WHERE ac.usuario_responsable_id = :id AND ac.activo = 1
+                   AND ac.estado IN ('PENDIENTE','EN_TRAMITE') AND e.estudio_id = :estudioId
+                """, Map.of("id", id, "estudioId", estudioId),
+                (rs, n) -> new long[] {rs.getLong(1), rs.getLong(2), rs.getLong(3)});
+    }
+
+    /**
+     * Cambia el responsable de la actuacion y le lleva sus alertas todavia
+     * PROGRAMADA (las que V15 permitio colgar de una actuacion, no de un plazo).
+     *
+     * @return cuantas alertas se movieron.
+     */
+    public int moverActuacion(Long actuacionId, Long destinoId, Long origenId) {
+        jdbc.update("UPDATE actuaciones SET usuario_responsable_id = :destino WHERE id = :id",
+                Map.of("destino", destinoId, "id", actuacionId));
+        return jdbc.update("""
+                UPDATE alertas SET usuario_destino_id = :destino
+                 WHERE actuacion_id = :id AND plazo_id IS NULL
+                   AND estado = 'PROGRAMADA' AND usuario_destino_id = :origen
+                """, Map.of("destino", destinoId, "id", actuacionId, "origen", origenId));
     }
 
     public void moverTarea(Long tareaId, Long destinoId) {

@@ -191,8 +191,10 @@ public class UsuarioService {
      *    cambio quede en la linea de tiempo y el equipo quede coherente.
      * 2. Plazos: siguen al responsable de su expediente, que tras el paso 1 ya
      *    es el nuevo. Se llevan sus alertas todavia programadas.
-     * 3. Tareas y clientes: a su destino.
-     * 4. Apoyo en otros equipos: se retira (no se traspasa: el equipo lo decide
+     * 3. Actuaciones abiertas: igual que los plazos, siguen a su expediente,
+     *    con las alertas que cuelgan de ellas.
+     * 4. Tareas y clientes: a su destino.
+     * 5. Apoyo en otros equipos: se retira (no se traspasa: el equipo lo decide
      *    el responsable de cada expediente).
      *
      * Despues de esto la carga que bloquea la baja queda en cero.
@@ -240,7 +242,24 @@ public class UsuarioService {
             plazos++;
         }
 
-        // 3. Tareas y clientes
+        // 3. Actuaciones abiertas: misma regla que los plazos
+        int actuaciones = 0;
+        for (long[] actuacion : repository.actuacionesAbiertas(origenId, estudioId)) {
+            long actuacionId = actuacion[0];
+            long expedienteId = actuacion[1];
+            long responsableExpediente = actuacion[2];
+            Long destino = responsableExpediente != origenId ? responsableExpediente : expedientesA;
+            if (destino == null) {
+                throw new ParametroInvalidoException("Hay actuaciones en expedientes que siguen a nombre de "
+                        + origen + ": indica a quien pasan sus expedientes");
+            }
+            alertas += repository.moverActuacion(actuacionId, destino, origenId);
+            repository.auditar(estudioId, autorId, "actuaciones", actuacionId, expedienteId,
+                    "Actuacion reasignada de " + origen + " a " + repository.nombreDe(destino) + ".");
+            actuaciones++;
+        }
+
+        // 4. Tareas y clientes
         for (long[] tarea : tareas) {
             repository.moverTarea(tarea[0], tareasA);
             repository.auditar(estudioId, autorId, "tareas", tarea[0], tarea[1],
@@ -252,17 +271,18 @@ public class UsuarioService {
                     "Abogado responsable cambiado de " + origen + " a " + repository.nombreDe(clientesA) + ".");
         }
 
-        // 4. Apoyo en otros equipos
+        // 5. Apoyo en otros equipos
         int equipos = 0;
         for (Long expedienteId : repository.expedientesComoApoyo(origenId, estudioId)) {
             equipos += expedienteRepository.retirarDelEquipo(estudioId, expedienteId, origenId, autorId);
         }
 
         ResultadoReasignacion resultado = new ResultadoReasignacion(
-                expedientes.size(), plazos, alertas, tareas.size(), clientes.size(), equipos);
+                expedientes.size(), plazos, alertas, tareas.size(), actuaciones, clientes.size(), equipos);
         repository.auditar(estudioId, autorId, "usuarios", origenId, null,
                 "Reasignacion del trabajo de " + origen + ": " + resultado.expedientes() + " expediente(s), "
-                        + plazos + " plazo(s), " + tareas.size() + " tarea(s), " + clientes.size()
+                        + plazos + " plazo(s), " + tareas.size() + " tarea(s), " + actuaciones
+                        + " actuacion(es), " + clientes.size()
                         + " cliente(s); retirado de " + equipos + " equipo(s).");
         return resultado;
     }
@@ -349,6 +369,7 @@ public class UsuarioService {
         if (c.expedientes() > 0) texto.append(c.expedientes()).append(" expediente(s), ");
         if (c.plazosAbiertos() > 0) texto.append(c.plazosAbiertos()).append(" plazo(s) abierto(s), ");
         if (c.tareasAbiertas() > 0) texto.append(c.tareasAbiertas()).append(" tarea(s) abierta(s), ");
+        if (c.actuacionesAbiertas() > 0) texto.append(c.actuacionesAbiertas()).append(" actuacion(es) abierta(s), ");
         if (c.clientes() > 0) texto.append(c.clientes()).append(" cliente(s), ");
         if (c.equiposApoyo() > 0) texto.append("apoyo en ").append(c.equiposApoyo()).append(" equipo(s), ");
         return texto.substring(0, texto.length() - 2);

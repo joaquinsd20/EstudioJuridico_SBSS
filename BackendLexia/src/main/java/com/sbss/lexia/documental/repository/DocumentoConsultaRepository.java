@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -83,12 +84,15 @@ public class DocumentoConsultaRepository {
      * cerrado a proposito.
      */
     private String filtroVisibilidad(Map<String, Object> p) {
-        p.put("estudioId", SesionActual.estudioId());
-        StringBuilder f = new StringBuilder(" AND e.estudio_id = :estudioId ");
+        // Estudio y asignacion salen de la regla comun (RF-02): antes esto solo
+        // acotaba por estudio, asi que cualquiera del estudio veia los documentos
+        // de un expediente confidencial que no tenia asignado.
+        StringBuilder f = new StringBuilder(VisibilidadExpedientes.sql("e"));
+        VisibilidadExpedientes.parametros(p);
         if (SesionActual.esPortalCliente()) {
-            p.put("clienteId", SesionActual.clienteId());
-            f.append(" AND e.cliente_id = :clienteId ")
-             .append(" AND d.es_confidencial = 0 ")
+            // Lo que sigue es propio del documento, no del expediente: el cliente
+            // no ve lo confidencial ni lo que todavia se esta redactando.
+            f.append(" AND d.es_confidencial = 0 ")
              .append(" AND d.estado NOT IN ('BORRADOR', 'EN_REVISION', 'OBSERVADO') ");
         }
         return f.toString();
@@ -278,14 +282,10 @@ public class DocumentoConsultaRepository {
      * reciben el expedienteId del cliente HTTP, asi que sin esto bastaria
      * probar numeros para leer las actuaciones y tareas de otro estudio.
      */
+    /** Misma regla comun, para las consultas que reciben un expedienteId del cliente. */
     private String expedienteVisible(Map<String, Object> p) {
-        p.put("estudioId", SesionActual.estudioId());
-        String f = " AND e.estudio_id = :estudioId ";
-        if (SesionActual.esPortalCliente()) {
-            p.put("clienteId", SesionActual.clienteId());
-            f += " AND e.cliente_id = :clienteId ";
-        }
-        return f;
+        VisibilidadExpedientes.parametros(p);
+        return VisibilidadExpedientes.sql("e");
     }
 
     public List<RelacionOpcion> actuaciones(Long expedienteId) {

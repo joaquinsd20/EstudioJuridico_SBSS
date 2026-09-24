@@ -10,6 +10,7 @@ import com.sbss.lexia.expedientes.repository.ExpedienteRepositoryJdbc;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -71,7 +72,8 @@ public class ExpedienteService {
     }
 
     private boolean puedeEditar() {
-        return tieneAutoridad("EXPEDIENTE_CREAR") || tieneAutoridad("EXPEDIENTE_EDITAR");
+        return SesionActual.tieneAutoridad("EXPEDIENTE_CREAR")
+                || SesionActual.tieneAutoridad("EXPEDIENTE_EDITAR");
     }
 
     @Transactional
@@ -119,16 +121,12 @@ public class ExpedienteService {
         }
     }
 
+    // Misma regla que usan agenda, actuaciones y documental.
     private boolean verTodos() {
-        return tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
+        return VisibilidadExpedientes.verTodos();
     }
 
     private boolean verConfidenciales() {
-        return tieneAutoridad("EXPEDIENTE_CONFIDENCIAL") || tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
-    }
-
-    private boolean tieneAutoridad(String codigo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.getAuthorities().stream().anyMatch(a -> codigo.equals(a.getAuthority()));
+        return VisibilidadExpedientes.verConfidenciales();
     }
 }

@@ -40,7 +40,7 @@ MIN=$(q "SELECT IF(VERSION() >= '8.0.16', 'SI', 'NO');")
 check "Version >= 8.0.16 (los CHECK se aplican)" "$MIN" "SI"
 
 titulo "2. Inventario del esquema"
-check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "38"
+check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "39"
 check "Roles del sistema (V12)"      "$(q "SELECT COUNT(*) FROM roles;")" "8"
 check "Permisos del sistema (V12)"   "$(q "SELECT COUNT(*) FROM permisos;")" "31"
 check "Pares rol-permiso (V12)"      "$(q "SELECT COUNT(*) FROM roles_permisos;")" "123"
