@@ -209,10 +209,10 @@ public class ActuacionRepositoryJdbc {
                 .addValue("requiere",requiereRevision).addValue("motivo",motivoRevision).addValue("actReq",actuacionRequerida)
                 .addValue("creadorId",creadorId);
         return insertar("""
-                INSERT INTO plazos(expediente_id,actuacion_origen_id,tipo_plazo_id,descripcion,fecha_notificacion,fecha_inicio_computo,
+                INSERT INTO plazos(expediente_id,actuacion_origen_id,tipo_plazo_id,descripcion,origen,fecha_notificacion,fecha_inicio_computo,
                   dias_plazo,tipo_computo,fecha_vencimiento,fecha_vencimiento_interna,usuario_responsable_id,usuario_revisor_id,
                   estado,nivel_riesgo,requiere_revision_profesional,motivo_revision,actuacion_requerida,usuario_creacion_id)
-                VALUES(:expedienteId,:actuacionId,:tipoPlazoId,:descripcion,:fechaNotif,:inicio,:dias,:tipo,:venc,:interna,
+                VALUES(:expedienteId,:actuacionId,:tipoPlazoId,:descripcion,'ACTUACION',:fechaNotif,:inicio,:dias,:tipo,:venc,:interna,
                   :responsableId,:revisorId,'CALCULADO',:riesgo,:requiere,:motivo,:actReq,:creadorId)
                 """,p);
     }
