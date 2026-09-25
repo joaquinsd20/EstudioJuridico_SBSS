@@ -6,10 +6,15 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
 
+
+    <!-- ===================================================== -->
     <!-- ENCABEZADO -->
+    <!-- ===================================================== -->
+
     <header class="facturacion-header">
 
       <div>
+
         <span class="eyebrow">
           Finanzas
         </span>
@@ -20,13 +25,16 @@
 
         <p>
           Control visual de honorarios pactados, pagos, saldos,
-          gastos y modalidades de cobro.
+          cuentas vencidas y modalidades de cobro.
         </p>
+
       </div>
+
 
       <button
         class="btn-primary-action"
         type="button"
+        (click)="abrirModalRegistro()"
       >
         + Registrar Honorario / Pago
       </button>
@@ -34,8 +42,14 @@
     </header>
 
 
+    <!-- ===================================================== -->
     <!-- KPIs -->
+    <!-- ===================================================== -->
+
     <section class="kpi-grid">
+
+
+      <!-- TOTAL HONORARIOS -->
 
       <article class="kpi-card">
 
@@ -44,7 +58,10 @@
         </span>
 
         <strong class="kpi-value text-indigo">
-          S/ 148,500.00
+          {{
+            (resumen.totalPactado || 0)
+              | currency:'PEN':'symbol':'1.2-2'
+          }}
         </strong>
 
         <small>
@@ -54,6 +71,8 @@
       </article>
 
 
+      <!-- TOTAL COBRADO -->
+
       <article class="kpi-card">
 
         <span class="kpi-label">
@@ -61,7 +80,10 @@
         </span>
 
         <strong class="kpi-value text-success">
-          S/ 98,200.00
+          {{
+            (resumen.totalCobrado || 0)
+              | currency:'PEN':'symbol':'1.2-2'
+          }}
         </strong>
 
         <small>
@@ -71,6 +93,8 @@
       </article>
 
 
+      <!-- SALDOS PENDIENTES -->
+
       <article class="kpi-card">
 
         <span class="kpi-label">
@@ -78,7 +102,10 @@
         </span>
 
         <strong class="kpi-value text-danger">
-          S/ 50,300.00
+          {{
+            (resumen.saldosPendientes || 0)
+              | currency:'PEN':'symbol':'1.2-2'
+          }}
         </strong>
 
         <small>
@@ -88,18 +115,28 @@
       </article>
 
 
+      <!-- CUENTAS VENCIDAS -->
+
       <article class="kpi-card">
 
         <span class="kpi-label">
-          Gastos Reembolsables
+          Cuentas Vencidas
         </span>
 
         <strong class="kpi-value text-warning">
-          S/ 4,850.00
+          {{
+            (resumen.totalVencido || 0)
+              | currency:'PEN':'symbol':'1.2-2'
+          }}
         </strong>
 
         <small>
-          Gastos asociados a expedientes
+          {{ resumen.cuentasVencidas || 0 }}
+          {{
+            (resumen.cuentasVencidas || 0) === 1
+              ? 'cuenta vencida'
+              : 'cuentas vencidas'
+          }}
         </small>
 
       </article>
@@ -107,12 +144,16 @@
     </section>
 
 
+    <!-- ===================================================== -->
     <!-- FILTROS -->
+    <!-- ===================================================== -->
+
     <section class="card-panel mb-4">
 
       <div class="panel-heading">
 
         <div>
+
           <span class="panel-kicker">
             Búsqueda y clasificación
           </span>
@@ -125,7 +166,9 @@
             Consulta visual de registros financieros por cliente,
             expediente, modalidad o estado.
           </p>
+
         </div>
+
 
         <span class="panel-number">
           01
@@ -136,20 +179,27 @@
 
       <div class="form-grid-3">
 
+
+        <!-- BUSCAR -->
+
         <div class="form-group">
 
           <label>
-            Buscar por Cliente / Expediente
+            Buscar por Cliente
           </label>
 
           <input
             type="text"
             class="custom-input"
-            placeholder="Nombre de cliente o código de expediente"
+            placeholder="Nombre del cliente"
+            [(ngModel)]="filtroTexto"
+            (input)="aplicarFiltros()"
           >
 
         </div>
 
+
+        <!-- MODALIDAD -->
 
         <div class="form-group">
 
@@ -157,30 +207,21 @@
             Modalidad de Cobro
           </label>
 
-          <select class="custom-select">
+          <select
+            class="custom-select"
+            [(ngModel)]="filtroModalidad"
+            (change)="aplicarFiltros()"
+          >
 
-            <option>
+            <option [ngValue]="null">
               Todas las modalidades
             </option>
 
-            <option>
-              Tarifa Fija / Global
-            </option>
-
-            <option>
-              Cuota de Litis (Éxito)
-            </option>
-
-            <option>
-              Iguala Mensual (Retainer)
-            </option>
-
-            <option>
-              Tarifa por Hora
-            </option>
-
-            <option>
-              Híbrido (Fijo + Éxito)
+            <option
+              *ngFor="let modalidad of catalogos.modalidadesCobro"
+              [ngValue]="modalidad.id"
+            >
+              {{ modalidad.nombre }}
             </option>
 
           </select>
@@ -188,28 +229,34 @@
         </div>
 
 
+        <!-- ESTADO -->
+
         <div class="form-group">
 
           <label>
             Estado del Pago
           </label>
 
-          <select class="custom-select">
+          <select
+            class="custom-select"
+            [(ngModel)]="filtroEstado"
+            (change)="aplicarFiltros()"
+          >
 
-            <option>
+            <option value="">
               Todos los estados
             </option>
 
-            <option>
-              Pagado totalmente
+            <option value="PENDIENTE">
+              Pendiente
             </option>
 
-            <option>
-              Con Saldo Pendiente
+            <option value="PARCIAL">
+              Pago Parcial
             </option>
 
-            <option>
-              Cuenta Vencida
+            <option value="PAGADO">
+              Pagado
             </option>
 
           </select>
@@ -221,24 +268,31 @@
     </section>
 
 
+    <!-- ===================================================== -->
     <!-- TABLA -->
+    <!-- ===================================================== -->
+
     <section class="card-panel">
 
       <div class="panel-heading panel-heading-row">
 
         <div>
+
           <span class="panel-kicker">
             Control financiero
           </span>
 
           <h2>
-            Registro de Cuentas por Cobrar y Gastos
+            Registro de Cuentas por Cobrar
           </h2>
 
           <p>
-            5 registros financieros encontrados
+            {{ honorarios.length }}
+            registros financieros encontrados
           </p>
+
         </div>
+
 
         <span class="panel-number">
           02
@@ -254,15 +308,39 @@
           <thead>
 
             <tr>
-              <th>Expediente</th>
-              <th>Cliente</th>
-              <th>Modalidad de Cobro</th>
-              <th>Monto Pactado</th>
-              <th>Adelantos / Pagos</th>
-              <th>Saldo Pendiente</th>
-              <th>Gastos</th>
-              <th>Estado</th>
-              <th class="text-right">Acciones</th>
+
+              <th>
+                Expediente
+              </th>
+
+              <th>
+                Cliente
+              </th>
+
+              <th>
+                Modalidad de Cobro
+              </th>
+
+              <th>
+                Monto Pactado
+              </th>
+
+              <th>
+                Adelantos / Pagos
+              </th>
+
+              <th>
+                Saldo Pendiente
+              </th>
+
+              <th>
+                Estado
+              </th>
+
+              <th class="text-right">
+                Acciones
+              </th>
+
             </tr>
 
           </thead>
@@ -270,336 +348,263 @@
 
           <tbody>
 
-            <tr>
+
+            <!-- ================================================= -->
+            <!-- REGISTROS -->
+            <!-- ================================================= -->
+
+            <tr *ngFor="let item of honorarios">
+
+
+              <!-- EXPEDIENTE -->
 
               <td>
+
                 <strong class="expediente-code">
-                  01452-2026
+
+                  {{
+                    item.expedienteNumero ||
+                    'Sin expediente'
+                  }}
+
                 </strong>
+
               </td>
 
+
+              <!-- CLIENTE -->
+
               <td>
+
                 <div class="client-cell">
+
                   <span class="client-avatar">
-                    CM
+
+                    {{
+                      item.clienteNombre
+                        ? item.clienteNombre.substring(0, 2).toUpperCase()
+                        : 'CL'
+                    }}
+
                   </span>
 
+
                   <div>
+
                     <strong>
-                      Corporación Minera del Norte S.A.C.
+                      {{ item.clienteNombre }}
                     </strong>
 
                     <small>
-                      Cliente corporativo
+                      {{
+                        item.clienteDocumento ||
+                        'Sin documento'
+                      }}
                     </small>
+
                   </div>
+
                 </div>
+
               </td>
 
+
+              <!-- MODALIDAD -->
+
               <td>
+
                 <span class="billing-type">
-                  Tarifa Fija / Global
+
+                  {{
+                    item.modalidadCobro ||
+                    'Sin modalidad'
+                  }}
+
                 </span>
+
               </td>
+
+
+              <!-- MONTO PACTADO -->
 
               <td class="amount-cell">
-                S/ 45,000.00
+
+                {{
+                  (item.montoTotal || 0)
+                    | currency:'PEN':'symbol':'1.2-2'
+                }}
+
               </td>
+
+
+              <!-- ADELANTOS / PAGOS -->
 
               <td class="amount-paid">
-                S/ 30,000.00
+
+                {{
+                  (item.montoPagado || 0)
+                    | currency:'PEN':'symbol':'1.2-2'
+                }}
+
               </td>
 
-              <td class="amount-pending">
-                S/ 15,000.00
+
+              <!-- SALDO PENDIENTE -->
+
+              <td
+                [ngClass]="
+                  item.montoPendiente > 0
+                    ? 'amount-pending'
+                    : 'amount-zero'
+                "
+              >
+
+                {{
+                  (item.montoPendiente || 0)
+                    | currency:'PEN':'symbol':'1.2-2'
+                }}
+
               </td>
+
+
+              <!-- ESTADO -->
 
               <td>
-                S/ 1,200.00
+
+                <div class="status-group">
+
+                  <span
+                    class="badge"
+                    [ngClass]="{
+                      'status-paid':
+                        item.estadoCodigo === 'PAGADO',
+
+                      'status-partial':
+                        item.estadoCodigo === 'PARCIAL',
+
+                      'status-pending':
+                        item.estadoCodigo === 'PENDIENTE'
+                    }"
+                  >
+
+                    {{
+                      item.estadoNombre ||
+                      item.estadoCodigo ||
+                      'Pendiente'
+                    }}
+
+                  </span>
+
+
+                  <span
+                    *ngIf="esHonorarioVencido(item)"
+                    class="badge status-overdue"
+                  >
+                    Vencido
+                  </span>
+
+                </div>
+
               </td>
 
-              <td>
-                <span class="badge badge-pending">
-                  Con Saldo Pendiente
-                </span>
-              </td>
+
+              <!-- ================================================= -->
+              <!-- ACCIONES -->
+              <!-- ================================================= -->
 
               <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Ver Detalle
+
+                <!-- EDITAR: SOLO PENDIENTE O PARCIAL -->
+
+                <button
+                  *ngIf="
+                    item.estadoCodigo === 'PENDIENTE' ||
+                    item.estadoCodigo === 'PARCIAL'
+                  "
+                  class="btn-icon edit"
+                  type="button"
+                  (click)="abrirModalEditar(item)"
+                  title="Editar honorario"
+                >
+                  Editar
                 </button>
 
-                <button class="btn-icon payment" type="button">
-                  Añadir Pago
+
+                <!-- VER DETALLE: SIEMPRE DISPONIBLE -->
+
+                <button
+                  class="btn-icon detail"
+                  type="button"
+                  (click)="verDetalle(item)"
+                  title="Ver detalle del honorario"
+                >
+                  Ver detalle
                 </button>
+
+
+                <!-- AÑADIR PAGO / PAGADO -->
+
+                <button
+                  class="btn-icon payment"
+                  type="button"
+                  (click)="abrirModalPago(item)"
+                  [disabled]="item.estadoCodigo === 'PAGADO'"
+                  [title]="
+                    item.estadoCodigo === 'PAGADO'
+                      ? 'Este honorario ya se encuentra pagado'
+                      : 'Registrar pago'
+                  "
+                >
+
+                  {{
+                    item.estadoCodigo === 'PAGADO'
+                      ? 'Pagado'
+                      : 'Añadir Pago'
+                  }}
+
+                </button>
+
               </td>
 
             </tr>
 
 
-            <tr>
+            <!-- ================================================= -->
+            <!-- SIN DATOS -->
+            <!-- ================================================= -->
 
-              <td>
-                <strong class="expediente-code">
-                  00891-2026
-                </strong>
-              </td>
+            <tr
+              *ngIf="
+                honorarios.length === 0
+                && !loading
+              "
+            >
 
-              <td>
-                <div class="client-cell">
-                  <span class="client-avatar">
-                    IS
-                  </span>
+              <td
+                colspan="8"
+                class="text-center py-4"
+              >
 
-                  <div>
-                    <strong>
-                      Inmobiliaria San José S.A.
-                    </strong>
+                No se encontraron honorarios registrados.
 
-                    <small>
-                      Cliente corporativo
-                    </small>
-                  </div>
-                </div>
-              </td>
-
-              <td>
-                <span class="billing-type">
-                  Iguala Mensual (Retainer)
-                </span>
-              </td>
-
-              <td class="amount-cell">
-                S/ 12,000.00
-              </td>
-
-              <td class="amount-paid">
-                S/ 12,000.00
-              </td>
-
-              <td class="amount-zero">
-                S/ 0.00
-              </td>
-
-              <td>
-                S/ 350.00
-              </td>
-
-              <td>
-                <span class="badge badge-success">
-                  Pagado totalmente
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Ver Detalle
-                </button>
-
-                <button class="btn-icon payment" type="button">
-                  Añadir Pago
-                </button>
               </td>
 
             </tr>
 
 
-            <tr>
+            <!-- ================================================= -->
+            <!-- CARGANDO -->
+            <!-- ================================================= -->
 
-              <td>
-                <strong class="expediente-code">
-                  02105-2025
-                </strong>
-              </td>
+            <tr *ngIf="loading">
 
-              <td>
-                <div class="client-cell">
-                  <span class="client-avatar">
-                    CB
-                  </span>
+              <td
+                colspan="8"
+                class="text-center py-4"
+              >
 
-                  <div>
-                    <strong>
-                      Carlos Eduardo Benítez
-                    </strong>
+                Cargando datos...
 
-                    <small>
-                      Cliente particular
-                    </small>
-                  </div>
-                </div>
-              </td>
-
-              <td>
-                <span class="billing-type">
-                  Híbrido (Fijo + Éxito)
-                </span>
-              </td>
-
-              <td class="amount-cell">
-                S/ 25,000.00
-              </td>
-
-              <td class="amount-paid">
-                S/ 10,000.00
-              </td>
-
-              <td class="amount-pending">
-                S/ 15,000.00
-              </td>
-
-              <td>
-                S/ 2,100.00
-              </td>
-
-              <td>
-                <span class="badge badge-danger">
-                  Cuenta Vencida
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Ver Detalle
-                </button>
-
-                <button class="btn-icon payment" type="button">
-                  Añadir Pago
-                </button>
-              </td>
-
-            </tr>
-
-
-            <tr>
-
-              <td>
-                <strong class="expediente-code">
-                  00312-2026
-                </strong>
-              </td>
-
-              <td>
-                <div class="client-cell">
-                  <span class="client-avatar">
-                    DL
-                  </span>
-
-                  <div>
-                    <strong>
-                      Distribuidora Logística del Perú
-                    </strong>
-
-                    <small>
-                      Cliente corporativo
-                    </small>
-                  </div>
-                </div>
-              </td>
-
-              <td>
-                <span class="billing-type">
-                  Cuota de Litis (Éxito)
-                </span>
-              </td>
-
-              <td class="amount-cell">
-                S/ 38,000.00
-              </td>
-
-              <td class="amount-paid">
-                S/ 25,000.00
-              </td>
-
-              <td class="amount-pending">
-                S/ 13,000.00
-              </td>
-
-              <td>
-                S/ 800.00
-              </td>
-
-              <td>
-                <span class="badge badge-pending">
-                  Con Saldo Pendiente
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Ver Detalle
-                </button>
-
-                <button class="btn-icon payment" type="button">
-                  Añadir Pago
-                </button>
-              </td>
-
-            </tr>
-
-
-            <tr>
-
-              <td>
-                <strong class="expediente-code">
-                  01780-2026
-                </strong>
-              </td>
-
-              <td>
-                <div class="client-cell">
-                  <span class="client-avatar">
-                    MR
-                  </span>
-
-                  <div>
-                    <strong>
-                      María Elena Rostro
-                    </strong>
-
-                    <small>
-                      Cliente particular
-                    </small>
-                  </div>
-                </div>
-              </td>
-
-              <td>
-                <span class="billing-type">
-                  Tarifa por Hora
-                </span>
-              </td>
-
-              <td class="amount-cell">
-                S/ 28,500.00
-              </td>
-
-              <td class="amount-paid">
-                S/ 21,200.00
-              </td>
-
-              <td class="amount-pending">
-                S/ 7,300.00
-              </td>
-
-              <td>
-                S/ 400.00
-              </td>
-
-              <td>
-                <span class="badge badge-pending">
-                  Con Saldo Pendiente
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Ver Detalle
-                </button>
-
-                <button class="btn-icon payment" type="button">
-                  Añadir Pago
-                </button>
               </td>
 
             </tr>
@@ -613,5 +618,1134 @@
     </section>
 
   </main>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- MODAL: REGISTRAR HONORARIO / PAGO -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-backdrop"
+  *ngIf="mostrarModal"
+>
+
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+
+
+      <!-- ===================================================== -->
+      <!-- CABECERA -->
+      <!-- ===================================================== -->
+
+      <div class="modal-header">
+
+        <h3>
+
+          {{
+            modoFormulario === 'EDICION'
+              ? 'Editar Honorario'
+              : modoFormulario === 'PAGO'
+                ? 'Registrar Pago'
+                : 'Registrar Honorario'
+          }}
+
+        </h3>
+
+
+        <button
+          type="button"
+          class="btn-close"
+          (click)="cerrarModal()"
+          [disabled]="guardando"
+        >
+          &times;
+        </button>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- FORMULARIO -->
+      <!-- ===================================================== -->
+
+      <form
+        #formRegistro="ngForm"
+        (ngSubmit)="guardarMovimiento()"
+      >
+
+        <div class="modal-body">
+
+
+          <!-- ================================================= -->
+          <!-- CLIENTE -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+              Cliente (*)
+            </label>
+
+            <select
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.clienteId"
+              name="clienteId"
+              required
+              (change)="onClienteChange()"
+              [disabled]="
+                guardando ||
+                modoFormulario === 'PAGO' ||
+                (
+                  modoFormulario === 'EDICION' &&
+                  (honorarioEditando?.montoPagado || 0) > 0
+                )
+              "
+            >
+
+              <option
+                [ngValue]="null"
+                disabled
+              >
+
+                {{
+                  cargandoClientes
+                    ? 'Cargando clientes...'
+                    : 'Seleccionar cliente'
+                }}
+
+              </option>
+
+
+              <option
+                *ngFor="let cliente of catalogos.clientes"
+                [ngValue]="cliente.id"
+              >
+
+                {{ cliente.nombre }}
+
+              </option>
+
+            </select>
+
+
+            <small
+              *ngIf="
+                !cargandoClientes &&
+                catalogos.clientes.length === 0
+              "
+            >
+              No hay clientes disponibles.
+            </small>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- EXPEDIENTE -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+              Expediente (*)
+            </label>
+
+            <select
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.expedienteId"
+              name="expedienteId"
+              required
+              [disabled]="
+                guardando ||
+                modoFormulario === 'PAGO' ||
+                (
+                  modoFormulario === 'EDICION' &&
+                  (honorarioEditando?.montoPagado || 0) > 0
+                )
+              "
+            >
+
+              <option
+                [ngValue]="null"
+                disabled
+              >
+                Seleccionar expediente
+              </option>
+
+
+              <option
+                *ngFor="
+                  let expediente
+                  of obtenerExpedientesDisponibles()
+                "
+                [ngValue]="expediente.id"
+              >
+
+                {{ expediente.nombre }}
+
+                <ng-container *ngIf="expediente.detalle">
+                  · {{ expediente.detalle }}
+                </ng-container>
+
+              </option>
+
+            </select>
+
+
+            <small
+              *ngIf="
+                nuevoMovimiento.clienteId !== null &&
+                obtenerExpedientesDisponibles().length === 0
+              "
+            >
+              No hay expedientes disponibles para el cliente seleccionado.
+            </small>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- TIPO DE OPERACIÓN -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+              Tipo de Operación (*)
+            </label>
+
+
+            <!-- NUEVO HONORARIO -->
+
+            <select
+              *ngIf="modoFormulario === 'NUEVO'"
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.tipoOperacion"
+              name="tipoOperacion"
+              required
+            >
+
+              <option value="Honorario Pactado">
+                Honorario Pactado
+              </option>
+
+            </select>
+
+
+            <!-- PAGO DE HONORARIO EXISTENTE -->
+
+            <select
+              *ngIf="modoFormulario === 'PAGO'"
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.tipoOperacion"
+              name="tipoOperacion"
+              required
+              disabled
+            >
+
+              <option value="Abono / Pago de Cuota">
+                Abono / Pago de Cuota
+              </option>
+
+            </select>
+
+
+            <!-- EDICIÓN DE HONORARIO -->
+
+            <select
+              *ngIf="modoFormulario === 'EDICION'"
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.tipoOperacion"
+              name="tipoOperacion"
+              required
+              disabled
+            >
+
+              <option value="Honorario Pactado">
+                Honorario Pactado
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- MODALIDAD / MONTO / FECHA -->
+          <!-- ================================================= -->
+
+          <div class="form-grid-3">
+
+
+            <!-- MODALIDAD -->
+
+            <div class="form-group mb-3">
+
+              <label>
+                Modalidad de Cobro (*)
+              </label>
+
+              <select
+                class="custom-select"
+                [(ngModel)]="nuevoMovimiento.modalidad"
+                name="modalidad"
+                required
+                [disabled]="
+                  guardando ||
+                  modoFormulario === 'PAGO'
+                "
+              >
+
+                <option
+                  *ngFor="
+                    let modalidad
+                    of catalogos.modalidadesCobro
+                  "
+                  [ngValue]="modalidad.nombre"
+                >
+                  {{ modalidad.nombre }}
+                </option>
+
+              </select>
+
+            </div>
+
+
+            <!-- MONTO -->
+
+            <div class="form-group mb-3">
+
+              <label>
+
+                {{
+                  modoFormulario === 'PAGO'
+                    ? 'Monto del Pago (S/) (*)'
+                    : 'Monto Pactado (S/) (*)'
+                }}
+
+              </label>
+
+              <input
+                type="number"
+                min="0.01"
+                step="0.01"
+                class="custom-input"
+                placeholder="0.00"
+                [(ngModel)]="nuevoMovimiento.monto"
+                name="monto"
+                required
+                [disabled]="
+                  guardando ||
+                  (
+                    modoFormulario === 'EDICION' &&
+                    (honorarioEditando?.montoPagado || 0) > 0
+                  )
+                "
+              >
+
+            </div>
+
+
+            <!-- FECHA DE REGISTRO / PAGO -->
+
+            <div class="form-group mb-3">
+
+              <label>
+
+                {{
+                  modoFormulario === 'PAGO'
+                    ? 'Fecha del Pago (*)'
+                    : 'Fecha de Registro (*)'
+                }}
+
+              </label>
+
+              <input
+                type="date"
+                class="custom-input"
+                [(ngModel)]="nuevoMovimiento.fecha"
+                name="fecha"
+                required
+                [disabled]="guardando"
+              >
+
+            </div>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- FECHA DE VENCIMIENTO -->
+          <!-- ================================================= -->
+
+          <div
+            *ngIf="modoFormulario !== 'PAGO'"
+            class="form-group mb-3"
+          >
+
+            <label>
+              Fecha de Vencimiento (*)
+            </label>
+
+            <input
+              type="date"
+              class="custom-input"
+              [(ngModel)]="nuevoMovimiento.fechaVencimiento"
+              name="fechaVencimiento"
+              required
+              [disabled]="guardando"
+            >
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- ETAPA PROCESAL -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+              Etapa Procesal / Servicio
+            </label>
+
+            <select
+              class="custom-select"
+              [(ngModel)]="nuevoMovimiento.etapaProcesal"
+              name="etapaProcesal"
+              [disabled]="
+                guardando ||
+                modoFormulario === 'PAGO'
+              "
+            >
+
+              <option value="Sin etapa específica">
+                Sin etapa específica
+              </option>
+
+              <option value="Etapa Postulatoria">
+                Etapa Postulatoria
+              </option>
+
+              <option value="Etapa Probatoria">
+                Etapa Probatoria
+              </option>
+
+              <option value="Etapa Decisoria / Sentencia">
+                Etapa Decisoria / Sentencia
+              </option>
+
+              <option value="Ejecución">
+                Ejecución
+              </option>
+
+            </select>
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- CONCEPTO -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+
+              {{
+                modoFormulario === 'PAGO'
+                  ? 'N° de Cuota / Concepto del Pago'
+                  : 'Concepto del Honorario'
+              }}
+
+            </label>
+
+            <input
+              type="text"
+              class="custom-input"
+              [placeholder]="
+                honorarioSeleccionadoUuid
+                  ? 'Ej. Cuota 2 de 4'
+                  : 'Ej. Honorarios por patrocinio legal'
+              "
+              [(ngModel)]="nuevoMovimiento.concepto"
+              name="concepto"
+            >
+
+          </div>
+
+
+          <!-- ================================================= -->
+          <!-- OBSERVACIONES -->
+          <!-- ================================================= -->
+
+          <div class="form-group mb-3">
+
+            <label>
+              Observaciones / Sustento
+            </label>
+
+            <textarea
+              rows="3"
+              class="custom-input"
+              [placeholder]="
+                honorarioSeleccionadoUuid
+                  ? 'Número de operación bancaria, comprobante o notas del pago...'
+                  : 'Detalles adicionales del honorario...'
+              "
+              [(ngModel)]="nuevoMovimiento.observaciones"
+              name="observaciones"
+            ></textarea>
+
+          </div>
+
+        </div>
+
+
+        <!-- =================================================== -->
+        <!-- FOOTER -->
+        <!-- =================================================== -->
+
+        <div class="modal-footer">
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cerrarModal()"
+            [disabled]="guardando"
+          >
+            Cancelar
+          </button>
+
+
+          <button
+            type="submit"
+            class="btn-primary-action"
+            [disabled]="
+              guardando ||
+              formRegistro.invalid
+            "
+          >
+
+            <ng-container *ngIf="guardando">
+              Guardando...
+            </ng-container>
+
+
+            <ng-container *ngIf="!guardando">
+
+              {{
+                modoFormulario === 'EDICION'
+                  ? 'Guardar Cambios'
+                  : modoFormulario === 'PAGO'
+                    ? 'Registrar Pago'
+                    : 'Registrar Honorario'
+              }}
+
+            </ng-container>
+
+          </button>
+
+        </div>
+
+      </form>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- ========================================================= -->
+<!-- NUEVO MODAL: DETALLE DEL HONORARIO -->
+<!-- ========================================================= -->
+
+<div
+  class="modal-backdrop"
+  *ngIf="mostrarModalDetalle"
+>
+
+  <div class="modal-dialog modal-dialog-detail">
+
+    <div class="modal-content">
+
+
+      <!-- ===================================================== -->
+      <!-- CABECERA DEL DETALLE -->
+      <!-- ===================================================== -->
+
+      <div class="modal-header">
+
+        <div>
+
+          <span class="panel-kicker">
+            Información financiera
+          </span>
+
+          <h3>
+            Detalle del Honorario
+          </h3>
+
+        </div>
+
+
+        <button
+          type="button"
+          class="btn-close"
+          (click)="cerrarDetalle()"
+          [disabled]="descargandoComprobante"
+          title="Cerrar detalle"
+        >
+          &times;
+        </button>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- CARGANDO DETALLE -->
+      <!-- ===================================================== -->
+
+      <div
+        class="modal-body"
+        *ngIf="cargandoDetalle"
+      >
+
+        <div class="detail-loading">
+          Cargando detalle del honorario...
+        </div>
+
+      </div>
+
+
+      <!-- ===================================================== -->
+      <!-- INFORMACIÓN DEL DETALLE -->
+      <!-- ===================================================== -->
+
+      <ng-container
+        *ngIf="
+          !cargandoDetalle &&
+          detalleHonorario as detalle
+        "
+      >
+
+        <div class="modal-body detail-modal-body">
+
+
+          <!-- ================================================= -->
+          <!-- IDENTIFICACIÓN -->
+          <!-- ================================================= -->
+
+          <section class="detail-section">
+
+            <div class="detail-section-header">
+
+              <div>
+
+                <span class="panel-kicker">
+                  Identificación
+                </span>
+
+                <h4>
+                  Información del honorario
+                </h4>
+
+              </div>
+
+
+              <div class="status-group">
+
+                <span
+                  class="badge"
+                  [ngClass]="{
+                    'status-paid':
+                      detalle.estadoCodigo === 'PAGADO',
+
+                    'status-partial':
+                      detalle.estadoCodigo === 'PARCIAL',
+
+                    'status-pending':
+                      detalle.estadoCodigo === 'PENDIENTE'
+                  }"
+                >
+                  {{
+                    detalle.estadoNombre ||
+                    detalle.estadoCodigo ||
+                    'Pendiente'
+                  }}
+                </span>
+
+
+                <span
+                  *ngIf="detalle.vencido"
+                  class="badge status-overdue"
+                >
+                  Vencido
+                </span>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-grid">
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Cliente
+                </span>
+
+                <strong>
+                  {{
+                    detalle.clienteNombre ||
+                    'Sin cliente'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Documento
+                </span>
+
+                <strong>
+                  {{
+                    detalle.clienteDocumento ||
+                    'Sin documento'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Expediente
+                </span>
+
+                <strong>
+                  {{
+                    detalle.expedienteNumero ||
+                    'Sin expediente'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Modalidad de Cobro
+                </span>
+
+                <strong>
+                  {{
+                    detalle.modalidadCobro ||
+                    'Sin modalidad'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item detail-item-wide">
+
+                <span class="detail-label">
+                  Concepto
+                </span>
+
+                <strong>
+                  {{
+                    detalle.concepto ||
+                    'Honorarios profesionales'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Etapa Procesal / Servicio
+                </span>
+
+                <strong>
+                  {{
+                    detalle.etapaProcesal ||
+                    'Sin etapa específica'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Fecha de Registro
+                </span>
+
+                <strong>
+                  {{
+                    detalle.fechaEmision
+                      ? (detalle.fechaEmision | date:'dd/MM/yyyy')
+                      : 'Sin fecha'
+                  }}
+                </strong>
+
+              </div>
+
+
+              <div class="detail-item">
+
+                <span class="detail-label">
+                  Fecha de Vencimiento
+                </span>
+
+                <strong
+                  [class.detail-overdue-text]="detalle.vencido"
+                >
+                  {{
+                    detalle.fechaVencimiento
+                      ? (detalle.fechaVencimiento | date:'dd/MM/yyyy')
+                      : 'Sin fecha'
+                  }}
+                </strong>
+
+              </div>
+
+            </div>
+
+          </section>
+
+
+          <!-- ================================================= -->
+          <!-- RESUMEN FINANCIERO -->
+          <!-- ================================================= -->
+
+          <section class="detail-section">
+
+            <div class="detail-section-header">
+
+              <div>
+
+                <span class="panel-kicker">
+                  Resumen
+                </span>
+
+                <h4>
+                  Estado financiero
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-financial-grid">
+
+
+              <article class="detail-financial-card">
+
+                <span>
+                  Monto Pactado
+                </span>
+
+                <strong>
+                  {{
+                    (detalle.montoPactado || 0)
+                      | currency:'PEN':'symbol':'1.2-2'
+                  }}
+                </strong>
+
+              </article>
+
+
+              <article class="detail-financial-card">
+
+                <span>
+                  Total Pagado
+                </span>
+
+                <strong class="text-success">
+                  {{
+                    (detalle.montoPagado || 0)
+                      | currency:'PEN':'symbol':'1.2-2'
+                  }}
+                </strong>
+
+              </article>
+
+
+              <article class="detail-financial-card">
+
+                <span>
+                  Saldo Pendiente
+                </span>
+
+                <strong
+                  [ngClass]="
+                    detalle.saldoPendiente > 0
+                      ? 'text-danger'
+                      : 'text-success'
+                  "
+                >
+                  {{
+                    (detalle.saldoPendiente || 0)
+                      | currency:'PEN':'symbol':'1.2-2'
+                  }}
+                </strong>
+
+              </article>
+
+            </div>
+
+          </section>
+
+
+          <!-- ================================================= -->
+          <!-- OBSERVACIONES -->
+          <!-- ================================================= -->
+
+          <section
+            class="detail-section"
+            *ngIf="detalle.observaciones"
+          >
+
+            <div class="detail-section-header">
+
+              <div>
+
+                <span class="panel-kicker">
+                  Información adicional
+                </span>
+
+                <h4>
+                  Observaciones
+                </h4>
+
+              </div>
+
+            </div>
+
+
+            <div class="detail-observations">
+
+              {{
+                detalle.observaciones
+              }}
+
+            </div>
+
+          </section>
+
+
+          <!-- ================================================= -->
+          <!-- HISTORIAL DE PAGOS -->
+          <!-- ================================================= -->
+
+          <section class="detail-section">
+
+            <div class="detail-section-header">
+
+              <div>
+
+                <span class="panel-kicker">
+                  Movimientos
+                </span>
+
+                <h4>
+                  Historial de Pagos
+                </h4>
+
+              </div>
+
+
+              <span class="detail-payment-count">
+
+                {{ detalle.pagos.length }}
+
+                {{
+                  detalle.pagos.length === 1
+                    ? 'pago'
+                    : 'pagos'
+                }}
+
+              </span>
+
+            </div>
+
+
+            <!-- EXISTEN PAGOS -->
+
+            <div
+              class="detail-payments-table-wrapper"
+              *ngIf="
+                detalle.pagos &&
+                detalle.pagos.length > 0
+              "
+            >
+
+              <table class="detail-payments-table">
+
+                <thead>
+
+                  <tr>
+
+                    <th>
+                      Fecha
+                    </th>
+
+                    <th>
+                      Concepto
+                    </th>
+
+                    <th>
+                      Observaciones
+                    </th>
+
+                    <th class="text-right">
+                      Monto
+                    </th>
+
+                  </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                  <tr
+                    *ngFor="
+                      let pago
+                      of detalle.pagos
+                    "
+                  >
+
+                    <td>
+
+                      {{
+                        pago.fecha
+                          ? (pago.fecha | date:'dd/MM/yyyy')
+                          : 'Sin fecha'
+                      }}
+
+                    </td>
+
+
+                    <td>
+
+                      {{
+                        pago.concepto ||
+                        'Pago de honorario'
+                      }}
+
+                    </td>
+
+
+                    <td>
+
+                      {{
+                        pago.observaciones ||
+                        'Sin observaciones'
+                      }}
+
+                    </td>
+
+
+                    <td class="amount-paid text-right">
+
+                      {{
+                        (pago.monto || 0)
+                          | currency:'PEN':'symbol':'1.2-2'
+                      }}
+
+                    </td>
+
+                  </tr>
+
+                </tbody>
+
+              </table>
+
+            </div>
+
+
+            <!-- SIN PAGOS -->
+
+            <div
+              class="detail-empty-payments"
+              *ngIf="
+                !detalle.pagos ||
+                detalle.pagos.length === 0
+              "
+            >
+
+              No se han registrado pagos para este honorario.
+
+            </div>
+
+          </section>
+
+        </div>
+
+
+        <!-- =================================================== -->
+        <!-- FOOTER DEL DETALLE -->
+        <!-- =================================================== -->
+
+        <div class="modal-footer detail-modal-footer">
+
+
+          <button
+            type="button"
+            class="btn-secondary"
+            (click)="cerrarDetalle()"
+            [disabled]="descargandoComprobante"
+          >
+            Cerrar
+          </button>
+
+
+          <!--
+            El botón únicamente existe cuando el backend indica
+            que el honorario está completamente pagado.
+          -->
+
+          <button
+            *ngIf="detalle.puedeEmitirComprobante"
+            type="button"
+            class="btn-primary-action"
+            (click)="emitirComprobante()"
+            [disabled]="descargandoComprobante"
+          >
+
+            {{
+              descargandoComprobante
+                ? 'Generando comprobante...'
+                : 'Emitir comprobante'
+            }}
+
+          </button>
+
+        </div>
+
+      </ng-container>
+
+    </div>
+
+  </div>
 
 </div>
