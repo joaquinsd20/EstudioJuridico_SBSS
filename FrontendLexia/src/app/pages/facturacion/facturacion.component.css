@@ -629,6 +629,24 @@
   color: #15803d;
 }
 
+/* NUEVO: BOTÓN VER DETALLE */
+.btn-icon.detail {
+  color: #2563eb;
+  border-color: #dbeafe;
+  background: #eff6ff;
+}
+
+.btn-icon.detail:hover {
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+  background: #dbeafe;
+}
+
+.btn-icon:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
 
 /* =========================================================
    SCROLL
@@ -710,6 +728,7 @@
   }
 
 }
+
 .panel-kicker {
   display: block;
   margin-bottom: 4px;
@@ -718,4 +737,821 @@
   font-weight: 800;
   letter-spacing: .08em;
   text-transform: uppercase;
+}
+
+
+/* =========================================================
+   REGISTRAR HONORARIO
+========================================================= */
+
+/* CAPA OSCURA DE FONDO (BLUR) */
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+/* CONTENEDOR PRINCIPAL DEL MODAL */
+.modal-dialog {
+  background: #ffffff;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 580px;
+  box-shadow:
+    0 15px 25px -5px rgba(0, 0, 0, 0.1),
+    0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  z-index: 1060;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ENCABEZADO */
+.modal-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+.btn-close {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.btn-close:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.btn-close:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* CUERPO DEL MODAL Y FORMULARIO */
+.modal-body {
+  padding: 18px 20px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.form-group {
+  margin-bottom: 12px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  white-space: nowrap;
+}
+
+/* ENTRADAS Y DESPLEGABLES CON ALTURA Y SIZING UNIFORME */
+.custom-input,
+.custom-select {
+  width: 100%;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  color: #1e293b;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+  font-family: inherit;
+  vertical-align: middle;
+}
+
+.custom-input:focus,
+.custom-select:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 2px
+    rgba(37, 99, 235, 0.15);
+}
+
+.custom-input::placeholder {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+textarea.custom-input {
+  height: auto;
+  min-height: 65px;
+  padding: 8px 10px;
+  resize: vertical;
+}
+
+/* LAYOUT DE GRILLA PARA LOS CAMPOS EN LÍNEA */
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+
+.form-grid-3 .form-group {
+  margin-bottom: 0;
+}
+
+/* PIE DEL MODAL Y BOTONES DE ACCIÓN */
+.modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  background-color: #f8fafc;
+}
+
+/* BOTÓN CANCELAR CON FONDO ROJO */
+.btn-secondary {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 2px 4px
+    rgba(239, 68, 68, 0.15);
+}
+
+.btn-secondary:hover {
+  background-color: #dc2626;
+  box-shadow:
+    0 3px 5px
+    rgba(239, 68, 68, 0.25);
+}
+
+.btn-secondary:disabled {
+  opacity: .65;
+  cursor: not-allowed;
+}
+
+/* BOTÓN PRINCIPAL */
+.btn-primary-action {
+  background-color: #2563eb;
+  color: #ffffff;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 2px 4px
+    rgba(37, 99, 235, 0.15);
+  pointer-events: auto !important;
+}
+
+.btn-primary-action:hover {
+  background-color: #1d4ed8;
+  box-shadow:
+    0 3px 5px
+    rgba(37, 99, 235, 0.25);
+}
+
+.btn-primary-action:disabled {
+  background-color: #93c5fd;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* ADAPTABILIDAD MÓVIL */
+@media (max-width: 640px) {
+
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .modal-dialog {
+    margin: 6px;
+  }
+
+}
+
+
+/* =========================================================
+   ESTADOS DE PAGO
+========================================================= */
+
+/* PAGADO - VERDE */
+.status-paid {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+/* PAGO PARCIAL - AMARILLO */
+.status-partial {
+  background: #fef3c7;
+  color: #a16207;
+}
+
+/* PENDIENTE - ROJO */
+.status-pending {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   ESTADO VENCIDO
+========================================================= */
+
+/* Agrupa el estado de pago y la condición de vencimiento. */
+.status-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+
+/* VENCIDO - ROJO OSCURO */
+.status-overdue {
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+
+/* =========================================================
+   DETALLE DEL HONORARIO
+========================================================= */
+
+/*
+  El modal de detalle es más ancho que el modal de registro
+  porque muestra información financiera e historial de pagos.
+*/
+.modal-dialog-detail {
+  max-width: 880px;
+  max-height: calc(100vh - 32px);
+}
+
+
+/* =========================================================
+   CUERPO DEL DETALLE
+========================================================= */
+
+.detail-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: calc(100vh - 165px);
+  padding: 18px 20px;
+  overflow-y: auto;
+}
+
+
+/* =========================================================
+   ESTADO DE CARGA DEL DETALLE
+========================================================= */
+
+.detail-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 150px;
+
+  color: #64748b;
+
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   SECCIONES DEL DETALLE
+========================================================= */
+
+.detail-section {
+  padding: 16px;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 9px;
+
+  background: #ffffff;
+}
+
+.detail-section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  padding-bottom: 11px;
+  margin-bottom: 13px;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+.detail-section-header h4 {
+  margin: 0;
+
+  color: #1e293b;
+
+  font-size: 0.88rem;
+  font-weight: 700;
+
+  letter-spacing: -0.01em;
+}
+
+
+/* =========================================================
+   INFORMACIÓN GENERAL DEL HONORARIO
+========================================================= */
+
+.detail-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.detail-item {
+  min-width: 0;
+
+  padding: 11px 12px;
+
+  border: 1px solid #eef2f7;
+  border-radius: 7px;
+
+  background: #f8fafc;
+}
+
+.detail-item-wide {
+  grid-column: span 2;
+}
+
+.detail-label {
+  display: block;
+
+  margin-bottom: 5px;
+
+  color: #94a3b8;
+
+  font-size: 0.65rem;
+  font-weight: 700;
+
+  letter-spacing: .025em;
+
+  text-transform: uppercase;
+}
+
+.detail-item strong {
+  display: block;
+
+  color: #334155;
+
+  font-size: 0.78rem;
+  font-weight: 650;
+
+  line-height: 1.4;
+
+  overflow-wrap: anywhere;
+}
+
+.detail-overdue-text {
+  color: #b91c1c !important;
+}
+
+
+/* =========================================================
+   RESUMEN FINANCIERO DEL DETALLE
+========================================================= */
+
+.detail-financial-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3, minmax(0, 1fr));
+
+  gap: 12px;
+}
+
+.detail-financial-card {
+  padding: 14px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+
+  background: #f8fafc;
+}
+
+.detail-financial-card span {
+  display: block;
+
+  margin-bottom: 6px;
+
+  color: #64748b;
+
+  font-size: 0.66rem;
+  font-weight: 700;
+
+  text-transform: uppercase;
+}
+
+.detail-financial-card strong {
+  display: block;
+
+  color: #1e293b;
+
+  font-size: 1rem;
+  font-weight: 800;
+
+  line-height: 1.25;
+}
+
+.detail-financial-card strong.text-success {
+  color: #15803d;
+}
+
+.detail-financial-card strong.text-danger {
+  color: #b91c1c;
+}
+
+
+/* =========================================================
+   OBSERVACIONES DEL HONORARIO
+========================================================= */
+
+.detail-observations {
+  padding: 12px 14px;
+
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+
+  background: #f8fafc;
+
+  color: #475569;
+
+  font-size: 0.76rem;
+  line-height: 1.6;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   CONTADOR DE PAGOS
+========================================================= */
+
+.detail-payment-count {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 26px;
+
+  padding:
+    0
+    9px;
+
+  border-radius: 6px;
+
+  background: #eef2ff;
+
+  color: #4f46e5;
+
+  font-size: 0.67rem;
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   HISTORIAL DE PAGOS
+========================================================= */
+
+.detail-payments-table-wrapper {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.detail-payments-table {
+  width: 100%;
+
+  min-width: 620px;
+
+  border-collapse: collapse;
+
+  background: #ffffff;
+}
+
+.detail-payments-table th {
+  padding:
+    10px
+    12px;
+
+  border-bottom: 1px solid #e5e7eb;
+
+  background: #f8fafc;
+
+  color: #64748b;
+
+  font-size: 0.66rem;
+  font-weight: 800;
+
+  text-align: left;
+
+  white-space: nowrap;
+
+  text-transform: uppercase;
+}
+
+.detail-payments-table td {
+  padding:
+    11px
+    12px;
+
+  border-bottom: 1px solid #eef2f7;
+
+  color: #475569;
+
+  font-size: 0.73rem;
+
+  line-height: 1.4;
+
+  vertical-align: top;
+}
+
+.detail-payments-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.detail-payments-table tbody tr:hover {
+  background: #fafbfc;
+}
+
+.detail-payments-table .amount-paid {
+  color: #15803d;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   SIN PAGOS
+========================================================= */
+
+.detail-empty-payments {
+  padding:
+    24px
+    16px;
+
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+
+  background: #f8fafc;
+
+  color: #94a3b8;
+
+  font-size: 0.76rem;
+  font-weight: 600;
+
+  text-align: center;
+}
+
+
+/* =========================================================
+   FOOTER DEL MODAL DE DETALLE
+========================================================= */
+
+.detail-modal-footer {
+  flex-shrink: 0;
+
+  justify-content: flex-end;
+
+  background: #f8fafc;
+}
+
+
+/* =========================================================
+   ALINEACIONES AUXILIARES
+========================================================= */
+
+.text-right {
+  text-align: right !important;
+}
+
+.text-center {
+  text-align: center !important;
+}
+
+.py-4 {
+  padding-top: 16px !important;
+  padding-bottom: 16px !important;
+}
+
+
+/* =========================================================
+   SCROLL DEL MODAL DE DETALLE
+========================================================= */
+
+.detail-modal-body::-webkit-scrollbar,
+.detail-payments-table-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.detail-modal-body::-webkit-scrollbar-track,
+.detail-payments-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+.detail-modal-body::-webkit-scrollbar-thumb,
+.detail-payments-table-wrapper::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: #cbd5e1;
+}
+
+
+/* =========================================================
+   RESPONSIVE DEL DETALLE
+========================================================= */
+
+@media (max-width: 900px) {
+
+  .modal-dialog-detail {
+    max-width: 760px;
+  }
+
+  .detail-grid {
+    grid-template-columns:
+      repeat(2, minmax(0, 1fr));
+  }
+
+  .detail-item-wide {
+    grid-column: span 2;
+  }
+
+}
+
+
+@media (max-width: 700px) {
+
+  .modal-backdrop {
+    align-items: flex-start;
+
+    padding:
+      10px
+      8px;
+
+    overflow-y: auto;
+  }
+
+  .modal-dialog-detail {
+    max-width: 100%;
+
+    max-height: none;
+
+    margin:
+      8px
+      0;
+  }
+
+  .detail-modal-body {
+    max-height: none;
+
+    padding:
+      14px;
+  }
+
+  .detail-section {
+    padding: 13px;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item-wide {
+    grid-column: span 1;
+  }
+
+  .detail-financial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .detail-modal-footer .btn-secondary,
+  .detail-modal-footer .btn-primary-action {
+    width: 100%;
+  }
+
+}
+
+
+@media (max-width: 480px) {
+
+  .modal-header {
+    padding:
+      12px
+      14px;
+  }
+
+  .modal-header h3 {
+    font-size: .95rem;
+  }
+
+  .detail-modal-body {
+    padding:
+      12px;
+  }
+
+  .detail-section {
+    padding:
+      11px;
+  }
+
+  .detail-item {
+    padding:
+      10px;
+  }
+
+  .detail-financial-card {
+    padding:
+      12px;
+  }
+
+  .detail-financial-card strong {
+    font-size: .9rem;
+  }
+
+  .modal-footer {
+    padding:
+      11px
+      14px;
+  }
+
 }
