@@ -6,12 +6,14 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EstadoOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EventoLineaTiempo;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteDetalle;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteLista;
+import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.GuardarRequest;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.MateriaOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Opcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.PersonaRelacionada;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
 import com.sbss.lexia.shared.dto.Limites;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -802,6 +804,116 @@ public class ExpedienteRepositoryJdbc {
                 """, Map.of("id", expedienteId),
                 (rs, n) -> new Equipo(rs.getLong("id"), rs.getString("nombre_completo"),
                         rs.getString("rol_en_expediente"), rs.getBoolean("puede_editar")));
+    }
+
+    // =======================================================================
+    // BUSCADOR PARA SELECTORES
+    // =======================================================================
+    // Existe porque los /catalogos de actuaciones, plazos y monitor vuelcan
+    // TODOS los expedientes visibles en un desplegable: medido con 5.010,
+    // ~1 MB por peticion y 345 ms de consulta. Un desplegable con 5.000
+    // opciones tampoco se usa: se busca.
+    //
+    // Las tres ramas van por indice, y por eso es un UNION y no un OR. Medido
+    // con 5.010 expedientes, por consulta:
+    //
+    //   sin filtro ni limite (lo que hace /catalogos hoy) .... 345 ms
+    //   LOWER(CONCAT_WS(...)) LIKE '%x%' + LIMIT 20 ..........  19,1 ms
+    //   OR de los tres prefijos + LIMIT 20 ..................  16,6 ms
+    //   UNION de los tres, cada rama con su indice ..........   6,1 ms
+    //   una sola rama (el techo) ............................   3,1 ms
+    //
+    // El OR no usa ningun indice: EXPLAIN muestra un Filter sobre el conjunto.
+    // El UNION usa uq_expedientes_codigo, uq_expedientes_numero y
+    // ft_clientes_nombre.
+    // =======================================================================
+
+    /** Tokens de 1 o 2 letras no entran en el indice FULLTEXT de InnoDB. */
+    private static final int MINIMO_FULLTEXT = 3;
+
+    private static final String SELECT_OPCION = """
+            SELECT e.uuid_publico, e.codigo_interno, e.numero_expediente,
+                   c.nombre_busqueda cliente, u.nombre_completo responsable,
+                   e.es_confidencial
+              FROM expedientes e
+              JOIN clientes c ON c.id = e.cliente_id
+              JOIN usuarios u ON u.id = e.abogado_responsable_id
+             WHERE e.activo = 1
+            """;
+
+    /**
+     * Expedientes que el usuario puede ver y encajan con el texto. Sin texto,
+     * los mas recientes, que es lo que el selector muestra antes de teclear.
+     */
+    @Transactional(readOnly = true)
+    public List<ExpedienteOpcion> buscar(String texto, int limite) {
+        MapSqlParameterSource p = new MapSqlParameterSource();
+        p.addValues(VisibilidadExpedientes.parametros());
+        p.addValue("limite", Limites.limiteSelector(limite));
+
+        String base = SELECT_OPCION + VisibilidadExpedientes.sql("e");
+        String t = texto == null ? null : texto.trim();
+
+        if (t == null || t.isBlank()) {
+            return jdbc.query(base + " ORDER BY e.codigo_interno DESC LIMIT :limite", p, this::mapOpcion);
+        }
+
+        List<String> ramas = new ArrayList<>();
+        // Prefijo, no "contiene": asi entra por uq_expedientes_codigo y
+        // uq_expedientes_numero. Es ademas como se teclea un codigo.
+        p.addValue("prefijo", t + "%");
+        ramas.add("(" + base + " AND e.codigo_interno LIKE :prefijo LIMIT :limite)");
+        ramas.add("(" + base + " AND e.numero_expediente LIKE :prefijo LIMIT :limite)");
+
+        // Para el cliente, FULLTEXT y no prefijo: los nombres se guardan como
+        // "Banco del Peru S.A.A." y "Fernandez Salas Ana Maria", asi que
+        // buscar "peru" o "ana" con LIKE 'peru%' no encuentra nada. Con
+        // MATCH ... 'peru*' si, y usa ft_clientes_nombre.
+        String termino = terminoFulltext(t);
+        if (termino != null) {
+            p.addValue("termino", termino);
+            ramas.add("(" + base
+                    + " AND MATCH(c.nombre_busqueda) AGAINST (:termino IN BOOLEAN MODE) LIMIT :limite)");
+        }
+
+        // UNION y no UNION ALL: un expediente que encaje por codigo y por
+        // cliente saldria dos veces.
+        String sql = "SELECT * FROM (" + String.join(" UNION ", ramas)
+                + ") x ORDER BY codigo_interno DESC LIMIT :limite";
+        return jdbc.query(sql, p, this::mapOpcion);
+    }
+
+    /**
+     * Arma el termino de IN BOOLEAN MODE. El texto del usuario no se pasa
+     * crudo: los operadores de fulltext (+ - * " ( ) ~ < > @) dan resultados
+     * absurdos o un error de sintaxis. Cada palabra se vuelve obligatoria y
+     * con comodin al final: "banco peru" -> "+banco* +peru*".
+     *
+     * @return null si no queda ninguna palabra util, para omitir esa rama.
+     */
+    private static String terminoFulltext(String texto) {
+        String limpio = texto.replaceAll("[+\\-*\"()~<>@]", " ").trim();
+        if (limpio.isEmpty()) {
+            return null;
+        }
+        StringBuilder termino = new StringBuilder();
+        for (String palabra : limpio.split("\\s+")) {
+            if (palabra.length() >= MINIMO_FULLTEXT) {
+                termino.append('+').append(palabra).append("* ");
+            }
+        }
+        String resultado = termino.toString().trim();
+        return resultado.isEmpty() ? null : resultado;
+    }
+
+    private ExpedienteOpcion mapOpcion(ResultSet rs, int fila) throws SQLException {
+        return new ExpedienteOpcion(
+                rs.getString("uuid_publico"),
+                rs.getString("codigo_interno"),
+                rs.getString("numero_expediente"),
+                rs.getString("cliente"),
+                rs.getString("responsable"),
+                rs.getBoolean("es_confidencial"));
     }
 
     private List<Long> idsVisibles(

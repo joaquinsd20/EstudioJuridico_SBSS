@@ -1,6 +1,7 @@
 package com.sbss.lexia.tareas.repository;
 
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import com.sbss.lexia.tareas.dto.TareaDtos.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -57,7 +58,7 @@ public class TareaRepositoryJdbc {
               COALESCE(SUM(t.estado='COMPLETADA'),0) completadas
             FROM tareas t JOIN expedientes e ON e.id=t.expediente_id
             WHERE e.estudio_id=:estudioId AND t.activo=1
-            """, base(), (rs,n) -> new Resumen(rs.getLong("pendientes"), rs.getLong("proceso"),
+            """ + visibilidad(), base(), (rs,n) -> new Resumen(rs.getLong("pendientes"), rs.getLong("proceso"),
                     rs.getLong("revision"), rs.getLong("vencidas"), rs.getLong("completadas"), rs.getLong("total")));
     }
 
@@ -66,6 +67,7 @@ public class TareaRepositoryJdbc {
             SELECT e.id,e.codigo_interno,e.numero_expediente,c.nombre_busqueda
             FROM expedientes e JOIN clientes c ON c.id=e.cliente_id
             WHERE e.estudio_id=:estudioId AND e.activo=1
+            """ + visibilidad() + """
             ORDER BY e.codigo_interno DESC
             """, base(), (rs,n) -> new ExpedienteOpcion(rs.getLong(1), rs.getString(2), rs.getString(3), rs.getString(4)));
         List<UsuarioOpcion> usuarios = jdbc.query("""
@@ -78,23 +80,28 @@ public class TareaRepositoryJdbc {
 
     public TareaInfo tareaInfo(String uuid) {
         MapSqlParameterSource p=base().addValue("uuid",uuid);
-        List<TareaInfo> r=jdbc.query(detailSelect()+" WHERE e.estudio_id=:estudioId AND t.uuid_publico=:uuid AND t.activo=1",p,(rs,n)->mapInfo(rs));
+        List<TareaInfo> r=jdbc.query(detailSelect()+" WHERE e.estudio_id=:estudioId AND t.uuid_publico=:uuid AND t.activo=1"+visibilidad(),p,(rs,n)->mapInfo(rs));
         return r.isEmpty()?null:r.get(0);
     }
 
     public Long idPorUuid(String uuid) {
         MapSqlParameterSource p=base().addValue("uuid",uuid);
-        List<Long> r=jdbc.query("SELECT t.id FROM tareas t JOIN expedientes e ON e.id=t.expediente_id WHERE e.estudio_id=:estudioId AND t.uuid_publico=:uuid AND t.activo=1",p,(rs,n)->rs.getLong(1));
+        List<Long> r=jdbc.query("SELECT t.id FROM tareas t JOIN expedientes e ON e.id=t.expediente_id WHERE e.estudio_id=:estudioId AND t.uuid_publico=:uuid AND t.activo=1"+visibilidad(),p,(rs,n)->rs.getLong(1));
         return r.isEmpty()?null:r.get(0);
     }
 
     public String uuidPorId(Long id) {
         MapSqlParameterSource p=base().addValue("id",id);
-        List<String> r=jdbc.query("SELECT t.uuid_publico FROM tareas t JOIN expedientes e ON e.id=t.expediente_id WHERE e.estudio_id=:estudioId AND t.id=:id AND t.activo=1",p,(rs,n)->rs.getString(1));
+        List<String> r=jdbc.query("SELECT t.uuid_publico FROM tareas t JOIN expedientes e ON e.id=t.expediente_id WHERE e.estudio_id=:estudioId AND t.id=:id AND t.activo=1"+visibilidad(),p,(rs,n)->rs.getString(1));
         return r.isEmpty()?null:r.get(0);
     }
 
-    public boolean expedienteValido(Long id) { return existe("SELECT COUNT(*) FROM expedientes WHERE id=:id AND estudio_id=:estudioId AND activo=1", id); }
+    public boolean expedienteValido(Long id) {
+        // Con la regla de visibilidad: si no lo puede ver, no puede colgarle
+        // una tarea. Antes bastaba con que fuera del mismo estudio.
+        return existe("SELECT COUNT(*) FROM expedientes e WHERE e.id=:id AND e.estudio_id=:estudioId"
+                + " AND e.activo=1" + visibilidad(), id);
+    }
     public boolean usuarioValido(Long id) { return id == null || existe("SELECT COUNT(*) FROM usuarios WHERE id=:id AND estudio_id=:estudioId AND activo=1 AND estado='ACTIVO'", id); }
 
     public Long insertar(GuardarRequest r) {
@@ -121,6 +128,7 @@ public class TareaRepositoryJdbc {
               t.usuario_supervisor_id=:supervisorId,t.prioridad=:prioridad,t.fecha_limite=:fechaLimite,t.tiempo_estimado_minutos=:estimado,
               t.usuario_modificacion_id=:usuarioId
             WHERE t.id=:id AND e.estudio_id=:estudioId
+            """ + visibilidad() + """
             """,p);
     }
 
@@ -146,6 +154,7 @@ public class TareaRepositoryJdbc {
               t.porcentaje_avance=CASE WHEN :estado='COMPLETADA' THEN 100 ELSE t.porcentaje_avance END,
               t.usuario_modificacion_id=:usuarioId
           WHERE t.id=:id AND e.estudio_id=:estudioId
+          """ + visibilidad() + """
           """,p);
         jdbc.update("""
           INSERT INTO tarea_historial(tarea_id,usuario_id,estado_anterior,estado_nuevo,etapa_anterior,etapa_nueva,observacion)
@@ -160,6 +169,7 @@ public class TareaRepositoryJdbc {
             UPDATE subtareas s JOIN tareas t ON t.id=s.tarea_id JOIN expedientes e ON e.id=t.expediente_id
             SET s.completada=IF(s.completada=1,0,1), s.fecha_completado=IF(s.completada=0,NOW(3),NULL)
             WHERE s.id=:sid AND s.tarea_id=:tid AND e.estudio_id=:estudioId
+            """ + visibilidad() + """
             """,base().addValue("sid",subtareaId).addValue("tid",tareaId));
         actualizarAvance(tareaId); return n>0;
     }
@@ -202,15 +212,27 @@ public class TareaRepositoryJdbc {
       FROM tarea_historial h JOIN usuarios u ON u.id=h.usuario_id WHERE h.tarea_id=:id ORDER BY h.fecha_cambio DESC,h.id DESC
       """,Map.of("id",id),(rs,n)->new Historial(rs.getLong(1),rs.getString(2),rs.getString(3),rs.getString(4),rs.getString(5),rs.getString(6),rs.getString(7),getDateTime(rs,8))); }
 
+    /**
+     * Marca como VENCIDA lo que paso de fecha y sigue en curso.
+     *
+     * Ya NO toca APROBADA ni PRESENTADA: una tarea aprobada que pasa de fecha
+     * perdia su aprobacion y salia de la columna Completado del tablero. La
+     * aprobacion es un hecho, no caduca porque el plazo interno se pase.
+     *
+     * Va sin la regla de visibilidad a proposito: es un barrido del estudio, no
+     * una consulta de usuario. Acotarlo por lo que ve quien llama dejaria el
+     * resto sin marcar segun quien entre primero.
+     */
     public void marcarVencidas(){ jdbc.update("""
       UPDATE tareas t JOIN expedientes e ON e.id=t.expediente_id
       SET t.estado='VENCIDA' WHERE e.estudio_id=:estudioId AND t.activo=1 AND t.fecha_limite<NOW()
-        AND t.estado IN ('PENDIENTE','EN_PROCESO','EN_REVISION','OBSERVADA','APROBADA','PRESENTADA')
-      """,base()); }
+        AND t.estado IN ('PENDIENTE','EN_PROCESO','EN_REVISION','OBSERVADA')
+      """,new MapSqlParameterSource("estudioId",SesionActual.estudioId())); }
 
     private String construirFiltros(MapSqlParameterSource p,String texto,String estado,String prioridad,Long responsableId,
                                     Long expedienteId,LocalDateTime desde,LocalDateTime hasta){
-        StringBuilder sql=new StringBuilder(" WHERE e.estudio_id=:estudioId AND t.activo=1 ");
+        StringBuilder sql=new StringBuilder(" WHERE e.estudio_id=:estudioId AND t.activo=1 ")
+                .append(visibilidad());
         if(texto!=null&&!texto.isBlank()){
             sql.append(" AND (LOWER(t.titulo) LIKE :texto OR LOWER(COALESCE(t.descripcion,'')) LIKE :texto OR LOWER(e.codigo_interno) LIKE :texto OR LOWER(COALESCE(e.numero_expediente,'')) LIKE :texto OR LOWER(u.nombre_completo) LIKE :texto) ");
             p.addValue("texto","%"+texto.trim().toLowerCase()+"%");
@@ -226,7 +248,23 @@ public class TareaRepositoryJdbc {
 
     private String orden(){return " ORDER BY FIELD(t.estado,'VENCIDA','PENDIENTE','EN_PROCESO','EN_REVISION','OBSERVADA','APROBADA','PRESENTADA','COMPLETADA','CANCELADA'), FIELD(t.prioridad,'URGENTE','ALTA','MEDIA','BAJA'), t.fecha_limite ASC, t.orden_tablero ASC ";}
     private boolean existe(String sql,Long id){ return Boolean.TRUE.equals(jdbc.queryForObject(sql,base().addValue("id",id),Integer.class)>0); }
-    private MapSqlParameterSource base(){ return new MapSqlParameterSource("estudioId",SesionActual.estudioId()); }
+    private MapSqlParameterSource base(){
+        MapSqlParameterSource p = new MapSqlParameterSource("estudioId", SesionActual.estudioId());
+        p.addValues(VisibilidadExpedientes.parametros());
+        return p;
+    }
+
+    /**
+     * La regla de RF-02, compartida con expedientes, actuaciones, agenda,
+     * documental, plazos y monitor.
+     *
+     * Este modulo acotaba solo por `e.estudio_id`, asi que cualquiera del
+     * estudio veia las tareas de expedientes confidenciales que no tiene
+     * asignados, y podia crear tareas sobre ellos. Es la cuarta vez que la
+     * regla se pierde al escribir un modulo nuevo; el helper existe para que
+     * sea una linea.
+     */
+    private static String visibilidad(){ return VisibilidadExpedientes.sql("e"); }
 
     private String baseSelect(){ return """
       SELECT t.id,t.uuid_publico,t.titulo,t.expediente_id,e.codigo_interno,e.numero_expediente,c.nombre_busqueda,

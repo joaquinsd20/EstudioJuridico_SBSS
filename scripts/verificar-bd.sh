@@ -40,7 +40,7 @@ MIN=$(q "SELECT IF(VERSION() >= '8.0.16', 'SI', 'NO');")
 check "Version >= 8.0.16 (los CHECK se aplican)" "$MIN" "SI"
 
 titulo "2. Inventario del esquema"
-check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "43"
+check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "44"
 check "Roles del sistema (V12)"      "$(q "SELECT COUNT(*) FROM roles;")" "8"
 # 31 de V12 + 2 de V17 (MONITOR_*) + 4 de V20 (FACTURACION_*)
 check "Permisos del sistema"         "$(q "SELECT COUNT(*) FROM permisos;")" "37"
@@ -48,6 +48,8 @@ check "Permisos del sistema"         "$(q "SELECT COUNT(*) FROM permisos;")" "37
 check "Pares rol-permiso"            "$(q "SELECT COUNT(*) FROM roles_permisos;")" "145"
 # V19 se llamaba V19_facturacion.sql, con un solo guion bajo: Flyway la saltaba
 # con una linea en INFO y estas dos tablas no existian en ninguna base.
+# V22 agrego tarea_historial y la etapa del flujo de aprobacion.
+check "Etapa de flujo en tareas (V22)"  "$(q "SELECT COUNT(*) FROM information_schema.columns WHERE table_schema='${BASE}' AND table_name='tareas' AND column_name='etapa_flujo';")" "1"
 check "Tablas de facturacion (V19)"  "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_name IN ('honorarios','movimientos_financieros');")" "2"
 # Nadie operativo ni el portal llega al dinero (V20).
 check "Roles sin acceso a facturacion" "$(q "SELECT COUNT(*) FROM roles_permisos rp JOIN roles r ON r.id=rp.rol_id JOIN permisos p ON p.id=rp.permiso_id WHERE p.modulo='FACTURACION' AND r.codigo IN ('ABOGADO','ABOGADO_AUXILIAR','ASISTENTE_LEGAL','RECEPCIONISTA','CLIENTE');")" "0"

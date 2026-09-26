@@ -4,6 +4,7 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Catalogos;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EventoLineaTiempo;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteDetalle;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteLista;
+import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.GuardarRequest;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
 import com.sbss.lexia.expedientes.repository.ExpedienteRepositoryJdbc;
@@ -55,6 +56,15 @@ public class ExpedienteService {
             obtener(uuid);
         }
         return eventos;
+    }
+
+    /**
+     * Para los selectores de otros modulos: en vez de volcarles los miles de
+     * expedientes visibles, que busquen.
+     */
+    @Transactional(readOnly = true)
+    public List<ExpedienteOpcion> buscar(String texto, int limite) {
+        return repository.buscar(texto, limite);
     }
 
     @Transactional(readOnly = true)

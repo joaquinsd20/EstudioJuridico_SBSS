@@ -57,6 +57,21 @@ public final class Limites {
         return pedido != SIN_COTA;
     }
 
+    /**
+     * Un selector con autocompletado es otra cosa que un listado: 20 opciones
+     * por defecto y 50 como tope, porque nadie lee mas de eso en un
+     * desplegable. Medido: devolver los 5.010 expedientes visibles costaba
+     * 345 ms por consulta y ~1 MB; acotado a 20 son 6 ms.
+     */
+    public static final int SELECTOR_POR_DEFECTO = 20;
+
+    public static final int SELECTOR_TOPE = 50;
+
+    /** Acota lo que pidio un selector al rango [1, {@link #SELECTOR_TOPE}]. */
+    public static int limiteSelector(int pedido) {
+        return Math.max(1, Math.min(pedido, SELECTOR_TOPE));
+    }
+
     /** Un desplazamiento negativo no significa nada: se trata como 0. */
     public static int desplazamiento(int pedido) {
         return Math.max(0, pedido);

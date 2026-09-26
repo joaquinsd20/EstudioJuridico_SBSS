@@ -4,6 +4,7 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Catalogos;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EventoLineaTiempo;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteDetalle;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteLista;
+import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.GuardarRequest;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
 import com.sbss.lexia.expedientes.service.ExpedienteService;
@@ -47,6 +48,18 @@ public class ExpedienteController {
     @PreAuthorize("hasAuthority('EXPEDIENTE_LEER')")
     public Resumen resumen() {
         return service.resumen();
+    }
+
+    /**
+     * Selector de expedientes para los demas modulos. Acotado a 20 por
+     * defecto: los /catalogos que vuelcan todo cuestan ~1 MB por peticion.
+     */
+    @GetMapping("/buscar")
+    @PreAuthorize("hasAuthority('EXPEDIENTE_LEER')")
+    public List<ExpedienteOpcion> buscar(
+            @RequestParam(required = false) String texto,
+            @RequestParam(defaultValue = "20") int limite) {
+        return service.buscar(texto, limite);
     }
 
     @GetMapping("/catalogos")

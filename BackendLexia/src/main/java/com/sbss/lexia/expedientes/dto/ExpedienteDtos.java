@@ -166,4 +166,17 @@ public final class ExpedienteDtos {
             List<Long> equipoIds,
             List<Long> contraparteIds) {
     }
+
+    /**
+     * Lo minimo para elegir un expediente en un selector: sin cuantia, sin
+     * fechas, sin equipo. Identifica por uuid_publico y no por el BIGINT.
+     */
+    public record ExpedienteOpcion(
+            String uuid,
+            String codigoInterno,
+            String numeroExpediente,
+            String cliente,
+            String responsable,
+            boolean esConfidencial) {
+    }
 }
