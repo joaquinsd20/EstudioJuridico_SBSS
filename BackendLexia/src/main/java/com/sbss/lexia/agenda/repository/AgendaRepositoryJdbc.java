@@ -8,6 +8,7 @@ import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Participante;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Reprogramacion;
 import com.sbss.lexia.agenda.dto.AgendaDtos.UsuarioOpcion;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,7 +38,9 @@ public class AgendaRepositoryJdbc {
             Long expedienteId,
             Long participanteId,
             boolean verTodos,
-            boolean verConfidenciales) {
+            boolean verConfidenciales,
+            int limite,
+            int desplazamiento) {
 
         StringBuilder sql = new StringBuilder("""
                 SELECT ev.id, ev.uuid_publico, ev.tipo, ev.titulo, ev.descripcion,
@@ -87,6 +90,12 @@ public class AgendaRepositoryJdbc {
         }
 
         sql.append(" ORDER BY ev.fecha_inicio, ev.id");
+        // Un mes de agenda con volumen real eran 5.002 eventos y 3.194 KB.
+        if (Limites.acota(limite)) {
+            sql.append(" LIMIT :limite OFFSET :desplazamiento");
+            p.addValue("limite", Limites.limite(limite));
+            p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
+        }
         return jdbc.query(sql.toString(), p, (rs, n) -> mapEvento(rs));
     }
 

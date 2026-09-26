@@ -1,7 +1,9 @@
 package com.sbss.lexia.plazos.repository;
 
 import com.sbss.lexia.plazos.dto.PlazoDtos.*;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -22,10 +24,11 @@ public class PlazoRepositoryJdbc {
     private final NamedParameterJdbcTemplate jdbc;
 
     public List<PlazoLista> listar(String texto, Long expedienteId, Long responsableId, Long tipoPlazoId,
-            String estado, String riesgo, String computo, Boolean requiereRevision, LocalDate desde, LocalDate hasta) {
+            String estado, String riesgo, String computo, Boolean requiereRevision,
+            LocalDate desde, LocalDate hasta, int limite, int desplazamiento) {
         MapSqlParameterSource p = base();
         StringBuilder sql = new StringBuilder(selectBase()).append(" WHERE p.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId");
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         if (texto != null && !texto.isBlank()) {
             sql.append(" AND LOWER(CONCAT_WS(' ',p.descripcion,p.actuacion_requerida,p.observaciones,e.codigo_interno,e.numero_expediente,c.nombre_busqueda,m.nombre,o.nombre,o.distrito_judicial,tp.nombre,ur.nombre_completo,uv.nombre_completo,r.numero_resolucion,a.asunto,d.nombre)) LIKE :texto");
             p.addValue("texto", "%" + texto.trim().toLowerCase() + "%");
@@ -40,6 +43,11 @@ public class PlazoRepositoryJdbc {
         if (desde != null) { sql.append(" AND p.fecha_vencimiento>=:desde"); p.addValue("desde", desde); }
         if (hasta != null) { sql.append(" AND p.fecha_vencimiento<=:hasta"); p.addValue("hasta", hasta); }
         sql.append(" ORDER BY CASE WHEN ").append(estadoSql()).append("='VENCIDO' THEN 0 ELSE 1 END, p.fecha_vencimiento, p.id DESC");
+        // Sin cota, este listado devolvia todas las filas del estudio. Medido
+        // con volumen real: 15.009 plazos y 16.884 KB en una sola respuesta.
+        sql.append(" LIMIT :limite OFFSET :desplazamiento");
+        p.addValue("limite", Limites.limite(limite));
+        p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
         return jdbc.query(sql.toString(), p, this::mapLista);
     }
 
@@ -56,7 +64,7 @@ public class PlazoRepositoryJdbc {
                   FROM plazos p JOIN expedientes e ON e.id=p.expediente_id
                  WHERE p.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId
                 """.formatted(estadoSql(), estadoSql(), estadoSql(), estadoSql(), estadoSql()));
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         return jdbc.queryForObject(sql.toString(), p, (rs, n) -> new Resumen(
                 rs.getLong("total_activos"), rs.getLong("vencidos"), rs.getLong("vence_hoy"),
                 rs.getLong("proximos_siete"), rs.getLong("criticos"), rs.getLong("revision")));
@@ -65,7 +73,7 @@ public class PlazoRepositoryJdbc {
     public PlazoDetalle detalle(String uuid) {
         MapSqlParameterSource p = base().addValue("uuid", uuid);
         StringBuilder sql = new StringBuilder(selectBase()).append(" WHERE p.uuid_publico=:uuid AND p.activo=1 AND e.activo=1 AND e.estudio_id=:estudioId");
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         List<PlazoLista> filas = jdbc.query(sql.toString(), p, this::mapLista);
         if (filas.isEmpty()) return null;
         Long id = idPorUuid(uuid);
@@ -92,7 +100,7 @@ public class PlazoRepositoryJdbc {
     public boolean expedienteExiste(Long id) {
         MapSqlParameterSource p = base().addValue("id", id);
         StringBuilder sql = new StringBuilder("SELECT COUNT(*) FROM expedientes e WHERE e.id=:id AND e.activo=1 AND e.estudio_id=:estudioId");
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         Integer n = jdbc.queryForObject(sql.toString(), p, Integer.class);
         return n != null && n > 0;
     }
@@ -238,7 +246,7 @@ public class PlazoRepositoryJdbc {
                 SELECT p.id FROM plazos p JOIN expedientes e ON e.id=p.expediente_id
                  WHERE p.uuid_publico=:uuid AND p.activo=1 AND e.estudio_id=:estudioId
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         List<Long> filas = jdbc.query(sql.toString(), p, (rs, n) -> rs.getLong(1));
         return filas.isEmpty() ? null : filas.getFirst();
     }
@@ -307,7 +315,7 @@ public class PlazoRepositoryJdbc {
                   LEFT JOIN organos_jurisdiccionales o ON o.id=e.organo_id
                  WHERE e.estudio_id=:estudioId AND e.activo=1
                 """);
-        aplicarPortal(sql, p);
+        aplicarVisibilidad(sql, p);
         sql.append(" ORDER BY e.codigo_interno DESC");
         return jdbc.query(sql.toString(), p, (rs, n) -> new ExpedienteOpcion(
                 rs.getLong("id"), rs.getString("codigo_interno"), rs.getString("numero_expediente"),
@@ -426,8 +434,16 @@ public class PlazoRepositoryJdbc {
 
     private MapSqlParameterSource base() { return new MapSqlParameterSource().addValue("estudioId", SesionActual.estudioId()); }
 
-    private void aplicarPortal(StringBuilder sql, MapSqlParameterSource p) {
-        if (SesionActual.esPortalCliente()) { sql.append(" AND e.cliente_id=:clienteId"); p.addValue("clienteId", SesionActual.clienteId()); }
+    /**
+     * La regla de RF-02, la misma que usan expedientes, actuaciones, agenda y
+     * documental. Antes esto solo acotaba el portal del cliente, asi que
+     * cualquier usuario del estudio veia los plazos de expedientes
+     * confidenciales que no tenia asignados -- y podia elegirlos en
+     * /plazos/catalogos para crearles un plazo nuevo.
+     */
+    private void aplicarVisibilidad(StringBuilder sql, MapSqlParameterSource p) {
+        sql.append(VisibilidadExpedientes.sql("e"));
+        p.addValues(VisibilidadExpedientes.parametros());
     }
 
     private static Long getLong(ResultSet rs, String c) throws SQLException { return rs.getObject(c) == null ? null : rs.getLong(c); }

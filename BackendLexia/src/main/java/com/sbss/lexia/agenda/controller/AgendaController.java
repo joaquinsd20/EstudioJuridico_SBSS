@@ -43,8 +43,11 @@ public class AgendaController {
             @RequestParam(required = false) String tipo,
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) Long expedienteId,
-            @RequestParam(required = false) Long participanteId) {
-        return service.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId);
+            @RequestParam(required = false) Long participanteId,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
+        return service.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
+                limite, desplazamiento);
     }
 
     @GetMapping("/resumen")

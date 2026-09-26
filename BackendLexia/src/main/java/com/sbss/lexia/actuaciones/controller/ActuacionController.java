@@ -35,8 +35,10 @@ public class ActuacionController {
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
-            @RequestParam(defaultValue = "250") int limite) {
-        return service.listar(texto, tipoId, expedienteId, responsableId, estado, fechaDesde, fechaHasta, limite);
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
+        return service.listar(texto, tipoId, expedienteId, responsableId, estado, fechaDesde, fechaHasta,
+                limite, desplazamiento);
     }
 
     @GetMapping("/resumen")

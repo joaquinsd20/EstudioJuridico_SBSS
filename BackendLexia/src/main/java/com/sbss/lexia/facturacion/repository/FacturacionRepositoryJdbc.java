@@ -17,6 +17,7 @@ import com.sbss.lexia.facturacion.dto.FacturacionDtos.DetalleHonorario;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.ExpedienteOpcion;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.GuardarHonorarioRequest;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.HonorarioLista;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.Opcion;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.PagoHonorarioDetalle;
 import com.sbss.lexia.facturacion.dto.FacturacionDtos.RegistrarMovimientoRequest;
@@ -41,7 +42,9 @@ public class FacturacionRepositoryJdbc {
             String cliente,
             String expediente,
             Long modalidadId,
-            String estado) {
+            String estado,
+            int limite,
+            int desplazamiento) {
 
         StringBuilder sql = new StringBuilder("""
             SELECT
@@ -225,6 +228,12 @@ public class FacturacionRepositoryJdbc {
                 h.fecha_creacion DESC,
                 h.id DESC
         """);
+
+        // Los honorarios crecen con la facturacion del estudio: sin cota, este
+        // listado devolveria todos los del historial en una sola respuesta.
+        sql.append(" LIMIT :limite OFFSET :desplazamiento");
+        p.addValue("limite", Limites.limite(limite));
+        p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
 
 
         return jdbc.query(

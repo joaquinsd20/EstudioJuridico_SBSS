@@ -64,23 +64,26 @@ public class DocumentoController {
             @RequestParam(required = false) Boolean confidencial,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaHasta,
-            @RequestParam(defaultValue = "200") int limite) {
+            @RequestParam(defaultValue = "200") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
         return documentoService.listar(texto, categoria, estado, expedienteId, clienteId, creadorId,
-                extension, confidencial, fechaDesde, fechaHasta, false, limite);
+                extension, confidencial, fechaDesde, fechaHasta, false, limite, desplazamiento);
     }
 
     @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/papelera")
-    public List<DocumentoResponse> papelera(@RequestParam(defaultValue = "200") int limite) {
+    public List<DocumentoResponse> papelera(
+            @RequestParam(defaultValue = "200") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
         return documentoService.listar(null, null, null, null, null, null,
-                null, null, null, null, true, limite);
+                null, null, null, null, true, limite, desplazamiento);
     }
 
     @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")
     @GetMapping("/recientes")
     public List<DocumentoResponse> recientes(@RequestParam(defaultValue = "6") int limite) {
         return documentoService.listar(null, null, null, null, null, null,
-                null, null, LocalDate.now().minusDays(7), null, false, limite);
+                null, null, LocalDate.now().minusDays(7), null, false, limite, 0);
     }
 
     @PreAuthorize("hasAuthority('DOCUMENTO_LEER')")

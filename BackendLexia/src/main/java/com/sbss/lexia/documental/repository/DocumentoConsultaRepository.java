@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import lombok.RequiredArgsConstructor;
@@ -110,7 +111,8 @@ public class DocumentoConsultaRepository {
             LocalDate fechaDesde,
             LocalDate fechaHasta,
             boolean papelera,
-            int limite) {
+            int limite,
+            int desplazamiento) {
 
         StringBuilder sql = new StringBuilder(SELECT_BASE);
         Map<String, Object> p = new HashMap<>();
@@ -172,8 +174,9 @@ public class DocumentoConsultaRepository {
             p.put("fechaHasta", fechaHasta.plusDays(1).atStartOfDay());
         }
 
-        sql.append(" ORDER BY d.fecha_creacion DESC LIMIT :limite ");
-        p.put("limite", Math.max(1, Math.min(limite, 500)));
+        sql.append(" ORDER BY d.fecha_creacion DESC LIMIT :limite OFFSET :desplazamiento ");
+        p.put("limite", Limites.limite(limite));
+        p.put("desplazamiento", Limites.desplazamiento(desplazamiento));
         return jdbc.query(sql.toString(), p, this::mapDocumento);
     }
 

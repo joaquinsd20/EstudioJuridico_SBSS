@@ -9,6 +9,7 @@ import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
 import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
 import com.sbss.lexia.agenda.repository.AgendaRepositoryJdbc;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
@@ -53,7 +54,7 @@ public class AgendaService {
 
     @Transactional(readOnly = true)
     public List<EventoLista> listar(LocalDateTime desde, LocalDateTime hasta, String texto, String tipo,
-            String estado, Long expedienteId, Long participanteId) {
+            String estado, Long expedienteId, Long participanteId, int limite, int desplazamiento) {
         if (desde == null || hasta == null) {
             LocalDate hoy = LocalDate.now();
             desde = hoy.withDayOfMonth(1).atStartOfDay();
@@ -67,7 +68,7 @@ public class AgendaService {
             throw new ParametroInvalidoException("Estado de evento no válido");
         }
         return repository.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
-                verTodos(), verConfidenciales());
+                verTodos(), verConfidenciales(), limite, desplazamiento);
     }
 
     @Transactional(readOnly = true)
@@ -75,11 +76,13 @@ public class AgendaService {
         LocalDate hoy = LocalDate.now();
         LocalDateTime inicioMes = hoy.withDayOfMonth(1).atStartOfDay();
         LocalDateTime finMes = hoy.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
+        // Sin cota a proposito: el resumen cuenta sobre el mes completo, y
+        // acotarlo a 500 daria cifras falsas en un estudio con volumen.
         List<EventoLista> mes = repository.listar(inicioMes, finMes, null, null, null, null, null,
-                verTodos(), verConfidenciales());
+                verTodos(), verConfidenciales(), Limites.SIN_COTA, 0);
         LocalDateTime ahora = LocalDateTime.now();
         List<EventoLista> proximos = repository.listar(ahora, ahora.plusDays(7), null, null, null, null, null,
-                verTodos(), verConfidenciales());
+                verTodos(), verConfidenciales(), Limites.SIN_COTA, 0);
 
         long hoyCount = mes.stream()
                 .filter(e -> !"CANCELADO".equals(e.estado()))

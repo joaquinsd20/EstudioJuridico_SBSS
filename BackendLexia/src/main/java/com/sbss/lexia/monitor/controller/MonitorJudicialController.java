@@ -43,8 +43,11 @@ public class MonitorJudicialController {
             @RequestParam(required = false) String organo,
             @RequestParam(required = false) String estadoProcesal,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return service.listar(expediente, cliente, abogado, organo, estadoProcesal, desde, hasta);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
+        return service.listar(expediente, cliente, abogado, organo, estadoProcesal, desde, hasta,
+                limite, desplazamiento);
     }
 
     @GetMapping("/resumen")
@@ -66,8 +69,11 @@ public class MonitorJudicialController {
             @RequestParam(required = false) String tipoMovimiento,
             @RequestParam(required = false) String estadoVerificacion,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
-        return service.consultas(expedienteId, tipoMovimiento, estadoVerificacion, desde, hasta);
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
+        return service.consultas(expedienteId, tipoMovimiento, estadoVerificacion, desde, hasta,
+                limite, desplazamiento);
     }
 
     @PostMapping

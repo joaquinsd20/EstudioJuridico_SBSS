@@ -30,9 +30,11 @@ public class PlazoController {
             @RequestParam(required = false) String computo,
             @RequestParam(required = false) Boolean requiereRevision,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
         return service.listar(texto, expedienteId, responsableId, tipoPlazoId, estado, riesgo,
-                computo, requiereRevision, desde, hasta);
+                computo, requiereRevision, desde, hasta, limite, desplazamiento);
     }
 
     @GetMapping("/resumen")

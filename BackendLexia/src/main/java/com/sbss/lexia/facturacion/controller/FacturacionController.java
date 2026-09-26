@@ -8,6 +8,7 @@ import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -73,17 +74,22 @@ public class FacturacionController {
     // =========================================================
 
     @GetMapping
+    @PreAuthorize("hasAuthority('FACTURACION_LEER')")
     public List<HonorarioLista> listar(
             @RequestParam(required = false) String cliente,
             @RequestParam(required = false) String expediente,
             @RequestParam(required = false) Long modalidadId,
-            @RequestParam(required = false) String estado) {
+            @RequestParam(required = false) String estado,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
 
         return service.listar(
                 cliente,
                 expediente,
                 modalidadId,
-                estado
+                estado,
+                limite,
+                desplazamiento
         );
     }
 
@@ -106,6 +112,7 @@ public class FacturacionController {
     // =========================================================
 
     @GetMapping("/resumen")
+    @PreAuthorize("hasAuthority('FACTURACION_LEER')")
     public ResumenFacturacion resumen() {
 
         return service.resumen();
@@ -128,6 +135,7 @@ public class FacturacionController {
     // =========================================================
 
     @GetMapping("/catalogos")
+    @PreAuthorize("hasAuthority('FACTURACION_LEER')")
     public CatalogosFacturacion catalogos() {
 
         return service.catalogos();
@@ -143,6 +151,7 @@ public class FacturacionController {
     // =========================================================
 
     @PostMapping("/honorarios")
+    @PreAuthorize("hasAuthority('FACTURACION_REGISTRAR')")
     public ResponseEntity<Map<String, String>> crearHonorario(
             @Valid @RequestBody GuardarHonorarioRequest request) {
 
@@ -172,6 +181,7 @@ public class FacturacionController {
     // =========================================================
 
     @PutMapping("/honorarios/{uuid}")
+    @PreAuthorize("hasAuthority('FACTURACION_EDITAR')")
     public ResponseEntity<Map<String, String>> actualizarHonorario(
             @PathVariable String uuid,
             @Valid @RequestBody ActualizarHonorarioRequest request) {
@@ -220,6 +230,7 @@ public class FacturacionController {
     // =========================================================
 
     @GetMapping("/honorarios/{uuid}/detalle")
+    @PreAuthorize("hasAuthority('FACTURACION_LEER')")
     public ResponseEntity<DetalleHonorario> obtenerDetalleHonorario(
             @PathVariable String uuid) {
 
@@ -248,6 +259,7 @@ public class FacturacionController {
             value = "/honorarios/{uuid}/comprobante",
             produces = MediaType.APPLICATION_PDF_VALUE
     )
+    @PreAuthorize("hasAuthority('FACTURACION_EMITIR')")
     public ResponseEntity<byte[]> emitirComprobante(
             @PathVariable String uuid) {
 
@@ -286,6 +298,7 @@ public class FacturacionController {
     // =========================================================
 
     @PostMapping("/movimientos")
+    @PreAuthorize("hasAuthority('FACTURACION_REGISTRAR')")
     public ResponseEntity<Map<String, String>> crearMovimiento(
             @Valid @RequestBody RegistrarMovimientoRequest request) {
 
@@ -315,6 +328,7 @@ public class FacturacionController {
     // =========================================================
 
     @PostMapping("/honorarios/{uuid}/pagos")
+    @PreAuthorize("hasAuthority('FACTURACION_REGISTRAR')")
     public ResponseEntity<Map<String, String>> registrarPago(
             @PathVariable String uuid,
             @Valid @RequestBody RegistrarPagoRequest request) {
