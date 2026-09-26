@@ -6,7 +6,9 @@ import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.ExpedienteMonitor;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.ExpedienteOpcion;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.RegistrarConsultaRequest;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.Resumen;
+import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -28,7 +30,7 @@ public class MonitorJudicialRepositoryJdbc {
 
     public List<ExpedienteMonitor> listar(String expediente, String cliente, String abogado,
             String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
-            boolean verTodos, boolean verConfidenciales) {
+            int limite, int desplazamiento) {
 
         StringBuilder sql = new StringBuilder("""
                 SELECT m.uuid_publico, e.id expediente_id, e.codigo_interno, e.numero_expediente,
@@ -60,7 +62,7 @@ public class MonitorJudicialRepositoryJdbc {
                    AND e.activo=1
                 """);
         MapSqlParameterSource p = base();
-        aplicarVisibilidadExpediente(sql, p, verTodos, verConfidenciales);
+        aplicarVisibilidad(sql, p);
 
         if (expediente != null && !expediente.isBlank()) {
             sql.append(" AND LOWER(CONCAT_WS(' ',e.codigo_interno,e.numero_expediente)) LIKE :expediente");
@@ -95,11 +97,12 @@ public class MonitorJudicialRepositoryJdbc {
             sql.append(")");
         }
         sql.append(" ORDER BY COALESCE(m.ultima_consulta,m.fecha_creacion) DESC, e.codigo_interno DESC");
+        acotar(sql, p, limite, desplazamiento);
         return jdbc.query(sql.toString(), p, (rs, n) -> mapMonitor(rs));
     }
 
     public List<Consulta> listarConsultas(Long expedienteId, String tipoMovimiento, String estadoVerificacion,
-            LocalDate desde, LocalDate hasta, boolean verTodos, boolean verConfidenciales) {
+            LocalDate desde, LocalDate hasta, int limite, int desplazamiento) {
         StringBuilder sql = new StringBuilder("""
                 SELECT mc.uuid_publico, e.id expediente_id, e.codigo_interno, e.numero_expediente,
                        c.nombre_busqueda cliente, mc.fecha_consulta, us.id usuario_id,
@@ -119,7 +122,7 @@ public class MonitorJudicialRepositoryJdbc {
                    AND e.activo=1
                 """);
         MapSqlParameterSource p = base();
-        aplicarVisibilidadExpediente(sql, p, verTodos, verConfidenciales);
+        aplicarVisibilidad(sql, p);
         if (expedienteId != null) {
             sql.append(" AND e.id=:expedienteId");
             p.addValue("expedienteId", expedienteId);
@@ -140,18 +143,22 @@ public class MonitorJudicialRepositoryJdbc {
             sql.append(" AND DATE(mc.fecha_consulta)<=:hasta");
             p.addValue("hasta", hasta);
         }
-        sql.append(" ORDER BY mc.fecha_consulta DESC, mc.id DESC LIMIT 200");
+        // El LIMIT 200 estaba escrito a mano y no se podia pasar de ahi. El
+        // historial de consultas judiciales crece una fila por revision: con
+        // 500 expedientes revisados a diario son ~180.000 filas al ano.
+        sql.append(" ORDER BY mc.fecha_consulta DESC, mc.id DESC");
+        acotar(sql, p, limite, desplazamiento);
         return jdbc.query(sql.toString(), p, (rs, n) -> mapConsulta(rs));
     }
 
-    public Resumen resumen(boolean verTodos, boolean verConfidenciales) {
+    public Resumen resumen() {
         StringBuilder filtro = new StringBuilder("""
                 FROM monitor_expedientes m
                 JOIN expedientes e ON e.id=m.expediente_id
                WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
                 """);
         MapSqlParameterSource p = base();
-        aplicarVisibilidadExpediente(filtro, p, verTodos, verConfidenciales);
+        aplicarVisibilidad(filtro, p);
         String condicion = filtro.toString();
 
         Long monitoreados = jdbc.queryForObject("SELECT COUNT(*) " + condicion, p, Long.class);
@@ -161,25 +168,25 @@ public class MonitorJudicialRepositoryJdbc {
                 JOIN expedientes e ON e.id=m.expediente_id
                 WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
                   AND mc.hubo_movimiento=1 AND DATE(mc.fecha_consulta)=CURRENT_DATE
-                """ + visibilidadSql(verTodos, verConfidenciales), parametrosVisibilidad(p, verTodos), Long.class);
+                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
         Long resoluciones = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM monitor_consultas mc
                 JOIN monitor_expedientes m ON m.id=mc.monitor_id
                 JOIN expedientes e ON e.id=m.expediente_id
                 WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
                   AND mc.nueva_resolucion=1 AND DATE(mc.fecha_consulta)=CURRENT_DATE
-                """ + visibilidadSql(verTodos, verConfidenciales), parametrosVisibilidad(p, verTodos), Long.class);
+                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
         Long pendientes = jdbc.queryForObject("""
                 SELECT COUNT(*) FROM monitor_consultas mc
                 JOIN monitor_expedientes m ON m.id=mc.monitor_id
                 JOIN expedientes e ON e.id=m.expediente_id
                 WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
                   AND mc.estado_verificacion='PENDIENTE'
-                """ + visibilidadSql(verTodos, verConfidenciales), parametrosVisibilidad(p, verTodos), Long.class);
+                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
         return new Resumen(nvl(monitoreados), nvl(movimientos), nvl(resoluciones), nvl(pendientes));
     }
 
-    public Catalogos catalogos(boolean verTodos, boolean verConfidenciales) {
+    public Catalogos catalogos() {
         StringBuilder sql = new StringBuilder("""
                 SELECT DISTINCT e.id, e.codigo_interno, e.numero_expediente,
                        c.nombre_busqueda cliente, o.nombre organo,
@@ -191,7 +198,7 @@ public class MonitorJudicialRepositoryJdbc {
                  WHERE e.estudio_id=:estudioId AND e.activo=1
                 """);
         MapSqlParameterSource p = base();
-        aplicarVisibilidadExpedienteSinMonitor(sql, p, verTodos, verConfidenciales);
+        aplicarVisibilidad(sql, p);
         sql.append(" ORDER BY e.codigo_interno DESC");
         List<ExpedienteOpcion> expedientes = jdbc.query(sql.toString(), p, (rs, n) -> new ExpedienteOpcion(
                 rs.getLong("id"), rs.getString("codigo_interno"), rs.getString("numero_expediente"),
@@ -199,9 +206,9 @@ public class MonitorJudicialRepositoryJdbc {
         return new Catalogos(expedientes);
     }
 
-    public boolean expedienteVisible(Long expedienteId, boolean verTodos, boolean verConfidenciales) {
+    public boolean expedienteVisible(Long expedienteId) {
         if (expedienteId == null) return false;
-        return catalogos(verTodos, verConfidenciales).expedientes().stream().anyMatch(e -> e.id().equals(expedienteId));
+        return catalogos().expedientes().stream().anyMatch(e -> e.id().equals(expedienteId));
     }
 
     public String agregarExpediente(Long expedienteId, String fuentePlataforma) {
@@ -363,40 +370,24 @@ public class MonitorJudicialRepositoryJdbc {
                 """, p, Long.class);
     }
 
-    private void aplicarVisibilidadExpediente(StringBuilder sql, MapSqlParameterSource p,
-            boolean verTodos, boolean verConfidenciales) {
-        if (SesionActual.esPortalCliente()) {
-            sql.append(" AND e.cliente_id=:clienteId");
-            p.addValue("clienteId", SesionActual.clienteId(), Types.BIGINT);
-        } else if (!verTodos) {
-            sql.append(" AND (e.abogado_responsable_id=:usuarioId OR EXISTS (SELECT 1 FROM expediente_equipo eq WHERE eq.expediente_id=e.id AND eq.usuario_id=:usuarioId AND eq.activo=1))");
-            p.addValue("usuarioId", SesionActual.usuarioId());
-        }
-        if (!verConfidenciales) sql.append(" AND e.es_confidencial=0");
+    /**
+     * La regla de RF-02, compartida con expedientes, actuaciones, agenda,
+     * documental y plazos. Este modulo la tenia escrita dos veces
+     * (aplicarVisibilidadExpediente y visibilidadSql) y ambas aplicaban
+     * "es_confidencial=0" incluso a quien tenia el expediente asignado, asi
+     * que un responsable no veia su propio caso confidencial en el monitor.
+     * El helper ya decide eso leyendo el SecurityContext, de modo que sobran
+     * los parametros verTodos/verConfidenciales que venian del servicio.
+     */
+    private void acotar(StringBuilder sql, MapSqlParameterSource p, int limite, int desplazamiento) {
+        sql.append(" LIMIT :limite OFFSET :desplazamiento");
+        p.addValue("limite", Limites.limite(limite));
+        p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
     }
 
-    private void aplicarVisibilidadExpedienteSinMonitor(StringBuilder sql, MapSqlParameterSource p,
-            boolean verTodos, boolean verConfidenciales) {
-        aplicarVisibilidadExpediente(sql, p, verTodos, verConfidenciales);
-    }
-
-    private String visibilidadSql(boolean verTodos, boolean verConfidenciales) {
-        StringBuilder s = new StringBuilder();
-        if (SesionActual.esPortalCliente()) {
-            s.append(" AND e.cliente_id=:clienteId");
-        } else if (!verTodos) {
-            s.append(" AND (e.abogado_responsable_id=:usuarioId OR EXISTS (SELECT 1 FROM expediente_equipo eq WHERE eq.expediente_id=e.id AND eq.usuario_id=:usuarioId AND eq.activo=1))");
-        }
-        if (!verConfidenciales) s.append(" AND e.es_confidencial=0");
-        return s.toString();
-    }
-
-    private MapSqlParameterSource parametrosVisibilidad(MapSqlParameterSource original, boolean verTodos) {
-        MapSqlParameterSource p = new MapSqlParameterSource();
-        for (String name : original.getParameterNames()) p.addValue(name, original.getValue(name));
-        if (SesionActual.esPortalCliente()) p.addValue("clienteId", SesionActual.clienteId(), Types.BIGINT);
-        else if (!verTodos) p.addValue("usuarioId", SesionActual.usuarioId());
-        return p;
+    private void aplicarVisibilidad(StringBuilder sql, MapSqlParameterSource p) {
+        sql.append(VisibilidadExpedientes.sql("e"));
+        p.addValues(VisibilidadExpedientes.parametros());
     }
 
     private ExpedienteMonitor mapMonitor(ResultSet rs) throws SQLException {

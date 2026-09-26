@@ -78,10 +78,11 @@ public class DocumentoService {
             LocalDate fechaDesde,
             LocalDate fechaHasta,
             boolean papelera,
-            int limite) {
+            int limite,
+            int desplazamiento) {
         return consultaRepository.listar(texto, normalizarOpcional(categoria), normalizarOpcional(estado),
                 expedienteId, clienteId, creadorId, normalizarOpcional(extension), confidencial,
-                fechaDesde, fechaHasta, papelera, limite);
+                fechaDesde, fechaHasta, papelera, limite, desplazamiento);
     }
 
     @Transactional(readOnly = true)

@@ -11,6 +11,7 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.MateriaOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Opcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.PersonaRelacionada;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
+import com.sbss.lexia.shared.dto.Limites;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
@@ -49,7 +50,9 @@ public class ExpedienteRepositoryJdbc {
             String cliente,
             String estado,
             Long materiaId,
-            String organo) {
+            String organo,
+            int limite,
+            int desplazamiento) {
 
         List<Long> visibles = idsVisibles(estudioId, usuarioId, verTodos, verConfidenciales);
         if (visibles.isEmpty()) return List.of();
@@ -98,7 +101,10 @@ public class ExpedienteRepositoryJdbc {
             p.addValue("organo", like(organo));
         }
 
-        sql.append(" ORDER BY COALESCE(e.fecha_ultima_actuacion, e.fecha_creacion) DESC, e.id DESC LIMIT 250");
+        // El LIMIT 250 estaba escrito a mano: el cliente no podia ver la fila 251.
+        sql.append(" ORDER BY COALESCE(e.fecha_ultima_actuacion, e.fecha_creacion) DESC, e.id DESC")
+           .append(" LIMIT ").append(Limites.limite(limite))
+           .append(" OFFSET ").append(Limites.desplazamiento(desplazamiento));
 
         return jdbc.query(sql.toString(), p, (rs, rowNum) -> new ExpedienteLista(
                 rs.getString("uuid_publico"),

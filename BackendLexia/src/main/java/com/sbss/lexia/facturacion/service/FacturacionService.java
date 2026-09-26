@@ -21,7 +21,9 @@ public interface FacturacionService {
             String cliente,
             String expediente,
             Long modalidadId,
-            String estado
+            String estado,
+            int limite,
+            int desplazamiento
     );
 
 

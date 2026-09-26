@@ -25,10 +25,11 @@ public class ExpedienteService {
     private final ExpedienteRepositoryJdbc repository;
 
     @Transactional(readOnly = true)
-    public List<ExpedienteLista> listar(String texto, String cliente, String estado, Long materiaId, String organo) {
+    public List<ExpedienteLista> listar(String texto, String cliente, String estado, Long materiaId,
+            String organo, int limite, int desplazamiento) {
         return repository.listar(
                 SesionActual.estudioId(), SesionActual.usuarioId(), verTodos(), verConfidenciales(),
-                texto, cliente, estado, materiaId, organo);
+                texto, cliente, estado, materiaId, organo, limite, desplazamiento);
     }
 
     @Transactional(readOnly = true)

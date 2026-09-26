@@ -3,7 +3,8 @@
 -- MÓDULO: FACTURACIÓN Y HONORARIOS
 -- ============================================================
 
-USE lexia_db;
+-- Sin USE: la base la elige la conexion (DB_NAME / LEXIA_DB_NAME). Un USE fijo
+-- aqui escribiria en lexia_db aunque Flyway apunte a otra base.
 
 -- ============================================================
 -- 1. TABLA DE HONORARIOS
@@ -43,7 +44,11 @@ CREATE TABLE honorarios (
 
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_unicode_ci;
+-- utf8mb4_0900_ai_ci, la del resto del esquema. Con utf8mb4_unicode_ci el
+-- check "Una sola collation" de scripts/verificar-bd.sh falla, y cualquier
+-- comparacion futura entre honorarios.uuid y un CHAR(36) de otra tabla daria
+-- "Illegal mix of collations".
+COLLATE=utf8mb4_0900_ai_ci;
 
 -- ============================================================
 -- 2. TABLA DE MOVIMIENTOS FINANCIEROS
@@ -82,5 +87,9 @@ CREATE TABLE movimientos_financieros (
 
 ) ENGINE=InnoDB
 DEFAULT CHARSET=utf8mb4
-COLLATE=utf8mb4_unicode_ci;
+-- utf8mb4_0900_ai_ci, la del resto del esquema. Con utf8mb4_unicode_ci el
+-- check "Una sola collation" de scripts/verificar-bd.sh falla, y cualquier
+-- comparacion futura entre honorarios.uuid y un CHAR(36) de otra tabla daria
+-- "Illegal mix of collations".
+COLLATE=utf8mb4_0900_ai_ci;
 

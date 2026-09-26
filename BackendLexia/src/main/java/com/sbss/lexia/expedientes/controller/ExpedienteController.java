@@ -37,8 +37,10 @@ public class ExpedienteController {
             @RequestParam(required = false) String cliente,
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) Long materiaId,
-            @RequestParam(required = false) String organo) {
-        return service.listar(texto, cliente, estado, materiaId, organo);
+            @RequestParam(required = false) String organo,
+            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(defaultValue = "0") int desplazamiento) {
+        return service.listar(texto, cliente, estado, materiaId, organo, limite, desplazamiento);
     }
 
     @GetMapping("/resumen")

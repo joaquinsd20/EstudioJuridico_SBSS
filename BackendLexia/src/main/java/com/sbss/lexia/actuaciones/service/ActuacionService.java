@@ -38,11 +38,12 @@ public class ActuacionService {
 
     @Transactional(readOnly = true)
     public List<ActuacionLista> listar(String texto, Long tipoId, Long expedienteId, Long responsableId,
-            String estado, LocalDate desde, LocalDate hasta, int limite) {
+            String estado, LocalDate desde, LocalDate hasta, int limite, int desplazamiento) {
         String e = vacioANull(estado);
         if (e != null && !ESTADOS.contains(normalizar(e))) throw new ParametroInvalidoException("Estado de actuacion invalido");
         if (desde != null && hasta != null && hasta.isBefore(desde)) throw new ParametroInvalidoException("La fecha hasta no puede ser anterior a la fecha desde");
-        return repository.listar(texto, tipoId, expedienteId, responsableId, e == null ? null : normalizar(e), desde, hasta, limite);
+        return repository.listar(texto, tipoId, expedienteId, responsableId, e == null ? null : normalizar(e),
+                desde, hasta, limite, desplazamiento);
     }
 
     @Transactional(readOnly = true)

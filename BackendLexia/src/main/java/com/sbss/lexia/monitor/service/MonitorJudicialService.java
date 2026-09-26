@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,29 +30,30 @@ public class MonitorJudicialService {
     private final MonitorJudicialRepositoryJdbc repository;
 
     public List<ExpedienteMonitor> listar(String expediente, String cliente, String abogado,
-            String organo, String estadoProcesal, LocalDate desde, LocalDate hasta) {
+            String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
+            int limite, int desplazamiento) {
         validarRango(desde, hasta);
         return repository.listar(expediente, cliente, abogado, organo, estadoProcesal,
-                desde, hasta, verTodos(), verConfidenciales());
+                desde, hasta, limite, desplazamiento);
     }
 
     public List<Consulta> consultas(Long expedienteId, String tipoMovimiento, String estadoVerificacion,
-            LocalDate desde, LocalDate hasta) {
+            LocalDate desde, LocalDate hasta, int limite, int desplazamiento) {
         validarRango(desde, hasta);
         if (estadoVerificacion != null && !estadoVerificacion.isBlank()
                 && !VERIFICACIONES.contains(normalizar(estadoVerificacion))) {
             throw new ParametroInvalidoException("Estado de verificación no válido");
         }
         return repository.listarConsultas(expedienteId, tipoMovimiento, estadoVerificacion,
-                desde, hasta, verTodos(), verConfidenciales());
+                desde, hasta, limite, desplazamiento);
     }
 
     public Resumen resumen() {
-        return repository.resumen(verTodos(), verConfidenciales());
+        return repository.resumen();
     }
 
     public Catalogos catalogos() {
-        return repository.catalogos(verTodos(), verConfidenciales());
+        return repository.catalogos();
     }
 
     @Transactional
@@ -116,7 +115,7 @@ public class MonitorJudicialService {
     }
 
     private void validarExpediente(Long expedienteId) {
-        if (!repository.expedienteVisible(expedienteId, verTodos(), verConfidenciales())) {
+        if (!repository.expedienteVisible(expedienteId)) {
             throw new ParametroInvalidoException("El expediente no existe o no está disponible para el usuario");
         }
     }
@@ -127,18 +126,6 @@ public class MonitorJudicialService {
         }
     }
 
-    private boolean verTodos() {
-        return tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
-    }
-
-    private boolean verConfidenciales() {
-        return tieneAutoridad("EXPEDIENTE_CONFIDENCIAL") || tieneAutoridad("ADMINISTRADOR") || tieneAutoridad("SOCIO");
-    }
-
-    private boolean tieneAutoridad(String codigo) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return auth != null && auth.getAuthorities().stream().anyMatch(a -> codigo.equals(a.getAuthority()));
-    }
 
     private static String normalizar(String valor) {
         return valor == null ? "" : valor.trim().toUpperCase(Locale.ROOT);

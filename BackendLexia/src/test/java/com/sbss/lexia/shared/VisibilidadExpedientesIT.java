@@ -139,4 +139,127 @@ class VisibilidadExpedientesIT {
                     .andExpect(jsonPath("$[?(@.expedienteId == " + idExpedienteConfidencial() + ")]").isNotEmpty());
         }
     }
+
+    // =======================================================================
+    // PLAZOS (PR #41). Su filtro era "aplicarPortal": solo estudio y portal,
+    // el mismo metodo que actuaciones tenia antes del arreglo. Comprobado por
+    // HTTP antes de este cambio: Juan recibia 404 en EXP-0088 y sin embargo
+    // veia su plazo, podia elegirlo en /plazos/catalogos, y el listado general
+    // le devolvia los plazos de todo el estudio.
+    // =======================================================================
+
+    @Test
+    @DisplayName("plazos no muestra los de un expediente confidencial ajeno")
+    void plazosAcotaPorAsignacion() throws Exception {
+        long id = idExpedienteConfidencial();
+
+        mockMvc.perform(get("/api/v1/plazos").param("expedienteId", String.valueOf(id))
+                        .with(authentication(como(JUAN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        // Tampoco puede elegirlo para crearle un plazo nuevo
+        mockMvc.perform(get("/api/v1/plazos/catalogos").with(authentication(como(JUAN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expedientes[?(@.codigo == 'EXP-0088')]").isEmpty());
+    }
+
+    @Test
+    @DisplayName("plazos SI los muestra a su responsable, aunque sean confidenciales")
+    void plazosLosVeSuResponsable() throws Exception {
+        long id = idExpedienteConfidencial();
+        Integer cuantos = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM plazos WHERE expediente_id = ? AND activo = 1", Integer.class, id);
+        // Si la semilla dejara de traer plazos en EXP-0088, esta prueba pasaria
+        // en vacio y no comprobaria nada: mejor que falle y se note.
+        org.junit.jupiter.api.Assertions.assertTrue(cuantos != null && cuantos > 0,
+                "EXP-0088 debe tener al menos un plazo en la semilla para que esta prueba valga");
+
+        mockMvc.perform(get("/api/v1/plazos").param("expedienteId", String.valueOf(id))
+                        .with(authentication(como(MARIA))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[?(@.expedienteCodigo == 'EXP-0088')]").isNotEmpty());
+
+        mockMvc.perform(get("/api/v1/plazos/catalogos").with(authentication(como(MARIA))))
+                .andExpect(jsonPath("$.expedientes[?(@.codigo == 'EXP-0088')]").isNotEmpty());
+    }
+
+    // =======================================================================
+    // MONITOR JUDICIAL (PR #40). Tenia el bug inverso: aplicaba
+    // "es_confidencial = 0" incluso a quien tenia el expediente asignado, asi
+    // que Maria no veia su propio caso confidencial en el monitor.
+    // =======================================================================
+
+    @Test
+    @DisplayName("el monitor deja elegir el confidencial a su responsable, y no a un ajeno")
+    void monitorRespetaLaAsignacion() throws Exception {
+        mockMvc.perform(get("/api/v1/monitor-judicial/catalogos").with(authentication(como(MARIA))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expedientes[?(@.codigoInterno == 'EXP-0088')]").isNotEmpty());
+
+        mockMvc.perform(get("/api/v1/monitor-judicial/catalogos").with(authentication(como(JUAN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.expedientes[?(@.codigoInterno == 'EXP-0088')]").isEmpty());
+    }
+
+    // =======================================================================
+    // FACTURACION (PR #43). Sus 9 endpoints no tenian @PreAuthorize, asi que
+    // cualquier usuario autenticado leia los honorarios del estudio.
+    // Comprobado antes del arreglo: GET /api/v1/facturacion devolvia 200 a
+    // juan.perez. Los permisos FACTURACION_* no existian: los crea V20.
+    // =======================================================================
+
+    @Test
+    @DisplayName("la facturacion del estudio no la lee un abogado sin permiso")
+    void facturacionExigePermiso() throws Exception {
+        mockMvc.perform(get("/api/v1/facturacion").with(authentication(como(JUAN))))
+                .andExpect(status().isForbidden());
+        mockMvc.perform(get("/api/v1/facturacion/resumen").with(authentication(como(JUAN))))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("V19 creo de verdad las tablas de facturacion (su nombre se saltaba en silencio)")
+    void facturacionRespondeAlAdministrador() throws Exception {
+        // Esta prueba es el centinela del fallo de nombre: V19 se llamaba
+        // "V19_facturacion.sql" con un solo guion bajo, Flyway la saltaba con
+        // una linea en INFO y las tablas honorarios y movimientos_financieros
+        // nunca se creaban. El modulo no fallaba porque el servicio devolvia
+        // lista vacia ante cualquier excepcion. Quitado ese catch, si la
+        // migracion se salta otra vez esto revienta en vez de pasar.
+        mockMvc.perform(get("/api/v1/facturacion").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk());
+        mockMvc.perform(get("/api/v1/facturacion/resumen").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk());
+    }
+
+    // =======================================================================
+    // La cota de los listados (shared/dto/Limites).
+    // =======================================================================
+
+    @Test
+    @DisplayName("los listados respetan el limite pedido")
+    void losListadosSeAcotan() throws Exception {
+        mockMvc.perform(get("/api/v1/plazos").param("limite", "2").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
+        mockMvc.perform(get("/api/v1/expedientes").param("limite", "3").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(3)));
+        mockMvc.perform(get("/api/v1/agenda").param("limite", "1").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)));
+        // El historial del monitor crece una fila por revision judicial, y los
+        // honorarios con la facturacion: los dos tenian que acotarse tambien.
+        mockMvc.perform(get("/api/v1/monitor-judicial").param("limite", "2").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
+        mockMvc.perform(get("/api/v1/monitor-judicial/consultas").param("limite", "2")
+                        .with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
+        mockMvc.perform(get("/api/v1/facturacion").param("limite", "2").with(authentication(como(ADMIN))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
+    }
 }

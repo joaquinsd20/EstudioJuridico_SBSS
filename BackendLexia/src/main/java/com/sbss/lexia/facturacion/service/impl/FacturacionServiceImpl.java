@@ -57,7 +57,10 @@ public class FacturacionServiceImpl implements FacturacionService {
     }
 
     private Long getUsuarioIdActual() {
-        return 1L; // ID predeterminado del usuario
+        // Devolvia 1L fijo, asi que todo honorario, movimiento y pago quedaba
+        // registrado a nombre del usuario 1 hiciera quien lo hiciera. En un
+        // modulo de dinero la trazabilidad es el punto.
+        return SesionActual.usuarioId();
     }
 
 
@@ -70,28 +73,19 @@ public class FacturacionServiceImpl implements FacturacionService {
             String cliente,
             String expediente,
             Long modalidadId,
-            String estado) {
+            String estado,
+            int limite,
+            int desplazamiento) {
 
-        try {
-
-            return repository.listar(
-                    getEstudioIdActual(),
-                    cliente,
-                    expediente,
-                    modalidadId,
-                    estado
-            );
-
-        } catch (Exception e) {
-
-            log.error(
-                    "Error al listar honorarios: {}",
-                    e.getMessage(),
-                    e
-            );
-
-            return List.of();
-        }
+        return repository.listar(
+                getEstudioIdActual(),
+                cliente,
+                expediente,
+                modalidadId,
+                estado,
+                limite,
+                desplazamiento
+        );
     }
 
 
@@ -123,41 +117,7 @@ public class FacturacionServiceImpl implements FacturacionService {
     @Override
     public ResumenFacturacion resumen() {
 
-        try {
-
-            return repository.resumen(
-                    getEstudioIdActual()
-            );
-
-        } catch (Exception e) {
-
-            log.error(
-                    "Error al obtener el resumen financiero: {}",
-                    e.getMessage(),
-                    e
-            );
-
-            return new ResumenFacturacion(
-
-                    // totalFacturado
-                    BigDecimal.ZERO,
-
-                    // totalCobrado
-                    BigDecimal.ZERO,
-
-                    // totalPendiente
-                    BigDecimal.ZERO,
-
-                    // facturasPendientes
-                    0L,
-
-                    // totalVencido
-                    BigDecimal.ZERO,
-
-                    // cuentasVencidas
-                    0L
-            );
-        }
+        return repository.resumen(getEstudioIdActual());
     }
 
 
@@ -168,27 +128,7 @@ public class FacturacionServiceImpl implements FacturacionService {
     @Override
     public CatalogosFacturacion catalogos() {
 
-        try {
-
-            return repository.catalogos(
-                    getEstudioIdActual()
-            );
-
-        } catch (Exception e) {
-
-            log.error(
-                    "Error al obtener los catálogos de facturación: {}",
-                    e.getMessage(),
-                    e
-            );
-
-            return new CatalogosFacturacion(
-                    List.of(),
-                    List.of(),
-                    List.of(),
-                    List.of()
-            );
-        }
+        return repository.catalogos(getEstudioIdActual());
     }
 
 
