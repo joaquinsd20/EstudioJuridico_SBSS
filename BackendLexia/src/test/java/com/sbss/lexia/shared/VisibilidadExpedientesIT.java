@@ -1,5 +1,7 @@
 package com.sbss.lexia.shared;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.authentication;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -7,6 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.sbss.lexia.seguridad.security.UsuarioPrincipal;
 import com.sbss.lexia.seguridad.service.UsuarioDetailsService;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -17,6 +20,7 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
@@ -261,5 +265,60 @@ class VisibilidadExpedientesIT {
         mockMvc.perform(get("/api/v1/facturacion").param("limite", "2").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
+    }
+
+    // =======================================================================
+    // La FORMA del SQL que genera el helper, no solo lo que filtra.
+    //
+    // Una de las cuatro ramas no terminaba en espacio. Al concatenarla con un
+    // bloque de texto de Java -- que recorta los espacios finales -- el nombre
+    // del parametro se pego a la palabra siguiente:
+    //
+    //   ... AND e.estudio_id = :visEstudioIdORDER BY e.codigo_interno DESC
+    //   InvalidDataAccessApiUsageException: No value supplied for the SQL
+    //   parameter 'visEstudioIdORDER'
+    //
+    // Solo reventaba para Administrador y Socio, que son los unicos que caen
+    // en esa rama. Las pruebas de visibilidad no lo vieron porque todas usaban
+    // usuarios normales: filtraban bien, y el que no filtra era el que fallaba.
+    // =======================================================================
+
+    @Test
+    @DisplayName("el SQL del helper empieza y termina con espacio para CUALQUIER rol")
+    void elSqlSiempreVaEspaciado() {
+        // Los cuatro usuarios cubren las cuatro ramas: ve-todo, asignado,
+        // asignado sin confidenciales y portal del cliente.
+        for (String email : new String[] {ADMIN, JUAN, MARIA, "anamaria.fsalas@correo.com"}) {
+            try {
+                SecurityContextHolder.getContext().setAuthentication(como(email));
+                String sql = VisibilidadExpedientes.sql("e");
+
+                assertTrue(sql.startsWith(" AND "),
+                        email + " genera un SQL que no empieza por ' AND ': [" + sql + "]");
+                assertTrue(sql.endsWith(" "),
+                        email + " genera un SQL SIN espacio final: [" + sql + "]."
+                                + " Lo que se concatene detras se pegara al ultimo token.");
+
+                // Y la prueba de verdad: pegarle un ORDER BY como hace el codigo
+                // real no debe producir un token unico.
+                String pegado = sql + "ORDER BY e.id";
+                assertFalse(pegado.contains("IdORDER") || pegado.contains("0ORDER")
+                                || pegado.contains(")ORDER"),
+                        email + " deja el parametro pegado al ORDER BY: [" + pegado + "]");
+            } finally {
+                SecurityContextHolder.clearContext();
+            }
+        }
+    }
+
+    @Test
+    @DisplayName("los catalogos de tareas responden tambien al Administrador")
+    void losCatalogosRespondenAlAdministrador() throws Exception {
+        // La regresion salia por aqui: 500 para ADMINISTRADOR y SOCIO, 200 para
+        // el resto. Se comprueban los dos lados.
+        for (String email : new String[] {ADMIN, "sofia.ramirez@lexia.com", JUAN, MARIA}) {
+            mockMvc.perform(get("/api/v1/tareas/catalogos").with(authentication(como(email))))
+                    .andExpect(status().isOk());
+        }
     }
 }
