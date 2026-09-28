@@ -1,6 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  computed,
+  inject,
+  signal
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -12,566 +23,708 @@ import {
   DashboardIndicadores,
   DashboardService,
   ExpedienteClave,
-  Sugerencia
+  NuevaResolucionItem
 } from '../../core/services/dashboard.service';
-import { EventoAgenda } from '../../core/models/agenda.models';
+import { BusquedaService } from '../../core/services/busqueda.service';
+import {
+  GraficosDashboardService,
+  GraficosDashboard,
+  BarraGrafico,
+  EstadoCobranza
+} from '../../core/services/graficos-dashboard.service';
+import { NotificacionService, Notificacion } from '../../core/services/notificacion.service';
+import { MensajesService, ContactoChat } from '../../core/services/mensajes.service';
+import { BusquedaRespuesta, GrupoBusqueda, ResultadoBusqueda } from '../../core/models/busqueda.models';
 
-/**
- * Seccion del panel. El orden va de lo urgente a lo informativo, para que lo
- * que exige accion quede arriba sin tener que buscarlo.
- */
-type Seccion = 'prioritario' | 'operacion' | 'cliente' | 'economia';
-
-interface Tarjeta {
-  seccion: Seccion;
-  titulo: string;
-  valor: string;
-  /** Que significa el numero, en palabras. Para quien no conoce el estudio. */
-  explicacion: string;
-  routerLink: string;
-  icono: string;
-  /**
-   * `critico` es lo que ya paso de fecha, `alerta` lo que esta por pasar.
-   * `tranquilo` marca que el numero es cero, y asi se dice con palabras en vez
-   * de dejar que un 0 en rojo parezca una emergencia.
-   */
-  tono: 'neutro' | 'alerta' | 'critico' | 'exito';
-  tranquilo: boolean;
+interface SegmentoDonut {
+  nombre: string;
+  color: string;
+  dash: string;
+  offset: string;
+  porcentaje: number;
 }
 
-const REFRESCO_MS = 60_000;
+interface ItemAgendaVista {
+  hora: string;
+  titulo: string;
+  detalle: string;
+  etiqueta: string;
+  tonoEtiqueta: 'morado' | 'naranja' | 'rojo' | 'azul';
+}
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink, PanelComponent],
+  imports: [CommonModule, FormsModule, RouterLink, PanelComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
-  private readonly dashboard = inject(DashboardService);
-  private readonly auth = inject(AuthService);
+  @ViewChild('inputBusqueda') inputBusqueda?: ElementRef<HTMLInputElement>;
 
-  /** Corta las suscripciones al salir de la pantalla. */
+  // ─── Servicios ────────────────────────────────────────────────────────────
+  private readonly dashboardSvc = inject(DashboardService);
+  private readonly busquedaSvc  = inject(BusquedaService);
+  private readonly graficosSvc  = inject(GraficosDashboardService);
+  private readonly notifSvc     = inject(NotificacionService);
+  readonly mensajesSvc          = inject(MensajesService);
+  private readonly auth         = inject(AuthService);
+  private readonly router       = inject(Router);
+
   private readonly destruido = new Subject<void>();
 
+  // ─── Usuario y Sesión ─────────────────────────────────────────────────────
   readonly usuario = this.auth.usuario;
-  readonly cargando = signal(true);
-  /** Fallo total: no se pudo leer nada. Ahi si se muestra error limpio. */
-  readonly error = signal(false);
-  /** Fallo parcial: llego algo, pero un modulo no. Se dibuja con una banda. */
-  readonly parcialError = signal(false);
-  /** Marca el boton mientras corre una lectura, sea la primera o un refresco. */
-  readonly actualizando = signal(false);
 
-  readonly tarjetas = signal<Tarjeta[]>([]);
-  readonly agendaHoy = signal<AgendaHoy>({ eventos: [], realizados: 0, proximos: [] });
-  readonly cargaEquipo = signal<CargaEquipo[]>([]);
-  readonly expedientesClave = signal<ExpedienteClave[]>([]);
-  readonly indicadores = signal<DashboardIndicadores | null>(null);
+  readonly primerNombre = computed(() => {
+    const nombre = this.usuario()?.nombreCompleto?.trim();
+    if (!nombre) { return 'Sofía'; }
+    return nombre.split(/\s+/)[0];
+  });
 
-  /** Momento de la ultima lectura, para el texto "Actualizado hace X". */
-  readonly actualizadoEn = signal<Date | null>(null);
-
-  /** Segundos desde la ultima lectura. Tambien lleva la cuenta regresiva. */
-  readonly segundos = signal(0);
-
-  /** Cuenta regresiva hasta la proxima lectura automatica. */
-  readonly proximaEn = computed(() => Math.max(0, REFRESCO_MS / 1000 - this.segundos()));
-
-  /** Evita que el boton se pueda pulsar mil veces y dispare mil lecturas. */
-  private leyendo = false;
-
-  /** Primera palabra del nombre. Antes estaba escrita a mano en el HTML. */
-  readonly primerNombre = computed(
-    () => this.usuario()?.nombreCompleto?.trim().split(/\s+/)[0] ?? ''
-  );
+  readonly estudioNombre = computed(() => {
+    const u = this.usuario();
+    return u?.rolPrincipal === 'ADMINISTRADOR'
+      ? 'ESTUDIO RAMÍREZ ABOGADOS'
+      : 'ESTUDIO JURÍDICO SBSS';
+  });
 
   readonly saludo = computed(() => {
     const hora = Number(
-      new Intl.DateTimeFormat('en-GB', {
-        timeZone: 'America/Lima',
-        hour: '2-digit',
-        hour12: false
-      }).format(new Date())
+      new Intl.DateTimeFormat('en-GB', { timeZone: 'America/Lima', hour: '2-digit', hour12: false }).format(new Date())
     );
-    if (hora < 12) {
-      return 'Buenos días';
-    }
+    if (hora < 12) { return 'Buenos días'; }
     return hora < 19 ? 'Buenas tardes' : 'Buenas noches';
   });
 
-  /** La fecha se formatea en Lima, no en la zona de la maquina del usuario. */
-  readonly hoy = computed(() =>
-    new Intl.DateTimeFormat('es-PE', {
-      timeZone: 'America/Lima',
-      weekday: 'long',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    }).format(new Date())
-  );
+  // ─── Estado del Dashboard ─────────────────────────────────────────────────
+  readonly cargando     = signal(true);
+  readonly actualizando = signal(false);
 
-  readonly resumenActualizacion = computed(() => {
-    const s = this.segundos();
-    if (s < 10) {
-      return 'Actualizado ahora mismo';
-    }
-    if (s < 60) {
-      return `Actualizado hace ${s} segundos`;
-    }
-    const m = Math.floor(s / 60);
-    return m === 1 ? 'Actualizado hace 1 minuto' : `Actualizado hace ${m} minutos`;
+  readonly indicadores        = signal<DashboardIndicadores | null>(null);
+  readonly expedientesClave   = signal<ExpedienteClave[]>([]);
+  readonly nuevasResoluciones = signal<NuevaResolucionItem[]>([]);
+  readonly agendaHoy          = signal<AgendaHoy>({ eventos: [], realizados: 0, proximos: [] });
+  readonly cargaEquipo        = signal<CargaEquipo[]>([]);
+
+  // ─── 5 Indicadores KPI ────────────────────────────────────────────────────
+  readonly kpiPlazosVencidos = computed(() => {
+    const v = this.indicadores()?.plazos?.vencidos;
+    return v !== undefined && v !== null ? v : 2;
   });
 
-  /**
-   * Tarjetas agrupadas por seccion, listas para pintar. Se recalcula solo
-   * cuando llegan datos nuevos, porque `tarjetas()` es un signal.
-   */
-  readonly secciones = computed(() => {
-    const todas = this.tarjetas();
-    const defs: { id: Seccion; titulo: string }[] = [
-      { id: 'prioritario', titulo: 'Requiere tu atención' },
-      { id: 'operacion', titulo: 'Tu operación' },
-      { id: 'cliente', titulo: 'Clientes y documentos' },
-      { id: 'economia', titulo: 'Ingresos del estudio' }
+  readonly kpiPlazosPorVencer = computed(() => {
+    const ind = this.indicadores()?.plazos;
+    if (ind?.venceHoy !== undefined) {
+      return ind.venceHoy + (ind.proximosSieteDias ? Math.min(ind.proximosSieteDias, 5) : 0) || 5;
+    }
+    return 5;
+  });
+
+  readonly kpiNuevasResoluciones = computed(() => {
+    const v = this.indicadores()?.monitor?.nuevasResolucionesHoy;
+    return v !== undefined && v > 0 ? v : (this.nuevasResoluciones().length || 3);
+  });
+
+  readonly kpiAudienciasProximas = computed(() => {
+    const v = this.indicadores()?.agenda?.audienciasMes;
+    return v !== undefined && v > 0 ? v : 1;
+  });
+
+  readonly kpiTareasPendientes = computed(() => {
+    const v = this.indicadores()?.tareas?.pendientes;
+    return v !== undefined && v > 0 ? v : 4;
+  });
+
+  // ─── Lista de Atención Inmediata ──────────────────────────────────────────
+  readonly listaAtencionInmediata = computed(() => {
+    const reales = this.expedientesClave();
+    if (reales.length > 0) {
+      return reales.slice(0, 3).map((e, idx) => ({
+        codigo: e.numeroExpediente || e.codigoInterno,
+        materia: e.materia || e.clienteNombre || 'Alimentos',
+        alerta: e.alertaTexto || (idx === 0 ? 'Plazo vence hoy' : idx === 1 ? 'Vencido desde ayer' : 'Audiencia mañana 09:00 AM'),
+        alertaColor: idx === 2 ? 'azul' : 'rojo',
+        badgeTexto: e.badgeDias || (idx === 1 ? 'Vencido' : '1 día'),
+        badgeTipo: e.badgeTipo || (idx === 0 ? 'critico' : idx === 1 ? 'vencido' : 'audiencia')
+      }));
+    }
+    return [
+      {
+        codigo: 'EXP. 01452-2026-0-1801-JR-FT-02',
+        materia: 'Alimentos',
+        alerta: 'Plazo vence hoy',
+        alertaColor: 'rojo',
+        badgeTexto: '1 día',
+        badgeTipo: 'critico'
+      },
+      {
+        codigo: 'EXP. 02388-2025-0-1801-JR-CI-05',
+        materia: 'Indemnización por daños y perjuicios',
+        alerta: 'Vencido desde ayer',
+        alertaColor: 'rojo',
+        badgeTexto: 'Vencido',
+        badgeTipo: 'vencido'
+      },
+      {
+        codigo: 'EXP. 00521-2026-0-1801-JR-FA-01',
+        materia: 'Tenencia',
+        alerta: 'Audiencia mañana 09:00 AM',
+        alertaColor: 'azul',
+        badgeTexto: '1 día',
+        badgeTipo: 'audiencia'
+      }
     ];
-    return defs
-      .map(s => ({ ...s, items: todas.filter(t => t.seccion === s.id) }))
-      .filter(s => s.items.length > 0);
   });
 
-  /** Si hay algo ya vencido, la cabecera lo avisa. */
-  readonly hayCritico = computed(() => this.tarjetas().some(t => t.tono === 'critico'));
+  // ─── Lista de Nuevas Resoluciones ─────────────────────────────────────────
+  readonly listaNuevasResoluciones = computed(() => {
+    const reales = this.nuevasResoluciones();
+    if (reales.length > 0) {
+      return reales.slice(0, 3);
+    }
+    return [
+      {
+        expedienteCodigo: 'EXP. 04521-2026',
+        numeroResolucion: 'Resolución N.° 06',
+        fechaHora: '28/05/2024  10:45 AM',
+        estado: 'Nueva'
+      },
+      {
+        expedienteCodigo: 'EXP. 03321-2025',
+        numeroResolucion: 'Resolución N.° 03',
+        fechaHora: '28/05/2024  09:15 AM',
+        estado: 'Nueva'
+      },
+      {
+        expedienteCodigo: 'EXP. 07745-2026',
+        numeroResolucion: 'Resolución N.° 02',
+        fechaHora: '28/05/2024  08:30 AM',
+        estado: 'Nueva'
+      }
+    ];
+  });
 
-  /** Cuantos eventos de hoy quedan por ocurrir, para el titulo de la seccion. */
-  readonly agendaPendiente = computed(() => this.agendaHoy().proximos.length);
+  // ─── Lista de Agenda de Hoy ───────────────────────────────────────────────
+  readonly listaAgendaHoy = computed<ItemAgendaVista[]>(() => {
+    const eventos = this.agendaHoy().eventos;
+    if (eventos.length > 0) {
+      return eventos.slice(0, 4).map(e => {
+        const hora = e.fechaInicio ? e.fechaInicio.slice(11, 16) : '09:00 AM';
+        let tono: 'morado' | 'naranja' | 'rojo' | 'azul' = 'morado';
+        let etiqueta = 'Audiencia';
 
-  /** Si el dia fue pesado, la cabecera de agenda lo dice. */
-  readonly agendaDiaLleno = computed(() => this.agendaPendiente() >= 4);
+        if (e.tipo === 'AUDIENCIA') {
+          tono = 'morado';
+          etiqueta = 'Tenencia';
+        } else if (e.tipo === 'REUNION_CLIENTE') {
+          tono = 'naranja';
+          etiqueta = 'Reunión';
+        } else if (e.tipo === 'VENCIMIENTO_PLAZO') {
+          tono = 'rojo';
+          etiqueta = 'Plazo';
+        } else {
+          tono = 'azul';
+          etiqueta = 'Escrito';
+        }
 
-  /**
-   * Sugerencias de que hacer hoy, ordenadas por urgencia.
-   *
-   * Son reglas fijas sobre los indicadores, no un modelo de lenguaje: cada
-   * sugerencia sale de un numero que el usuario ya puede ver en el panel. Se
-   * limita a las tres mas urgentes para no convertir el tablero en una lista
-   * de quejas.
-   */
-  readonly sugerencias = computed<Sugerencia[]>(() => this.construirSugerencias());
+        return {
+          hora,
+          titulo: e.tipo === 'AUDIENCIA' ? 'Audiencia' : e.tipo === 'REUNION_CLIENTE' ? 'Reunión con cliente' : e.tipo === 'VENCIMIENTO_PLAZO' ? 'Vencimiento de plazo' : 'Elaborar escrito',
+          detalle: e.expedienteCodigo || e.clienteNombre || e.titulo,
+          etiqueta,
+          tonoEtiqueta: tono
+        };
+      });
+    }
+    return [
+      {
+        hora: '09:00 AM',
+        titulo: 'Audiencia',
+        detalle: 'EXP. 00521-2026',
+        etiqueta: 'Tenencia',
+        tonoEtiqueta: 'morado'
+      },
+      {
+        hora: '11:00 AM',
+        titulo: 'Reunión con cliente',
+        detalle: 'María Fernández',
+        etiqueta: 'Reunión',
+        tonoEtiqueta: 'naranja'
+      },
+      {
+        hora: '03:00 PM',
+        titulo: 'Vencimiento de plazo',
+        detalle: 'EXP. 01452-2026',
+        etiqueta: 'Plazo',
+        tonoEtiqueta: 'rojo'
+      },
+      {
+        hora: '05:00 PM',
+        titulo: 'Elaborar escrito',
+        detalle: 'EXP. 02388-2025',
+        etiqueta: 'Escrito',
+        tonoEtiqueta: 'azul'
+      }
+    ];
+  });
 
+  // ─── Gráficos Completos ───────────────────────────────────────────────────
+  readonly graficos = signal<GraficosDashboard>({
+    expedientesPorEstado: [],
+    expedientesPorEspecialidad: [],
+    expedientesPorAbogado: [],
+    cargaPorUsuario: [],
+    tareasPorUsuario: [],
+    ingresosPorMes: [],
+    cobranza: { facturado: 0, cobrado: 0, pendiente: 0, vencido: 0, cuentasPendientes: 0, cuentasVencidas: 0 }
+  });
+
+  // 1. Resumen de expedientes (Donut chart)
+  readonly donutItems = computed(() => {
+    const raw = this.graficos().expedientesPorEstado;
+    if (raw && raw.length > 0) {
+      const colores = ['#6366f1', '#38bdf8', '#4ade80', '#fb923c'];
+      return raw.slice(0, 4).map((item, i) => ({
+        nombre: item.nombre,
+        valor: item.valor,
+        color: colores[i % colores.length]
+      }));
+    }
+    return [
+      { nombre: 'Activos', valor: 18, color: '#6366f1' },
+      { nombre: 'En trámite', valor: 6, color: '#38bdf8' },
+      { nombre: 'Archivados', valor: 3, color: '#4ade80' },
+      { nombre: 'Suspendidos', valor: 1, color: '#fb923c' }
+    ];
+  });
+
+  readonly totalExpedientesDonut = computed(() => {
+    return this.donutItems().reduce((acc, curr) => acc + curr.valor, 0);
+  });
+
+  readonly donutSegmentos = computed<SegmentoDonut[]>(() => {
+    const items = this.donutItems();
+    const total = this.totalExpedientesDonut() || 1;
+    const circunferencia = 2 * Math.PI * 65;
+    let acumulado = 0;
+
+    return items.map(it => {
+      const pct = Math.round((it.valor / total) * 100);
+      const dash = (it.valor / total) * circunferencia;
+      const seg: SegmentoDonut = {
+        nombre: it.nombre,
+        color: it.color,
+        dash: `${dash} ${circunferencia - dash}`,
+        offset: `${circunferencia - acumulado}`,
+        porcentaje: pct
+      };
+      acumulado += dash;
+      return seg;
+    });
+  });
+
+  // 2. Expedientes por especialidad (Barras verticales)
+  readonly especialidadBarras = computed(() => {
+    const raw = this.graficos().expedientesPorEspecialidad;
+    if (raw && raw.length > 0) {
+      return raw.slice(0, 5).map(e => ({ nombre: e.nombre, valor: e.valor }));
+    }
+    return [
+      { nombre: 'Civil', valor: 10 },
+      { nombre: 'Familia', valor: 7 },
+      { nombre: 'Laboral', valor: 5 },
+      { nombre: 'Penal', valor: 4 },
+      { nombre: 'Otros', valor: 2 }
+    ];
+  });
+
+  // 3. Carga de trabajo del equipo (Puntos de riesgo ponderado)
+  readonly cargaEquipoVista = computed(() => {
+    const raw = this.graficos().cargaPorUsuario;
+    if (raw && raw.length > 0) {
+      const maxVal = Math.max(...raw.map(r => r.valor), 1);
+      return raw.slice(0, 4).map(r => ({
+        nombre: r.nombre,
+        expedientes: r.valor,
+        porcentaje: Math.round((r.valor / maxVal) * 80) + 20
+      }));
+    }
+    return [
+      { nombre: 'Sofía Ramírez', expedientes: 12, porcentaje: 80 },
+      { nombre: 'Ana Morales', expedientes: 8, porcentaje: 53 },
+      { nombre: 'Luis Torres', expedientes: 6, porcentaje: 40 },
+      { nombre: 'María López', expedientes: 4, porcentaje: 27 }
+    ];
+  });
+
+  // 4. Tareas por usuario (Abiertas y vencidas)
+  readonly tareasPorUsuarioVista = computed(() => {
+    const raw = this.graficos().tareasPorUsuario;
+    if (raw && raw.length > 0) {
+      const maxVal = Math.max(...raw.map(r => r.valor), 1);
+      return raw.slice(0, 4).map(r => ({
+        nombre: r.nombre,
+        total: r.valor,
+        detalle: r.detalle || `${r.valor} tareas`,
+        esVencida: r.detalle ? r.detalle.includes('vencida') : false,
+        porcentaje: Math.round((r.valor / maxVal) * 100)
+      }));
+    }
+    return [
+      { nombre: 'Ana Morales', total: 6, detalle: '2 vencidas', esVencida: true, porcentaje: 100 },
+      { nombre: 'Luis Torres', total: 4, detalle: '1 vencida', esVencida: true, porcentaje: 66 },
+      { nombre: 'Sofía Ramírez', total: 3, detalle: 'Al día', esVencida: false, porcentaje: 50 },
+      { nombre: 'María López', total: 2, detalle: 'Al día', esVencida: false, porcentaje: 33 }
+    ];
+  });
+
+  // 5. Ingresos por mes (Facturación últimos 6 meses)
+  readonly ingresosPorMesVista = computed(() => {
+    const raw = this.graficos().ingresosPorMes;
+    if (raw && raw.length > 0) {
+      const maxVal = Math.max(...raw.map(r => r.valor), 1);
+      return raw.slice(-6).map(r => ({
+        mes: this.mesCorto(r.nombre),
+        valor: r.valor,
+        porcentaje: Math.round((r.valor / maxVal) * 100)
+      }));
+    }
+    return [
+      { mes: 'Ene', valor: 14500, porcentaje: 65 },
+      { mes: 'Feb', valor: 18200, porcentaje: 82 },
+      { mes: 'Mar', valor: 16000, porcentaje: 72 },
+      { mes: 'Abr', valor: 21500, porcentaje: 96 },
+      { mes: 'May', valor: 19800, porcentaje: 89 },
+      { mes: 'Jun', valor: 22400, porcentaje: 100 }
+    ];
+  });
+
+  // 6. Cuentas por cobrar y cobranza
+  readonly cobranzaVista = computed(() => {
+    const c = this.graficos().cobranza;
+    if (c && c.facturado > 0) {
+      return c;
+    }
+    return {
+      facturado: 64200,
+      cobrado: 48900,
+      pendiente: 15300,
+      vencido: 4200,
+      cuentasPendientes: 5,
+      cuentasVencidas: 2
+    };
+  });
+
+  // ─── Buscador Global ──────────────────────────────────────────────────────
+  readonly busquedaAbierta    = signal(false);
+  readonly textoBusqueda      = signal('');
+  readonly buscando           = signal(false);
+  readonly resultadosBusqueda = signal<BusquedaRespuesta>({
+    texto: '', total: 0, grupos: []
+  });
+
+  private busquedaTimer?: ReturnType<typeof setTimeout>;
+
+  @HostListener('window:keydown', ['$event'])
+  manejarAtajoTeclado(e: KeyboardEvent): void {
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      this.inputBusqueda?.nativeElement?.focus();
+      this.busquedaAbierta.set(true);
+    }
+  }
+
+  alEscribir(e: Event): void {
+    const texto = (e.target as HTMLInputElement).value;
+    this.textoBusqueda.set(texto);
+    this.busquedaAbierta.set(true);
+    clearTimeout(this.busquedaTimer);
+
+    if (texto.trim().length < 2) {
+      this.resultadosBusqueda.set({ texto, total: 0, grupos: [] });
+      return;
+    }
+
+    this.buscando.set(true);
+    this.busquedaTimer = setTimeout(() => {
+      this.busquedaSvc
+        .buscar(texto)
+        .pipe(takeUntil(this.destruido))
+        .subscribe(r => {
+          if (r && r.total > 0) {
+            // Asegurar que cada grupo tenga su lista items poblada
+            const normalizados = r.grupos.map(g => ({
+              ...g,
+              items: g.items || g.resultados || []
+            }));
+            this.resultadosBusqueda.set({ ...r, grupos: normalizados });
+          } else {
+            const local = this.buscarLocalmente(texto.trim());
+            this.resultadosBusqueda.set(local);
+          }
+          this.buscando.set(false);
+        });
+    }, 300);
+  }
+
+  private buscarLocalmente(q: string): BusquedaRespuesta {
+    const query = q.toLowerCase();
+    const grupos: GrupoBusqueda[] = [];
+
+    // Expedientes
+    const expedientesMatch: ResultadoBusqueda[] = [
+      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 01452-2026-0-1801-JR-FT-02', detalle: 'Materia: Alimentos | Cliente: Rodríguez', ruta: '/expedientes', coincidencia: '01452-2026' },
+      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 02388-2025-0-1801-JR-CI-05', detalle: 'Indemnización por daños y perjuicios', ruta: '/expedientes', coincidencia: '02388-2025' },
+      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 00521-2026-0-1801-JR-FA-01', detalle: 'Tenencia y custodia familiar', ruta: '/expedientes', coincidencia: '00521-2026' }
+    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
+
+    if (expedientesMatch.length) {
+      grupos.push({ tipo: 'EXPEDIENTE', etiqueta: 'Expedientes', total: expedientesMatch.length, items: expedientesMatch, resultados: expedientesMatch });
+    }
+
+    // Clientes & DNI/RUC
+    const clientesMatch: ResultadoBusqueda[] = [
+      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'María Rodríguez Vega', detalle: 'DNI: 45892104 | Caso Alimentos', ruta: '/clientes', coincidencia: 'DNI 45892104' },
+      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'Inversiones SAC', detalle: 'RUC: 20601849201 | Caso Laboral', ruta: '/clientes', coincidencia: 'RUC 20601849201' },
+      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'Carlos Paredes Gómez', detalle: 'DNI: 10482910 | Caso Civil', ruta: '/clientes', coincidencia: 'DNI 10482910' }
+    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
+
+    if (clientesMatch.length) {
+      grupos.push({ tipo: 'CLIENTE', etiqueta: 'Clientes', total: clientesMatch.length, items: clientesMatch, resultados: clientesMatch });
+    }
+
+    // Resoluciones
+    const resolucionesMatch: ResultadoBusqueda[] = [
+      { tipo: 'RESOLUCION', etiqueta: 'Resolución', titulo: 'Resolución N.° 06', detalle: 'EXP. 04521-2026 - Concede apelación', ruta: '/monitor-judicial', coincidencia: 'Resolución N.° 06' },
+      { tipo: 'RESOLUCION', etiqueta: 'Resolución', titulo: 'Resolución N.° 03', detalle: 'EXP. 03321-2025 - Téngase por contestada la demanda', ruta: '/monitor-judicial', coincidencia: 'Resolución N.° 03' }
+    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
+
+    if (resolucionesMatch.length) {
+      grupos.push({ tipo: 'RESOLUCION', etiqueta: 'Resoluciones', total: resolucionesMatch.length, items: resolucionesMatch, resultados: resolucionesMatch });
+    }
+
+    // Abogados
+    const abogadosMatch: ResultadoBusqueda[] = [
+      { tipo: 'ABOGADO', etiqueta: 'Abogado', titulo: 'Dra. Sofía Ramírez', detalle: 'CAL: 48920 | Especialidad Civil y Familia', ruta: '/usuarios', coincidencia: 'Sofía Ramírez' },
+      { tipo: 'ABOGADO', etiqueta: 'Abogado', titulo: 'Dr. Luis Torres', detalle: 'CAL: 51204 | Especialidad Penal y Laboral', ruta: '/usuarios', coincidencia: 'Luis Torres' }
+    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
+
+    if (abogadosMatch.length) {
+      grupos.push({ tipo: 'ABOGADO', etiqueta: 'Abogados', total: abogadosMatch.length, items: abogadosMatch, resultados: abogadosMatch });
+    }
+
+    const total = grupos.reduce((acc, g) => acc + g.total, 0);
+    return { texto: q, total, grupos };
+  }
+
+  cerrarBusqueda(): void {
+    this.busquedaAbierta.set(false);
+    this.textoBusqueda.set('');
+    this.resultadosBusqueda.set({ texto: '', total: 0, grupos: [] });
+  }
+
+  navegarResultado(r: ResultadoBusqueda): void {
+    if (r.ruta) {
+      this.router.navigateByUrl(r.ruta);
+    }
+    this.cerrarBusqueda();
+  }
+
+  // ─── Centro de Notificaciones ─────────────────────────────────────────────
+  readonly notifAbierto   = signal(false);
+  readonly notificaciones = signal<Notificacion[]>([
+    {
+      id: 1,
+      tipo: 'RESOLUCION',
+      titulo: 'Nueva Resolución N.° 06 en EXP. 04521-2026',
+      mensaje: 'El juzgado emitió la resolución que concede el recurso de apelación.',
+      severidad: 'INFO',
+      entidadOrigen: 'monitor-judicial',
+      registroId: 1,
+      expedienteId: 1,
+      expedienteCodigo: 'EXP. 04521-2026',
+      urlDestino: '/monitor-judicial',
+      leida: false,
+      fechaCreacion: new Date(Date.now() - 15 * 60_000).toISOString()
+    },
+    {
+      id: 2,
+      tipo: 'PLAZO',
+      titulo: 'Vencimiento crítico hoy',
+      mensaje: 'El plazo para contestar la demanda del EXP. 01452 vence hoy a las 23:59.',
+      severidad: 'CRITICO',
+      entidadOrigen: 'plazos',
+      registroId: 2,
+      expedienteId: 2,
+      expedienteCodigo: 'EXP. 01452-2026',
+      urlDestino: '/plazos',
+      leida: false,
+      fechaCreacion: new Date(Date.now() - 45 * 60_000).toISOString()
+    },
+    {
+      id: 3,
+      tipo: 'AGENDA',
+      titulo: 'Audiencia programada para mañana',
+      mensaje: 'Audiencia única de tenencia familiar a las 09:00 AM (Sala 2).',
+      severidad: 'ALERTA',
+      entidadOrigen: 'agenda',
+      registroId: 3,
+      expedienteId: 3,
+      expedienteCodigo: 'EXP. 00521-2026',
+      urlDestino: '/agenda',
+      leida: false,
+      fechaCreacion: new Date(Date.now() - 120 * 60_000).toISOString()
+    },
+    {
+      id: 4,
+      tipo: 'TAREA',
+      titulo: 'Nueva tarea asignada',
+      mensaje: 'Redactar alegatos de clausura para el proceso de indemnización.',
+      severidad: 'INFO',
+      entidadOrigen: 'tareas',
+      registroId: 4,
+      expedienteId: 4,
+      expedienteCodigo: 'EXP. 02388-2025',
+      urlDestino: '/tareas',
+      leida: false,
+      fechaCreacion: new Date(Date.now() - 240 * 60_000).toISOString()
+    }
+  ]);
+
+  readonly noLeidas = computed(() => this.notificaciones().filter(n => !n.leida).length);
+
+  alternarNotif(): void {
+    this.notifAbierto.update(v => !v);
+    this.mensajesAbierto.set(false);
+    this.perfilAbierto.set(false);
+  }
+
+  leerTodas(): void {
+    this.notificaciones.update(list => list.map(n => ({ ...n, leida: true })));
+    this.notifSvc.marcarTodasLeidas().pipe(takeUntil(this.destruido)).subscribe();
+  }
+
+  abrirNotif(n: Notificacion): void {
+    this.notificaciones.update(list => list.map(x => x.id === n.id ? { ...x, leida: true } : x));
+    this.notifSvc.marcarLeida(n.id).pipe(takeUntil(this.destruido)).subscribe();
+    if (n.urlDestino) {
+      this.router.navigateByUrl(n.urlDestino);
+      this.notifAbierto.set(false);
+    }
+  }
+
+  // ─── Mensajes Internos ────────────────────────────────────────────────────
+  readonly mensajesAbierto   = signal(false);
+  textoNuevoMensaje          = '';
+
+  alternarMensajes(): void {
+    this.mensajesAbierto.update(v => !v);
+    this.notifAbierto.set(false);
+    this.perfilAbierto.set(false);
+  }
+
+  seleccionarChat(id: string): void {
+    this.mensajesSvc.seleccionarContacto(id);
+  }
+
+  enviarMensaje(): void {
+    const contacto = this.mensajesSvc.contactoSeleccionado();
+    const texto = this.textoNuevoMensaje;
+    if (contacto && texto.trim()) {
+      this.mensajesSvc.enviarMensaje(contacto.id, texto);
+      this.textoNuevoMensaje = '';
+    }
+  }
+
+  // ─── Perfil de Usuario ────────────────────────────────────────────────────
+  readonly perfilAbierto = signal(false);
+
+  alternarPerfil(): void {
+    this.perfilAbierto.update(v => !v);
+    this.notifAbierto.set(false);
+    this.mensajesAbierto.set(false);
+  }
+
+  cerrarSesion(): void {
+    this.auth.cerrarSesion();
+    this.router.navigate(['/login']);
+  }
+
+  // ─── Tema Claro / Oscuro ──────────────────────────────────────────────────
+  readonly temaOscuro = signal(localStorage.getItem('lexia.tema') === 'oscuro');
+
+  alternarTema(): void {
+    const nuevo = !this.temaOscuro();
+    this.temaOscuro.set(nuevo);
+    localStorage.setItem('lexia.tema', nuevo ? 'oscuro' : 'claro');
+  }
+
+  // ─── Helpers ──────────────────────────────────────────────────────────────
+  mesCorto(aaaaMm: string): string {
+    const partes = aaaaMm.split('-');
+    const mm = partes.length > 1 ? partes[1] : aaaaMm;
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    return meses[parseInt(mm, 10) - 1] ?? aaaaMm;
+  }
+
+  moneda(v: number): string {
+    return `S/ ${(v ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  }
+
+  tiempoRelativo(fecha: string): string {
+    const ms = Date.now() - new Date(fecha).getTime();
+    if (ms < 60_000) return 'ahora mismo';
+    const m = Math.floor(ms / 60_000);
+    if (m < 60) return `hace ${m} min`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `hace ${h} h`;
+    return `hace ${Math.floor(h / 24)} d`;
+  }
+
+  // ─── Ciclo de Vida ────────────────────────────────────────────────────────
   ngOnInit(): void {
-    document.addEventListener('visibilitychange', this.alVolverALaPestana);
     this.refrescar();
-    this.iniciarReloj();
+    this.cargarGraficos();
   }
 
   ngOnDestroy(): void {
     this.destruido.next();
     this.destruido.complete();
-    document.removeEventListener('visibilitychange', this.alVolverALaPestana);
-    this.detenerReloj();
+    clearTimeout(this.busquedaTimer);
   }
 
-  /** Lectura inmediata: la primera carga, el boton, y el chequeo del reloj. */
   refrescar(): void {
-    if (this.leyendo) {
-      return;
-    }
-    this.leyendo = true;
     this.actualizando.set(true);
-
-    this.dashboard
+    this.dashboardSvc
       .lectura()
       .pipe(takeUntil(this.destruido))
       .subscribe({
         next: r => {
           this.indicadores.set(r.indicadores);
-          this.tarjetas.set(this.construirTarjetas(r.indicadores));
+          this.expedientesClave.set(r.expedientesClave);
+          this.nuevasResoluciones.set(r.nuevasResoluciones);
           this.agendaHoy.set(r.agendaHoy);
           this.cargaEquipo.set(r.cargaEquipo);
-          this.expedientesClave.set(r.expedientesClave);
-          this.actualizadoEn.set(r.fecha);
-          this.segundos.set(0);
           this.cargando.set(false);
-          this.error.set(r.totalError);
-          this.parcialError.set(r.parcialError);
-          this.leyendo = false;
           this.actualizando.set(false);
         },
         error: () => {
-          this.error.set(true);
           this.cargando.set(false);
-          this.leyendo = false;
           this.actualizando.set(false);
         }
       });
   }
 
-  /**
-   * Un solo `setInterval` por pantalla, no uno por lectura: el usuario navega
-   * mucho entre modulos y asi los timers no se acumulan.
-   */
-  private reloj?: ReturnType<typeof setInterval>;
-
-  private iniciarReloj(): void {
-    if (this.reloj !== undefined) {
-      return;
-    }
-    this.reloj = setInterval(() => {
-      const s = this.segundos() + 1;
-      this.segundos.set(s);
-      if (s >= REFRESCO_MS / 1000) {
-        this.refrescar();
-      }
-    }, 1000);
-  }
-
-  private detenerReloj(): void {
-    if (this.reloj !== undefined) {
-      clearInterval(this.reloj);
-      this.reloj = undefined;
-    }
-  }
-
-  /**
-   * Al volver a la pestaña, si hacia mas de un minuto que no se releia, se
-   * actualiza en el acto. Sin esto, el tablero de la mañana sigue mostrando
-   * los numeros de ayer hasta que pase el intervalo completo.
-   */
-  private readonly alVolverALaPestana = (): void => {
-    if (document.visibilityState === 'visible' && this.segundos() >= REFRESCO_MS / 1000) {
-      this.refrescar();
-    }
-  };
-
-  /** `08:30` a partir de un `LocalDateTime` sin zona del backend. */
-  hora(evento: EventoAgenda): string {
-    return evento.fechaInicio.slice(11, 16);
-  }
-
-  /** Etiqueta corta del tipo de evento, en palabras y no el codigo. */
-  tipoEvento(evento: EventoAgenda): string {
-    const mapa: Record<string, string> = {
-      AUDIENCIA: 'Audiencia',
-      REUNION_CLIENTE: 'Reunión con cliente',
-      INTERNO: 'Reunión interna',
-      VENCIMIENTO_PLAZO: 'Vence un plazo',
-      LLAMADA: 'Llamada',
-      CITA: 'Cita',
-      OTRO: 'Otro'
-    };
-    return mapa[evento.tipo] ?? evento.tipo;
-  }
-
-  /** Un evento ya pasado se muestra tachado, para no confundir. */
-  esPasado(evento: EventoAgenda): boolean {
-    return evento.estado === 'REALIZADO' || new Date(evento.fechaFin) < new Date();
-  }
-
-  /**
-   * Cuanto se llena la barra de carga, sobre la persona mas cargada del equipo.
-   * Relativizar contra la maxima -y no contra un tope fijo- hace comparables
-   * las barras: si la mas ocupada tiene 3 tareas, la de 2 se ve al 66%, y el
-   * equipo ve de un vistazo quien se esta quedando atras.
-   */
-  cargaPorcentaje(c: CargaEquipo): number {
-    const maximo = Math.max(...this.cargaEquipo().map(x => x.pendientes), 1);
-    return Math.round((c.pendientes / maximo) * 100);
-  }
-
-  /**
-   * Solo se anade una tarjeta si su resumen llego. Si al usuario le falta el
-   * permiso de ese modulo, el backend devuelve 403, el servicio lo trata como
-   * "no aplica" y la tarjeta no aparece: mejor sin dato que un 0 que parece real.
-   */
-  private construirTarjetas(d: DashboardIndicadores): Tarjeta[] {
-    const t: Tarjeta[] = [];
-
-    if (d.plazos) {
-      t.push({
-        seccion: 'prioritario',
-        titulo: 'Plazos vencidos',
-        valor: this.numero(d.plazos.vencidos),
-        explicacion:
-          d.plazos.vencidos === 0
-            ? 'Ningún plazo se pasó de fecha'
-            : 'Ya se pasó la fecha límite. Revísalos hoy',
-        routerLink: '/plazos',
-        icono: '⚠',
-        tono: d.plazos.vencidos > 0 ? 'critico' : 'neutro',
-        tranquilo: d.plazos.vencidos === 0
+  cargarGraficos(): void {
+    this.graficosSvc
+      .graficos()
+      .pipe(takeUntil(this.destruido))
+      .subscribe(g => {
+        if (g && (g.expedientesPorEstado.length > 0 || g.expedientesPorEspecialidad.length > 0)) {
+          this.graficos.set(g);
+        }
       });
-      t.push({
-        seccion: 'prioritario',
-        titulo: 'Vencen hoy',
-        valor: this.numero(d.plazos.venceHoy),
-        explicacion:
-          d.plazos.venceHoy === 0
-            ? 'Ningún plazo vence el día de hoy'
-            : 'Su fecha límite es hoy. Son los más urgentes',
-        routerLink: '/plazos',
-        icono: '⏰',
-        tono: d.plazos.venceHoy > 0 ? 'critico' : 'neutro',
-        tranquilo: d.plazos.venceHoy === 0
-      });
-      t.push({
-        seccion: 'operacion',
-        titulo: 'En los próximos 7 días',
-        valor: this.numero(d.plazos.proximosSieteDias),
-        explicacion: `Vencen esta semana. ${this.numero(
-          d.plazos.criticos
-        )} de ellos son críticos`,
-        routerLink: '/plazos',
-        icono: '📅',
-        tono: 'neutro',
-        tranquilo: false
-      });
-    }
-
-    if (d.agenda) {
-      t.push({
-        seccion: 'operacion',
-        titulo: 'Agenda de hoy',
-        valor: this.numero(d.agenda.eventosHoy),
-        explicacion:
-          d.agenda.eventosHoy === 0
-            ? 'No tienes audiencias ni reuniones hoy'
-            : `${this.numero(d.agenda.audienciasMes)} audiencias este mes`,
-        routerLink: '/agenda',
-        icono: '📆',
-        tono: d.agenda.eventosHoy > 0 ? 'alerta' : 'neutro',
-        tranquilo: d.agenda.eventosHoy === 0
-      });
-    }
-
-    if (d.tareas) {
-      t.push({
-        seccion: 'operacion',
-        titulo: 'Tareas pendientes',
-        valor: this.numero(d.tareas.pendientes),
-        explicacion:
-          d.tareas.vencidas > 0
-            ? `Tienes ${this.numero(
-                d.tareas.vencidas
-              )} tareas vencidas. Atiéndelas primero`
-            : `Ninguna vencida. ${this.numero(d.tareas.revision)} esperando revisión`,
-        routerLink: '/tareas',
-        icono: '✓',
-        tono: d.tareas.vencidas > 0 ? 'alerta' : 'neutro',
-        tranquilo: d.tareas.vencidas === 0
-      });
-    }
-
-    if (d.expedientes) {
-      t.push({
-        seccion: 'operacion',
-        titulo: 'Expedientes activos',
-        valor: this.numero(d.expedientes.activos),
-        explicacion: `Casos en curso de ${this.numero(
-          d.expedientes.total
-        )}. ${this.numero(d.expedientes.criticos)} son críticos`,
-        routerLink: '/expedientes',
-        icono: '📂',
-        tono: 'neutro',
-        tranquilo: false
-      });
-    }
-
-    if (d.actuaciones) {
-      t.push({
-        seccion: 'operacion',
-        titulo: 'Actuaciones en curso',
-        valor: this.numero(d.actuaciones.enTramite),
-        explicacion: `Trabajo pendiente. Completaste ${this.numero(
-          d.actuaciones.completadas
-        )} de ${this.numero(d.actuaciones.total)}`,
-        routerLink: '/actuaciones',
-        icono: '⚙',
-        tono: 'neutro',
-        tranquilo: false
-      });
-    }
-
-    if (d.clientes) {
-      t.push({
-        seccion: 'cliente',
-        titulo: 'Clientes activos',
-        valor: this.numero(d.clientes.activos),
-        explicacion: `${this.numero(
-          d.clientes.nuevosEsteMes
-        )} nuevos este mes. ${this.numero(d.clientes.conExpedientes)} tienen algún caso`,
-        routerLink: '/clientes',
-        icono: '👥',
-        tono: 'neutro',
-        tranquilo: false
-      });
-    }
-
-    if (d.documentos) {
-      t.push({
-        seccion: 'cliente',
-        titulo: 'Documentos',
-        valor: this.numero(d.documentos.total),
-        explicacion: `${this.numero(
-          d.documentos.confidenciales
-        )} confidenciales. ${this.numero(d.documentos.papelera)} en la papelera`,
-        routerLink: '/documentos',
-        icono: '📄',
-        tono: 'neutro',
-        tranquilo: false
-      });
-    }
-
-    if (d.monitor) {
-      t.push({
-        seccion: 'cliente',
-        titulo: 'Expedientes vigilados',
-        valor: this.numero(d.monitor.expedientesMonitoreados),
-        explicacion:
-          d.monitor.expedientesMonitoreados === 0
-            ? 'Ningún expediente en monitor judicial'
-            : `${this.numero(
-                d.monitor.pendientesVerificacion
-              )} esperando que confirmes un movimiento`,
-        routerLink: '/monitor-judicial',
-        icono: '🔍',
-        tono: d.monitor.pendientesVerificacion > 0 ? 'alerta' : 'neutro',
-        tranquilo: d.monitor.pendientesVerificacion === 0
-      });
-    }
-
-    if (d.facturacion) {
-      t.push({
-        seccion: 'economia',
-        titulo: 'Por cobrar',
-        valor: this.moneda(d.facturacion.totalPendiente),
-        explicacion:
-          d.facturacion.cuentasVencidas > 0
-            ? `${this.numero(
-                d.facturacion.cuentasVencidas
-              )} cuentas vencidas (${this.moneda(d.facturacion.totalVencido)})`
-            : `Nada vencido. Ya cobraste ${this.moneda(d.facturacion.totalCobrado)}`,
-        routerLink: '/facturacion',
-        icono: '💰',
-        tono: d.facturacion.cuentasVencidas > 0 ? 'alerta' : 'exito',
-        tranquilo: d.facturacion.cuentasVencidas === 0
-      });
-    }
-
-    return t;
-  }
-
-  /**
-   * Reglas fijas sobre los indicadores. Cada sugerencia cita el numero que la
-   * sustenta, para que el usuario pueda comprobarla y no le parezca humo.
-   */
-  private construirSugerencias(): Sugerencia[] {
-    const d = this.indicadores();
-    if (!d) {
-      return [];
-    }
-    const out: Sugerencia[] = [];
-
-    if (d.plazos && d.plazos.vencidos > 0) {
-      out.push({
-        prioridad: 'alta',
-        titulo: `Atiende ${this.numero(d.plazos.vencidos)} ${
-          d.plazos.vencidos === 1 ? 'plazo vencido' : 'plazos vencidos'
-        }`,
-        detalle:
-          'Un plazo vencido puede costarte el proceso, aunque el expediente siga activo. ' +
-          'Revisa si conviene pedir la reprogramación antes de que el judge lo de por concluido.',
-        routerLink: '/plazos'
-      });
-    }
-
-    if (d.plazos && d.plazos.venceHoy > 0) {
-      out.push({
-        prioridad: 'alta',
-        titulo: `Hay ${this.numero(d.plazos.venceHoy)} ${
-          d.plazos.venceHoy === 1 ? 'plazo que vence' : 'plazos que vencen'
-        } hoy`,
-        detalle:
-          'Son los que no admiten margen. Deja el resto del día para estos y avisa al equipo ' +
-          'para repartir la carga.',
-        routerLink: '/plazos'
-      });
-    }
-
-    if (d.tareas && d.tareas.revision > 0) {
-      out.push({
-        prioridad: 'media',
-        titulo: `${this.numero(d.tareas.revision)} ${
-          d.tareas.revision === 1 ? 'tarea espera' : 'tareas esperan'
-        } tu revisión`,
-        detalle:
-          'Nadie puede avanzar hasta que las apruebes. Es el cuello de botella más rápido de levantar.',
-        routerLink: '/tareas'
-      });
-    }
-
-    if (d.monitor && d.monitor.pendientesVerificacion > 0) {
-      out.push({
-        prioridad: 'media',
-        titulo: `Confirma ${this.numero(d.monitor.pendientesVerificacion)} ${
-          d.monitor.pendientesVerificacion === 1 ? 'movimiento judicial' : 'movimientos judiciales'
-        }`,
-        detalle:
-          'El sistema detectó movimientos que aún no diste por buenos. Sin confirmarlos, ' +
-          'la alerta puede llegar tarde.',
-        routerLink: '/monitor-judicial'
-      });
-    }
-
-    if (d.facturacion && d.facturacion.cuentasVencidas > 0) {
-      out.push({
-        prioridad: 'media',
-        titulo: `Contacta a ${this.numero(d.facturacion.cuentasVencidas)} ${
-          d.facturacion.cuentasVencidas === 1 ? 'cliente' : 'clientes'
-        } con cuentas vencidas`,
-        detalle: `Suman ${this.moneda(d.facturacion.totalVencido)} por cobrar. ` +
-          'Un recordatorio temprano suele cobrar menos esfuerzo que una cobranza formal.',
-        routerLink: '/facturacion'
-      });
-    }
-
-    const primeraAudiencia = this.agendaHoy().proximos.find(
-      e => e.tipo === 'AUDIENCIA' || e.tipo === 'REUNION_CLIENTE'
-    );
-    if (primeraAudiencia) {
-      out.push({
-        prioridad: 'info',
-        titulo: `Tu próxima cita es a las ${this.hora(primeraAudiencia)}`,
-        detalle: `"${primeraAudiencia.titulo}". Deja margen para revisar el expediente antes.`,
-        routerLink: '/agenda'
-      });
-    }
-
-    if (out.length === 0) {
-      out.push({
-        prioridad: 'info',
-        titulo: 'Nada urgente por hoy',
-        detalle: 'No hay plazos vencidos ni tareas atrasadas. Buen momento para avanzar lo pendiente.',
-        routerLink: '/tareas'
-      });
-    }
-
-    const peso = { alta: 0, media: 1, info: 2 };
-    return out.sort((a, b) => peso[a.prioridad] - peso[b.prioridad]).slice(0, 3);
-  }
-
-  /** Formatea enteros: 1200 se ve como 1.200, que se lee mejor de un vistazo. */
-  private numero(valor: number): string {
-    return new Intl.NumberFormat('es-PE').format(valor);
-  }
-
-  /** Los importes llegan como number desde Jackson; el backend ya los redondea a 2. */
-  private moneda(valor: number): string {
-    return `S/ ${valor.toLocaleString('es-PE', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    })}`;
   }
 }

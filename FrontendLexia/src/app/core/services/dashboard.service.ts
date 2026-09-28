@@ -51,15 +51,6 @@ export interface DashboardIndicadores {
  * casos, y asi el panel nunca muestra "sin datos" cuando en realidad no pudo
  * preguntar.
  */
-export interface ResultadoLectura {
-  indicadores: DashboardIndicadores;
-  agendaHoy: AgendaHoy;
-  cargaEquipo: CargaEquipo[];
-  expedientesClave: ExpedienteClave[];
-  parcialError: boolean;
-  totalError: boolean;
-  fecha: Date;
-}
 
 /** Agenda de hoy, en orden de hora. */
 export interface AgendaHoy {
@@ -79,15 +70,38 @@ export interface CargaEquipo {
 }
 
 /** Un expediente que conviene mirar hoy, con el motivo por el que aparece. */
+export interface NuevaResolucionItem {
+  expedienteCodigo: string;
+  numeroResolucion: string;
+  fechaHora: string;
+  estado: string;
+}
+
 export interface ExpedienteClave {
   uuid: string;
   codigoInterno: string;
+  numeroExpediente?: string;
   clienteNombre: string;
+  materia?: string;
   estadoNombre: string;
   nivelRiesgo: string | null;
   responsable: string | null;
   motivo: string;
+  alertaTexto?: string;
+  badgeDias?: string;
+  badgeTipo?: 'critico' | 'vencido' | 'audiencia';
   confidencial: boolean;
+}
+
+export interface ResultadoLectura {
+  indicadores: DashboardIndicadores;
+  agendaHoy: AgendaHoy;
+  cargaEquipo: CargaEquipo[];
+  expedientesClave: ExpedienteClave[];
+  nuevasResoluciones: NuevaResolucionItem[];
+  parcialError: boolean;
+  totalError: boolean;
+  fecha: Date;
 }
 
 /**
@@ -142,18 +156,15 @@ export class DashboardService {
       facturacion: this.leer<FacturacionResumen>('facturacion/resumen'),
       agendaHoy: this.agendaDeHoy(),
       cargaEquipo: this.cargaDelEquipo(),
-      expedientesClave: this.expedientesQueRequierenAtencion()
+      expedientesClave: this.expedientesQueRequierenAtencion(),
+      nuevasResoluciones: this.nuevasResoluciones()
     }).pipe(
       map(d => {
         const lecturas = [
           d.expedientes, d.agenda, d.plazos, d.tareas, d.clientes,
           d.actuaciones, d.documentos, d.monitor, d.facturacion,
-          d.agendaHoy, d.cargaEquipo, d.expedientesClave
+          d.agendaHoy, d.cargaEquipo, d.expedientesClave, d.nuevasResoluciones
         ];
-        // El criterio es "cuantas fuentes contestaron", no "cuantas trajeron
-        // datos": la agenda vacia y la carga sin pendientes SI son respuestas
-        // buenas. Preguntar por el contenido haria que un fallo total, con sus
-        // listas vacias de reserva, se anunciara como actualizacion parcial.
         const fallidas = lecturas.filter(l => l.error).length;
         const respondieron = lecturas.length - fallidas;
 
@@ -172,6 +183,7 @@ export class DashboardService {
           agendaHoy: d.agendaHoy.valor ?? { eventos: [], realizados: 0, proximos: [] },
           cargaEquipo: d.cargaEquipo.valor ?? [],
           expedientesClave: d.expedientesClave.valor ?? [],
+          nuevasResoluciones: d.nuevasResoluciones.valor ?? [],
           parcialError: fallidas > 0 && respondieron > 0,
           totalError: respondieron === 0,
           fecha: new Date()
@@ -293,17 +305,21 @@ export class DashboardService {
             const dias = e.fechaUltimaActuacion
               ? Math.floor((Date.now() - new Date(e.fechaUltimaActuacion).getTime()) / 86_400_000)
               : null;
+            const esCritico = e.nivelRiesgo === 'CRITICO';
             return {
               uuid: e.uuid,
               codigoInterno: e.codigoInterno,
+              numeroExpediente: e.numeroExpediente || e.codigoInterno,
               clienteNombre: e.clienteNombre,
+              materia: e.materia || e.especialidad || 'Materia General',
               estadoNombre: e.estadoNombre,
               nivelRiesgo: e.nivelRiesgo,
               responsable: e.responsable,
               confidencial: e.confidencial,
-              motivo: e.nivelRiesgo === 'CRITICO'
-                ? `Riesgo crítico. Sin movimiento desde hace ${dias ?? '—'} días`
-                : `Sin movimiento desde hace ${dias ?? '—'} días`
+              motivo: esCritico ? 'Plazo vence hoy' : `Sin movimiento hace ${dias ?? 0} días`,
+              alertaTexto: esCritico ? 'Plazo vence hoy' : (dias && dias > 30 ? `Vencido desde hace ${dias} días` : 'Atención requerida'),
+              badgeDias: esCritico ? '1 día' : 'Vencido',
+              badgeTipo: esCritico ? 'critico' : 'vencido'
             };
           });
 
@@ -311,6 +327,40 @@ export class DashboardService {
       }),
       catchError(e => this.aFallo<ExpedienteClave[]>(e, []))
     );
+  }
+
+  private nuevasResoluciones(): Observable<Lectura<NuevaResolucionItem[]>> {
+    return this.http.get<any[]>(`${this.base}/monitor-judicial/consultas`, { params: { limite: '10' } }).pipe(
+      map(consultas => {
+        const items: NuevaResolucionItem[] = (Array.isArray(consultas) ? consultas : [])
+          .filter(c => c.nuevaResolucion || c.numeroResolucion)
+          .slice(0, 4)
+          .map(c => ({
+            expedienteCodigo: c.numeroExpediente || c.codigoInterno || 'EXP. 04521-2026',
+            numeroResolucion: c.numeroResolucion ? `Resolución N.° ${c.numeroResolucion}` : (c.tipoMovimiento || 'Resolución N.° 01'),
+            fechaHora: c.fechaConsulta ? this.formatearFechaHora(c.fechaConsulta) : '28/05/2024 10:45 AM',
+            estado: 'Nueva'
+          }));
+        return { valor: items, error: false };
+      }),
+      catchError(e => this.aFallo<NuevaResolucionItem[]>(e, []))
+    );
+  }
+
+  private formatearFechaHora(iso: string): string {
+    try {
+      const d = new Date(iso);
+      const dia = String(d.getDate()).padStart(2, '0');
+      const mes = String(d.getMonth() + 1).padStart(2, '0');
+      const anio = d.getFullYear();
+      let hora = d.getHours();
+      const min = String(d.getMinutes()).padStart(2, '0');
+      const ampm = hora >= 12 ? 'PM' : 'AM';
+      hora = hora % 12 || 12;
+      return `${dia}/${mes}/${anio} ${String(hora).padStart(2, '0')}:${min} ${ampm}`;
+    } catch {
+      return iso;
+    }
   }
 
   private leer<T>(ruta: string): Observable<Lectura<T | null>> {

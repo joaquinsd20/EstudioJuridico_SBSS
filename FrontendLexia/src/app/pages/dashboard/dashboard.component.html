@@ -1,225 +1,680 @@
-<div class="layout-wrapper">
+<div class="layout-wrapper" [class.tema-oscuro]="temaOscuro()">
 
   <app-panel></app-panel>
 
   <main class="main-content">
 
-    <header class="page-header">
-      <div class="saludo">
-        <span class="eyebrow">Panel general</span>
-        <h1>{{ saludo() }}, {{ primerNombre() }}</h1>
-        <p class="fecha-hoy">{{ hoy() }}</p>
+    <!-- ======================================================
+         TOPBAR: buscador general + notificaciones + mensajes + perfil
+    ====================================================== -->
+    <header class="topbar">
+
+      <!-- BUSCADOR GENERAL (Expediente, Cliente, Contraparte, DNI/RUC, Resolución, Actuación, Documento, Abogado) -->
+      <div class="buscador-container" [class.abierto]="busquedaAbierta()">
+        <div class="buscador-bar">
+          <span class="icono-lupa" aria-hidden="true">🔍</span>
+          <input
+            #inputBusqueda
+            type="search"
+            class="input-busq"
+            placeholder="Buscar expediente, cliente, DNI/RUC, resolución, actuación, documento, abogado..."
+            [value]="textoBusqueda()"
+            (input)="alEscribir($event)"
+            (focus)="busquedaAbierta.set(true)"
+            (keydown.escape)="cerrarBusqueda()"
+            aria-label="Buscador general del estudio"
+            autocomplete="off"
+          />
+          <span class="kbd-badge" (click)="inputBusqueda.focus()">+ Ctrl + K</span>
+          @if (buscando()) {
+            <span class="mini-spinner" aria-label="Buscando..."></span>
+          }
+        </div>
+
+        <!-- RESULTADOS DROPDOWN -->
+        @if (busquedaAbierta() && resultadosBusqueda().total > 0) {
+          <div class="buscador-dropdown" role="listbox">
+            @for (grupo of resultadosBusqueda().grupos; track grupo.tipo) {
+              @if (grupo.items.length) {
+                <div class="busq-grupo">
+                  <div class="busq-grupo-header">
+                    <span class="busq-grupo-titulo">{{ grupo.etiqueta }}</span>
+                    <span class="busq-grupo-conteo">{{ grupo.total }} resultados</span>
+                  </div>
+                  @for (r of grupo.items; track r.titulo + r.tipo) {
+                    <div
+                      class="busq-item"
+                      (click)="navegarResultado(r)"
+                      role="option"
+                    >
+                      <span class="chip-tipo" [ngClass]="'chip-' + r.tipo.toLowerCase()">{{ r.etiqueta }}</span>
+                      <div class="busq-item-info">
+                        <strong>{{ r.titulo }}</strong>
+                        @if (r.detalle) {
+                          <span class="busq-sub">{{ r.detalle }}</span>
+                        }
+                      </div>
+                      @if (r.coincidencia) {
+                        <span class="chip-match">{{ r.coincidencia }}</span>
+                      }
+                      <span class="busq-flecha">→</span>
+                    </div>
+                  }
+                </div>
+              }
+            }
+          </div>
+        }
+
+        @if (busquedaAbierta() && textoBusqueda().length >= 2 && !buscando() && resultadosBusqueda().total === 0) {
+          <div class="buscador-dropdown buscador-vacio">
+            <span>No se encontraron resultados para "{{ textoBusqueda() }}"</span>
+          </div>
+        }
+
+        @if (busquedaAbierta()) {
+          <div class="buscador-backdrop" (click)="cerrarBusqueda()"></div>
+        }
       </div>
 
-      <div class="auto-refresh">
-        <span class="estado-actualizacion">
-          <span class="punto" [class.pausado]="error()"></span>
-          {{ error() ? 'Sin conexión con el servidor' : resumenActualizacion() }}
-        </span>
+      <!-- ACCIONES DERECHA -->
+      <div class="topbar-actions">
+
+        <!-- NOTIFICACIONES -->
+        <div class="notif-anchor">
+          <button
+            type="button"
+            class="btn-icon"
+            (click)="alternarNotif()"
+            [attr.aria-label]="'Notificaciones (' + noLeidas() + ' no leídas)'"
+            title="Centro de notificaciones"
+          >
+            <span class="btn-emoji">🔔</span>
+            @if (noLeidas() > 0) {
+              <span class="badge-count">{{ noLeidas() }}</span>
+            }
+          </button>
+
+          <!-- PANEL FLOTANTE DE NOTIFICACIONES -->
+          @if (notifAbierto()) {
+            <div class="popover-panel notif-panel" role="dialog">
+              <div class="popover-header">
+                <div class="popover-title-row">
+                  <strong>Notificaciones</strong>
+                  <span class="popover-badge-pill">{{ noLeidas() }} nuevas</span>
+                </div>
+                @if (noLeidas() > 0) {
+                  <button type="button" class="btn-link-action" (click)="leerTodas()">
+                    Marcar todas leídas
+                  </button>
+                }
+              </div>
+
+              <div class="notif-scroll-list">
+                @for (n of notificaciones(); track n.id) {
+                  <div
+                    class="notif-card-item"
+                    [class.no-leida]="!n.leida"
+                    (click)="abrirNotif(n)"
+                  >
+                    <span class="notif-indicator" [ngClass]="'sev-' + n.severidad.toLowerCase()"></span>
+                    <div class="notif-text">
+                      <div class="notif-headline">
+                        <strong>{{ n.titulo }}</strong>
+                        <span class="notif-time">{{ tiempoRelativo(n.fechaCreacion) }}</span>
+                      </div>
+                      <p class="notif-desc">{{ n.mensaje }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+            <div class="popover-backdrop" (click)="notifAbierto.set(false)"></div>
+          }
+        </div>
+
+        <!-- MENSAJES INTERNOS -->
+        <div class="chat-anchor">
+          <button
+            type="button"
+            class="btn-icon"
+            (click)="alternarMensajes()"
+            [attr.aria-label]="'Mensajes internos (' + mensajesSvc.totalNoLeidos() + ' sin leer)'"
+            title="Mensajes internos del estudio"
+          >
+            <span class="btn-emoji">💬</span>
+            @if (mensajesSvc.totalNoLeidos() > 0) {
+              <span class="badge-count">{{ mensajesSvc.totalNoLeidos() }}</span>
+            }
+          </button>
+
+          <!-- MODAL / DRAWER DE MENSAJES INTERNOS -->
+          @if (mensajesAbierto()) {
+            <div class="chat-modal" role="dialog">
+              <div class="chat-modal-inner">
+                <!-- COLUMNA CONTACTOS -->
+                <div class="chat-contacts-col">
+                  <div class="chat-contacts-header">
+                    <strong>Mensajes del Estudio</strong>
+                  </div>
+                  <div class="chat-contacts-list">
+                    @for (c of mensajesSvc.contactos(); track c.id) {
+                      <div
+                        class="contact-item"
+                        [class.activo]="mensajesSvc.contactoSeleccionado()?.id === c.id"
+                        (click)="seleccionarChat(c.id)"
+                      >
+                        <div class="contact-avatar-wrap">
+                          <span class="contact-avatar">{{ c.avatar }}</span>
+                          @if (c.enLinea) {
+                            <span class="online-dot" title="En línea"></span>
+                          }
+                        </div>
+                        <div class="contact-meta">
+                          <div class="contact-top">
+                            <span class="contact-name">{{ c.nombre }}</span>
+                            @if (c.noLeidos > 0) {
+                              <span class="chat-unread-badge">{{ c.noLeidos }}</span>
+                            }
+                          </div>
+                          <span class="contact-last-msg">{{ c.ultimoMensaje }}</span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+
+                <!-- COLUMNA CHAT CONVERSACIÓN -->
+                <div class="chat-thread-col">
+                  @if (mensajesSvc.contactoSeleccionado(); as contacto) {
+                    <div class="thread-header">
+                      <div class="thread-user">
+                        <span class="contact-avatar sm">{{ contacto.avatar }}</span>
+                        <div>
+                          <strong>{{ contacto.nombre }}</strong>
+                          <span class="thread-status">{{ contacto.enLinea ? '🟢 En línea' : '⚪ Desconectado' }} · {{ contacto.rol }}</span>
+                        </div>
+                      </div>
+                      <button type="button" class="btn-close-chat" (click)="mensajesAbierto.set(false)">✕</button>
+                    </div>
+
+                    <div class="thread-messages">
+                      @for (msg of contacto.mensajes; track msg.id) {
+                        <div class="chat-bubble-row" [class.mio]="msg.esMio">
+                          <div class="chat-bubble">
+                            <p>{{ msg.texto }}</p>
+                            <span class="chat-time">{{ msg.fechaHora }}</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+
+                    <div class="thread-input-row">
+                      <input
+                        type="text"
+                        class="chat-input"
+                        placeholder="Escribe un mensaje para {{ contacto.nombre }}..."
+                        [(ngModel)]="textoNuevoMensaje"
+                        (keydown.enter)="enviarMensaje()"
+                      />
+                      <button type="button" class="btn-send" (click)="enviarMensaje()">
+                        Enviar ✉️
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="popover-backdrop" (click)="mensajesAbierto.set(false)"></div>
+          }
+        </div>
+
+        <!-- TEMA CLARO / OSCURO -->
         <button
           type="button"
-          class="btn-refrescar"
-          (click)="refrescar()"
-          [disabled]="cargando() || actualizando()"
-          [attr.aria-label]="'Actualizar ahora. Próxima actualización en ' + proximaEn() + ' segundos'"
-          [title]="'Se actualiza solo cada 60 segundos'"
+          class="btn-icon"
+          (click)="alternarTema()"
+          [title]="temaOscuro() ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro'"
+          aria-label="Alternar tema claro y oscuro"
         >
-          <span class="icono-refrescar" [class.girando]="actualizando()">↻</span>
-          Actualizar
+          <span class="btn-emoji">{{ temaOscuro() ? '☀️' : '🌙' }}</span>
         </button>
-      </div>
-    </header>
 
-    <div class="aviso" *ngIf="error()">
-      <strong>No pudimos leer los indicadores.</strong>
-      Revisa que el backend esté encendido en el puerto 8080 y vuelve a
-      pulsar <em>Actualizar</em>.
-    </div>
-
-    <div class="aviso aviso-suave" *ngIf="parcialError() && !error()">
-      <strong>Actualización incompleta.</strong>
-      Algún módulo no respondió, así que puede faltar información en el panel.
-      Los datos que sí llegaron son válidos.
-    </div>
-
-    <div class="cargando" *ngIf="cargando()">
-      <span class="spinner"></span>
-      Cargando el resumen del estudio...
-    </div>
-
-    <ng-container *ngIf="!cargando()">
-
-      <div class="todo-en-orden" *ngIf="!hayCritico() && tarjetas().length">
-        <span class="check">✓</span>
-        <div>
-          <strong>Nada vencido a la vista</strong>
-          <p>No hay plazos vencidos ni vencen hoy. Todo al día por ahora.</p>
-        </div>
-      </div>
-
-      <section class="bloque bloque-sugerencias" *ngIf="sugerencias().length">
-        <h2 class="bloque-titulo">
-          Sugerencias para hoy
-          <span class="sub">según lo que tienes abierto ahora mismo</span>
-        </h2>
-
-        <div class="sugerencias">
-          <a
-            class="sugerencia"
-            *ngFor="let s of sugerencias()"
-            [ngClass]="s.prioridad"
-            [routerLink]="s.routerLink"
-          >
-            <span class="sugerencia-marca" aria-hidden="true"></span>
-            <div class="sugerencia-cuerpo">
-              <strong>{{ s.titulo }}</strong>
-              <p>{{ s.detalle }}</p>
+        <!-- BRANDING Y PERFIL DEL USUARIO -->
+        <div class="perfil-anchor">
+          <div class="studio-badge" (click)="alternarPerfil()" title="Ver opciones de perfil">
+            <span class="studio-logo-box">R</span>
+            <div class="studio-info">
+              <span class="studio-pre">ESTUDIO</span>
+              <span class="studio-name">{{ primerNombre() }}</span>
+              <span class="studio-sub">RAMÍREZ</span>
             </div>
-            <span class="sugerencia-flecha" aria-hidden="true">→</span>
-          </a>
-        </div>
-
-        <p class="nota-fuente">
-          Son reglas fijas sobre los números de arriba, no un modelo de IA.
-          Cada sugerencia cita el dato que la justifica.
-        </p>
-      </section>
-
-      <div class="dos-columnas">
-
-        <section class="bloque bloque-agenda">
-          <div class="bloque-cabecera">
-            <h2 class="bloque-titulo">
-              Tu agenda de hoy
-              <span class="sub" *ngIf="agendaPendiente()">{{ agendaPendiente() }} por ocurrir</span>
-            </h2>
-            <a routerLink="/agenda" class="ver-todo">Ver agenda completa →</a>
+            <span class="studio-arrow">▾</span>
           </div>
 
-          <p class="dia-libre" *ngIf="!agendaHoy().eventos.length">
-            <span aria-hidden="true">🌤</span>
-            Hoy no tienes audiencias ni reuniones. Buen día para avanzar lo pendiente.
-          </p>
-
-          <ol class="linea-tiempo" *ngIf="agendaHoy().eventos.length">
-            <li
-              *ngFor="let e of agendaHoy().eventos"
-              [class.pasado]="esPasado(e)"
-              [attr.aria-label]="hora(e) + ' ' + tipoEvento(e) + ': ' + e.titulo"
-            >
-              <span class="lt-hora">{{ hora(e) }}</span>
-              <span class="lt-punto" [style.borderColor]="e.colorHex || '#94A3B8'" aria-hidden="true"></span>
-              <div class="lt-cuerpo">
-                <span class="lt-tipo">{{ tipoEvento(e) }}</span>
-                <strong class="lt-titulo">{{ e.titulo }}</strong>
-                <span class="lt-detalle" *ngIf="e.clienteNombre">{{ e.clienteNombre }}</span>
-                <span class="lt-detalle" *ngIf="e.expedienteCodigo">
-                  <a [routerLink]="['/expedientes']">{{ e.expedienteCodigo }}</a>
-                </span>
-                <span class="lt-detalle" *ngIf="e.ubicacion">{{ e.ubicacion }}</span>
-                <span class="lt-detalle" *ngIf="e.enlaceVirtual">
-                  <a [href]="e.enlaceVirtual" target="_blank" rel="noopener">Enlace virtual</a>
-                </span>
-                <span class="lt-estado" *ngIf="e.estado === 'REALIZADO'">Ya se realizó</span>
-                <span class="lt-estado pendiente" *ngIf="e.estado === 'PROGRAMADO'">Sin confirmar</span>
+          <!-- POPOVER DE PERFIL -->
+          @if (perfilAbierto()) {
+            <div class="popover-panel perfil-panel" role="dialog">
+              <div class="perfil-card-header">
+                <span class="perfil-avatar-lg">{{ primerNombre().charAt(0) }}</span>
+                <div class="perfil-user-details">
+                  <strong>{{ usuario()?.nombreCompleto || 'Sofía Ramírez' }}</strong>
+                  <span class="perfil-email">{{ usuario()?.email || 'sramirez@estudioramirez.pe' }}</span>
+                  <span class="perfil-role-tag">{{ usuario()?.rolPrincipal || 'Abogada Senior' }}</span>
+                </div>
               </div>
-            </li>
-          </ol>
-        </section>
 
-        <section class="bloque bloque-equipo">
-          <h2 class="bloque-titulo">
-            Carga del equipo
-            <span class="sub">tareas abiertas por persona</span>
-          </h2>
-
-          <p class="dia-libre" *ngIf="!cargaEquipo().length">
-            <span aria-hidden="true">👥</span>
-            No hay tareas abiertas para comparar la carga.
-          </p>
-
-          <ul class="carga-lista" *ngIf="cargaEquipo().length">
-            <li *ngFor="let c of cargaEquipo()">
-              <div class="carga-nombre">
-                <span class="avatar" aria-hidden="true">{{ c.responsable.charAt(0) }}</span>
-                <strong>{{ c.responsable }}</strong>
+              <div class="perfil-menu-links">
+                <a routerLink="/configuracion" (click)="perfilAbierto.set(false)" class="perfil-menu-item">
+                  <span>⚙️ Configuración del estudio</span>
+                  <span class="chevron-r">›</span>
+                </a>
+                <a routerLink="/cambiar-password" (click)="perfilAbierto.set(false)" class="perfil-menu-item">
+                  <span>🔑 Cambiar contraseña</span>
+                  <span class="chevron-r">›</span>
+                </a>
+                <button type="button" (click)="alternarTema()" class="perfil-menu-item btn-menu">
+                  <span>{{ temaOscuro() ? '☀️ Activar tema claro' : '🌙 Activar tema oscuro' }}</span>
+                </button>
+                <div class="perfil-divider"></div>
+                <button type="button" (click)="cerrarSesion()" class="perfil-menu-item btn-logout">
+                  <span>🚪 Cerrar sesión</span>
+                </button>
               </div>
-              <div class="carga-barra" aria-hidden="true">
-                <span
-                  class="carga-relleno"
-                  [class.con-vencidas]="c.vencidas > 0"
-                  [style.width.%]="cargaPorcentaje(c)"
-                ></span>
-              </div>
-              <span class="carga-texto" [class.con-vencidas]="c.vencidas > 0">
-                {{ c.resumen }}
-              </span>
-            </li>
-          </ul>
-
-          <p class="nota-fuente" *ngIf="cargaEquipo().length">
-            Si alguien acumula vencidas, conviene reasignarle una tarea antes de
-            que se le junten.
-          </p>
-        </section>
+            </div>
+            <div class="popover-backdrop" (click)="perfilAbierto.set(false)"></div>
+          }
+        </div>
 
       </div>
 
-      <section class="bloque" *ngIf="expedientesClave().length">
-        <h2 class="bloque-titulo">
-          Expedientes que piden atención
-          <span class="sub">riesgo alto o sin movimiento</span>
-        </h2>
+    </header>
 
-        <div class="expedientes-lista">
-          <a
-            class="expediente-item"
-            *ngFor="let e of expedientesClave()"
-            [routerLink]="['/expedientes']"
-            [queryParams]="{ texto: e.codigoInterno }"
-          >
-            <span class="exp-codigo">{{ e.codigoInterno }}</span>
-            <div class="exp-cuerpo">
-              <strong>{{ e.clienteNombre }}</strong>
-              <span class="exp-motivo">{{ e.motivo }}</span>
-            </div>
-            <span class="exp-estado">{{ e.estadoNombre }}</span>
-            <span class="confidencial" *ngIf="e.confidencial" title="Documentación confidencial">🔒</span>
-            <span class="stat-flecha" aria-hidden="true">→</span>
-          </a>
+    <!-- ======================================================
+         SALUDO Y BIENVENIDA
+    ====================================================== -->
+    <section class="welcome-header">
+      <h1>{{ saludo() }}, {{ primerNombre() }} 👋</h1>
+      <p>Aquí tienes el resumen general de tu estudio jurídico.</p>
+    </section>
+
+    <!-- ======================================================
+         5 INDICADORES KPI SUPERIORES
+    ====================================================== -->
+    <section class="kpi-grid">
+
+      <!-- 1. Plazos vencidos -->
+      <a class="kpi-card" routerLink="/plazos">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap icon-red">
+            <span class="kpi-icon">⏱️</span>
+          </div>
+          <span class="kpi-title">Plazos vencidos</span>
         </div>
-      </section>
+        <div class="kpi-number">{{ kpiPlazosVencidos() }}</div>
+        <div class="kpi-subtitle">Requieren atención inmediata</div>
+      </a>
 
-      <section class="bloque" *ngFor="let s of secciones()">
-        <h2 class="bloque-titulo" [class.urgente]="s.id === 'prioritario'">
-          {{ s.titulo }}
-        </h2>
-
-        <div class="stats-row">
-          <a
-            class="stat-card"
-            *ngFor="let t of s.items"
-            [ngClass]="[t.tono, t.tranquilo ? 'tranquilo' : 'pendiente']"
-            [routerLink]="t.routerLink"
-            [attr.aria-label]="t.titulo + ': ' + t.valor + '. ' + t.explicacion"
-          >
-            <span class="stat-icon" [ngClass]="t.tranquilo ? 'ok' : 'aviso'">{{ t.icono }}</span>
-            <div class="stat-cuerpo">
-              <strong>{{ t.valor }}</strong>
-              <span class="stat-titulo">{{ t.titulo }}</span>
-              <span class="stat-detalle">{{ t.explicacion }}</span>
-            </div>
-            <span class="stat-flecha" aria-hidden="true">→</span>
-          </a>
+      <!-- 2. Plazos por vencer -->
+      <a class="kpi-card" routerLink="/plazos">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap icon-orange">
+            <span class="kpi-icon">📅</span>
+          </div>
+          <span class="kpi-title">Plazos por vencer</span>
         </div>
-      </section>
+        <div class="kpi-number">{{ kpiPlazosPorVencer() }}</div>
+        <div class="kpi-subtitle">En los próximos 3 días</div>
+      </a>
 
-      <p class="sin-datos" *ngIf="!tarjetas().length && !error()">
-        Todavía no hay indicadores para tu rol. En cuanto registres
-        expedientes o tareas, aparecerán aquí.
-      </p>
+      <!-- 3. Nuevas resoluciones -->
+      <a class="kpi-card" routerLink="/monitor-judicial">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap icon-green">
+            <span class="kpi-icon">📄</span>
+          </div>
+          <span class="kpi-title">Nuevas resoluciones</span>
+        </div>
+        <div class="kpi-number">{{ kpiNuevasResoluciones() }}</div>
+        <div class="kpi-subtitle">Desde la última revisión</div>
+      </a>
 
-    </ng-container>
+      <!-- 4. Audiencias próximas -->
+      <a class="kpi-card" routerLink="/agenda">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap icon-blue">
+            <span class="kpi-icon">⚖️</span>
+          </div>
+          <span class="kpi-title">Audiencias próximas</span>
+        </div>
+        <div class="kpi-number">{{ kpiAudienciasProximas() }}</div>
+        <div class="kpi-subtitle">En los próximos 7 días</div>
+      </a>
+
+      <!-- 5. Tareas pendientes -->
+      <a class="kpi-card" routerLink="/tareas">
+        <div class="kpi-top">
+          <div class="kpi-icon-wrap icon-purple">
+            <span class="kpi-icon">📝</span>
+          </div>
+          <span class="kpi-title">Tareas pendientes</span>
+        </div>
+        <div class="kpi-number">{{ kpiTareasPendientes() }}</div>
+        <div class="kpi-subtitle">Asignadas a tu equipo</div>
+      </a>
+
+    </section>
+
+    <!-- ======================================================
+         FILA MEDIA: 3 COLUMNAS PRINCIPALES
+    ====================================================== -->
+    <section class="middle-grid">
+
+      <!-- COLUMNA 1: ATENCIÓN INMEDIATA -->
+      <div class="card-column">
+        <div class="column-header">
+          <span class="header-icon icon-warning">⚠️</span>
+          <h2>Atención inmediata</h2>
+        </div>
+
+        <div class="column-list">
+          @for (item of listaAtencionInmediata(); track item.codigo) {
+            <a class="item-entry" [routerLink]="['/expedientes']" [queryParams]="{ texto: item.codigo }">
+              <div class="entry-line-top">
+                <strong class="entry-code">{{ item.codigo }}</strong>
+                <div class="entry-tags">
+                  <span class="tag-dias">{{ item.badgeTexto }}</span>
+                  <span class="badge-pill" [ngClass]="'pill-' + item.badgeTipo">
+                    {{ item.badgeTipo === 'critico' ? 'Crítico' : item.badgeTipo === 'vencido' ? 'Vencido' : 'Audiencia' }}
+                  </span>
+                </div>
+              </div>
+              <div class="entry-materia">{{ item.materia }}</div>
+              <div class="entry-alerta" [ngClass]="'alerta-' + item.alertaColor">
+                {{ item.alerta }}
+              </div>
+            </a>
+          }
+        </div>
+
+        <div class="column-footer">
+          <a routerLink="/expedientes" class="footer-link">Ver todos los críticos →</a>
+        </div>
+      </div>
+
+      <!-- COLUMNA 2: NUEVAS RESOLUCIONES -->
+      <div class="card-column">
+        <div class="column-header">
+          <span class="header-icon icon-resoluciones">📑</span>
+          <h2>Nuevas resoluciones</h2>
+        </div>
+
+        <div class="column-list">
+          @for (res of listaNuevasResoluciones(); track res.expedienteCodigo + res.numeroResolucion) {
+            <a class="item-entry" [routerLink]="['/monitor-judicial']">
+              <div class="entry-line-top">
+                <strong class="entry-code">{{ res.expedienteCodigo }}</strong>
+                <span class="badge-pill pill-nueva">Nueva</span>
+              </div>
+              <div class="entry-materia">{{ res.numeroResolucion }}</div>
+              <div class="entry-fecha">{{ res.fechaHora }}</div>
+            </a>
+          }
+        </div>
+
+        <div class="column-footer">
+          <a routerLink="/monitor-judicial" class="footer-link">Ver todas las nuevas resoluciones →</a>
+        </div>
+      </div>
+
+      <!-- COLUMNA 3: AGENDA DE HOY -->
+      <div class="card-column">
+        <div class="column-header">
+          <span class="header-icon icon-agenda">📅</span>
+          <h2>Agenda de hoy</h2>
+        </div>
+
+        <div class="column-list agenda-list">
+          @for (ev of listaAgendaHoy(); track ev.hora + ev.titulo) {
+            <a class="agenda-entry" routerLink="/agenda">
+              <span class="agenda-hora">{{ ev.hora }}</span>
+              <span class="agenda-bullet" [ngClass]="'bullet-' + ev.tonoEtiqueta"></span>
+              <div class="agenda-body">
+                <strong class="agenda-titulo">{{ ev.titulo }}</strong>
+                <span class="agenda-detalle">{{ ev.detalle }}</span>
+              </div>
+              <span class="badge-pill" [ngClass]="'pill-tint-' + ev.tonoEtiqueta">
+                {{ ev.etiqueta }}
+              </span>
+            </a>
+          }
+        </div>
+
+        <div class="column-footer">
+          <a routerLink="/agenda" class="footer-link">Ver agenda completa →</a>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================
+         FILA INFERIOR: GRÁFICOS OPERATIVOS (Expedientes, Especialidad, Carga)
+    ====================================================== -->
+    <section class="charts-grid">
+
+      <!-- GRÁFICO 1: RESUMEN DE EXPEDIENTES (Donut) -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-resumen">🕒</span>
+          <h2>Resumen de expedientes</h2>
+        </div>
+
+        <div class="donut-chart-container">
+          <div class="donut-svg-wrap">
+            <svg class="donut-svg" viewBox="0 0 180 180" aria-hidden="true">
+              <circle cx="90" cy="90" r="65" fill="none" stroke="#f1f5f9" stroke-width="26" />
+              @for (seg of donutSegmentos(); track seg.nombre) {
+                <circle
+                  cx="90"
+                  cy="90"
+                  r="65"
+                  fill="none"
+                  [attr.stroke]="seg.color"
+                  stroke-width="26"
+                  [attr.stroke-dasharray]="seg.dash"
+                  [attr.stroke-dashoffset]="seg.offset"
+                  stroke-linecap="butt"
+                />
+              }
+            </svg>
+            <div class="donut-center-text">
+              <span class="donut-number">{{ totalExpedientesDonut() }}</span>
+              <span class="donut-label">Total</span>
+            </div>
+          </div>
+
+          <div class="donut-legend">
+            @for (seg of donutSegmentos(); track seg.nombre) {
+              <div class="legend-row">
+                <span class="legend-box" [style.backgroundColor]="seg.color"></span>
+                <span class="legend-name">{{ seg.nombre }}</span>
+                <span class="legend-val">{{ donutItems()[$index].valor }} ({{ seg.porcentaje }}%)</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICO 2: EXPEDIENTES POR ESPECIALIDAD (Barras verticales) -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-esp">📅</span>
+          <h2>Expedientes por especialidad</h2>
+        </div>
+
+        <div class="bar-chart-container">
+          <div class="chart-y-axis">
+            <span>12</span>
+            <span>10</span>
+            <span>8</span>
+            <span>6</span>
+            <span>4</span>
+            <span>2</span>
+            <span>0</span>
+          </div>
+
+          <div class="chart-bars-wrap">
+            <div class="grid-line" style="bottom: 100%;"></div>
+            <div class="grid-line" style="bottom: 83.3%;"></div>
+            <div class="grid-line" style="bottom: 66.6%;"></div>
+            <div class="grid-line" style="bottom: 50%;"></div>
+            <div class="grid-line" style="bottom: 33.3%;"></div>
+            <div class="grid-line" style="bottom: 16.6%;"></div>
+            <div class="grid-line" style="bottom: 0;"></div>
+
+            <div class="bars-flex">
+              @for (b of especialidadBarras(); track b.nombre) {
+                <div class="bar-column">
+                  <span class="bar-value-top">{{ b.valor }}</span>
+                  <div class="bar-track">
+                    <div
+                      class="bar-fill"
+                      [style.height.%]="(b.valor / 12) * 100"
+                    ></div>
+                  </div>
+                  <span class="bar-label-bottom">{{ b.nombre }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICO 3: CARGA DE TRABAJO DEL EQUIPO (Ponderada) -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-carga">⚖️</span>
+          <h2>Carga de trabajo del equipo</h2>
+        </div>
+
+        <div class="team-carga-header">
+          <span>Abogado</span>
+          <span>Expedientes</span>
+        </div>
+
+        <div class="team-carga-list">
+          @for (c of cargaEquipoVista(); track c.nombre) {
+            <div class="team-row">
+              <div class="team-user">
+                <span class="team-avatar">{{ c.nombre.charAt(0) }}</span>
+                <span class="team-name">{{ c.nombre }}</span>
+              </div>
+              <div class="team-bar-track">
+                <div
+                  class="team-bar-fill"
+                  [style.width.%]="c.porcentaje"
+                ></div>
+              </div>
+              <span class="team-count">{{ c.expedientes }}</span>
+              <span class="team-percent">{{ c.porcentaje }}%</span>
+            </div>
+          }
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ======================================================
+         FILA ADICIONAL: TAREAS, INGRESOS Y CUENTAS POR COBRAR
+    ====================================================== -->
+    <section class="charts-grid second-row">
+
+      <!-- GRÁFICO 4: TAREAS POR USUARIO -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-tareas">📝</span>
+          <h2>Tareas por usuario</h2>
+        </div>
+        <p class="chart-sub">Distribución de tareas activas y vencidas por responsable</p>
+
+        <div class="team-carga-list">
+          @for (t of tareasPorUsuarioVista(); track t.nombre) {
+            <div class="team-row">
+              <div class="team-user">
+                <span class="team-avatar" [class.alert-user]="t.esVencida">{{ t.nombre.charAt(0) }}</span>
+                <span class="team-name">{{ t.nombre }}</span>
+              </div>
+              <div class="team-bar-track">
+                <div
+                  class="team-bar-fill"
+                  [class.bar-red]="t.esVencida"
+                  [style.width.%]="t.porcentaje"
+                ></div>
+              </div>
+              <span class="team-count" [class.text-red]="t.esVencida">{{ t.total }}</span>
+              <span class="team-detail-tag" [class.tag-red]="t.esVencida">{{ t.detalle }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- GRÁFICO 5: INGRESOS POR MES -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-ingresos">📈</span>
+          <h2>Ingresos del estudio</h2>
+        </div>
+        <p class="chart-sub">Honorarios facturados en los últimos 6 meses (S/)</p>
+
+        <div class="ingresos-chart-wrap">
+          <div class="ingresos-bars">
+            @for (ing of ingresosPorMesVista(); track ing.mes) {
+              <div class="ingreso-col">
+                <span class="ingreso-val">S/ {{ (ing.valor / 1000).toFixed(1) }}k</span>
+                <div class="ingreso-bar-track">
+                  <div
+                    class="ingreso-bar-fill"
+                    [style.height.%]="ing.porcentaje"
+                  ></div>
+                </div>
+                <span class="ingreso-mes">{{ ing.mes }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- GRÁFICO 6: CUENTAS POR COBRAR Y COBRANZA -->
+      <div class="chart-card">
+        <div class="column-header">
+          <span class="header-icon icon-cobranza">💰</span>
+          <h2>Cuentas por cobrar</h2>
+        </div>
+        <p class="chart-sub">Estado de facturación y saldos pendientes</p>
+
+        <div class="cobranza-kpi-grid">
+          <div class="cob-box cob-box-blue">
+            <span class="cob-box-title">Facturado</span>
+            <strong class="cob-box-amount">{{ moneda(cobranzaVista().facturado) }}</strong>
+          </div>
+          <div class="cob-box cob-box-green">
+            <span class="cob-box-title">Cobrado</span>
+            <strong class="cob-box-amount">{{ moneda(cobranzaVista().cobrado) }}</strong>
+          </div>
+          <div class="cob-box cob-box-orange">
+            <span class="cob-box-title">Pendiente</span>
+            <strong class="cob-box-amount">{{ moneda(cobranzaVista().pendiente) }}</strong>
+            <span class="cob-box-sub">{{ cobranzaVista().cuentasPendientes }} cuentas</span>
+          </div>
+          <div class="cob-box cob-box-red">
+            <span class="cob-box-title">Vencido</span>
+            <strong class="cob-box-amount">{{ moneda(cobranzaVista().vencido) }}</strong>
+            <span class="cob-box-sub">{{ cobranzaVista().cuentasVencidas }} vencidas</span>
+          </div>
+        </div>
+      </div>
+
+    </section>
 
   </main>
 

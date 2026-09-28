@@ -29,41 +29,35 @@ export const TIPOS_BUSQUEDA: { codigo: TipoBusqueda; etiqueta: string }[] = [
 
 /** Cabecera de cada grupo: el tipo y cuantos resultados trae. */
 export interface GrupoBusqueda {
-  tipo: TipoBusqueda;
+  tipo: TipoBusqueda | string;
   etiqueta: string;
   total: number;
-  resultados: ResultadoBusqueda[];
+  items: ResultadoBusqueda[];
+  resultados?: ResultadoBusqueda[];
 }
 
 /**
  * Un resultado, con los mismos campos para todos los tipos.
- *
- * Se opta por un unico tipo y no por siete porque el buscador solo muestra
- * cuatro cosas de cada fila: titulo, un subtitulo, una etiqueta y a donde
- * lleva. Modelar cada tipo por separado obligaria a un `@switch` en la
- * plantilla por cada uno, y cada uno anadiria una excepcion.
  */
 export interface ResultadoBusqueda {
-  /** Identificador publico, el que acepta el modulo de destino. */
-  uuid: string;
-  /** Linea principal. */
+  uuid?: string;
   titulo: string;
-  /** Linea secundaria, con el contexto que hace distinguir dos homonimos. */
-  subtitulo: string | null;
-  /** Etiqueta corta del tipo, para el chip de color. */
-  tipo: TipoBusqueda;
-  etiquetaTipo: string;
-  /** Destino dentro de la SPA. Viene del backend como `urlDestino`. */
+  subtitulo?: string | null;
+  detalle?: string | null;
+  tipo: TipoBusqueda | string;
+  etiqueta?: string;
+  etiquetaTipo?: string;
   ruta: string | null;
-  /** Marca los resultados que el usuario no tiene permiso a abrir. */
-  restringido: boolean;
+  restringido?: boolean;
+  expedienteId?: number;
+  expedienteCodigo?: string;
+  coincidencia?: string;
+  fecha?: string;
 }
 
 export interface BusquedaRespuesta {
   texto: string;
   grupos: GrupoBusqueda[];
-  /** Suma de resultados de todos los grupos. */
   total: number;
-  /** true si algun grupo se quedo sin resultados visibles por permisos. */
-  parcialPorPermisos: boolean;
+  parcialPorPermisos?: boolean;
 }
