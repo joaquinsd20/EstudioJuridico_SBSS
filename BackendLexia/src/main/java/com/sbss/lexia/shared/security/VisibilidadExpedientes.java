@@ -26,6 +26,21 @@ import java.util.Map;
  *
  * Genera SQL con parámetros con nombre propios (`vis*`) para no chocar con los
  * del módulo que la use.
+ *
+ * <p><b>Lo que devuelve empieza y termina con un espacio, siempre.</b> No es
+ * cosmético: una de las cuatro ramas no lo hacía, y al concatenarla con un
+ * bloque de texto de Java —que recorta los espacios finales— el nombre del
+ * parámetro se pegó a la palabra siguiente:
+ *
+ * <pre>
+ *   WHERE ... AND e.estudio_id = :visEstudioIdORDER BY e.codigo_interno DESC
+ *
+ *   InvalidDataAccessApiUsageException: No value supplied for the SQL
+ *   parameter 'visEstudioIdORDER'
+ * </pre>
+ *
+ * Solo reventaba para Administrador y Socio, que son los unicos que caen en esa
+ * rama, y solo en /api/v1/tareas/catalogos. Lo fija VisibilidadExpedientesTest.
  */
 public final class VisibilidadExpedientes {
 
@@ -59,23 +74,32 @@ public final class VisibilidadExpedientes {
 
         if (SesionActual.esPortalCliente()) {
             f.append(" AND ").append(alias).append(".cliente_id = :").append(P_CLIENTE)
-             .append(" AND ").append(alias).append(".es_confidencial = 0 ");
-            return f.toString();
+             .append(" AND ").append(alias).append(".es_confidencial = 0");
+            return cerrar(f);
         }
         if (!verTodos()) {
             f.append(" AND (").append(alias).append(".abogado_responsable_id = :").append(P_USUARIO)
              .append(" OR EXISTS (SELECT 1 FROM expediente_equipo eqvis")
              .append(" WHERE eqvis.expediente_id = ").append(alias).append(".id")
              .append(" AND eqvis.usuario_id = :").append(P_USUARIO)
-             .append(" AND eqvis.activo = 1)) ");
+             .append(" AND eqvis.activo = 1))");
             // Sin verTodos, lo anterior ya limita a lo asignado: el confidencial
             // asignado SE VE, que es lo que pide el RF-02.
-            return f.toString();
+            return cerrar(f);
         }
         if (!verConfidenciales()) {
-            f.append(" AND ").append(alias).append(".es_confidencial = 0 ");
+            f.append(" AND ").append(alias).append(".es_confidencial = 0");
         }
-        return f.toString();
+        return cerrar(f);
+    }
+
+    /**
+     * Toda rama sale por aqui, y por eso el espacio final esta garantizado.
+     * Sin el, lo que venga detras se pega al nombre del parametro: ver el
+     * javadoc de la clase.
+     */
+    private static String cerrar(StringBuilder f) {
+        return f.append(' ').toString();
     }
 
     /** Los parámetros que usa {@link #sql(String)}, añadidos al mapa del módulo. */
