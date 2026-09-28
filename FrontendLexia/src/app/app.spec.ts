@@ -14,10 +14,13 @@ describe('App', () => {
     expect(app).toBeTruthy();
   });
 
-  it('should render title', async () => {
+  // App es un contenedor: solo el <router-outlet>, y las pantallas llegan por
+  // loadComponent. Este test verifica el arbol de rutas, no un titulo en el
+  // template (que no lo tiene, y por eso fallaba desde el andamiaje del CLI).
+  it('debe montar el router-outlet que hospeda las pantallas', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, FrontedLexia');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

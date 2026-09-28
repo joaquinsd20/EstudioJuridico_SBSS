@@ -1,25 +1,225 @@
 <div class="layout-wrapper">
 
-  <!-- PANEL LATERAL REUTILIZABLE -->
   <app-panel></app-panel>
 
   <main class="main-content">
 
-    <div class="dashboard-header">
+    <header class="page-header">
+      <div class="saludo">
+        <span class="eyebrow">Panel general</span>
+        <h1>{{ saludo() }}, {{ primerNombre() }}</h1>
+        <p class="fecha-hoy">{{ hoy() }}</p>
+      </div>
 
-      <div>
+      <div class="auto-refresh">
+        <span class="estado-actualizacion">
+          <span class="punto" [class.pausado]="error()"></span>
+          {{ error() ? 'Sin conexión con el servidor' : resumenActualizacion() }}
+        </span>
+        <button
+          type="button"
+          class="btn-refrescar"
+          (click)="refrescar()"
+          [disabled]="cargando() || actualizando()"
+          [attr.aria-label]="'Actualizar ahora. Próxima actualización en ' + proximaEn() + ' segundos'"
+          [title]="'Se actualiza solo cada 60 segundos'"
+        >
+          <span class="icono-refrescar" [class.girando]="actualizando()">↻</span>
+          Actualizar
+        </button>
+      </div>
+    </header>
 
-        <h2>
-          Buenos días, Carlos Mendoza Rojas 👋
+    <div class="aviso" *ngIf="error()">
+      <strong>No pudimos leer los indicadores.</strong>
+      Revisa que el backend esté encendido en el puerto 8080 y vuelve a
+      pulsar <em>Actualizar</em>.
+    </div>
+
+    <div class="aviso aviso-suave" *ngIf="parcialError() && !error()">
+      <strong>Actualización incompleta.</strong>
+      Algún módulo no respondió, así que puede faltar información en el panel.
+      Los datos que sí llegaron son válidos.
+    </div>
+
+    <div class="cargando" *ngIf="cargando()">
+      <span class="spinner"></span>
+      Cargando el resumen del estudio...
+    </div>
+
+    <ng-container *ngIf="!cargando()">
+
+      <div class="todo-en-orden" *ngIf="!hayCritico() && tarjetas().length">
+        <span class="check">✓</span>
+        <div>
+          <strong>Nada vencido a la vista</strong>
+          <p>No hay plazos vencidos ni vencen hoy. Todo al día por ahora.</p>
+        </div>
+      </div>
+
+      <section class="bloque bloque-sugerencias" *ngIf="sugerencias().length">
+        <h2 class="bloque-titulo">
+          Sugerencias para hoy
+          <span class="sub">según lo que tienes abierto ahora mismo</span>
         </h2>
 
-        
+        <div class="sugerencias">
+          <a
+            class="sugerencia"
+            *ngFor="let s of sugerencias()"
+            [ngClass]="s.prioridad"
+            [routerLink]="s.routerLink"
+          >
+            <span class="sugerencia-marca" aria-hidden="true"></span>
+            <div class="sugerencia-cuerpo">
+              <strong>{{ s.titulo }}</strong>
+              <p>{{ s.detalle }}</p>
+            </div>
+            <span class="sugerencia-flecha" aria-hidden="true">→</span>
+          </a>
+        </div>
+
+        <p class="nota-fuente">
+          Son reglas fijas sobre los números de arriba, no un modelo de IA.
+          Cada sugerencia cita el dato que la justifica.
+        </p>
+      </section>
+
+      <div class="dos-columnas">
+
+        <section class="bloque bloque-agenda">
+          <div class="bloque-cabecera">
+            <h2 class="bloque-titulo">
+              Tu agenda de hoy
+              <span class="sub" *ngIf="agendaPendiente()">{{ agendaPendiente() }} por ocurrir</span>
+            </h2>
+            <a routerLink="/agenda" class="ver-todo">Ver agenda completa →</a>
+          </div>
+
+          <p class="dia-libre" *ngIf="!agendaHoy().eventos.length">
+            <span aria-hidden="true">🌤</span>
+            Hoy no tienes audiencias ni reuniones. Buen día para avanzar lo pendiente.
+          </p>
+
+          <ol class="linea-tiempo" *ngIf="agendaHoy().eventos.length">
+            <li
+              *ngFor="let e of agendaHoy().eventos"
+              [class.pasado]="esPasado(e)"
+              [attr.aria-label]="hora(e) + ' ' + tipoEvento(e) + ': ' + e.titulo"
+            >
+              <span class="lt-hora">{{ hora(e) }}</span>
+              <span class="lt-punto" [style.borderColor]="e.colorHex || '#94A3B8'" aria-hidden="true"></span>
+              <div class="lt-cuerpo">
+                <span class="lt-tipo">{{ tipoEvento(e) }}</span>
+                <strong class="lt-titulo">{{ e.titulo }}</strong>
+                <span class="lt-detalle" *ngIf="e.clienteNombre">{{ e.clienteNombre }}</span>
+                <span class="lt-detalle" *ngIf="e.expedienteCodigo">
+                  <a [routerLink]="['/expedientes']">{{ e.expedienteCodigo }}</a>
+                </span>
+                <span class="lt-detalle" *ngIf="e.ubicacion">{{ e.ubicacion }}</span>
+                <span class="lt-detalle" *ngIf="e.enlaceVirtual">
+                  <a [href]="e.enlaceVirtual" target="_blank" rel="noopener">Enlace virtual</a>
+                </span>
+                <span class="lt-estado" *ngIf="e.estado === 'REALIZADO'">Ya se realizó</span>
+                <span class="lt-estado pendiente" *ngIf="e.estado === 'PROGRAMADO'">Sin confirmar</span>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="bloque bloque-equipo">
+          <h2 class="bloque-titulo">
+            Carga del equipo
+            <span class="sub">tareas abiertas por persona</span>
+          </h2>
+
+          <p class="dia-libre" *ngIf="!cargaEquipo().length">
+            <span aria-hidden="true">👥</span>
+            No hay tareas abiertas para comparar la carga.
+          </p>
+
+          <ul class="carga-lista" *ngIf="cargaEquipo().length">
+            <li *ngFor="let c of cargaEquipo()">
+              <div class="carga-nombre">
+                <span class="avatar" aria-hidden="true">{{ c.responsable.charAt(0) }}</span>
+                <strong>{{ c.responsable }}</strong>
+              </div>
+              <div class="carga-barra" aria-hidden="true">
+                <span
+                  class="carga-relleno"
+                  [class.con-vencidas]="c.vencidas > 0"
+                  [style.width.%]="cargaPorcentaje(c)"
+                ></span>
+              </div>
+              <span class="carga-texto" [class.con-vencidas]="c.vencidas > 0">
+                {{ c.resumen }}
+              </span>
+            </li>
+          </ul>
+
+          <p class="nota-fuente" *ngIf="cargaEquipo().length">
+            Si alguien acumula vencidas, conviene reasignarle una tarea antes de
+            que se le junten.
+          </p>
+        </section>
 
       </div>
 
-    </div>
+      <section class="bloque" *ngIf="expedientesClave().length">
+        <h2 class="bloque-titulo">
+          Expedientes que piden atención
+          <span class="sub">riesgo alto o sin movimiento</span>
+        </h2>
 
-    <!-- aquí continúa toda tu interfaz Dashboard -->
+        <div class="expedientes-lista">
+          <a
+            class="expediente-item"
+            *ngFor="let e of expedientesClave()"
+            [routerLink]="['/expedientes']"
+            [queryParams]="{ texto: e.codigoInterno }"
+          >
+            <span class="exp-codigo">{{ e.codigoInterno }}</span>
+            <div class="exp-cuerpo">
+              <strong>{{ e.clienteNombre }}</strong>
+              <span class="exp-motivo">{{ e.motivo }}</span>
+            </div>
+            <span class="exp-estado">{{ e.estadoNombre }}</span>
+            <span class="confidencial" *ngIf="e.confidencial" title="Documentación confidencial">🔒</span>
+            <span class="stat-flecha" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="bloque" *ngFor="let s of secciones()">
+        <h2 class="bloque-titulo" [class.urgente]="s.id === 'prioritario'">
+          {{ s.titulo }}
+        </h2>
+
+        <div class="stats-row">
+          <a
+            class="stat-card"
+            *ngFor="let t of s.items"
+            [ngClass]="[t.tono, t.tranquilo ? 'tranquilo' : 'pendiente']"
+            [routerLink]="t.routerLink"
+            [attr.aria-label]="t.titulo + ': ' + t.valor + '. ' + t.explicacion"
+          >
+            <span class="stat-icon" [ngClass]="t.tranquilo ? 'ok' : 'aviso'">{{ t.icono }}</span>
+            <div class="stat-cuerpo">
+              <strong>{{ t.valor }}</strong>
+              <span class="stat-titulo">{{ t.titulo }}</span>
+              <span class="stat-detalle">{{ t.explicacion }}</span>
+            </div>
+            <span class="stat-flecha" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </section>
+
+      <p class="sin-datos" *ngIf="!tarjetas().length && !error()">
+        Todavía no hay indicadores para tu rol. En cuanto registres
+        expedientes o tareas, aparecerán aquí.
+      </p>
+
+    </ng-container>
 
   </main>
 

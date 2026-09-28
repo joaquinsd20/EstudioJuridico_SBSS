@@ -1,5 +1,6 @@
 package com.sbss.lexia.seguridad.service;
 
+import com.sbss.lexia.seguridad.dto.ActualizarPerfilRequest;
 import com.sbss.lexia.seguridad.dto.CambiarPasswordRequest;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
 import com.sbss.lexia.seguridad.dto.LoginResponse;
@@ -119,6 +120,29 @@ public class AuthService {
         return usuarioRepository.findByEmailConRoles(email)
                 .map(this::aDto)
                 .orElseThrow(() -> new IllegalStateException("Usuario autenticado sin registro"));
+    }
+
+    /**
+     * El usuario edita su propio perfil.
+     *
+     * Carga la entidad y toca SOLO los campos de `ActualizarPerfilRequest`; los
+     * demas se dejan como estan, aunque el request no los mentione. Se
+     * reutiliza `findByEmailConRoles` en vez del id del principal para que la
+     * escritura caiga sobre la fila que la sesion ya dijo que es suya, y se
+     * devuelve el DTO entero para que Angular repinte el sidebar con el nombre
+     * nuevo sin tener que recargar.
+     */
+    @Transactional
+    public UsuarioAutenticadoDto actualizarPerfil(String email, ActualizarPerfilRequest peticion) {
+        Usuario usuario = usuarioRepository.findByEmailConRoles(email)
+                .orElseThrow(() -> new IllegalStateException("Usuario autenticado sin registro"));
+
+        usuario.setNombres(peticion.nombres().trim());
+        usuario.setApellidos(peticion.apellidos().trim());
+        usuario.setTelefono(peticion.telefono());
+        usuario.setFotoUrl(peticion.fotoUrl());
+
+        return aDto(usuario);
     }
 
     private UsuarioAutenticadoDto aDto(Usuario usuario) {

@@ -157,6 +157,27 @@
 
 	<build>
 		<plugins>
+			<!-- Desde el JDK 23 (JEP 'deprecate implicit annotation processing', y
+			     efectivo en el 24) javac ya NO ejecuta por su cuenta los annotation
+			     processors que encuentra en el classpath. Consecuencia en este
+			     proyecto: Lombok deja de correr, @Getter y @Setter no generan nada,
+			     y la compilacion falla con ~200 errores 'cannot find symbol' sobre
+			     metodos como getUuidPublico() o builder().
+
+			     '-proc:full' devuelve el comportamiento anterior de forma explicita.
+			     Se pone aqui, y no como <annotationProcessorPaths> de Lombok, por dos
+			     razones: sigue funcionando con el JDK 21 que declara <java.version>,
+			     y no fija una version de Lombok distinta de la que ya gobierna el
+			     parent de Spring Boot. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<compilerArgs>
+						<arg>-proc:full</arg>
+					</compilerArgs>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>

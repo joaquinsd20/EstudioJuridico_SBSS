@@ -1,5 +1,6 @@
 package com.sbss.lexia.seguridad.controller;
 
+import com.sbss.lexia.seguridad.dto.ActualizarPerfilRequest;
 import com.sbss.lexia.seguridad.dto.CambiarPasswordRequest;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
 import com.sbss.lexia.seguridad.dto.LoginResponse;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -48,5 +50,24 @@ public class AuthController {
     public ResponseEntity<UsuarioAutenticadoDto> yo(
             @AuthenticationPrincipal UsuarioPrincipal usuario) {
         return ResponseEntity.ok(authService.usuarioActual(usuario.getEmail()));
+    }
+
+    /**
+     * El usuario actualiza su propio perfil.
+     *
+     * Sin `@PreAuthorize` a proposito, igual que en `yo` y `cambiar-password`:
+     * con un token valido ya se sabe quien es, y estas son de las pocas rutas
+     * permitidas mientras `debe_cambiar_password = 1`. El id sale SIEMPRE del
+     * token, nunca del cuerpo: por eso un usuario no puede editar el perfil de
+     * otro ni aunque mande su id.
+     *
+     * Devuelve el usuario completo para que el front actualice el nombre del
+     * sidebar con la respuesta, sin pedir un `GET /yo` extra.
+     */
+    @PutMapping("/yo")
+    public ResponseEntity<UsuarioAutenticadoDto> actualizarYo(
+            @AuthenticationPrincipal UsuarioPrincipal usuario,
+            @Valid @RequestBody ActualizarPerfilRequest peticion) {
+        return ResponseEntity.ok(authService.actualizarPerfil(usuario.getEmail(), peticion));
     }
 }
