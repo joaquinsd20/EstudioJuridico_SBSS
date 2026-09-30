@@ -1555,3 +1555,346 @@ textarea.custom-input {
   }
 
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .facturacion-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .facturacion-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .kpi-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .kpi-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .text-success {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .text-danger {
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .text-warning {
+  color: #e1b884;
+}
+
+:host-context(.tema-oscuro-global) .card-panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .form-group label {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-input,
+:host-context(.tema-oscuro-global) .custom-select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .custom-table th {
+  border-bottom: 1px solid #334155;
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .custom-table td {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-table tbody tr {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .expediente-code {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .client-avatar {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .client-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .billing-type {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .amount-cell {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .amount-paid {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .amount-pending {
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .amount-zero {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .badge-success {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .badge-pending {
+  background: #49401d;
+  color: #e7bc7e;
+}
+
+:host-context(.tema-oscuro-global) .badge-danger {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon.payment {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon.detail {
+  color: #83a1e2;
+  border-color: #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon.detail:hover {
+  color: #879ede;
+  border-color: #2d496c;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-container::-webkit-scrollbar-track {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-container::-webkit-scrollbar-thumb {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .modal-dialog {
+  background: #111827;
+  border: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .modal-header {
+  border-bottom: 1px solid #334155;
+  background-color: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-header h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .btn-close {
+  background: #172033;
+  border: 1px solid #334155;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-close:hover {
+  background-color: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-input,
+:host-context(.tema-oscuro-global) .custom-select {
+  border: 1px solid #334155;
+  color: #e5e7eb;
+  background-color: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-footer {
+  border-top: 1px solid #334155;
+  background-color: #172033;
+}
+
+:host-context(.tema-oscuro-global) .status-paid {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .status-partial {
+  background: #49401d;
+  color: #e7bc7e;
+}
+
+:host-context(.tema-oscuro-global) .status-pending {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .detail-loading {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-section {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .detail-section-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .detail-section-header h4 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-item {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-item strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-overdue-text {
+  color: #dd8888 !important;
+}
+
+:host-context(.tema-oscuro-global) .detail-financial-card {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-financial-card span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-financial-card strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-financial-card strong.text-success {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .detail-financial-card strong.text-danger {
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .detail-observations {
+  border: 1px solid #334155;
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-payment-count {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table-wrapper {
+  border: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table th {
+  border-bottom: 1px solid #334155;
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table td {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table tbody tr:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-payments-table .amount-paid {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .detail-empty-payments {
+  border: 1px dashed #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-modal-footer {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-modal-body::-webkit-scrollbar-track,
+:host-context(.tema-oscuro-global) .detail-payments-table-wrapper::-webkit-scrollbar-track {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-modal-body::-webkit-scrollbar-thumb,
+:host-context(.tema-oscuro-global) .detail-payments-table-wrapper::-webkit-scrollbar-thumb {
+  background: #172033;
+}

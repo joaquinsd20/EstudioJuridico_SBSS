@@ -35,6 +35,7 @@ import {
 import { NotificacionService, Notificacion } from '../../core/services/notificacion.service';
 import { MensajesService, ContactoChat } from '../../core/services/mensajes.service';
 import { BusquedaRespuesta, GrupoBusqueda, ResultadoBusqueda } from '../../core/models/busqueda.models';
+import { TemaService } from '../../core/services/tema.service';
 
 interface SegmentoDonut {
   nombre: string;
@@ -71,6 +72,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly mensajesSvc          = inject(MensajesService);
   private readonly auth         = inject(AuthService);
   private readonly router       = inject(Router);
+  private readonly temaSvc      = inject(TemaService);
 
   private readonly destruido = new Subject<void>();
 
@@ -653,12 +655,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ─── Tema Claro / Oscuro ──────────────────────────────────────────────────
-  readonly temaOscuro = signal(localStorage.getItem('lexia.tema') === 'oscuro');
+  readonly temaOscuro = this.temaSvc.oscuro;
 
   alternarTema(): void {
-    const nuevo = !this.temaOscuro();
-    this.temaOscuro.set(nuevo);
-    localStorage.setItem('lexia.tema', nuevo ? 'oscuro' : 'claro');
+    this.temaSvc.alternar();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

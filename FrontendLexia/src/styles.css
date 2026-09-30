@@ -282,3 +282,33 @@ select {
 .detail-section {
   padding-top: 13px;
 }
+
+/* =========================================================
+   TEMA GLOBAL — SOLO ESTRUCTURA
+   Los colores internos de cada módulo se adaptan en su propio CSS.
+   Esto evita que el tema oscuro deforme o mezcle interfaces.
+========================================================= */
+
+html.tema-oscuro-global,
+body.tema-oscuro-global {
+  background: #0b0f19;
+  color: #e5e7eb;
+  color-scheme: dark;
+}
+
+body.tema-oscuro-global .layout-wrapper,
+body.tema-oscuro-global .layout-wrapper > .main-content {
+  background: #0b0f19 !important;
+}
+
+body.tema-oscuro-global .layout-wrapper > .main-content::-webkit-scrollbar-track {
+  background: #111827;
+}
+
+body.tema-oscuro-global .layout-wrapper > .main-content::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+body.tema-oscuro-global .layout-wrapper > .main-content::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
