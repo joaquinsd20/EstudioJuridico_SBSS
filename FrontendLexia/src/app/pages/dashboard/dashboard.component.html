@@ -675,24 +675,56 @@
         </div>
         <p class="chart-sub">Estado de facturación y saldos pendientes</p>
 
-        <div class="cobranza-kpi-grid">
-          <div class="cob-box cob-box-blue">
-            <span class="cob-box-title">Facturado</span>
-            <strong class="cob-box-amount">{{ moneda(cobranzaVista().facturado) }}</strong>
+        <div class="cobranza-chart">
+          <div class="cobranza-total">
+            <span>Total facturado</span>
+            <strong>{{ moneda(cobranzaVista().facturado) }}</strong>
           </div>
-          <div class="cob-box cob-box-green">
-            <span class="cob-box-title">Cobrado</span>
-            <strong class="cob-box-amount">{{ moneda(cobranzaVista().cobrado) }}</strong>
+
+          <div class="cobranza-bars">
+            <div class="cobranza-row">
+              <div class="cobranza-row-head">
+                <span>Cobrado</span>
+                <strong>{{ moneda(cobranzaVista().cobrado) }}</strong>
+              </div>
+              <div class="cobranza-track">
+                <div
+                  class="cobranza-fill cobrado"
+                  [style.width.%]="porcentaje(cobranzaVista().cobrado)"
+                ></div>
+              </div>
+            </div>
+
+            <div class="cobranza-row">
+              <div class="cobranza-row-head">
+                <span>Pendiente</span>
+                <strong>{{ moneda(cobranzaVista().pendiente) }}</strong>
+              </div>
+              <div class="cobranza-track">
+                <div
+                  class="cobranza-fill pendiente"
+                  [style.width.%]="porcentaje(cobranzaVista().pendiente)"
+                ></div>
+              </div>
+            </div>
+
+            <div class="cobranza-row">
+              <div class="cobranza-row-head">
+                <span>Vencido</span>
+                <strong>{{ moneda(cobranzaVista().vencido) }}</strong>
+              </div>
+              <div class="cobranza-track">
+                <div
+                  class="cobranza-fill vencido"
+                  [style.width.%]="porcentaje(cobranzaVista().vencido)"
+                ></div>
+              </div>
+            </div>
           </div>
-          <div class="cob-box cob-box-orange">
-            <span class="cob-box-title">Pendiente</span>
-            <strong class="cob-box-amount">{{ moneda(cobranzaVista().pendiente) }}</strong>
-            <span class="cob-box-sub">{{ cobranzaVista().cuentasPendientes }} cuentas</span>
-          </div>
-          <div class="cob-box cob-box-red">
-            <span class="cob-box-title">Vencido</span>
-            <strong class="cob-box-amount">{{ moneda(cobranzaVista().vencido) }}</strong>
-            <span class="cob-box-sub">{{ cobranzaVista().cuentasVencidas }} vencidas</span>
+
+          <div class="cobranza-footer">
+            <span><strong>{{ cobranzaVista().cuentasPendientes }}</strong> cuentas pendientes</span>
+            <span class="cobranza-risk"><strong>{{ cobranzaVista().cuentasVencidas }}</strong> vencidas</span>
           </div>
         </div>
       </div>

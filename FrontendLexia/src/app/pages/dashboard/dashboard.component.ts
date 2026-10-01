@@ -650,6 +650,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return `S/ ${(v ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   }
 
+  /**
+   * Ancho de cada barra del gráfico de cuentas por cobrar, en porcentaje del
+   * total facturado.
+   *
+   * La versión anterior hacía `(cobrado / facturado) * 100` en la plantilla.
+   * Con `facturado` en 0 —un estudio que aún no ha facturado, o un periodo
+   * sin movimientos— eso es 0/0: la plantilla pinta `NaN%`, la barra se
+   * dibuja con un ancho inválido y el navegador la deja a cero sin avisar.
+   * Aquí se resuelve a 0 a propósito, que es lo que se quiere ver: no hay
+   * nada que representar.
+   *
+   * Se acotó además por arriba porque un saldo vencido puede superar lo
+   * facturado en el periodo, y una barra de 130% se sale de su carril.
+   */
+  porcentaje(valor: number): number {
+    const total = this.cobranzaVista().facturado;
+    if (!total) return 0;
+    const pct = (valor / total) * 100;
+    if (!Number.isFinite(pct) || pct <= 0) return 0;
+    return Math.min(pct, 100);
+  }
+
   tiempoRelativo(fecha: string): string {
     const ms = Date.now() - new Date(fecha).getTime();
     if (ms < 60_000) return 'ahora mismo';

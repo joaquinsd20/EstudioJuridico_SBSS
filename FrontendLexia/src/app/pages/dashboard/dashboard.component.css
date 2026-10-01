@@ -1317,6 +1317,27 @@
   font-size: 12px;
 }
 
+/*
+Los dos badges del pie de "Cuentas por cobrar" son superficies de color
+claro (#fffbeb y #fef2f2) con texto tambien oscuro. En tema oscuro se
+quedaban igual: dos parches crema y rosado al pie de una tarjeta negra, y
+la unica superficie clara que quedaba en el dashboard entero.
+
+El fondo baja a #1f2937 y el texto sube a un ambar y un rojo claros, que
+se leen sobre el gris del pie. Se eligieron los lados claros de la misma
+familia de color que ya usaba cada badge, no los mismos tonos, porque un
+#92400e sobre #1f2937 no se lee.
+*/
+:host-context(.tema-oscuro-global) .cobranza-footer span {
+  background: #1f2937;
+  color: #fbbf24;
+}
+
+:host-context(.tema-oscuro-global) .cobranza-footer .cobranza-risk {
+  background: #1f2937;
+  color: #fca5a5;
+}
+
 /* Ajustes de los nuevos grÃ¡ficos en tema oscuro del dashboard */
 :host-context(.tema-oscuro-global) .chart-sub,
 :host-context(.tema-oscuro-global) .ingreso-val,
