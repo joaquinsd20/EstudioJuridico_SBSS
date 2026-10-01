@@ -1636,3 +1636,387 @@ tbody tr:hover {
     padding: 15px 18px;
   }
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .page-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .page-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-secondary {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .btn-secondary:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stat-card strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .panel,
+:host-context(.tema-oscuro-global) .featured-section {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .panel-header,
+:host-context(.tema-oscuro-global) .section-heading {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .panel-header h2,
+:host-context(.tema-oscuro-global) .section-heading h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .panel-header p,
+:host-context(.tema-oscuro-global) .section-heading p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .search-box {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .search-box input {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .search-box input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .filters select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .vista-tabs button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .vista-tabs button.active {
+  border-color: #2d3a6c;
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .stats-mini {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stats-mini strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) th {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) td {
+  border-top: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) tbody tr:hover {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .person-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.jurisprudencia,
+:host-context(.tema-oscuro-global) .card-icon.jurisprudencia {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.legislacion,
+:host-context(.tema-oscuro-global) .card-icon.legislacion {
+  background: #172033;
+  color: #82e3da;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.doctrina,
+:host-context(.tema-oscuro-global) .card-icon.doctrina {
+  background: #172033;
+  color: #e6ac7f;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.contrato,
+:host-context(.tema-oscuro-global) .card-icon.contrato {
+  background: #172033;
+  color: #83a1e2;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.plantilla,
+:host-context(.tema-oscuro-global) .card-icon.plantilla {
+  background: #172033;
+  color: #d88db3;
+}
+
+:host-context(.tema-oscuro-global) .resource-icon.libro,
+:host-context(.tema-oscuro-global) .card-icon.libro {
+  background: #172033;
+  color: #e5ba80;
+}
+
+:host-context(.tema-oscuro-global) .role-pill {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .jurisprudencia-pill {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .legislacion-pill {
+  background: #172033;
+  color: #84e1d9;
+}
+
+:host-context(.tema-oscuro-global) .doctrina-pill {
+  background: #172033;
+  color: #ddb888;
+}
+
+:host-context(.tema-oscuro-global) .contrato-pill {
+  background: #172033;
+  color: #83a1e2;
+}
+
+:host-context(.tema-oscuro-global) .plantilla-pill {
+  background: #172033;
+  color: #d68fb4;
+}
+
+:host-context(.tema-oscuro-global) .libro-pill {
+  background: #172033;
+  color: #e1b884;
+}
+
+:host-context(.tema-oscuro-global) .status {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .status.off {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .icon-action {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .icon-action:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .icon-action.view {
+  color: #7ec2e7;
+}
+
+:host-context(.tema-oscuro-global) .icon-action.download {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .recurso-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .card-titulo {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .card-autor {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap::-webkit-scrollbar-thumb {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .modal-content {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .modal-header h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-close {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-close:hover {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-group label {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-group input,
+:host-context(.tema-oscuro-global) .form-group textarea,
+:host-context(.tema-oscuro-global) .form-group select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-group input::placeholder,
+:host-context(.tema-oscuro-global) .form-group textarea::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .form-group input:focus,
+:host-context(.tema-oscuro-global) .form-group textarea:focus,
+:host-context(.tema-oscuro-global) .form-group select:focus {
+  border-color: #323367;
+}
+
+:host-context(.tema-oscuro-global) .upload-box {
+  border: 1.5px dashed #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .upload-box:hover {
+  border-color: #303569;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .upload-box.has-file {
+  border-color: #2d3a6c;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .upload-icon {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .upload-info strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .btn-select-file,
+:host-context(.tema-oscuro-global) .btn-change-file {
+  border: 1px solid #2d3a6c;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .btn-select-file:hover,
+:host-context(.tema-oscuro-global) .btn-change-file:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .file-icon {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .file-details strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .remove-file {
+  background: #172033;
+  color: #dc8989;
+}
+
+:host-context(.tema-oscuro-global) .remove-file:hover {
+  background: #491d1d;
+}
+
+:host-context(.tema-oscuro-global) .upload-hint {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .upload-hint p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-actions {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .btn-cancel {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-cancel:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-item {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .detail-item strong {
+  color: #e5e7eb;
+}

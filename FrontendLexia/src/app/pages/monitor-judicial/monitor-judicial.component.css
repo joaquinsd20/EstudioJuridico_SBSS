@@ -785,3 +785,287 @@ button:disabled {
     grid-column: auto;
   }
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .eyebrow,
+:host-context(.tema-oscuro-global) .panel-kicker {
+  color: #aa8adb;
+}
+
+:host-context(.tema-oscuro-global) .page-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .page-header p,
+:host-context(.tema-oscuro-global) .panel-header p,
+:host-context(.tema-oscuro-global) .modal-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-secondary {
+  background: #172033;
+  color: #aa8bda;
+}
+
+:host-context(.tema-oscuro-global) .btn-ghost {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .message.error {
+  background: #172033;
+  color: #db8a8a;
+  border: 1px solid #6b2e2e;
+}
+
+:host-context(.tema-oscuro-global) .message.success {
+  background: #172033;
+  color: #8ed7aa;
+  border: 1px solid #336645;
+}
+
+:host-context(.tema-oscuro-global) .stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stat-card strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .stat-danger {
+  color: #dc8989 !important;
+}
+
+:host-context(.tema-oscuro-global) .stat-accent {
+  color: #b595d0 !important;
+}
+
+:host-context(.tema-oscuro-global) .panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .panel-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .panel-header h2,
+:host-context(.tema-oscuro-global) .modal-header h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .filters-area {
+  border-bottom: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .filter-field span {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .filter-field input {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .filter-field input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .filter-footer {
+  border-top: 1px dashed #334155;
+}
+
+:host-context(.tema-oscuro-global) .filter-footer > span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .monitor-table th {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .monitor-table td {
+  border-top: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .monitor-table tbody tr:hover {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .spinner {
+  border: 2px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .spinner.light {
+  border-top-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .expediente-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .status-badge {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .lawyer-avatar {
+  background: #172033;
+  color: #aa8bda;
+}
+
+:host-context(.tema-oscuro-global) .verification.pending {
+  background: #172033;
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .verification.ok {
+  background: #172033;
+  color: #7ee7c9;
+}
+
+:host-context(.tema-oscuro-global) .verification.rejected {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .action-main {
+  background: #172033;
+  color: #aa8bda;
+}
+
+:host-context(.tema-oscuro-global) .action-danger {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .history-item {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .history-top strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .history-top span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .origin {
+  background: #172033;
+  color: #aa8bda !important;
+}
+
+:host-context(.tema-oscuro-global) .history-body {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .history-body b {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .verify-actions button {
+  background: #172033;
+  color: #8ed7aa;
+}
+
+:host-context(.tema-oscuro-global) .verify-actions .reject {
+  background: #172033;
+  color: #db8a8a;
+}
+
+:host-context(.tema-oscuro-global) .modal-card {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .close {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .field {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .field input,
+:host-context(.tema-oscuro-global) .field select,
+:host-context(.tema-oscuro-global) .field textarea {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .check-field {
+  border: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .ia-warning {
+  border: 1px solid #6c5f2d;
+  background: #172033;
+  color: #e2a783;
+}
+
+:host-context(.tema-oscuro-global) .modal-actions {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .confirm-icon {
+  background: #172033;
+  color: #de8d87;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content p strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .confirm-note {
+  border: 1px solid #334155;
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .confirm-actions {
+  background: #111827;
+}

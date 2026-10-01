@@ -1424,3 +1424,312 @@ select {
   }
 
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .header-section {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .module-title {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .module-subtitle {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .filter-group label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .custom-select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .kpi-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .kpi-title {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .kpi-value {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .kpi-badge.positive {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .charts-section,
+:host-context(.tema-oscuro-global) .reports-table-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .section-heading {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .section-subtitle {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .table-heading p {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .section-number {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .chart-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .chart-title {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .chart-placeholder {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .chart-y-labels {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .line-area {
+  border-left: 1px solid #334155;
+  border-bottom: 1px solid #334155;
+  background: repeating-linear-gradient(
+      to top,
+      transparent,
+      transparent 29px,
+      #172033 30px
+    );
+}
+
+:host-context(.tema-oscuro-global) .chart-labels {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .mock-donut::after {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .donut-center strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .donut-center span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .chart-legend li {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .chart-legend strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .bar-chart {
+  background: repeating-linear-gradient(
+      to top,
+      #172033,
+      #172033 31px,
+      #172033 32px
+    );
+}
+
+:host-context(.tema-oscuro-global) .bar-item > span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .bar-legend {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .wave-chart {
+  border-left: 1px solid #334155;
+  border-bottom: 1px solid #334155;
+  background: repeating-linear-gradient(
+      to top,
+      transparent,
+      transparent 31px,
+      #172033 32px
+    );
+}
+
+:host-context(.tema-oscuro-global) .custom-table th {
+  border-bottom: 1px solid #334155;
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .custom-table td {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .lawyer-avatar {
+  background: #172033;
+  color: #9e95d0;
+}
+
+:host-context(.tema-oscuro-global) .lawyer-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.food {
+  background: #172033;
+  color: #95d0a3;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.labor {
+  background: #172033;
+  color: #d8bb8d;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.civil {
+  background: #172033;
+  color: #95a8d0;
+}
+
+:host-context(.tema-oscuro-global) .metric-text {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .download-btn {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon.more {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon:hover,
+:host-context(.tema-oscuro-global) .download-btn:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .sidebar-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .sidebar-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .sidebar-icon {
+  background: #172033;
+  color: #9d95d0;
+}
+
+:host-context(.tema-oscuro-global) .sidebar-icon.actions {
+  background: #172033;
+  color: #daba8b;
+}
+
+:host-context(.tema-oscuro-global) .sidebar-title {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-value {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-box {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-box strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-box p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .action-btn {
+  border: 1px solid #334155;
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .action-btn:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .summary-card {
+  background: linear-gradient(
+      145deg,
+      #111827,
+      #111827
+    );
+}
+
+:host-context(.tema-oscuro-global) .summary-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .progress-track {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .summary-card small {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .table-responsive::-webkit-scrollbar-track {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-responsive::-webkit-scrollbar-thumb {
+  background: #172033;
+}

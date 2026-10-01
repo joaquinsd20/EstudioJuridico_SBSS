@@ -1618,3 +1618,508 @@
 
 /* Paginación escalable del módulo Tareas */
 .paginacion{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 4px 2px;border-top:1px solid #eef2f7;margin-top:14px}.paginacion-info{display:flex;gap:12px;color:#64748b;font-size:8px}.paginacion-controles{display:flex;align-items:center;gap:8px}.paginacion-controles label{display:flex;align-items:center;gap:6px;color:#64748b;font-size:8px}.paginacion-controles select,.paginacion-controles button{border:1px solid #dbe1ea;background:#fff;border-radius:7px;padding:7px 9px;color:#334155;font-size:8px}.paginacion-controles button{cursor:pointer;font-weight:700}.paginacion-controles button:disabled{opacity:.45;cursor:not-allowed}@media(max-width:650px){.paginacion{align-items:flex-start;flex-direction:column}.paginacion-controles{width:100%;flex-wrap:wrap}.paginacion-controles button{flex:1}}
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .page-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .fecha-hoy {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .notif-button {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .notif-badge {
+  border: 2px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.warning {
+  background: #49401d;
+  color: #e6ac7f;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.danger {
+  background: #172033;
+  color: #dc8989;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.primary {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.info {
+  background: #172033;
+  color: #83a1e2;
+}
+
+:host-context(.tema-oscuro-global) .stat-card strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .stat-card span:not(.stat-icon) {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .panel-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .panel-header h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .panel-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .bar-track {
+  border-bottom: 1px solid #334155;
+  background: repeating-linear-gradient(
+      to top,
+      transparent,
+      transparent 29px,
+      #172033 30px
+    );
+}
+
+:host-context(.tema-oscuro-global) .search-box {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .search-box input {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .estado-select,
+:host-context(.tema-oscuro-global) .date-filtro input {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .date-filtro {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .vista-tabs button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .vista-tabs button.active {
+  border-color: #2d3a6c;
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .vista-tabs .export-btn {
+  border-color: #34654e;
+  background: #172033;
+  color: #7ee7c6;
+}
+
+:host-context(.tema-oscuro-global) .kanban-col {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .kanban-col-head {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .kanban-count {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .kanban-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .kanban-card.vencida {
+  border-color: #6b2e35;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .tag {
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.high {
+  background: #172033;
+  color: #dba58a;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.medium {
+  background: #172033;
+  color: #83a1e2;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.low {
+  background: #172033;
+  color: #7ee7c6;
+}
+
+:host-context(.tema-oscuro-global) .completed-tag {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .kanban-fecha {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .kanban-fecha.overdue {
+  color: #dc8989;
+}
+
+:host-context(.tema-oscuro-global) .kanban-titulo {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .kanban-progress-bar {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .kanban-responsable {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .task-check {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .table-summary {
+  border: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .table-summary-header {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-summary-header strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .tareas-table th {
+  border-top: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .tareas-table td {
+  border-top: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .tarea-titulo {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .codigo {
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .due {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .due.overdue {
+  color: #dc8989;
+}
+
+:host-context(.tema-oscuro-global) .pending-state {
+  background: #49401d;
+  color: #e7bc7e;
+}
+
+:host-context(.tema-oscuro-global) .progress-state {
+  background: #172033;
+  color: #83a1e2;
+}
+
+:host-context(.tema-oscuro-global) .completed-state {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .detalle-audiencia {
+  background: linear-gradient(
+      135deg,
+      #172033,
+      #172033
+    );
+}
+
+:host-context(.tema-oscuro-global) .detalle-audiencia strong {
+  color: #9793d2;
+}
+
+:host-context(.tema-oscuro-global) .detalle-grid dd {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .lista-item {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .lista-item.active {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .evento-dia {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .evento-info strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .evento-hora {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .plazo-dias {
+  background: #172033;
+  color: #e6ac7f;
+}
+
+:host-context(.tema-oscuro-global) .plazo-dias.vencido {
+  background: #172033;
+  color: #dc8989;
+}
+
+:host-context(.tema-oscuro-global) .tag.risk {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .nota-item {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .nota-text {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap::-webkit-scrollbar-thumb {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .tareas-table tbody tr:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .state-badge,
+:host-context(.tema-oscuro-global) .flow-badge {
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .toast.ok {
+  background: #172033;
+  color: #7ee7c9;
+  border: 1px solid #34654e;
+}
+
+:host-context(.tema-oscuro-global) .toast.bad {
+  background: #172033;
+  color: #e2839a;
+  border: 1px solid #6b2e35;
+}
+
+:host-context(.tema-oscuro-global) .task-modal {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-x {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-head h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-head p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .form-grid label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .form-grid input,
+:host-context(.tema-oscuro-global) .form-grid select,
+:host-context(.tema-oscuro-global) .form-grid textarea,
+:host-context(.tema-oscuro-global) .subtask-add input,
+:host-context(.tema-oscuro-global) .comment-box textarea,
+:host-context(.tema-oscuro-global) .time-row input {
+  border: 1px solid #334155;
+  color: #e5e7eb;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .subtask-editor {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .subtask-editor h3,
+:host-context(.tema-oscuro-global) .detail-columns h3,
+:host-context(.tema-oscuro-global) .history h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .subtask-add button,
+:host-context(.tema-oscuro-global) .comment-box button,
+:host-context(.tema-oscuro-global) .time-row button,
+:host-context(.tema-oscuro-global) .observe-btn,
+:host-context(.tema-oscuro-global) .ghost-btn {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .subtask-row {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .observe-btn {
+  color: #e6ac7f;
+  background: #172033;
+  border-color: #6c5f2d;
+}
+
+:host-context(.tema-oscuro-global) .flow-step span {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .flow-step.done {
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .detail-grid>div {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-grid span {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-description {
+  color: #e5e7eb;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .detail-columns {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .check-row {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .attachment {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .comment {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .history {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .attach-upload input {
+  border: 1px dashed #334155;
+}
+
+:host-context(.tema-oscuro-global) .attach-upload button {
+  border: 1px solid #2d3a6c;
+  background: #172033;
+  color: #9691d4;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.urgente {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.alta {
+  background: #172033;
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.media {
+  background: #172033;
+  color: #879ede;
+}
+
+:host-context(.tema-oscuro-global) .tag.priority.baja {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .paginacion {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-info {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles select,
+:host-context(.tema-oscuro-global) .paginacion-controles button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}

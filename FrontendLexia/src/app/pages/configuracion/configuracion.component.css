@@ -1063,3 +1063,249 @@
   letter-spacing: .08em;
   text-transform: uppercase;
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .config-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .config-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-secondary-action {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .btn-secondary-action:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .tabs-navigation {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .tab-item {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .tab-item:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .tab-item.active {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .config-stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .config-stat-card strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .card-panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .panel-heading p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .form-group label {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-input,
+:host-context(.tema-oscuro-global) .custom-select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .custom-table th {
+  border-bottom: 1px solid #334155;
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .custom-table td {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .role-pill {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .role-pill.admin {
+  background: #172033;
+  color: #9e95d0;
+}
+
+:host-context(.tema-oscuro-global) .role-pill.director {
+  background: #172033;
+  color: #95a8d0;
+}
+
+:host-context(.tema-oscuro-global) .role-pill.lawyer {
+  background: #172033;
+  color: #95d0a5;
+}
+
+:host-context(.tema-oscuro-global) .role-pill.assistant {
+  background: #172033;
+  color: #d8bb8d;
+}
+
+:host-context(.tema-oscuro-global) .role-pill.accounting {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .status.active {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .btn-icon:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .setting-card {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .setting-icon,
+:host-context(.tema-oscuro-global) .automation-icon {
+  background: #172033;
+  color: #9d95d0;
+}
+
+:host-context(.tema-oscuro-global) .setting-copy strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .setting-copy span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .setting-value {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .backup-box {
+  border: 1px dashed #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .backup-box strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .backup-box span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .switch-slider {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .switch-slider::after {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .automation-item {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .alert-icon {
+  background: #172033;
+  color: #d09595;
+}
+
+:host-context(.tema-oscuro-global) .automation-content strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .automation-content p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .alert-preview {
+  border: 1px solid #615438;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .alert-preview-icon {
+  color: #dcbe89;
+}
+
+:host-context(.tema-oscuro-global) .alert-preview strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .alert-preview span {
+  color: #d0bb95;
+}
+
+:host-context(.tema-oscuro-global) .table-container::-webkit-scrollbar-track {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-container::-webkit-scrollbar-thumb {
+  background: #172033;
+}
