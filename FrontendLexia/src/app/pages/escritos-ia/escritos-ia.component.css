@@ -1112,3 +1112,254 @@ textarea {
   letter-spacing: .08em;
   text-transform: uppercase;
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .page-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .page-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .section-heading,
+:host-context(.tema-oscuro-global) .draft-header,
+:host-context(.tema-oscuro-global) .details-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .section-heading h2,
+:host-context(.tema-oscuro-global) .draft-header h2,
+:host-context(.tema-oscuro-global) .details-header h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .section-heading p,
+:host-context(.tema-oscuro-global) .draft-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .prompt-box label {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .prompt-box textarea {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .prompt-box textarea::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .templates-title h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .template-list button {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .template-list button:hover {
+  background: #172033;
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .workflow-step {
+  border: 1px solid #334155;
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .workflow-step.active {
+  background: #172033;
+  color: #bc95d0;
+}
+
+:host-context(.tema-oscuro-global) .workflow-arrow {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .more-button,
+:host-context(.tema-oscuro-global) .details-header button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .document-editor {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .editor-toolbar {
+  border-bottom: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .editor-toolbar button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .editor-toolbar button:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .document-page h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .document-page p {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .ai-box {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .ai-box-header {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .ai-box-header span {
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .recommendation,
+:host-context(.tema-oscuro-global) .juris-item {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .juris-item small {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .event-main {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .event-main strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .event-main span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-icon {
+  background: #172033;
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .detail-line strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-block h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .person-avatar {
+  background: #321d49;
+  color: #aa8cd9;
+}
+
+:host-context(.tema-oscuro-global) .person-avatar.purple {
+  background: #261d49;
+}
+
+:host-context(.tema-oscuro-global) .participant strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .mini-card-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .mini-card-header h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .event-item {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .note-row {
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .note-row p {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .history-table th {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .history-table td {
+  border-top: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .history-status.draft {
+  background: #172033;
+  color: #b589dc;
+}
+
+:host-context(.tema-oscuro-global) .history-status.review {
+  background: #172033;
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .history-status.approved {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .history-actions button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .history-actions button:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap::-webkit-scrollbar-thumb {
+  background: #172033;
+}

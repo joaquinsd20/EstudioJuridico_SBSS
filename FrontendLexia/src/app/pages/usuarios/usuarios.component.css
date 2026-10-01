@@ -958,3 +958,234 @@ tbody tr:hover {
 .destino select {
   flex: 1;
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .page-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .search-box {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .search-box input {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .filters select {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .search-box:focus-within,
+:host-context(.tema-oscuro-global) .filters select:focus {
+  border-color: #303569;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) th,
+:host-context(.tema-oscuro-global) td {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) th {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) tbody tr {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) tbody tr:hover {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .code {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .person-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .mini-avatar {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .role-pill {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .status {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .status.off {
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .icon-action {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .icon-action:hover {
+  background: #172033;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .icon-action.view {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .icon-action.delete {
+  color: #e2839a;
+}
+
+:host-context(.tema-oscuro-global) .icon-action.restore {
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .table-wrap::-webkit-scrollbar-thumb {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .status.warn {
+  background: #172033;
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .etiqueta-temporal {
+  color: #e6ac7f;
+}
+
+:host-context(.tema-oscuro-global) .texto-alerta {
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .alerta {
+  border: 1px solid #6b2e2e;
+  background: #172033;
+  color: #dd8888;
+}
+
+:host-context(.tema-oscuro-global) .modal {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-cabecera p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .btn-secundario {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .ficha dt {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .carga li {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .carga li.pesa {
+  background: #172033;
+  color: #e59d80;
+}
+
+:host-context(.tema-oscuro-global) .nota,
+:host-context(.tema-oscuro-global) .texto-confirmacion {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .campos label,
+:host-context(.tema-oscuro-global) .roles legend {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .campos input,
+:host-context(.tema-oscuro-global) .campos select,
+:host-context(.tema-oscuro-global) .destino select {
+  border: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .campos input:focus,
+:host-context(.tema-oscuro-global) .campos select:focus {
+  border-color: #323367;
+}
+
+:host-context(.tema-oscuro-global) .solo-lectura {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .roles {
+  border: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .credencial {
+  border: 1px dashed #323367;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .bloque-reasignar {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .lista-carga {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .destino {
+  color: #e5e7eb;
+}

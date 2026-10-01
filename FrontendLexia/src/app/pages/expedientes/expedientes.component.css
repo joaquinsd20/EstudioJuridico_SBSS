@@ -2586,3 +2586,799 @@ button:disabled {
 .modal-state-message.error-state strong {
   color: #991b1b;
 }
+
+
+/* =========================================================
+   TEMA OSCURO ADAPTADO A ESTE MÓDULO
+   Solo cambia color/superficies; no altera estructura ni medidas.
+========================================================= */
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
+
+:host-context(.tema-oscuro-global) {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .main-content {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-header h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stat-card {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.purple {
+  background: #172033;
+  color: #ac95d0;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.green {
+  background: #172033;
+  color: #95d0a5;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.red {
+  background: #172033;
+  color: #d59090;
+}
+
+:host-context(.tema-oscuro-global) .stat-information span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .stat-information strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .stat-information small {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .search-control,
+:host-context(.tema-oscuro-global) .filter-control {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .search-icon {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .search-control input,
+:host-context(.tema-oscuro-global) .filter-control input,
+:host-context(.tema-oscuro-global) .filter-control select {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .search-control input::placeholder,
+:host-context(.tema-oscuro-global) .filter-control input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .clear-button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .card,
+:host-context(.tema-oscuro-global) .detail-panel {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .table-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .table-header > div:first-child > span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .table-tools button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table thead {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table th {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table td {
+  border-top: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table tbody tr {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table tbody tr:hover {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .expedientes-table tbody tr.selected-row {
+  background: linear-gradient(
+      90deg,
+      #172033,
+      #111827
+    );
+}
+
+:host-context(.tema-oscuro-global) .exp-icon {
+  background: #172033;
+  color: #ad95d0;
+}
+
+:host-context(.tema-oscuro-global) .expediente-cell strong {
+  color: #b995d0;
+}
+
+:host-context(.tema-oscuro-global) .expediente-cell span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .client-avatar {
+  background: #172033;
+  color: #b595d0;
+}
+
+:host-context(.tema-oscuro-global) .client-avatar.company {
+  background: #172033;
+  color: #95add0;
+}
+
+:host-context(.tema-oscuro-global) .client-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .client-cell span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.family {
+  background: #172033;
+  color: #ad95d0;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.civil {
+  background: #172033;
+  color: #95acd0;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.labor {
+  background: #172033;
+  color: #95d0a6;
+}
+
+:host-context(.tema-oscuro-global) .matter-badge.criminal {
+  background: #172033;
+  color: #d09595;
+}
+
+:host-context(.tema-oscuro-global) .court-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .court-cell span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .responsible-avatar {
+  background: #172033;
+  color: #b495d0;
+}
+
+:host-context(.tema-oscuro-global) .responsible-cell strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .status.active {
+  background: #172033;
+  color: #95d0a7;
+}
+
+:host-context(.tema-oscuro-global) .status.process {
+  background: #172033;
+  color: #95a9d0;
+}
+
+:host-context(.tema-oscuro-global) .status.suspended {
+  background: #172033;
+  color: #dab98b;
+}
+
+:host-context(.tema-oscuro-global) .status.archived {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .actions button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .actions button:hover {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .chart-header {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .chart-icon {
+  color: #b095d0;
+}
+
+:host-context(.tema-oscuro-global) .chart-header h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .donut-chart::after {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .donut-center strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .donut-center span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .chart-legend > div {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .bar-chart {
+  background: repeating-linear-gradient(
+      to top,
+      transparent,
+      transparent 30px,
+      #172033 31px
+    );
+}
+
+:host-context(.tema-oscuro-global) .bar-item strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .bar-item span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-header h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-header button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-title {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .detail-exp-icon {
+  background: #172033;
+  color: #ad95d0;
+}
+
+:host-context(.tema-oscuro-global) .detail-title h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-title span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .detail-status-row {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .detail-status-row > span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-status {
+  background: #172033;
+  color: #95d0a7;
+}
+
+:host-context(.tema-oscuro-global) .detail-section h4 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-client-avatar,
+:host-context(.tema-oscuro-global) .lawyer-avatar {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-client strong,
+:host-context(.tema-oscuro-global) .lawyer-detail strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .detail-client span,
+:host-context(.tema-oscuro-global) .lawyer-detail span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .information-row {
+  border-bottom: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .information-row span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .information-row strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .counter {
+  background: #172033;
+  color: #ad95d0;
+}
+
+:host-context(.tema-oscuro-global) .purple-event {
+  background: #172033;
+  color: #ac95d0;
+}
+
+:host-context(.tema-oscuro-global) .orange-event {
+  background: #172033;
+  color: #d8b58d;
+}
+
+:host-context(.tema-oscuro-global) .red-event {
+  background: #172033;
+  color: #d29393;
+}
+
+:host-context(.tema-oscuro-global) .event-item strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .event-item span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .document-icon {
+  background: #172033;
+  color: #d19494;
+}
+
+:host-context(.tema-oscuro-global) .document-icon.word {
+  background: #172033;
+  color: #93aed2;
+}
+
+:host-context(.tema-oscuro-global) .document-item strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .document-item span {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .download-icon {
+  color: #b795d0 !important;
+}
+
+:host-context(.tema-oscuro-global) .stat-icon.blue {
+  background: #172033;
+  color: #94b1d1;
+}
+
+:host-context(.tema-oscuro-global) .table-secondary {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .loading-inline {
+  color: #a683e2;
+}
+
+:host-context(.tema-oscuro-global) .error-feedback {
+  border-color: #6b2e2e;
+  background: #172033;
+  color: #de8d87;
+}
+
+:host-context(.tema-oscuro-global) .success-feedback {
+  border-color: #336645;
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .dynamic-status {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .risk-low {
+  background: #172033;
+  color: #89dca8;
+}
+
+:host-context(.tema-oscuro-global) .risk-medium {
+  background: #172033;
+  color: #e6b37f;
+}
+
+:host-context(.tema-oscuro-global) .risk-high {
+  background: #172033;
+  color: #d49191;
+}
+
+:host-context(.tema-oscuro-global) .empty-state {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .empty-state strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .status-catalog span {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .requirement-content strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .requirement-content p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-loading,
+:host-context(.tema-oscuro-global) .detail-empty {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-empty strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .muted-text {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .expediente-modal {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .modal-header {
+  border-bottom: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .modal-kicker {
+  color: #a683e2;
+}
+
+:host-context(.tema-oscuro-global) .modal-header h2 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-header p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-close {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .secondary-button {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .detail-card-block {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .detail-card-block h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .block-title > span:not(.status-large) {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .data-grid > div {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .data-grid span,
+:host-context(.tema-oscuro-global) .case-summary > span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .data-grid strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .data-grid small {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .case-summary {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .case-summary p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .timeline-entry:not(:last-child)::before {
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .timeline-body {
+  border: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .timeline-type {
+  color: #a683e2;
+}
+
+:host-context(.tema-oscuro-global) .timeline-entry h4 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .timeline-entry time {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .timeline-entry p {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .timeline-meta {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .relation-chip {
+  background: #172033;
+  color: #ac95d0;
+}
+
+:host-context(.tema-oscuro-global) .person-row > span {
+  background: #172033;
+  color: #ac95d0;
+}
+
+:host-context(.tema-oscuro-global) .person-row strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .person-row small {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .neutral-avatar > span {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .quick-info > div {
+  border-top: 1px solid #334155;
+}
+
+:host-context(.tema-oscuro-global) .quick-info span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .quick-info strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-modal {
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .form-section-title {
+  border-bottom: 1px solid #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-grid label > span,
+:host-context(.tema-oscuro-global) .textarea-label > span,
+:host-context(.tema-oscuro-global) .checkbox-panel > strong {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .form-grid input,
+:host-context(.tema-oscuro-global) .form-grid select,
+:host-context(.tema-oscuro-global) .textarea-label textarea {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .form-grid input:focus,
+:host-context(.tema-oscuro-global) .form-grid select:focus,
+:host-context(.tema-oscuro-global) .textarea-label textarea:focus {
+  border-color: #413069;
+}
+
+:host-context(.tema-oscuro-global) .checkbox-panel {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .check-option {
+  border: 1px solid #334155;
+  background: #111827;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .confidential-toggle {
+  border: 1px solid #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .confidential-toggle strong {
+  color: #b095d0;
+}
+
+:host-context(.tema-oscuro-global) .confidential-toggle small {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-footer {
+  border-top: 1px solid #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .detail-load-error {
+  color: #db8a8a;
+}
+
+:host-context(.tema-oscuro-global) .detail-load-error span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .inline-warning {
+  background: #172033;
+  color: #e09c85;
+}
+
+:host-context(.tema-oscuro-global) .compact-loading {
+  background: #172033;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-state-message {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-state-message strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .modal-state-message span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .modal-state-message.error-state strong {
+  color: #db8a8a;
+}
+
+/* =========================================================
+   AJUSTE FINAL - EXPEDIENTES / TEMA OSCURO
+   Mantiene el mismo layout visual que el resto de módulos.
+========================================================= */
+
+/* Asegura que el panel lateral conserve su espacio dentro de Expedientes. */
+.layout-wrapper > app-panel {
+  display: block;
+  width: 250px;
+  min-width: 250px;
+  max-width: 250px;
+  height: 100vh;
+  flex: 0 0 250px;
+}
+
+.layout-wrapper > .main-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* El contenedor exterior de filtros también debe cambiar de tema. */
+:host-context(.tema-oscuro-global) .filters-card {
+  background: #111827;
+  border-color: #334155;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .12);
+}
+
+:host-context(.tema-oscuro-global) .search-control,
+:host-context(.tema-oscuro-global) .filter-control {
+  background: #111827;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .search-control:focus-within,
+:host-context(.tema-oscuro-global) .filter-control:focus-within {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+
+:host-context(.tema-oscuro-global) .search-control input,
+:host-context(.tema-oscuro-global) .filter-control input,
+:host-context(.tema-oscuro-global) .filter-control select {
+  background: transparent;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .search-control input::placeholder,
+:host-context(.tema-oscuro-global) .filter-control input::placeholder {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .filter-control select option {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .clear-button {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .clear-button:hover {
+  color: #ffffff;
+}
+
+/* Faltaba la variante azul del indicador En trámite. */
+:host-context(.tema-oscuro-global) .stat-icon.blue {
+  background: #172033;
+  color: #83a1e2;
+}
+
+/* Textos secundarios que todavía conservaban tonos del tema claro. */
+:host-context(.tema-oscuro-global) .table-secondary,
+:host-context(.tema-oscuro-global) .loading-inline,
+:host-context(.tema-oscuro-global) .empty-state span,
+:host-context(.tema-oscuro-global) .requirement-content p {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .empty-state strong,
+:host-context(.tema-oscuro-global) .requirement-content strong {
+  color: #e5e7eb;
+}
+
+/* Mantiene el mismo fondo oscuro continuo que Actuaciones. */
+:host-context(.tema-oscuro-global) .layout-wrapper,
+:host-context(.tema-oscuro-global) .main-content {
+  background: #0b0f19 !important;
+}
