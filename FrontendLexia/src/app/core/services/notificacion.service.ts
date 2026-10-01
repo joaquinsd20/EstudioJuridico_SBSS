@@ -9,7 +9,8 @@ export interface Notificacion {
   tipo: string;
   titulo: string;
   mensaje: string;
-  severidad: 'INFO' | 'ALERTA' | 'CRITICO';
+  /** Valores admitidos por `ck_notificaciones_severidad` (V6__documental.sql:203). */
+  severidad: 'INFO' | 'EXITO' | 'ADVERTENCIA' | 'CRITICA';
   entidadOrigen: string | null;
   registroId: number | null;
   expedienteId: number | null;

@@ -1,4 +1,4 @@
-<div class="layout-wrapper" [class.tema-oscuro]="temaOscuro()">
+<div class="layout-wrapper">
 
   <app-panel></app-panel>
 
@@ -126,6 +126,12 @@
                       <p class="notif-desc">{{ n.mensaje }}</p>
                     </div>
                   </div>
+                } @empty {
+                  <div class="empty-hint">
+                    <span class="empty-hint-emoji">🔔</span>
+                    <strong>Sin novedades</strong>
+                    <p>No tienes notificaciones pendientes. Aquí aparecerán las resoluciones y plazos nuevos.</p>
+                  </div>
                 }
               </div>
             </div>
@@ -166,9 +172,9 @@
                       >
                         <div class="contact-avatar-wrap">
                           <span class="contact-avatar">{{ c.avatar }}</span>
-                          @if (c.enLinea) {
-                            <span class="online-dot" title="En línea"></span>
-                          }
+                          <!-- El puntito de "en linea" no se pinta: no hay
+                                  presencia en el backend, asi que siempre
+                                  saldria apagado y no aportaria nada. -->
                         </div>
                         <div class="contact-meta">
                           <div class="contact-top">
@@ -177,7 +183,7 @@
                               <span class="chat-unread-badge">{{ c.noLeidos }}</span>
                             }
                           </div>
-                          <span class="contact-last-msg">{{ c.ultimoMensaje }}</span>
+                          <span class="contact-last-msg">{{ c.ultimoMensaje || 'Aún no hay mensajes' }}</span>
                         </div>
                       </div>
                     }
@@ -192,7 +198,12 @@
                         <span class="contact-avatar sm">{{ contacto.avatar }}</span>
                         <div>
                           <strong>{{ contacto.nombre }}</strong>
-                          <span class="thread-status">{{ contacto.enLinea ? '🟢 En línea' : '⚪ Desconectado' }} · {{ contacto.rol }}</span>
+                          <!-- Solo el cargo, que viene del backend. El "en linea"
+                               no se muestra porque no hay presencia: se
+                               pondria "desconectado" a todos y "en linea" a
+                               ninguno, que es informacion inventada. Si se
+                               quiere, hace falta un /usuarios/{id}/presencia. -->
+                          <span class="thread-status">{{ contacto.rol || 'Colega del estudio' }}</span>
                         </div>
                       </div>
                       <button type="button" class="btn-close-chat" (click)="mensajesAbierto.set(false)">✕</button>
@@ -205,6 +216,12 @@
                             <p>{{ msg.texto }}</p>
                             <span class="chat-time">{{ msg.fechaHora }}</span>
                           </div>
+                        </div>
+                      } @empty {
+                        <div class="empty-hint">
+                          <span class="empty-hint-emoji">✉️</span>
+                          <strong>Conversación vacía</strong>
+                          <p>Escribe el primer mensaje para {{ contacto.nombre }}. Solo lo ustedes dos pueden verlo.</p>
                         </div>
                       }
                     </div>
@@ -220,6 +237,12 @@
                       <button type="button" class="btn-send" (click)="enviarMensaje()">
                         Enviar ✉️
                       </button>
+                    </div>
+                  } @else {
+                    <div class="empty-hint">
+                      <span class="empty-hint-emoji">💬</span>
+                      <strong>Elige una conversación</strong>
+                      <p>Selecciona un contacto de la lista para ver el historial y escribirle.</p>
                     </div>
                   }
                 </div>

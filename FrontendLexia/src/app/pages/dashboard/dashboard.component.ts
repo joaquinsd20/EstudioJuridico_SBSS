@@ -34,6 +34,7 @@ import {
 } from '../../core/services/graficos-dashboard.service';
 import { NotificacionService, Notificacion } from '../../core/services/notificacion.service';
 import { MensajesService, ContactoChat } from '../../core/services/mensajes.service';
+import { TemaService } from '../../core/services/tema.service';
 import { BusquedaRespuesta, GrupoBusqueda, ResultadoBusqueda } from '../../core/models/busqueda.models';
 
 interface SegmentoDonut {
@@ -68,6 +69,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly busquedaSvc  = inject(BusquedaService);
   private readonly graficosSvc  = inject(GraficosDashboardService);
   private readonly notifSvc     = inject(NotificacionService);
+  private readonly temaSvc      = inject(TemaService);
   readonly mensajesSvc          = inject(MensajesService);
   private readonly auth         = inject(AuthService);
   private readonly router       = inject(Router);
@@ -534,66 +536,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // ─── Centro de Notificaciones ─────────────────────────────────────────────
   readonly notifAbierto   = signal(false);
-  readonly notificaciones = signal<Notificacion[]>([
-    {
-      id: 1,
-      tipo: 'RESOLUCION',
-      titulo: 'Nueva Resolución N.° 06 en EXP. 04521-2026',
-      mensaje: 'El juzgado emitió la resolución que concede el recurso de apelación.',
-      severidad: 'INFO',
-      entidadOrigen: 'monitor-judicial',
-      registroId: 1,
-      expedienteId: 1,
-      expedienteCodigo: 'EXP. 04521-2026',
-      urlDestino: '/monitor-judicial',
-      leida: false,
-      fechaCreacion: new Date(Date.now() - 15 * 60_000).toISOString()
-    },
-    {
-      id: 2,
-      tipo: 'PLAZO',
-      titulo: 'Vencimiento crítico hoy',
-      mensaje: 'El plazo para contestar la demanda del EXP. 01452 vence hoy a las 23:59.',
-      severidad: 'CRITICO',
-      entidadOrigen: 'plazos',
-      registroId: 2,
-      expedienteId: 2,
-      expedienteCodigo: 'EXP. 01452-2026',
-      urlDestino: '/plazos',
-      leida: false,
-      fechaCreacion: new Date(Date.now() - 45 * 60_000).toISOString()
-    },
-    {
-      id: 3,
-      tipo: 'AGENDA',
-      titulo: 'Audiencia programada para mañana',
-      mensaje: 'Audiencia única de tenencia familiar a las 09:00 AM (Sala 2).',
-      severidad: 'ALERTA',
-      entidadOrigen: 'agenda',
-      registroId: 3,
-      expedienteId: 3,
-      expedienteCodigo: 'EXP. 00521-2026',
-      urlDestino: '/agenda',
-      leida: false,
-      fechaCreacion: new Date(Date.now() - 120 * 60_000).toISOString()
-    },
-    {
-      id: 4,
-      tipo: 'TAREA',
-      titulo: 'Nueva tarea asignada',
-      mensaje: 'Redactar alegatos de clausura para el proceso de indemnización.',
-      severidad: 'INFO',
-      entidadOrigen: 'tareas',
-      registroId: 4,
-      expedienteId: 4,
-      expedienteCodigo: 'EXP. 02388-2025',
-      urlDestino: '/tareas',
-      leida: false,
-      fechaCreacion: new Date(Date.now() - 240 * 60_000).toISOString()
-    }
-  ]);
+
+  /**
+   * Arranca VACIA a proposito.
+   *
+   * Antes se inicializaba con cuatro notificaciones escritas a mano
+   * ("Nueva Resolucion N. 06 en EXP. 04521-2026", "Vencimiento critico
+   * hoy"...), y nunca se llamo a la API. Se veian en pantalla como si
+   * fueran reales, con su contador, su hora relativa y su enlace a un
+   * expediente: cuatro filas falsas en un panel que el usuario toma
+   * por fiable. Un array vacio es honesto mientras llega la respuesta;
+   * uno relleno solo miente.
+   */
+  readonly notificaciones = signal<Notificacion[]>([]);
 
   readonly noLeidas = computed(() => this.notificaciones().filter(n => !n.leida).length);
+
+  /**
+   * Carga la bandeja de notificaciones.
+   *
+   * Va en ngOnInit y no al abrir el panel porque el contador del boton
+   * tiene que ser correcto con el panel cerrado: ese numero es la
+   * unica pista de que hay algo pendiente.
+   */
+  private cargarNotificaciones(): void {
+    this.notifSvc
+      .listar()
+      .pipe(takeUntil(this.destruido))
+      .subscribe(b => this.notificaciones.set(b.items));
+  }
 
   alternarNotif(): void {
     this.notifAbierto.update(v => !v);
@@ -620,12 +591,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   textoNuevoMensaje          = '';
 
   alternarMensajes(): void {
-    this.mensajesAbierto.update(v => !v);
+    const abre = !this.mensajesAbierto();
+
+    this.mensajesAbierto.set(abre);
     this.notifAbierto.set(false);
     this.perfilAbierto.set(false);
+
+    // La lista de colegas se pide al ABRIR, no al montar. Es una llamada por
+    // visita al dashboard para un panel que casi siempre esta cerrado.
+    if (abre) {
+      this.mensajesSvc.abrir();
+    }
   }
 
-  seleccionarChat(id: string): void {
+  seleccionarChat(id: number): void {
     this.mensajesSvc.seleccionarContacto(id);
   }
 
@@ -653,12 +632,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ─── Tema Claro / Oscuro ──────────────────────────────────────────────────
-  readonly temaOscuro = signal(localStorage.getItem('lexia.tema') === 'oscuro');
+  readonly temaOscuro = this.temaSvc.oscuro;
 
   alternarTema(): void {
-    const nuevo = !this.temaOscuro();
-    this.temaOscuro.set(nuevo);
-    localStorage.setItem('lexia.tema', nuevo ? 'oscuro' : 'claro');
+    this.temaSvc.alternar();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
@@ -687,6 +664,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.refrescar();
     this.cargarGraficos();
+    this.cargarNotificaciones();
   }
 
   ngOnDestroy(): void {
