@@ -184,6 +184,20 @@
   <!-- PARTE INFERIOR -->
   <div class="sidebar-bottom">
 
+    <!-- TEMA CLARO / OSCURO: disponible en todos los modulos -->
+    <button
+      class="theme-toggle"
+      type="button"
+      (click)="tema.alternar()"
+      [attr.aria-label]="tema.etiqueta()"
+      [attr.aria-pressed]="tema.oscuro()"
+      [title]="tema.etiqueta()"
+    >
+      <span class="theme-toggle-icon">{{ tema.oscuro() ? '☀️' : '🌙' }}</span>
+      <span class="theme-toggle-text">{{ tema.oscuro() ? 'Tema claro' : 'Tema oscuro' }}</span>
+    </button>
+
+
     <div class="user-profile">
 
       <div class="avatar">
