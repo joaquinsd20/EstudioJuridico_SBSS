@@ -1,5 +1,10 @@
 package com.sbss.lexia.expedientes.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Catalogos;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EventoLineaTiempo;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteDetalle;
@@ -8,16 +13,13 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.ExpedienteOpcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.GuardarRequest;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
 import com.sbss.lexia.expedientes.repository.ExpedienteRepositoryJdbc;
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,11 +28,11 @@ public class ExpedienteService {
     private final ExpedienteRepositoryJdbc repository;
 
     @Transactional(readOnly = true)
-    public List<ExpedienteLista> listar(String texto, String cliente, String estado, Long materiaId,
-            String organo, int limite, int desplazamiento) {
+    public PaginaDto<ExpedienteLista> listar(String texto, String cliente, String estado, Long materiaId,
+            String organo, int page, int size) {
         return repository.listar(
                 SesionActual.estudioId(), SesionActual.usuarioId(), verTodos(), verConfidenciales(),
-                texto, cliente, estado, materiaId, organo, limite, desplazamiento);
+                texto, cliente, estado, materiaId, organo, page, size);
     }
 
     @Transactional(readOnly = true)

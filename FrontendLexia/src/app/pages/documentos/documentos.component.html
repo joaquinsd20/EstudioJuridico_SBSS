@@ -171,7 +171,7 @@
           <div class="table-header">
             <div>
               <h2>Biblioteca de Documentos</h2>
-              <span>{{ documentos.length }} documentos encontrados</span>
+              <span>{{ documentos.length }} documentos en la página {{ pagina + 1 }}</span>
             </div>
             <div class="table-tools">
               @if (cargando) {
@@ -257,6 +257,17 @@
               </tbody>
             </table>
           </div>
+          <nav class="paginacion-documentos" aria-label="Páginas de documentos">
+            <label class="tamano-pagina" for="tamano-pagina-documentos">
+              Registros por página
+              <select id="tamano-pagina-documentos" [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)" [disabled]="cargando">
+                <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+              </select>
+            </label>
+            <button type="button" (click)="cambiarPagina(pagina - 1)" [disabled]="cargando || pagina === 0">Anterior</button>
+            <span>Página {{ pagina + 1 }}</span>
+            <button type="button" (click)="cambiarPagina(pagina + 1)" [disabled]="cargando || !hayPaginaSiguiente">Siguiente</button>
+          </nav>
         </section>
 
         <section class="card recent-card">

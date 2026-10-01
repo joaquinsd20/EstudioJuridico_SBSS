@@ -1,11 +1,8 @@
 package com.sbss.lexia.actuaciones.controller;
 
-import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
-import com.sbss.lexia.actuaciones.service.ActuacionService;
-import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,6 +14,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionDetalle;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionLista;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Catalogos;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.CrearRequest;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.CrearResponse;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.DocumentoOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Resumen;
+import com.sbss.lexia.actuaciones.service.ActuacionService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/actuaciones")

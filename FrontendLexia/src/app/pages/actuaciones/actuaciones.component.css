@@ -442,3 +442,27 @@
   border-top: 1px solid #334155;
   background: #111827;
 }
+
+.paginacion-actuaciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+  color: #475569;
+  font-size: 13px;
+}
+.paginacion-actuaciones label { display: flex; align-items: center; gap: 8px; }
+.paginacion-actuaciones select,
+.paginacion-actuaciones button {
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #17324d;
+  font: inherit;
+  cursor: pointer;
+}
+.paginacion-actuaciones select:disabled,
+.paginacion-actuaciones button:disabled { opacity: .45; cursor: not-allowed; }
