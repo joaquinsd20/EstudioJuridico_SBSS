@@ -158,17 +158,28 @@ export class MensajesService {
         const actual = this._seleccionado();
         if (!actual || actual.id !== contactoId) return;
 
+        if (!conv) return;
+
+        // El servidor ya cerro la lectura en GET /conversacion, asi que aqui
+        // no hace falta un PATCH extra: lo que se hace es bajar el contador
+        // local para que la insignia no siga marcando lo que ya se leyo. Si
+        // solo se hiciera en local, la insignia reapareceria al recargar.
         this.marcarLeidos(contactoId);
 
-        if (conv) {
-          this._seleccionado.set({
-            ...actual, mensajes: (conv.mensajes ?? []).map(m => this.aMensaje(m))
-          });
-        }
+        this._seleccionado.set({
+          ...actual, mensajes: (conv.mensajes ?? []).map(m => this.aMensaje(m))
+        });
       });
   }
 
-  /** Pone a cero los no leidos del contacto tras abrir su hilo. */
+  /**
+   * Pone a cero los no leidos del contacto tras abrir su hilo.
+   *
+   * Solo local, a proposito: GET /conversacion ya marco la conversacion como
+   * leida en el servidor, de modo que no hace falta un PATCH .../leer que
+   * seria una escritura redundante. Si esa peticcion fallara, el contador
+   * local habria dicho una cosa y el servidor otra.
+   */
   private marcarLeidos(contactoId: number): void {
     this._contactos.update(lista => lista.map(c => (c.id === contactoId ? { ...c, noLeidos: 0 } : c)));
   }
