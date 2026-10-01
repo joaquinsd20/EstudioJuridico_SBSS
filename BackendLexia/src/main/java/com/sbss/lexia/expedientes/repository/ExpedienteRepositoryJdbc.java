@@ -1,5 +1,26 @@
 package com.sbss.lexia.expedientes.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.function.Supplier;
+
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Catalogos;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Equipo;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.EstadoOpcion;
@@ -13,28 +34,12 @@ import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Opcion;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.PersonaRelacionada;
 import com.sbss.lexia.expedientes.dto.ExpedienteDtos.Resumen;
 import com.sbss.lexia.shared.dto.Limites;
+import com.sbss.lexia.shared.dto.PaginaDto;
+import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.function.Supplier;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @RequiredArgsConstructor
@@ -43,7 +48,7 @@ public class ExpedienteRepositoryJdbc {
 
     private final NamedParameterJdbcTemplate jdbc;
 
-    public List<ExpedienteLista> listar(
+    public PaginaDto<ExpedienteLista> listar(
             Integer estudioId,
             Long usuarioId,
             boolean verTodos,
@@ -53,23 +58,18 @@ public class ExpedienteRepositoryJdbc {
             String estado,
             Long materiaId,
             String organo,
-            int limite,
-            int desplazamiento) {
+            int page,
+            int size) {
 
-        List<Long> visibles = idsVisibles(estudioId, usuarioId, verTodos, verConfidenciales);
-        if (visibles.isEmpty()) return List.of();
+        if (page < 0 || size < 1 || size > 100) {
+            throw new ParametroInvalidoException("page debe ser >= 0 y size debe estar entre 1 y 100");
+        }
+        long offset = (long) page * size;
+        if (offset > Integer.MAX_VALUE) {
+            throw new ParametroInvalidoException("La página solicitada supera el desplazamiento permitido");
+        }
 
         StringBuilder sql = new StringBuilder("""
-                SELECT e.uuid_publico, e.codigo_interno, e.numero_expediente, e.anio,
-                       c.nombre_busqueda cliente_nombre,
-                       CONCAT(c.tipo_documento, ' ', c.numero_documento) cliente_documento,
-                       esp.nombre especialidad, COALESCE(m.nombre, 'Sin materia') materia,
-                       COALESCE(o.nombre, 'Sin órgano asignado') organo,
-                       o.distrito_judicial,
-                       u.nombre_completo responsable,
-                       ee.codigo estado_codigo, ee.nombre estado_nombre, ee.color_hex estado_color,
-                       e.nivel_riesgo, e.cuantia, e.moneda, e.fecha_inicio,
-                       e.fecha_ultima_actuacion, e.es_confidencial
                   FROM expedientes e
                   JOIN clientes c ON c.id = e.cliente_id
                   JOIN especialidades esp ON esp.id = e.especialidad_id
@@ -77,10 +77,19 @@ public class ExpedienteRepositoryJdbc {
                   LEFT JOIN organos_jurisdiccionales o ON o.id = e.organo_id
                   JOIN estados_expediente ee ON ee.id = e.estado_id
                   JOIN usuarios u ON u.id = e.abogado_responsable_id
-                 WHERE e.id IN (:visibles)
+                 WHERE e.estudio_id = :estudioId AND e.activo = 1
                 """);
 
-        MapSqlParameterSource p = new MapSqlParameterSource().addValue("visibles", visibles);
+        MapSqlParameterSource p = new MapSqlParameterSource()
+                .addValue("estudioId", estudioId);
+        if (!verTodos) {
+            sql.append(" AND (e.abogado_responsable_id = :usuarioId OR EXISTS (" +
+                    "SELECT 1 FROM expediente_equipo eq WHERE eq.expediente_id = e.id " +
+                    "AND eq.usuario_id = :usuarioId AND eq.activo = 1))");
+            p.addValue("usuarioId", usuarioId);
+        } else if (!verConfidenciales) {
+            sql.append(" AND e.es_confidencial = 0");
+        }
 
         if (texto != null && !texto.isBlank()) {
             sql.append(" AND LOWER(CONCAT_WS(' ', e.codigo_interno, e.numero_expediente, c.nombre_busqueda)) LIKE :texto");
@@ -103,12 +112,27 @@ public class ExpedienteRepositoryJdbc {
             p.addValue("organo", like(organo));
         }
 
-        // El LIMIT 250 estaba escrito a mano: el cliente no podia ver la fila 251.
-        sql.append(" ORDER BY COALESCE(e.fecha_ultima_actuacion, e.fecha_creacion) DESC, e.id DESC")
-           .append(" LIMIT ").append(Limites.limite(limite))
-           .append(" OFFSET ").append(Limites.desplazamiento(desplazamiento));
+        // Contar con los mismos permisos y filtros, antes de añadir LIMIT.
+        Long total = jdbc.queryForObject("SELECT COUNT(*) " + sql, p, Long.class);
+        long totalElementos = total == null ? 0 : total;
+        long paginas = (totalElementos + size - 1) / size;
+        int totalPaginas = (int) Math.min(paginas, Integer.MAX_VALUE);
 
-        return jdbc.query(sql.toString(), p, (rs, rowNum) -> new ExpedienteLista(
+        String consulta = """
+                SELECT e.uuid_publico, e.codigo_interno, e.numero_expediente, e.anio,
+                       c.nombre_busqueda cliente_nombre,
+                       CONCAT(c.tipo_documento, ' ', c.numero_documento) cliente_documento,
+                       esp.nombre especialidad, COALESCE(m.nombre, 'Sin materia') materia,
+                       COALESCE(o.nombre, 'Sin órgano asignado') organo,
+                       o.distrito_judicial,
+                       u.nombre_completo responsable,
+                       ee.codigo estado_codigo, ee.nombre estado_nombre, ee.color_hex estado_color,
+                       e.nivel_riesgo, e.cuantia, e.moneda, e.fecha_inicio,
+                       e.fecha_ultima_actuacion, e.es_confidencial
+                """ + sql + " ORDER BY COALESCE(e.fecha_ultima_actuacion, e.fecha_creacion) DESC, e.id DESC" +
+                " LIMIT :size OFFSET :offset";
+        p.addValue("size", size).addValue("offset", offset);
+        List<ExpedienteLista> contenido = jdbc.query(consulta, p, (rs, rowNum) -> new ExpedienteLista(
                 rs.getString("uuid_publico"),
                 rs.getString("codigo_interno"),
                 rs.getString("numero_expediente"),
@@ -129,35 +153,31 @@ public class ExpedienteRepositoryJdbc {
                 getLocalDate(rs, "fecha_inicio"),
                 rs.getTimestamp("fecha_ultima_actuacion") == null ? null : rs.getTimestamp("fecha_ultima_actuacion").toLocalDateTime(),
                 rs.getBoolean("es_confidencial")));
+        return new PaginaDto<>(contenido, page, size, totalElementos, totalPaginas,
+                page >= totalPaginas - 1);
     }
 
     public Resumen resumen(Integer estudioId, Long usuarioId, boolean verTodos, boolean verConfidenciales) {
-        List<Long> visibles = idsVisibles(estudioId, usuarioId, verTodos, verConfidenciales);
-        if (visibles.isEmpty()) return new Resumen(0, 0, 0, 0);
-
-        String sql = """
-                SELECT ee.codigo estado_codigo, e.nivel_riesgo
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*) total,
+                       COALESCE(SUM(ee.codigo NOT IN ('ARCHIVADO','CONCLUIDO','GANADO','PERDIDO','DERIVADO')), 0) activos,
+                       COALESCE(SUM(ee.codigo = 'TRAMITE'), 0) en_tramite,
+                       COALESCE(SUM(e.nivel_riesgo = 'CRITICO'), 0) criticos
                   FROM expedientes e
                   JOIN estados_expediente ee ON ee.id = e.estado_id
-                 WHERE e.id IN (:visibles)
-                """;
-
-        List<Map<String, Object>> filas = jdbc.queryForList(
-                sql, new MapSqlParameterSource().addValue("visibles", visibles));
-
-        long total = filas.size();
-        long activos = filas.stream()
-                .map(f -> String.valueOf(f.get("estado_codigo")))
-                .filter(codigo -> !List.of("ARCHIVADO", "CONCLUIDO", "GANADO", "PERDIDO", "DERIVADO").contains(codigo))
-                .count();
-        long enTramite = filas.stream()
-                .filter(f -> "TRAMITE".equals(String.valueOf(f.get("estado_codigo"))))
-                .count();
-        long criticos = filas.stream()
-                .filter(f -> "CRITICO".equals(String.valueOf(f.get("nivel_riesgo"))))
-                .count();
-
-        return new Resumen(total, activos, enTramite, criticos);
+                 WHERE e.estudio_id = :estudioId AND e.activo = 1
+                """);
+        MapSqlParameterSource p = new MapSqlParameterSource().addValue("estudioId", estudioId);
+        if (!verTodos) {
+            sql.append(" AND (e.abogado_responsable_id = :usuarioId OR EXISTS (" +
+                    "SELECT 1 FROM expediente_equipo eq WHERE eq.expediente_id = e.id " +
+                    "AND eq.usuario_id = :usuarioId AND eq.activo = 1))");
+            p.addValue("usuarioId", usuarioId);
+        } else if (!verConfidenciales) {
+            sql.append(" AND e.es_confidencial = 0");
+        }
+        return jdbc.queryForObject(sql.toString(), p, (rs, n) -> new Resumen(
+                rs.getLong("total"), rs.getLong("activos"), rs.getLong("en_tramite"), rs.getLong("criticos")));
     }
 
     public ExpedienteDetalle detalle(
@@ -916,50 +936,6 @@ public class ExpedienteRepositoryJdbc {
                 rs.getBoolean("es_confidencial"));
     }
 
-    private List<Long> idsVisibles(
-            Integer estudioId,
-            Long usuarioId,
-            boolean verTodos,
-            boolean verConfidenciales) {
-
-        StringBuilder sql = new StringBuilder("""
-                SELECT DISTINCT e.id
-                  FROM expedientes e
-                """);
-
-        if (!verTodos) {
-            sql.append("""
-                     LEFT JOIN expediente_equipo eq
-                       ON eq.expediente_id = e.id
-                      AND eq.usuario_id = :usuarioId
-                      AND eq.activo = 1
-                    """);
-        }
-
-        sql.append("""
-                 WHERE e.estudio_id = :estudioId
-                   AND e.activo = 1
-                """);
-
-        if (!verTodos) {
-            sql.append(" AND (e.abogado_responsable_id = :usuarioId OR eq.usuario_id IS NOT NULL)");
-        }
-        // RF-02: los confidenciales se ocultan a los roles operativos "salvo
-        // asignacion explicita". Sin verTodos, la consulta ya se limita a los
-        // expedientes donde la persona es responsable o esta en el equipo, asi que
-        // ahi el filtro solo servia para ocultarle su propio caso (EXP-0088 de la
-        // semilla: su responsable recibia 404 al abrirlo). Se aplica solo al ver
-        // todo el estudio.
-        if (verTodos && !verConfidenciales) {
-            sql.append(" AND e.es_confidencial = 0");
-        }
-
-        MapSqlParameterSource p = new MapSqlParameterSource().addValue("estudioId", estudioId);
-        if (!verTodos) p.addValue("usuarioId", usuarioId);
-
-        return jdbc.query(sql.toString(), p, (rs, rowNum) -> rs.getLong("id"));
-    }
-
     private Long idVisible(
             String uuid,
             Integer estudioId,
@@ -992,7 +968,7 @@ public class ExpedienteRepositoryJdbc {
         Long responsableId = fila.responsableId();
         boolean confidencial = fila.confidencial();
 
-        // Ver el comentario de idsVisibles: estar asignado basta (RF-02).
+        // RF-02: el responsable o un miembro del equipo puede ver su expediente confidencial.
         if (responsableId.equals(usuarioId)) return expedienteId;
         if (verTodos) return confidencial && !verConfidenciales ? null : expedienteId;
 

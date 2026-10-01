@@ -1,9 +1,9 @@
+import { RecursoJuridico } from '../../core/models/biblioteca-juridica.models';
+import { BibliotecaJuridicaService } from '../../core/services/biblioteca-juridica.service';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
 import { PanelComponent } from '../panel/panel.component';
-import { environment } from '../../../environments/environment';
 
 /**
  * La base guarda CODIGOS en MAYUSCULAS (convencion del proyecto: se puede
@@ -40,19 +40,7 @@ export const ETIQUETA_ESTADO: Record<string, string> = {
   ARCHIVADO: 'Archivado'
 };
 
-export interface RecursoJuridico {
-  id: number;
-  titulo: string;
-  subtituloDescripcion: string;
-  tipo: string;
-  categoria: string;
-  anio: number;
-  expedienteCodigo: string;
-  nombreArchivo: string;
-  extension?: string;
-  estado: 'ACTIVO' | 'ARCHIVADO';
-  fechaCreacion: string;
-}
+
 
 @Component({
   selector: 'app-biblioteca-juridica',
@@ -72,9 +60,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
   etiquetaCategoria(codigo: string): string { return ETIQUETA_CATEGORIA[codigo] ?? codigo; }
   etiquetaEstado(codigo: string): string { return ETIQUETA_ESTADO[codigo] ?? codigo; }
 
-  // environment.apiUrl, no una URL fija: en produccion vale '/api/v1'
-  // (mismo origen) y con localhost hardcodeado el modulo no funcionaria.
-  private apiUrl = `${environment.apiUrl}/biblioteca/recursos`;
+  
 
   recursos: RecursoJuridico[] = [];
   recursosFiltrados: RecursoJuridico[] = [];
@@ -96,7 +82,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
 
   // Inyectamos ChangeDetectorRef
   constructor(
-    private http: HttpClient,
+    private service: BibliotecaJuridicaService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -116,9 +102,9 @@ export class BibliotecaJuridicaComponent implements OnInit {
   // OBTENER RECURSOS (CON DETECCIÓN DE CAMBIOS FORZADA)
   // =========================================================
   obtenerRecursos(): void {
-    this.http.get<any>(this.apiUrl).subscribe({
+    this.service.listar().subscribe({
       next: (response) => {
-        const data = response && response.content ? response.content : response;
+        const data = Array.isArray(response) ? response : response.content;
         this.recursos = Array.isArray(data) ? data : [];
         
         // Copia directa e inmediata para la vista
@@ -245,7 +231,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
       formData.append('archivo', this.archivoSeleccionado);
     }
 
-    this.http.post<RecursoJuridico>(this.apiUrl, formData).subscribe({
+    this.service.crear(formData).subscribe({
       next: () => {
         alert('Recurso agregado correctamente.');
         this.obtenerRecursos();
@@ -278,7 +264,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
 
     const nuevaPestana = window.open('about:blank', '_blank');
 
-    this.http.get(`${this.apiUrl}/${item.id}/ver`, { responseType: 'blob' }).subscribe({
+    this.service.ver(item.id).subscribe({
       next: (blob: Blob) => {
         if (blob.type === 'application/json') {
           nuevaPestana?.close();
@@ -312,7 +298,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
   // DESCARGA
   // =========================================================
   descargarDocumento(id: number, nombreArchivo: string): void {
-    this.http.get(`${this.apiUrl}/${id}/descargar`, { responseType: 'blob' }).subscribe({
+    this.service.descargar(id).subscribe({
       next: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -361,7 +347,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
     
     if (!confirmacion) return;
 
-    this.http.delete(`${this.apiUrl}/${item.id}`).subscribe({
+    this.service.eliminar(item.id).subscribe({
       next: () => {
         alert('Recurso eliminado correctamente.');
         this.cerrarModales();

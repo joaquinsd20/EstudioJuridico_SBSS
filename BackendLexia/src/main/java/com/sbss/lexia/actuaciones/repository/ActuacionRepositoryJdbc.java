@@ -1,23 +1,39 @@
 package com.sbss.lexia.actuaciones.repository;
 
-import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
-import com.sbss.lexia.shared.dto.Limites;
-import com.sbss.lexia.shared.security.SesionActual;
-import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionDetalle;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionLista;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.AlertaRelacionada;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Catalogos;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.DocumentoOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.DocumentoRelacionado;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.EventoRelacionado;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ExpedienteOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.PlazoRelacionado;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Resumen;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TareaRelacionada;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TipoActuacionOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TipoPlazoOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.UsuarioOpcion;
+import com.sbss.lexia.shared.dto.Limites;
+import com.sbss.lexia.shared.security.SesionActual;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
+
+import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor

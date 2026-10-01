@@ -21,9 +21,8 @@ import com.sbss.lexia.biblioteca.dto.RecursoCrearRequest;
 import com.sbss.lexia.biblioteca.dto.RecursoFiltroRequest;
 import com.sbss.lexia.biblioteca.entity.RecursoJuridico;
 import com.sbss.lexia.biblioteca.repository.RecursoJuridicoRepository;
-import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService;
-import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService.ArchivoGuardado;
+import com.sbss.lexia.shared.security.SesionActual;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.criteria.Predicate;
@@ -36,7 +35,7 @@ import lombok.extern.slf4j.Slf4j;
 public class BibliotecaJuridicaService {
 
     private final RecursoJuridicoRepository repository;
-    private final AlmacenamientoDocumentoService almacenamientoService;
+    private final AlmacenamientoBibliotecaService almacenamientoService;
 
     // =========================================================
     // ESTADÍSTICAS

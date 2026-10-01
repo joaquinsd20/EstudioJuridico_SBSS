@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
@@ -14,6 +14,16 @@ import {
 } from '../../core/models/expediente.models';
 import { ExpedienteFiltros, ExpedienteService } from '../../core/services/expediente.service';
 import { PanelComponent } from '../panel/panel.component';
+import { environment } from '../../../environments/environment';
+
+interface PaginaExpedientes {
+  contenido: ExpedienteLista[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
+  esUltima: boolean;
+}
 
 @Component({
   selector: 'app-expedientes',
@@ -24,6 +34,7 @@ import { PanelComponent } from '../panel/panel.component';
 })
 export class ExpedientesComponent implements OnInit, OnDestroy {
   private readonly expedienteService = inject(ExpedienteService);
+  private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private filtroTimer?: ReturnType<typeof setTimeout>;
   private listadoSolicitud = 0;
@@ -41,6 +52,11 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
 
   resumen: ExpedienteResumen = { total: 0, activos: 0, enTramite: 0, criticos: 0 };
   expedientes: ExpedienteLista[] = [];
+  pagina = 0;
+  tamanoPagina = 20;
+  readonly tamanosPagina = [10, 20, 40, 100];
+  totalElementos = 0;
+  totalPaginas = 0;
   seleccionado: ExpedienteLista | null = null;
   detalle: ExpedienteDetalle | null = null;
   lineaTiempo: EventoLineaTiempo[] = [];
@@ -75,17 +91,29 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
     this.cargarListado(true);
   }
 
+  private listarPagina(): Observable<PaginaExpedientes> {
+    let params = new HttpParams().set('page', this.pagina).set('size', this.tamanoPagina);
+    Object.entries(this.filtros).forEach(([clave, valor]) => {
+      if (valor !== undefined && valor !== null && valor !== '') {
+        params = params.set(clave, String(valor));
+      }
+    });
+    return this.http.get<PaginaExpedientes>(`${environment.apiUrl}/expedientes`, { params });
+  }
+
   private cargarListado(seleccionarPrimero: boolean): void {
     const solicitud = ++this.listadoSolicitud;
     this.cargando = true;
     this.error = '';
     this.actualizarVista();
 
-    this.expedienteService.listar(this.filtros).subscribe({
-      next: (expedientes) => {
+    this.listarPagina().subscribe({
+      next: (resultado) => {
         if (solicitud !== this.listadoSolicitud) return;
 
-        this.expedientes = expedientes ?? [];
+        this.expedientes = resultado.contenido;
+        this.totalElementos = resultado.totalElementos;
+        this.totalPaginas = resultado.totalPaginas;
         this.cargando = false;
 
         if (!this.expedientes.length) {
@@ -168,6 +196,19 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
       clearTimeout(this.filtroTimer);
       this.filtroTimer = undefined;
     }
+    this.pagina = 0;
+    this.cargarListado(true);
+  }
+
+  cambiarTamanoPagina(nuevoTamano: number): void {
+    if (this.cargando || !this.tamanosPagina.includes(nuevoTamano) || nuevoTamano === this.tamanoPagina) return;
+    this.tamanoPagina = nuevoTamano;
+    this.aplicarFiltros();
+  }
+
+  cambiarPagina(nuevaPagina: number): void {
+    if (this.cargando || nuevaPagina < 0 || nuevaPagina >= this.totalPaginas || nuevaPagina === this.pagina) return;
+    this.pagina = nuevaPagina;
     this.cargarListado(true);
   }
 
@@ -353,6 +394,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
         const uuid = this.editandoUuid ?? respuesta?.uuid ?? null;
         this.guardando = false;
         this.modalFormulario = false;
+        if (!eraEdicion) this.pagina = 0;
         this.mostrarExito(eraEdicion ? 'Expediente actualizado correctamente.' : 'Expediente creado correctamente.');
         this.recargar(uuid);
       },
@@ -370,10 +412,12 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
     this.actualizarVista();
     this.cargarResumen();
 
-    this.expedienteService.listar(this.filtros).subscribe({
-      next: (expedientes) => {
+    this.listarPagina().subscribe({
+      next: (resultado) => {
         if (solicitud !== this.listadoSolicitud) return;
-        this.expedientes = expedientes ?? [];
+        this.expedientes = resultado.contenido;
+        this.totalElementos = resultado.totalElementos;
+        this.totalPaginas = resultado.totalPaginas;
         this.cargando = false;
         const seleccionado = this.expedientes.find(e => e.uuid === uuidSeleccionar) ?? this.expedientes[0] ?? null;
         if (seleccionado) this.seleccionar(seleccionado, true);

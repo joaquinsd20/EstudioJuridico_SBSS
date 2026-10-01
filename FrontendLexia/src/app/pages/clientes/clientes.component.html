@@ -64,10 +64,15 @@
             </tbody>
           </table>
         </div>
-        <div class="pagination" *ngIf="totalPaginas > 1">
-          <button (click)="cambiarPagina(-1)" [disabled]="pagina === 0">‹ Anterior</button>
-          <span>Página {{ pagina + 1 }} de {{ totalPaginas }}</span>
-          <button (click)="cambiarPagina(1)" [disabled]="pagina + 1 >= totalPaginas">Siguiente ›</button>
+        <div class="pagination" role="navigation" aria-label="Páginas de clientes">
+          <label for="tamano-pagina-clientes">Registros por página
+            <select id="tamano-pagina-clientes" [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)" [disabled]="cargando">
+              <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+            </select>
+          </label>
+          <button (click)="cambiarPagina(-1)" [disabled]="cargando || pagina === 0">‹ Anterior</button>
+          <span>Página {{ pagina + 1 }} de {{ totalPaginas || 1 }}</span>
+          <button (click)="cambiarPagina(1)" [disabled]="cargando || pagina + 1 >= totalPaginas">Siguiente ›</button>
         </div>
       </section>
 

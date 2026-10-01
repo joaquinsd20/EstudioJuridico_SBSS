@@ -1,8 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { Observable, forkJoin } from 'rxjs';
+import { environment } from '../../../environments/environment';
 
 import {
   ActuacionCrear,
@@ -29,6 +30,13 @@ import { PanelComponent } from '../panel/panel.component';
 })
 export class ActuacionesComponent implements OnInit {
   private readonly service = inject(ActuacionService);
+  private readonly http = inject(HttpClient);
+  private solicitudListado = 0;
+  private solicitudDetalle = 0;
+  pagina = 0;
+  tamanoPagina = 20;
+  readonly tamanosPagina = [10, 20, 40, 100];
+  hayPaginaSiguiente = false;
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
 
@@ -61,15 +69,18 @@ export class ActuacionesComponent implements OnInit {
   ngOnInit(): void { this.cargarTodo(); }
 
   cargarTodo(seleccionarUuid?: string): void {
+    this.pagina = 0;
+    const solicitud = ++this.solicitudListado;
     this.cargando = true;
     this.error = '';
     forkJoin({
-      actuaciones: this.service.listar(this.filtros),
+      actuaciones: this.listarPagina(),
       resumen: this.service.resumen(),
       catalogos: this.service.catalogos()
     }).subscribe({
       next: r => {
-        this.actuaciones = r.actuaciones;
+        if (solicitud !== this.solicitudListado) return;
+        this.asignarPagina(r.actuaciones);
         this.resumen = r.resumen;
         this.catalogos = r.catalogos;
         this.cargando = false;
@@ -77,23 +88,66 @@ export class ActuacionesComponent implements OnInit {
           ? this.actuaciones.find(a => a.uuid === seleccionarUuid)
           : (this.seleccionado ? this.actuaciones.find(a => a.uuid === this.seleccionado?.uuid) : this.actuaciones[0]);
         if (objetivo) this.seleccionar(objetivo);
-        else { this.seleccionado = null; this.detalle = null; }
+        else { this.limpiarSeleccion(); }
         this.actualizarVista();
       },
-      error: e => { this.cargando = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
+      error: e => { if (solicitud !== this.solicitudListado) return; this.cargando = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
     });
   }
 
   buscar(): void {
+    this.pagina = 0;
+    this.cargarPagina();
+  }
+
+  cambiarTamanoPagina(nuevoTamano: number): void {
+    if (this.cargando || !this.tamanosPagina.includes(nuevoTamano) || nuevoTamano === this.tamanoPagina) return;
+    this.tamanoPagina = nuevoTamano;
+    this.buscar();
+  }
+
+  cambiarPagina(nuevaPagina: number): void {
+    if (this.cargando || nuevaPagina < 0 || nuevaPagina === this.pagina ||
+        (nuevaPagina > this.pagina && !this.hayPaginaSiguiente)) return;
+    this.pagina = nuevaPagina;
+    this.cargarPagina();
+  }
+
+  private listarPagina(): Observable<ActuacionLista[]> {
+    let params = new HttpParams()
+      .set('limite', this.tamanoPagina + 1)
+      .set('desplazamiento', this.pagina * this.tamanoPagina);
+    Object.entries(this.filtros).forEach(([clave, valor]) => {
+      if (valor !== undefined && valor !== null && valor !== '') params = params.set(clave, String(valor));
+    });
+    return this.http.get<ActuacionLista[]>(`${environment.apiUrl}/actuaciones`, { params });
+  }
+
+  private asignarPagina(actuaciones: ActuacionLista[]): void {
+    this.hayPaginaSiguiente = actuaciones.length > this.tamanoPagina;
+    this.actuaciones = actuaciones.slice(0, this.tamanoPagina);
+  }
+
+  private limpiarSeleccion(): void {
+    ++this.solicitudDetalle;
+    this.seleccionado = null;
+    this.detalle = null;
+    this.cargandoDetalle = false;
+  }
+
+  private cargarPagina(): void {
+    const solicitud = ++this.solicitudListado;
+    this.error = '';
     this.cargando = true;
-    this.service.listar(this.filtros).subscribe({
+    this.listarPagina().subscribe({
       next: r => {
-        this.actuaciones = r;
+        if (solicitud !== this.solicitudListado) return;
+        this.asignarPagina(r);
         this.cargando = false;
-        if (r.length) this.seleccionar(r[0]); else { this.seleccionado = null; this.detalle = null; }
+        if (this.actuaciones.length) this.seleccionar(this.actuaciones[0]); else { this.limpiarSeleccion(); }
         this.actualizarVista();
       },
-      error: e => { this.cargando = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
+      error: e => { if (solicitud !== this.solicitudListado) return; this.cargando = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
     });
   }
 
@@ -103,11 +157,12 @@ export class ActuacionesComponent implements OnInit {
   }
 
   seleccionar(a: ActuacionLista): void {
+    const solicitud = ++this.solicitudDetalle;
     this.seleccionado = a;
     this.cargandoDetalle = true;
     this.service.detalle(a.uuid).subscribe({
-      next: d => { this.detalle = d; this.cargandoDetalle = false; this.actualizarVista(); },
-      error: e => { this.cargandoDetalle = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
+      next: d => { if (solicitud !== this.solicitudDetalle) return; this.detalle = d; this.cargandoDetalle = false; this.actualizarVista(); },
+      error: e => { if (solicitud !== this.solicitudDetalle) return; this.cargandoDetalle = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
     });
   }
 

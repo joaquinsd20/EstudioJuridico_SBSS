@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { finalize, forkJoin } from 'rxjs';
+import { finalize, forkJoin, Observable } from 'rxjs';
 
 import {
   CategoriaDocumento,
@@ -27,6 +27,7 @@ import {
 } from '../../core/models/documento.models';
 import { DocumentoService } from '../../core/services/documento.service';
 import { PanelComponent } from '../panel/panel.component';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-documentos',
@@ -37,6 +38,7 @@ import { PanelComponent } from '../panel/panel.component';
 })
 export class DocumentosComponent implements OnInit, OnDestroy {
   private readonly documentoService = inject(DocumentoService);
+  private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly cdr = inject(ChangeDetectorRef);
 
@@ -53,6 +55,11 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   ];
 
   documentos: Documento[] = [];
+  pagina = 0;
+  tamanoPagina = 20;
+  readonly tamanosPagina = [10, 20, 40, 100];
+  hayPaginaSiguiente = false;
+  private solicitudListado = 0;
   recientes: Documento[] = [];
   papelera: Documento[] = [];
   versiones: DocumentoVersion[] = [];
@@ -161,10 +168,12 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   cargarTodo(): void {
+    const solicitud = ++this.solicitudListado;
+    this.pagina = 0;
     this.cargando = true;
     this.error = '';
     forkJoin({
-      documentos: this.documentoService.listar(this.filtros),
+      documentos: this.listarPagina(),
       recientes: this.documentoService.recientes(6),
       papelera: this.documentoService.papelera(),
       estadisticas: this.documentoService.estadisticas(),
@@ -172,7 +181,8 @@ export class DocumentosComponent implements OnInit, OnDestroy {
       creadores: this.documentoService.creadores()
     }).subscribe({
       next: r => {
-        this.documentos = r.documentos;
+        if (solicitud !== this.solicitudListado) return;
+        this.asignarPagina(r.documentos);
         this.recientes = r.recientes;
         this.papelera = r.papelera;
         this.estadisticas = r.estadisticas;
@@ -188,6 +198,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
         this.actualizarVista();
       },
       error: e => {
+        if (solicitud !== this.solicitudListado) return;
         this.error = this.mensajeError(e);
         this.cargando = false;
         this.actualizarVista();
@@ -196,15 +207,55 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   buscar(): void {
+    this.pagina = 0;
+    this.cargarPagina();
+  }
+
+  cambiarTamanoPagina(nuevoTamano: number): void {
+    if (this.cargando || !this.tamanosPagina.includes(nuevoTamano) || nuevoTamano === this.tamanoPagina) return;
+    this.tamanoPagina = nuevoTamano;
+    this.pagina = 0;
+    this.cerrarMenuAcciones();
+    this.cargarPagina();
+  }
+
+  cambiarPagina(nuevaPagina: number): void {
+    if (this.cargando || nuevaPagina < 0 || (nuevaPagina > this.pagina && !this.hayPaginaSiguiente)) return;
+    this.pagina = nuevaPagina;
+    this.cerrarMenuAcciones();
+    this.cargarPagina();
+  }
+
+  private listarPagina(): Observable<Documento[]> {
+    let params = new HttpParams()
+      .set('limite', this.tamanoPagina + 1)
+      .set('desplazamiento', this.pagina * this.tamanoPagina);
+    Object.entries(this.filtros).forEach(([clave, valor]) => {
+      if (valor !== undefined && valor !== null && valor !== '') {
+        params = params.set(clave, String(valor));
+      }
+    });
+    return this.http.get<Documento[]>(`${environment.apiUrl}/documentos`, { params });
+  }
+
+  private asignarPagina(documentos: Documento[]): void {
+    this.hayPaginaSiguiente = documentos.length > this.tamanoPagina;
+    this.documentos = documentos.slice(0, this.tamanoPagina);
+  }
+
+  private cargarPagina(): void {
+    const solicitud = ++this.solicitudListado;
     this.cargando = true;
-    this.documentoService.listar(this.filtros).subscribe({
+    this.listarPagina().subscribe({
       next: docs => {
-        this.documentos = docs;
-        this.seleccionado = docs.length ? docs[0] : null;
+        if (solicitud !== this.solicitudListado) return;
+        this.asignarPagina(docs);
+        this.seleccionado = this.documentos[0] ?? null;
         this.cargando = false;
         this.actualizarVista();
       },
       error: e => {
+        if (solicitud !== this.solicitudListado) return;
         this.error = this.mensajeError(e);
         this.cargando = false;
         this.actualizarVista();

@@ -1,26 +1,28 @@
 package com.sbss.lexia.documental.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.stereotype.Repository;
+
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.ExpedienteOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.RelacionOpcion;
 import com.sbss.lexia.documental.dto.CatalogoDocumentoResponse.UsuarioOpcion;
 import com.sbss.lexia.documental.dto.DocumentoEstadisticasResponse;
 import com.sbss.lexia.documental.dto.DocumentoResponse;
 import com.sbss.lexia.documental.dto.DocumentoVersionResponse;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
@@ -174,7 +176,7 @@ public class DocumentoConsultaRepository {
             p.put("fechaHasta", fechaHasta.plusDays(1).atStartOfDay());
         }
 
-        sql.append(" ORDER BY d.fecha_creacion DESC LIMIT :limite OFFSET :desplazamiento ");
+        sql.append(" ORDER BY d.fecha_creacion DESC, d.id DESC LIMIT :limite OFFSET :desplazamiento ");
         p.put("limite", Limites.limite(limite));
         p.put("desplazamiento", Limites.desplazamiento(desplazamiento));
         return jdbc.query(sql.toString(), p, this::mapDocumento);

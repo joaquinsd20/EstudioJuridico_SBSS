@@ -1,3 +1,5 @@
+import { HonorarioLista, ResumenBackend, ResumenFacturacion, Opcion, CatalogosFacturacion, RegistroMovimientoDTO, MovimientoResponse, ActualizarHonorarioDTO, PagoHonorarioDetalle, DetalleHonorario } from '../../core/models/facturacion.models';
+import { FacturacionService } from '../../core/services/facturacion.service';
 import {
   ChangeDetectorRef,
   Component,
@@ -8,11 +10,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-import {
-  HttpClient,
-  HttpHeaders,
-  HttpParams
-} from '@angular/common/http';
+import { HttpParams } from '@angular/common/http';
 
 import {
   NavigationEnd,
@@ -25,211 +23,9 @@ import { filter } from 'rxjs/operators';
 import { PanelComponent } from '../panel/panel.component';
 
 
-/* =========================================================
-   INTERFACES
-   ========================================================= */
-
-export interface HonorarioLista {
-
-  uuid: string;
-
-  clienteId: number;
-  expedienteId: number;
-
-  clienteNombre: string;
-  clienteDocumento: string;
-
-  expedienteNumero: string;
-
-  concepto: string;
-
-  modalidadCobro: string;
-
-  montoTotal: number;
-  montoPagado: number;
-  montoPendiente: number;
-
-  moneda: string;
-
-  estadoCodigo: string;
-  estadoNombre: string;
-  estadoColor: string;
-
-  fechaEmision: string | null;
-  fechaVencimiento: string | null;
-}
-
-
-export interface ResumenBackend {
-
-  totalFacturado: number;
-  totalCobrado: number;
-  totalPendiente: number;
-  facturasPendientes: number;
-  totalVencido: number;
-  cuentasVencidas: number;
-}
-
-
-export interface ResumenFacturacion {
-
-  totalPactado: number;
-  totalCobrado: number;
-  saldosPendientes: number;
-  totalVencido: number;
-  cuentasVencidas: number;
-}
-
-
-export interface Opcion {
-
-  id: number;
-  nombre: string;
-  detalle?: string;
-
-  clienteId?: number | null;
-}
-
-
-export interface CatalogosFacturacion {
-
-  clientes: Opcion[];
-  expedientes: Opcion[];
-  modalidadesCobro: Opcion[];
-  estados: Opcion[];
-}
-
-
-export interface RegistroMovimientoDTO {
-
-  clienteId: number | null;
-
-  expedienteId: number | null;
-
-  tipoOperacion: string;
-
-  modalidad: string;
-
-  monto: number | null;
-
-  fecha: string;
-
-  fechaVencimiento: string | null;
-
-  etapaProcesal: string;
-
-  concepto: string;
-
-  observaciones: string;
-
-  honorarioUuid: string | null;
-}
-
-
-export interface MovimientoResponse {
-
-  uuid: string;
-}
-
-
-export interface ActualizarHonorarioDTO {
-
-  clienteId: number;
-
-  expedienteId: number;
-
-  modalidad: string;
-
-  montoPactado: number;
-
-  fecha: string;
-
-  fechaVencimiento: string;
-
-  etapaProcesal: string;
-
-  concepto: string;
-
-  observaciones: string;
-}
-
-
-/* =========================================================
-   NUEVO - PAGO DEL DETALLE
-   ========================================================= */
-
-export interface PagoHonorarioDetalle {
-
-  id: number;
-
-  fecha: string | null;
-
-  monto: number;
-
-  concepto: string;
-
-  observaciones: string;
-}
-
-
-/* =========================================================
-   NUEVO - DETALLE COMPLETO DEL HONORARIO
-   ========================================================= */
-
-export interface DetalleHonorario {
-
-  uuid: string;
-
-  clienteId: number;
-
-  expedienteId: number;
-
-  clienteNombre: string;
-
-  clienteDocumento: string;
-
-  expedienteNumero: string;
-
-  concepto: string;
-
-  modalidadCobro: string;
-
-  etapaProcesal: string;
-
-  observaciones: string;
-
-  montoPactado: number;
-
-  montoPagado: number;
-
-  saldoPendiente: number;
-
-  moneda: string;
-
-  estadoCodigo: string;
-
-  estadoNombre: string;
-
-  fechaEmision: string | null;
-
-  fechaVencimiento: string | null;
-
-  vencido: boolean;
-
-  puedeEmitirComprobante: boolean;
-
-  pagos: PagoHonorarioDetalle[];
-}
-
-
-/* =========================================================
-   COMPONENTE
-   ========================================================= */
-
 @Component({
 
   selector: 'app-facturacion',
-
   standalone: true,
 
   imports: [
@@ -239,163 +35,78 @@ export interface DetalleHonorario {
   ],
 
   templateUrl: './facturacion.component.html',
-
   styleUrl: './facturacion.component.css'
 
 })
 export class FacturacionComponent
   implements OnInit, OnDestroy {
 
-
-  /* =======================================================
-     URL BACKEND
-     ======================================================= */
-
-  private readonly apiUrl =
-    'http://localhost:8080/api/v1/facturacion';
-
-
-  /* =======================================================
-     SUSCRIPCIÓN DE NAVEGACIÓN
-     ======================================================= */
-
   private routerSubscription?: Subscription;
-
-
-  /* =======================================================
-     DATOS
-     ======================================================= */
-
   honorarios: HonorarioLista[] = [];
 
 
   resumen: ResumenFacturacion = {
-
     totalPactado: 0,
-
     totalCobrado: 0,
-
     saldosPendientes: 0,
-
     totalVencido: 0,
-
     cuentasVencidas: 0
 
   };
 
 
   catalogos: CatalogosFacturacion = {
-
     clientes: [],
-
     expedientes: [],
-
     modalidadesCobro: [],
-
     estados: []
 
   };
 
 
-  /* =======================================================
-     FILTROS
-     ======================================================= */
-
   filtroTexto: string = '';
-
   filtroModalidad: number | null = null;
-
   filtroEstado: string = '';
 
 
-  /* =======================================================
-     ESTADOS DE INTERFAZ
-     ======================================================= */
-
   loading: boolean = false;
-
   cargandoClientes: boolean = false;
-
   mostrarModal: boolean = false;
-
   guardando: boolean = false;
 
-
-  /* =======================================================
-     NUEVO - ESTADOS DEL MODAL DE DETALLE
-     ======================================================= */
-
   mostrarModalDetalle: boolean = false;
-
   cargandoDetalle: boolean = false;
-
   descargandoComprobante: boolean = false;
-
   detalleHonorario: DetalleHonorario | null = null;
 
-
-  /* =======================================================
-     HONORARIO SELECCIONADO
-     ======================================================= */
-
   honorarioSeleccionadoUuid: string | null = null;
-
   modoFormulario: 'NUEVO' | 'PAGO' | 'EDICION' = 'NUEVO';
-
   honorarioEditando: HonorarioLista | null = null;
-
-
-  /* =======================================================
-     FORMULARIO
-     ======================================================= */
 
   nuevoMovimiento: RegistroMovimientoDTO =
     this.obtenerEstadoInicialFormulario();
 
-
-  /* =======================================================
-     CONSTRUCTOR
-     ======================================================= */
-
   constructor(
-
-    private http: HttpClient,
-
+    private service: FacturacionService,
     private router: Router,
-
     private cdr: ChangeDetectorRef
-
   ) {}
 
 
-  /* =======================================================
-     INICIO
-     ======================================================= */
-
   ngOnInit(): void {
-
     this.refrescarFacturacion();
-
-
     this.routerSubscription =
-
       this.router.events
-
         .pipe(
-
           filter(
             evento =>
               evento instanceof NavigationEnd
           )
-
         )
 
         .subscribe((evento) => {
-
           const navigation =
             evento as NavigationEnd;
-
-
           if (
             navigation.urlAfterRedirects
               .toLowerCase()
@@ -406,94 +117,40 @@ export class FacturacionComponent
               'Regreso detectado a Facturación. Actualizando datos...'
             );
 
-
             this.refrescarFacturacion();
-
           }
-
         });
-
   }
-
 
   /* =======================================================
      DESTRUIR COMPONENTE
      ======================================================= */
-
   ngOnDestroy(): void {
-
     if (this.routerSubscription) {
-
       this.routerSubscription.unsubscribe();
-
     }
 
   }
-
 
   /* =======================================================
      ACTUALIZAR TODO
      ======================================================= */
 
   private refrescarFacturacion(): void {
-
     console.log(
       'Actualizando módulo de facturación...'
     );
 
-
     this.cargarResumen();
-
     this.cargarCatalogos();
-
     this.aplicarFiltros();
-
   }
-
-
-  /* =======================================================
-     HEADERS
-     ======================================================= */
-
-  private obtenerHeaders(): {
-    headers: HttpHeaders
-  } {
-
-    const token =
-
-      localStorage.getItem('token') ||
-
-      sessionStorage.getItem('token') ||
-
-      '';
-
-
-    return {
-
-      headers: new HttpHeaders({
-
-        Authorization:
-          `Bearer ${token}`,
-
-        'Cache-Control':
-          'no-cache',
-
-        Pragma:
-          'no-cache'
-
-      })
-
-    };
-
-  }
-
 
   /* =======================================================
      RESUMEN FINANCIERO
      ======================================================= */
 
   cargarResumen(): void {
-
     const params =
       new HttpParams()
         .set(
@@ -501,22 +158,7 @@ export class FacturacionComponent
           Date.now().toString()
         );
 
-
-    this.http
-      .get<ResumenBackend>(
-
-        `${this.apiUrl}/resumen`,
-
-        {
-
-          headers:
-            this.obtenerHeaders().headers,
-
-          params
-
-        }
-
-      )
+    this.service.resumen(params)
       .subscribe({
 
         next: (data) => {
@@ -556,9 +198,7 @@ export class FacturacionComponent
 
           };
 
-
           this.cdr.detectChanges();
-
         },
 
 
@@ -571,26 +211,16 @@ export class FacturacionComponent
 
 
           this.resumen = {
-
             totalPactado: 0,
-
             totalCobrado: 0,
-
             saldosPendientes: 0,
-
             totalVencido: 0,
-
             cuentasVencidas: 0
-
           };
 
-
           this.cdr.detectChanges();
-
         }
-
       });
-
   }
 
 
@@ -611,21 +241,7 @@ export class FacturacionComponent
         );
 
 
-    this.http
-      .get<CatalogosFacturacion>(
-
-        `${this.apiUrl}/catalogos`,
-
-        {
-
-          headers:
-            this.obtenerHeaders().headers,
-
-          params
-
-        }
-
-      )
+    this.service.catalogos(params)
       .subscribe({
 
         next: (data) => {
@@ -696,27 +312,16 @@ export class FacturacionComponent
 
 
           this.catalogos = {
-
             clientes: [],
-
             expedientes: [],
-
             modalidadesCobro: [],
-
             estados: []
-
           };
 
-
           this.cargandoClientes = false;
-
-
           this.cdr.detectChanges();
-
         }
-
       });
-
   }
 
 
@@ -729,47 +334,31 @@ export class FacturacionComponent
   ): Opcion[] {
 
     if (!Array.isArray(lista)) {
-
       return [];
-
     }
-
-
     return lista
-
       .filter(item =>
-
         item !== null &&
-
         item !== undefined &&
-
         item.id !== null &&
-
         item.id !== undefined
-
       )
 
       .map(item => ({
-
         id:
           Number(item.id),
-
         nombre:
           item.nombre ||
           'Sin nombre',
-
         detalle:
           item.detalle ||
           '',
-
         clienteId:
           item.clienteId !== null &&
           item.clienteId !== undefined
             ? Number(item.clienteId)
             : null
-
       }));
-
   }
 
 
@@ -802,7 +391,6 @@ export class FacturacionComponent
 
   }
 
-
   onClienteChange(): void {
 
     const expedienteSeleccionado =
@@ -812,9 +400,7 @@ export class FacturacionComponent
       expedienteSeleccionado === null ||
       expedienteSeleccionado === undefined
     ) {
-
       return;
-
     }
 
     const sigueDisponible =
@@ -826,13 +412,9 @@ export class FacturacionComponent
         );
 
     if (!sigueDisponible) {
-
       this.nuevoMovimiento.expedienteId = null;
-
     }
-
   }
-
 
   /* =======================================================
      CONSULTAR HONORARIOS
@@ -842,10 +424,8 @@ export class FacturacionComponent
 
     this.loading = true;
 
-
     let params =
       new HttpParams();
-
 
     params = params.set(
       '_t',
@@ -901,21 +481,7 @@ export class FacturacionComponent
     }
 
 
-    this.http
-      .get<HonorarioLista[]>(
-
-        this.apiUrl,
-
-        {
-
-          params,
-
-          headers:
-            this.obtenerHeaders().headers
-
-        }
-
-      )
+    this.service.listar(params)
       .subscribe({
 
         next: (data) => {
@@ -1713,16 +1279,7 @@ export class FacturacionComponent
     this.cdr.detectChanges();
 
 
-    this.http
-      .post<MovimientoResponse>(
-
-        `${this.apiUrl}/movimientos`,
-
-        payload,
-
-        this.obtenerHeaders()
-
-      )
+    this.service.registrarMovimiento(payload)
       .subscribe({
 
 
@@ -2076,16 +1633,7 @@ export class FacturacionComponent
     this.cdr.detectChanges();
 
 
-    this.http
-      .put<MovimientoResponse>(
-
-        `${this.apiUrl}/honorarios/${this.honorarioSeleccionadoUuid}`,
-
-        payload,
-
-        this.obtenerHeaders()
-
-      )
+    this.service.actualizarHonorario(this.honorarioSeleccionadoUuid, payload)
       .subscribe({
 
         next: (respuesta) => {
@@ -2236,21 +1784,7 @@ export class FacturacionComponent
         );
 
 
-    this.http
-      .get<DetalleHonorario>(
-
-        `${this.apiUrl}/honorarios/${encodeURIComponent(uuid)}/detalle`,
-
-        {
-
-          headers:
-            this.obtenerHeaders().headers,
-
-          params
-
-        }
-
-      )
+    this.service.detalle(uuid, params)
       .subscribe({
 
         next: (data) => {
@@ -2454,25 +1988,7 @@ export class FacturacionComponent
     this.cdr.detectChanges();
 
 
-    this.http
-      .get(
-
-        `${this.apiUrl}/honorarios/${encodeURIComponent(detalle.uuid)}/comprobante`,
-
-        {
-
-          headers:
-            this.obtenerHeaders().headers,
-
-          responseType:
-            'blob',
-
-          observe:
-            'response'
-
-        }
-
-      )
+    this.service.comprobante(detalle.uuid)
       .subscribe({
 
         next: (response) => {
@@ -2860,7 +2376,6 @@ export class FacturacionComponent
            */
 
         }
-
       }
 
 
@@ -2884,7 +2399,6 @@ export class FacturacionComponent
           .trim();
 
       }
-
     }
 
 
@@ -2904,9 +2418,7 @@ export class FacturacionComponent
 
       'honorario';
 
-
     return `comprobante-pago-${uuidLimpio}.pdf`;
-
   }
 
 
@@ -2917,14 +2429,11 @@ export class FacturacionComponent
   private obtenerEstadoInicialFormulario():
     RegistroMovimientoDTO {
 
-
     const fechaActual =
       new Date();
 
-
     const anio =
       fechaActual.getFullYear();
-
 
     const mes =
       String(
@@ -2934,7 +2443,6 @@ export class FacturacionComponent
           2,
           '0'
         );
-
 
     const dia =
       String(
@@ -2950,39 +2458,27 @@ export class FacturacionComponent
 
       clienteId:
         null,
-
       expedienteId:
         null,
-
       tipoOperacion:
         'Honorario Pactado',
-
       modalidad:
         'Por Etapas',
-
       monto:
         null,
-
       fecha:
         `${anio}-${mes}-${dia}`,
-
       fechaVencimiento:
         null,
-
       etapaProcesal:
         'Sin etapa específica',
-
       concepto:
         '',
-
       observaciones:
         '',
-
       honorarioUuid:
         null
-
     };
-
   }
 
 
@@ -3003,22 +2499,16 @@ export class FacturacionComponent
       return false;
 
     }
-
-
     return item.fechaVencimiento <
       this.obtenerFechaLocalActual();
-
   }
 
 
   private obtenerFechaLocalActual(): string {
-
     const fechaActual =
       new Date();
-
     const anio =
       fechaActual.getFullYear();
-
     const mes =
       String(
         fechaActual.getMonth() + 1
@@ -3027,7 +2517,6 @@ export class FacturacionComponent
           2,
           '0'
         );
-
     const dia =
       String(
         fechaActual.getDate()
@@ -3036,10 +2525,7 @@ export class FacturacionComponent
           2,
           '0'
         );
-
-
     return `${anio}-${mes}-${dia}`;
-
   }
 
 
@@ -3052,80 +2538,55 @@ export class FacturacionComponent
   ): number {
 
     if (
-
       valor === null ||
-
       valor === undefined ||
-
       valor === ''
 
     ) {
-
       return 0;
-
     }
-
 
     const numero =
       Number(valor);
 
-
     return Number.isNaN(numero)
       ? 0
       : numero;
-
   }
-
 
   private extraerMensajeError(
     error: any
   ): string {
 
     if (!error) {
-
       return '';
-
     }
-
 
     if (
       typeof error === 'string'
     ) {
-
       return error;
-
     }
-
 
     if (
       typeof error?.message === 'string'
     ) {
-
       return error.message;
-
     }
-
 
     if (
       typeof error?.mensaje === 'string'
     ) {
-
       return error.mensaje;
-
     }
 
 
     if (
       typeof error?.error === 'string'
     ) {
-
       return error.error;
-
     }
 
-
     return '';
-
   }
-
 }
