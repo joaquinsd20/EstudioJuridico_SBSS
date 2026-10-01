@@ -417,6 +417,12 @@
                 {{ item.alerta }}
               </div>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">✓</span>
+              <strong>Nada requiere atención</strong>
+              <p>Aquí aparecerán los expedientes críticos y los que llevan más de 30 días sin movimiento.</p>
+            </div>
           }
         </div>
 
@@ -442,6 +448,12 @@
               <div class="entry-materia">{{ res.numeroResolucion }}</div>
               <div class="entry-fecha">{{ res.fechaHora }}</div>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📑</span>
+              <strong>Sin resoluciones nuevas</strong>
+              <p>No hay resoluciones registradas desde tu última revisión.</p>
+            </div>
           }
         </div>
 
@@ -470,6 +482,12 @@
                 {{ ev.etiqueta }}
               </span>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📅</span>
+              <strong>Sin eventos para hoy</strong>
+              <p>No tienes audiencias, reuniones ni vencimientos programados para la fecha de hoy.</p>
+            </div>
           }
         </div>
 
@@ -493,6 +511,7 @@
         </div>
 
         <div class="donut-chart-container">
+          @if (donutSegmentos().length) {
           <div class="donut-svg-wrap">
             <svg class="donut-svg" viewBox="0 0 180 180" aria-hidden="true">
               <circle cx="90" cy="90" r="65" fill="none" stroke="#f1f5f9" stroke-width="26" />
@@ -525,6 +544,13 @@
               </div>
             }
           </div>
+          } @else {
+            <div class="chart-empty">
+              <span class="empty-hint-emoji">📊</span>
+              <strong>Sin expedientes por estado</strong>
+              <span>Aquí aparecerá la distribución cuando se carguen los expedientes.</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -537,13 +563,9 @@
 
         <div class="bar-chart-container">
           <div class="chart-y-axis">
-            <span>12</span>
-            <span>10</span>
-            <span>8</span>
-            <span>6</span>
-            <span>4</span>
-            <span>2</span>
-            <span>0</span>
+            @for (t of especialidadEscala().ticks; track $index) {
+              <span>{{ t }}</span>
+            }
           </div>
 
           <div class="chart-bars-wrap">
@@ -562,10 +584,16 @@
                   <div class="bar-track">
                     <div
                       class="bar-fill"
-                      [style.height.%]="(b.valor / 12) * 100"
+                      [style.height.%]="especialidadBarras().length ? (b.valor / especialidadEscala().maximo) * 100 : 0"
                     ></div>
                   </div>
                   <span class="bar-label-bottom">{{ b.nombre }}</span>
+                </div>
+              } @empty {
+                <div class="chart-empty">
+                  <span class="empty-hint-emoji">📅</span>
+                  <strong>Sin datos por especialidad</strong>
+                  <span>No hay expedientes clasificados por especialidad.</span>
                 </div>
               }
             </div>
@@ -600,6 +628,12 @@
               </div>
               <span class="team-count">{{ c.expedientes }}</span>
               <span class="team-percent">{{ c.porcentaje }}%</span>
+            </div>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">⚖️</span>
+              <strong>Sin carga asignada</strong>
+              <p>No hay expedientes activos repartidos entre los abogados del equipo.</p>
             </div>
           }
         </div>
@@ -637,6 +671,12 @@
               <span class="team-count" [class.text-red]="t.esVencida">{{ t.total }}</span>
               <span class="team-detail-tag" [class.tag-red]="t.esVencida">{{ t.detalle }}</span>
             </div>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📝</span>
+              <strong>Sin tareas activas</strong>
+              <p>No hay tareas abiertas ni vencidas asignadas al equipo.</p>
+            </div>
           }
         </div>
       </div>
@@ -661,6 +701,12 @@
                   ></div>
                 </div>
                 <span class="ingreso-mes">{{ ing.mes }}</span>
+              </div>
+            } @empty {
+              <div class="chart-empty">
+                <span class="empty-hint-emoji">📈</span>
+                <strong>Sin facturación registrada</strong>
+                <span>No hay honorarios facturados en los últimos 6 meses.</span>
               </div>
             }
           </div>

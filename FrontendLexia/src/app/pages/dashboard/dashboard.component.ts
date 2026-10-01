@@ -35,7 +35,7 @@ import {
 import { NotificacionService, Notificacion } from '../../core/services/notificacion.service';
 import { MensajesService, ContactoChat } from '../../core/services/mensajes.service';
 import { TemaService } from '../../core/services/tema.service';
-import { BusquedaRespuesta, GrupoBusqueda, ResultadoBusqueda } from '../../core/models/busqueda.models';
+import { BusquedaRespuesta, ResultadoBusqueda } from '../../core/models/busqueda.models';
 
 interface SegmentoDonut {
   nombre: string;
@@ -152,32 +152,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         badgeTipo: e.badgeTipo || (idx === 0 ? 'critico' : idx === 1 ? 'vencido' : 'audiencia')
       }));
     }
-    return [
-      {
-        codigo: 'EXP. 01452-2026-0-1801-JR-FT-02',
-        materia: 'Alimentos',
-        alerta: 'Plazo vence hoy',
-        alertaColor: 'rojo',
-        badgeTexto: '1 día',
-        badgeTipo: 'critico'
-      },
-      {
-        codigo: 'EXP. 02388-2025-0-1801-JR-CI-05',
-        materia: 'Indemnización por daños y perjuicios',
-        alerta: 'Vencido desde ayer',
-        alertaColor: 'rojo',
-        badgeTexto: 'Vencido',
-        badgeTipo: 'vencido'
-      },
-      {
-        codigo: 'EXP. 00521-2026-0-1801-JR-FA-01',
-        materia: 'Tenencia',
-        alerta: 'Audiencia mañana 09:00 AM',
-        alertaColor: 'azul',
-        badgeTexto: '1 día',
-        badgeTipo: 'audiencia'
-      }
-    ];
+    return [];
   });
 
   // ─── Lista de Nuevas Resoluciones ─────────────────────────────────────────
@@ -186,26 +161,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (reales.length > 0) {
       return reales.slice(0, 3);
     }
-    return [
-      {
-        expedienteCodigo: 'EXP. 04521-2026',
-        numeroResolucion: 'Resolución N.° 06',
-        fechaHora: '28/05/2024  10:45 AM',
-        estado: 'Nueva'
-      },
-      {
-        expedienteCodigo: 'EXP. 03321-2025',
-        numeroResolucion: 'Resolución N.° 03',
-        fechaHora: '28/05/2024  09:15 AM',
-        estado: 'Nueva'
-      },
-      {
-        expedienteCodigo: 'EXP. 07745-2026',
-        numeroResolucion: 'Resolución N.° 02',
-        fechaHora: '28/05/2024  08:30 AM',
-        estado: 'Nueva'
-      }
-    ];
+    return [];
   });
 
   // ─── Lista de Agenda de Hoy ───────────────────────────────────────────────
@@ -240,36 +196,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         };
       });
     }
-    return [
-      {
-        hora: '09:00 AM',
-        titulo: 'Audiencia',
-        detalle: 'EXP. 00521-2026',
-        etiqueta: 'Tenencia',
-        tonoEtiqueta: 'morado'
-      },
-      {
-        hora: '11:00 AM',
-        titulo: 'Reunión con cliente',
-        detalle: 'María Fernández',
-        etiqueta: 'Reunión',
-        tonoEtiqueta: 'naranja'
-      },
-      {
-        hora: '03:00 PM',
-        titulo: 'Vencimiento de plazo',
-        detalle: 'EXP. 01452-2026',
-        etiqueta: 'Plazo',
-        tonoEtiqueta: 'rojo'
-      },
-      {
-        hora: '05:00 PM',
-        titulo: 'Elaborar escrito',
-        detalle: 'EXP. 02388-2025',
-        etiqueta: 'Escrito',
-        tonoEtiqueta: 'azul'
-      }
-    ];
+    return [];
   });
 
   // ─── Gráficos Completos ───────────────────────────────────────────────────
@@ -294,12 +221,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         color: colores[i % colores.length]
       }));
     }
-    return [
-      { nombre: 'Activos', valor: 18, color: '#6366f1' },
-      { nombre: 'En trámite', valor: 6, color: '#38bdf8' },
-      { nombre: 'Archivados', valor: 3, color: '#4ade80' },
-      { nombre: 'Suspendidos', valor: 1, color: '#fb923c' }
-    ];
+    return [];
   });
 
   readonly totalExpedientesDonut = computed(() => {
@@ -333,13 +255,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
     if (raw && raw.length > 0) {
       return raw.slice(0, 5).map(e => ({ nombre: e.nombre, valor: e.valor }));
     }
-    return [
-      { nombre: 'Civil', valor: 10 },
-      { nombre: 'Familia', valor: 7 },
-      { nombre: 'Laboral', valor: 5 },
-      { nombre: 'Penal', valor: 4 },
-      { nombre: 'Otros', valor: 2 }
-    ];
+    return [];
+  });
+
+  /**
+   * Escala del eje Y del grafico de especialidades.
+   *
+   * El axis estaba fijo en 12, lo cual solo encajaba con los datos de
+   * ejemplo: con el maximo real (4 expedientes) las barras ocupaban un
+   * tercio y las etiquetas mentian. Ahora el tope sale de los datos.
+   *
+   * Se elige un paso limpio (1, 2, 5, 10...) y el tope es ese paso por
+   * las 6 divisiones del eje, para que las siete etiquetas salgan
+   * enteras y distintas en lugar de repetirse.
+   */
+  readonly especialidadEscala = computed(() => {
+    const maximoReal = this.especialidadBarras().reduce((acc, b) => Math.max(acc, b.valor), 0);
+    const pasos = [1, 2, 5, 10, 20, 25, 50, 100, 200, 250, 500, 1000, 2000, 2500, 5000, 10000];
+    const paso = pasos.find(p => p * 6 >= maximoReal) ?? Math.ceil(maximoReal / 6);
+    const maximo = maximoReal <= 0 ? 6 : paso * 6;
+    return { maximo, ticks: [0, 1, 2, 3, 4, 5, 6].map(n => maximo - (paso * n)) };
   });
 
   // 3. Carga de trabajo del equipo (Puntos de riesgo ponderado)
@@ -353,12 +288,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         porcentaje: Math.round((r.valor / maxVal) * 80) + 20
       }));
     }
-    return [
-      { nombre: 'Sofía Ramírez', expedientes: 12, porcentaje: 80 },
-      { nombre: 'Ana Morales', expedientes: 8, porcentaje: 53 },
-      { nombre: 'Luis Torres', expedientes: 6, porcentaje: 40 },
-      { nombre: 'María López', expedientes: 4, porcentaje: 27 }
-    ];
+    return [];
   });
 
   // 4. Tareas por usuario (Abiertas y vencidas)
@@ -374,12 +304,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         porcentaje: Math.round((r.valor / maxVal) * 100)
       }));
     }
-    return [
-      { nombre: 'Ana Morales', total: 6, detalle: '2 vencidas', esVencida: true, porcentaje: 100 },
-      { nombre: 'Luis Torres', total: 4, detalle: '1 vencida', esVencida: true, porcentaje: 66 },
-      { nombre: 'Sofía Ramírez', total: 3, detalle: 'Al día', esVencida: false, porcentaje: 50 },
-      { nombre: 'María López', total: 2, detalle: 'Al día', esVencida: false, porcentaje: 33 }
-    ];
+    return [];
   });
 
   // 5. Ingresos por mes (Facturación últimos 6 meses)
@@ -393,31 +318,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         porcentaje: Math.round((r.valor / maxVal) * 100)
       }));
     }
-    return [
-      { mes: 'Ene', valor: 14500, porcentaje: 65 },
-      { mes: 'Feb', valor: 18200, porcentaje: 82 },
-      { mes: 'Mar', valor: 16000, porcentaje: 72 },
-      { mes: 'Abr', valor: 21500, porcentaje: 96 },
-      { mes: 'May', valor: 19800, porcentaje: 89 },
-      { mes: 'Jun', valor: 22400, porcentaje: 100 }
-    ];
+    return [];
   });
 
   // 6. Cuentas por cobrar y cobranza
-  readonly cobranzaVista = computed(() => {
-    const c = this.graficos().cobranza;
-    if (c && c.facturado > 0) {
-      return c;
-    }
-    return {
-      facturado: 64200,
-      cobrado: 48900,
-      pendiente: 15300,
-      vencido: 4200,
-      cuentasPendientes: 5,
-      cuentasVencidas: 2
-    };
-  });
+  readonly cobranzaVista = computed(() => this.graficos().cobranza);
 
   // ─── Buscador Global ──────────────────────────────────────────────────────
   readonly busquedaAbierta    = signal(false);
@@ -463,62 +368,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }));
             this.resultadosBusqueda.set({ ...r, grupos: normalizados });
           } else {
-            const local = this.buscarLocalmente(texto.trim());
-            this.resultadosBusqueda.set(local);
+            this.resultadosBusqueda.set({ texto: texto.trim(), total: 0, grupos: [] });
           }
           this.buscando.set(false);
         });
     }, 300);
-  }
-
-  private buscarLocalmente(q: string): BusquedaRespuesta {
-    const query = q.toLowerCase();
-    const grupos: GrupoBusqueda[] = [];
-
-    // Expedientes
-    const expedientesMatch: ResultadoBusqueda[] = [
-      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 01452-2026-0-1801-JR-FT-02', detalle: 'Materia: Alimentos | Cliente: Rodríguez', ruta: '/expedientes', coincidencia: '01452-2026' },
-      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 02388-2025-0-1801-JR-CI-05', detalle: 'Indemnización por daños y perjuicios', ruta: '/expedientes', coincidencia: '02388-2025' },
-      { tipo: 'EXPEDIENTE', etiqueta: 'Expediente', titulo: 'EXP. 00521-2026-0-1801-JR-FA-01', detalle: 'Tenencia y custodia familiar', ruta: '/expedientes', coincidencia: '00521-2026' }
-    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
-
-    if (expedientesMatch.length) {
-      grupos.push({ tipo: 'EXPEDIENTE', etiqueta: 'Expedientes', total: expedientesMatch.length, items: expedientesMatch, resultados: expedientesMatch });
-    }
-
-    // Clientes & DNI/RUC
-    const clientesMatch: ResultadoBusqueda[] = [
-      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'María Rodríguez Vega', detalle: 'DNI: 45892104 | Caso Alimentos', ruta: '/clientes', coincidencia: 'DNI 45892104' },
-      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'Inversiones SAC', detalle: 'RUC: 20601849201 | Caso Laboral', ruta: '/clientes', coincidencia: 'RUC 20601849201' },
-      { tipo: 'CLIENTE', etiqueta: 'Cliente', titulo: 'Carlos Paredes Gómez', detalle: 'DNI: 10482910 | Caso Civil', ruta: '/clientes', coincidencia: 'DNI 10482910' }
-    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
-
-    if (clientesMatch.length) {
-      grupos.push({ tipo: 'CLIENTE', etiqueta: 'Clientes', total: clientesMatch.length, items: clientesMatch, resultados: clientesMatch });
-    }
-
-    // Resoluciones
-    const resolucionesMatch: ResultadoBusqueda[] = [
-      { tipo: 'RESOLUCION', etiqueta: 'Resolución', titulo: 'Resolución N.° 06', detalle: 'EXP. 04521-2026 - Concede apelación', ruta: '/monitor-judicial', coincidencia: 'Resolución N.° 06' },
-      { tipo: 'RESOLUCION', etiqueta: 'Resolución', titulo: 'Resolución N.° 03', detalle: 'EXP. 03321-2025 - Téngase por contestada la demanda', ruta: '/monitor-judicial', coincidencia: 'Resolución N.° 03' }
-    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
-
-    if (resolucionesMatch.length) {
-      grupos.push({ tipo: 'RESOLUCION', etiqueta: 'Resoluciones', total: resolucionesMatch.length, items: resolucionesMatch, resultados: resolucionesMatch });
-    }
-
-    // Abogados
-    const abogadosMatch: ResultadoBusqueda[] = [
-      { tipo: 'ABOGADO', etiqueta: 'Abogado', titulo: 'Dra. Sofía Ramírez', detalle: 'CAL: 48920 | Especialidad Civil y Familia', ruta: '/usuarios', coincidencia: 'Sofía Ramírez' },
-      { tipo: 'ABOGADO', etiqueta: 'Abogado', titulo: 'Dr. Luis Torres', detalle: 'CAL: 51204 | Especialidad Penal y Laboral', ruta: '/usuarios', coincidencia: 'Luis Torres' }
-    ].filter(x => x.titulo.toLowerCase().includes(query) || (x.detalle && x.detalle.toLowerCase().includes(query)));
-
-    if (abogadosMatch.length) {
-      grupos.push({ tipo: 'ABOGADO', etiqueta: 'Abogados', total: abogadosMatch.length, items: abogadosMatch, resultados: abogadosMatch });
-    }
-
-    const total = grupos.reduce((acc, g) => acc + g.total, 0);
-    return { texto: q, total, grupos };
   }
 
   cerrarBusqueda(): void {

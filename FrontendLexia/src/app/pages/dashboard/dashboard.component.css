@@ -446,6 +446,60 @@
   flex: 1;
 }
 
+/* Estado vacio de las listas y graficas del dashboard.
+   Se muestra cuando la API responde sin filas, en vez de inventar datos. */
+.empty-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 26px 18px;
+  text-align: center;
+  color: #98a1ae;
+}
+
+.empty-hint-emoji {
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.empty-hint strong {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6a7380;
+}
+
+.empty-hint p {
+  margin: 0;
+  max-width: 210px;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+/* Las graficas de barras centradas, para que el hueco quede alineado. */
+.chart-empty {
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #98a1ae;
+}
+
+.chart-empty strong {
+  font-size: 10px;
+  color: #6a7380;
+}
+
+.chart-empty span {
+  max-width: 220px;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
 .item-entry {
   display: flex;
   flex-direction: column;
@@ -946,6 +1000,20 @@
 :host-context(.tema-oscuro-global) .item-entry,
 :host-context(.tema-oscuro-global) .agenda-entry {
   border-bottom-color: #1f2937;
+}
+
+:host-context(.tema-oscuro-global) .empty-hint,
+:host-context(.tema-oscuro-global) .chart-empty {
+  color: #7d8896;
+}
+
+:host-context(.tema-oscuro-global) .empty-hint strong,
+:host-context(.tema-oscuro-global) .chart-empty strong {
+  color: #a9b3c1;
+}
+
+:host-context(.tema-oscuro-global) .empty-hint-emoji {
+  opacity: 0.5;
 }
 
 :host-context(.tema-oscuro-global) .grid-line {
