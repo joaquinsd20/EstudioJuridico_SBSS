@@ -42,6 +42,8 @@ export class ClientesComponent implements OnInit {
 
   filtros = { documento: '', nombre: '', tipoPersona: '', estado: '' };
   pagina = 0;
+  tamanoPagina = 20;
+  readonly tamanosPagina = [10, 20, 40, 100];
   totalPaginas = 0;
   totalElementos = 0;
 
@@ -66,7 +68,7 @@ export class ClientesComponent implements OnInit {
     this.cargando = true;
     this.error = '';
     forkJoin({
-      pagina: this.service.listar(this.filtros, this.pagina),
+      pagina: this.service.listar(this.filtros, this.pagina, this.tamanoPagina),
       resumen: this.service.resumen(),
       catalogos: this.service.catalogos()
     }).subscribe({
@@ -106,7 +108,14 @@ export class ClientesComponent implements OnInit {
     this.buscar();
   }
 
+  cambiarTamanoPagina(tamano: number): void {
+    if (this.cargando || !this.tamanosPagina.includes(tamano) || tamano === this.tamanoPagina) return;
+    this.tamanoPagina = tamano;
+    this.buscar();
+  }
+
   cambiarPagina(delta: number): void {
+    if (this.cargando) return;
     const nueva = this.pagina + delta;
     if (nueva < 0 || nueva >= this.totalPaginas) return;
     this.pagina = nueva;
@@ -355,7 +364,7 @@ export class ClientesComponent implements OnInit {
   }
 
   private refrescarTrasGuardar(uuid: string): void {
-    forkJoin({ pagina: this.service.listar(this.filtros, this.pagina), resumen: this.service.resumen() }).subscribe({
+    forkJoin({ pagina: this.service.listar(this.filtros, this.pagina, this.tamanoPagina), resumen: this.service.resumen() }).subscribe({
       next: r => {
         this.clientes = r.pagina.contenido;
         this.totalPaginas = r.pagina.totalPaginas;
@@ -371,7 +380,7 @@ export class ClientesComponent implements OnInit {
 
   private cargarLista(reseleccionar = true): void {
     this.cargando = true;
-    this.service.listar(this.filtros, this.pagina).subscribe({
+    this.service.listar(this.filtros, this.pagina, this.tamanoPagina).subscribe({
       next: r => {
         this.clientes = r.contenido;
         this.totalPaginas = r.totalPaginas;

@@ -21,6 +21,9 @@ export class PanelComponent {
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly tema = inject(TemaService);
+
+  readonly temaOscuro = this.tema.oscuro;
 
   /**
    * El selector de tema vive aqui y no en el dashboard. El sidebar es el
@@ -47,6 +50,10 @@ export class PanelComponent {
     const inicial2 = partes.length > 1 ? partes[partes.length - 1][0] : '';
     return (inicial1 + inicial2).toUpperCase();
   });
+
+  alternarTema(): void {
+    this.tema.alternar();
+  }
 
   cerrarSesion(): void {
     this.auth.cerrarSesion();

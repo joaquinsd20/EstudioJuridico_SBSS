@@ -1,11 +1,5 @@
 package com.sbss.lexia.actuaciones.service;
 
-import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
-import com.sbss.lexia.actuaciones.repository.ActuacionRepositoryJdbc;
-import com.sbss.lexia.shared.exception.ParametroInvalidoException;
-import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
-import com.sbss.lexia.shared.security.SesionActual;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -15,9 +9,31 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.*;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionDetalle;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.ActuacionLista;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.AlertaAutomatica;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Catalogos;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.CrearRequest;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.CrearResponse;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.DocumentoOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.DocumentoPendienteAutomatico;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.EventoAutomatico;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.PlazoAutomatico;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.Resumen;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TareaAutomatica;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TipoActuacionOpcion;
+import com.sbss.lexia.actuaciones.dto.ActuacionDtos.TipoPlazoOpcion;
+import com.sbss.lexia.actuaciones.repository.ActuacionRepositoryJdbc;
+import com.sbss.lexia.shared.exception.ParametroInvalidoException;
+import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
+import com.sbss.lexia.shared.security.SesionActual;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

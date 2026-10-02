@@ -81,6 +81,16 @@
             </tbody>
           </table>
         </div>
+        <nav class="paginacion-actuaciones" aria-label="Páginas de actuaciones">
+          <label for="tamano-pagina-actuaciones">Registros por página
+            <select id="tamano-pagina-actuaciones" [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)" [disabled]="cargando">
+              <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+            </select>
+          </label>
+          <button type="button" (click)="cambiarPagina(pagina - 1)" [disabled]="cargando || pagina === 0">Anterior</button>
+          <span>Página {{ pagina + 1 }} · {{ actuaciones.length }} registros</span>
+          <button type="button" (click)="cambiarPagina(pagina + 1)" [disabled]="cargando || !hayPaginaSiguiente">Siguiente</button>
+        </nav>
       </section>
 
       <aside class="card detail-card">

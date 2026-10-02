@@ -121,7 +121,7 @@
           <div class="table-header">
             <div>
               <h2>Expedientes</h2>
-              <span>{{ expedientes.length }} expediente(s) mostrado(s)</span>
+              <span>{{ expedientes.length }} de {{ totalElementos }} expediente(s) · Página {{ pagina + 1 }} de {{ totalPaginas || 1 }}</span>
             </div>
             @if (cargando) {
               <span class="loading-inline">Cargando...</span>
@@ -225,6 +225,17 @@
               </tbody>
             </table>
           </div>
+          <nav class="paginacion-expedientes" aria-label="Páginas de expedientes">
+            <label class="tamano-pagina" for="tamano-pagina-expedientes">
+              Registros por página
+              <select id="tamano-pagina-expedientes" [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)" [disabled]="cargando">
+                <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+              </select>
+            </label>
+            <button type="button" (click)="cambiarPagina(pagina - 1)" [disabled]="cargando || pagina === 0">Anterior</button>
+            <span>Página {{ pagina + 1 }} de {{ totalPaginas || 1 }}</span>
+            <button type="button" (click)="cambiarPagina(pagina + 1)" [disabled]="cargando || pagina + 1 >= totalPaginas">Siguiente</button>
+          </nav>
         </section>
 
         <section class="bottom-grid">

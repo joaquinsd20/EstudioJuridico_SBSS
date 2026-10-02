@@ -1066,7 +1066,7 @@
 }
 
 /* ==========================================================
-   ICONOGRAFÃA UNIFICADA DEL DASHBOARD
+   ICONOGRAFíA UNIFICADA DEL DASHBOARD
 ========================================================= */
 .dashboard-icon-sprite {
   position: absolute;
@@ -1656,7 +1656,7 @@ familia de color que ya usaba cada badge, no los mismos tonos, porque un
 
 .notif-indicator.sev-alta,
 .notif-indicator.sev-critica,
-.notif-indicator.sev-crÃ­tica {
+.notif-indicator.sev-critica {
   background: #ef4444;
 }
 
@@ -1818,7 +1818,7 @@ familia de color que ya usaba cada badge, no los mismos tonos, porque un
   color: #b91c1c;
 }
 
-/* MENSAJERÃA INTERNA */
+/* MENSAJERIA INTERNA */
 .chat-modal {
   position: fixed;
   top: 68px;
