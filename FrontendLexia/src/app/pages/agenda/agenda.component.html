@@ -44,6 +44,7 @@
         <span class="search-symbol">⌕</span>
         <input
           [(ngModel)]="filtroTexto"
+          (input)="onFiltroTextoInput()"
           (keyup.enter)="aplicarFiltros()"
           placeholder="Buscar por título, descripción, ubicación, expediente o cliente..."
         />
@@ -51,14 +52,14 @@
 
       <select [(ngModel)]="filtroExpediente" (change)="aplicarFiltros()">
         <option [ngValue]="null">Todos los expedientes</option>
-        <option *ngFor="let e of catalogos.expedientes" [ngValue]="e.id">
+        <option *ngFor="let e of catalogos.expedientes; trackBy: trackById" [ngValue]="e.id">
           {{ e.codigo }} · {{ e.clienteNombre }}
         </option>
       </select>
 
       <select [(ngModel)]="filtroParticipante" (change)="aplicarFiltros()">
         <option [ngValue]="null">Todos los participantes</option>
-        <option *ngFor="let u of catalogos.usuarios" [ngValue]="u.id">{{ u.nombre }}</option>
+        <option *ngFor="let u of catalogos.usuarios; trackBy: trackById" [ngValue]="u.id">{{ u.nombre }}</option>
       </select>
 
       <select [(ngModel)]="filtroEstado" (change)="aplicarFiltros()">
@@ -98,7 +99,7 @@
 
           <div class="calendar-grid body-grid" [class.week-view]="vista === 'SEMANA'">
             <div
-              *ngFor="let dia of dias"
+              *ngFor="let dia of dias; trackBy: trackByDia"
               class="calendar-cell"
               [class.other-month]="!dia.mesActual"
               [class.today]="dia.hoy"
@@ -113,7 +114,7 @@
 
               <div class="events-list">
                 <button
-                  *ngFor="let evento of eventosDelDia(dia)"
+                  *ngFor="let evento of eventosVisiblesDelDia(dia); trackBy: trackByEvento"
                   type="button"
                   class="calendar-event"
                   [class.cancelled]="evento.estado === 'CANCELADO'"
@@ -126,6 +127,14 @@
                   <span *ngIf="evento.requiereVerificacion" class="verify-dot" title="Pendiente de verificación">!</span>
                 </button>
               </div>
+
+              <button
+                *ngIf="eventosOcultosDelDia(dia) > 0"
+                type="button"
+                class="more-events"
+                (click)="fechaReferencia = dia.fecha; cambiarVista('DIA')">
+                +{{ eventosOcultosDelDia(dia) }} eventos
+              </button>
 
               <button *ngIf="puedeGestionar" type="button" class="cell-add" (click)="abrirNuevoEnDia(dia)">＋</button>
             </div>
@@ -149,7 +158,7 @@
             </div>
 
             <button
-              *ngFor="let evento of eventosDelDiaActual"
+              *ngFor="let evento of eventosDelDiaActual; trackBy: trackByEvento"
               type="button"
               class="day-event-row"
               [class.cancelled]="evento.estado === 'CANCELADO'"
@@ -185,7 +194,7 @@
           </div>
 
           <button
-            *ngFor="let tipo of tipos"
+            *ngFor="let tipo of tipos; trackBy: trackByTipo"
             type="button"
             class="event-type-item"
             [class.active]="filtroTipo === tipo.codigo"
@@ -208,7 +217,7 @@
           <div *ngIf="!eventosProximos.length" class="mini-empty">Sin eventos próximos en el rango.</div>
 
           <button
-            *ngFor="let evento of eventosProximos"
+            *ngFor="let evento of eventosProximos; trackBy: trackByEvento"
             type="button"
             class="upcoming-item"
             (click)="abrirDetalle(evento.uuid)"
@@ -260,7 +269,7 @@
           <span>Expediente vinculado</span>
           <select [(ngModel)]="formulario.expedienteId">
             <option [ngValue]="null">Sin expediente / interno</option>
-            <option *ngFor="let e of catalogos.expedientes" [ngValue]="e.id">
+            <option *ngFor="let e of catalogos.expedientes; trackBy: trackById" [ngValue]="e.id">
               {{ e.codigo }} · {{ e.clienteNombre }}
             </option>
           </select>
@@ -352,7 +361,7 @@
           <small>{{ formulario.participanteIds.length }} seleccionado(s)</small>
         </div>
         <div class="participant-grid">
-          <label *ngFor="let u of catalogos.usuarios" class="participant-option">
+          <label *ngFor="let u of catalogos.usuarios; trackBy: trackById" class="participant-option">
             <input
               type="checkbox"
               [checked]="participanteSeleccionado(u.id)"

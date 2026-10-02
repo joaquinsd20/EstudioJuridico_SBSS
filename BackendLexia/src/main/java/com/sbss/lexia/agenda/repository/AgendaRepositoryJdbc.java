@@ -7,6 +7,7 @@ import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
 import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Participante;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Reprogramacion;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
 import com.sbss.lexia.agenda.dto.AgendaDtos.UsuarioOpcion;
 import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.security.SesionActual;
@@ -97,6 +98,38 @@ public class AgendaRepositoryJdbc {
             p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
         }
         return jdbc.query(sql.toString(), p, (rs, n) -> mapEvento(rs));
+    }
+
+    public Resumen resumen(boolean verTodos, boolean verConfidenciales) {
+        LocalDateTime ahora = LocalDateTime.now();
+        LocalDateTime hoyInicio = ahora.toLocalDate().atStartOfDay();
+        LocalDateTime hoyFin = ahora.toLocalDate().atTime(23, 59, 59);
+        LocalDateTime mesInicio = ahora.toLocalDate().withDayOfMonth(1).atStartOfDay();
+        LocalDateTime mesFin = ahora.toLocalDate().withDayOfMonth(1).plusMonths(1).atStartOfDay();
+
+        StringBuilder sql = new StringBuilder("""
+                SELECT
+                  SUM(CASE WHEN ev.estado<>'CANCELADO' AND ev.fecha_inicio<=:hoyFin AND ev.fecha_fin>=:hoyInicio THEN 1 ELSE 0 END) eventos_hoy,
+                  SUM(CASE WHEN ev.estado<>'CANCELADO' AND ev.fecha_inicio<=:proximosFin AND ev.fecha_fin>=:ahora THEN 1 ELSE 0 END) proximos_siete,
+                  SUM(CASE WHEN ev.estado<>'CANCELADO' AND ev.tipo='AUDIENCIA' AND ev.fecha_inicio>=:mesInicio AND ev.fecha_inicio<:mesFin THEN 1 ELSE 0 END) audiencias_mes,
+                  SUM(CASE WHEN ev.requiere_verificacion=1 AND ev.fecha_inicio>=:mesInicio AND ev.fecha_inicio<:mesFin THEN 1 ELSE 0 END) pendientes_verificacion,
+                  SUM(CASE WHEN ev.estado<>'CANCELADO' AND ev.fecha_inicio>=:mesInicio AND ev.fecha_inicio<:mesFin THEN 1 ELSE 0 END) total_mes
+                FROM eventos_agenda ev
+                LEFT JOIN expedientes e ON e.id=ev.expediente_id
+                WHERE ev.estudio_id=:estudioId AND ev.activo=1
+                """);
+        MapSqlParameterSource p = base()
+                .addValue("ahora", ahora)
+                .addValue("hoyInicio", hoyInicio)
+                .addValue("hoyFin", hoyFin)
+                .addValue("proximosFin", ahora.plusDays(7))
+                .addValue("mesInicio", mesInicio)
+                .addValue("mesFin", mesFin);
+        aplicarVisibilidad(sql, p, verTodos, verConfidenciales);
+        return jdbc.queryForObject(sql.toString(), p, (rs, n) -> new Resumen(
+                rs.getLong("eventos_hoy"), rs.getLong("proximos_siete"),
+                rs.getLong("audiencias_mes"), rs.getLong("pendientes_verificacion"),
+                rs.getLong("total_mes")));
     }
 
     public EventoLista obtener(String uuid, boolean verTodos, boolean verConfidenciales) {

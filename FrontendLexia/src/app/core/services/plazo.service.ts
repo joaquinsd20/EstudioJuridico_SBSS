@@ -1,10 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CalculoPlazo,
   Plazo,
+  PlazoAnalitica,
   PlazoCatalogos,
   PlazoDetalle,
   PlazoFiltro,
@@ -18,6 +19,7 @@ import {
 export class PlazoService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/plazos`;
+  private catalogosCache$?: Observable<PlazoCatalogos>;
 
   listar(filtro: PlazoFiltro): Observable<Plazo[]> {
     let params = new HttpParams();
@@ -33,6 +35,9 @@ export class PlazoService {
     }
     if (filtro.desde) params = params.set('desde', filtro.desde);
     if (filtro.hasta) params = params.set('hasta', filtro.hasta);
+    if (filtro.fechaNotificacion) params = params.set('fechaNotificacion', filtro.fechaNotificacion);
+    params = params.set('limite', String(filtro.limite ?? 20));
+    params = params.set('desplazamiento', String(filtro.desplazamiento ?? 0));
     return this.http.get<Plazo[]>(this.base, { params });
   }
 
@@ -40,8 +45,16 @@ export class PlazoService {
     return this.http.get<PlazoResumen>(`${this.base}/resumen`);
   }
 
+  analitica(): Observable<PlazoAnalitica> {
+    return this.http.get<PlazoAnalitica>(`${this.base}/analitica`);
+  }
+
   catalogos(): Observable<PlazoCatalogos> {
-    return this.http.get<PlazoCatalogos>(`${this.base}/catalogos`);
+    if (!this.catalogosCache$) {
+      this.catalogosCache$ = this.http.get<PlazoCatalogos>(`${this.base}/catalogos`)
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    }
+    return this.catalogosCache$;
   }
 
   relaciones(expedienteId: number): Observable<PlazoRelaciones> {

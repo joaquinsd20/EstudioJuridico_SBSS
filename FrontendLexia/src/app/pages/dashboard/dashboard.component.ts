@@ -73,7 +73,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly mensajesSvc          = inject(MensajesService);
   private readonly auth         = inject(AuthService);
   private readonly router       = inject(Router);
-  private readonly temaSvc      = inject(TemaService);
 
   private readonly destruido = new Subject<void>();
 

@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, forkJoin } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
 import {
   AgendaCatalogos,
   AgendaResumen,
@@ -41,7 +41,8 @@ interface TipoVisual {
   standalone: true,
   imports: [CommonModule, FormsModule, PanelComponent],
   templateUrl: './agenda.component.html',
-  styleUrl: './agenda.component.css'
+  styleUrl: './agenda.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AgendaComponent implements OnInit, OnDestroy {
   private readonly agendaService = inject(AgendaService);
@@ -81,6 +82,10 @@ export class AgendaComponent implements OnInit, OnDestroy {
   fechaReferencia = this.inicioDia(new Date());
   dias: DiaCalendario[] = [];
   eventos: EventoAgenda[] = [];
+  private eventosPorFecha = new Map<string, EventoAgenda[]>();
+  private readonly destruir$ = new Subject<void>();
+  private readonly filtroTexto$ = new Subject<string>();
+  readonly maxEventosPorCelda = 5;
   detalle: EventoAgendaDetalle | null = null;
   catalogos: AgendaCatalogos = { expedientes: [], usuarios: [] };
   resumen: AgendaResumen = {
@@ -115,6 +120,10 @@ export class AgendaComponent implements OnInit, OnDestroy {
   private mensajeTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
+    this.filtroTexto$
+      .pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destruir$))
+      .subscribe(() => this.cargarEventos());
+
     this.reconstruirVista();
     this.cargando = true;
     forkJoin({
@@ -134,7 +143,13 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
     if (this.mensajeTimer) clearTimeout(this.mensajeTimer);
+  }
+
+  onFiltroTextoInput(): void {
+    this.filtroTexto$.next(this.filtroTexto.trim());
   }
 
   cambiarVista(vista: VistaAgenda): void {
@@ -203,26 +218,32 @@ export class AgendaComponent implements OnInit, OnDestroy {
       estado: this.filtroEstado,
       expedienteId: this.filtroExpediente,
       participanteId: this.filtroParticipante
-    }).pipe(finalize(() => {
+    }, 500, 0).pipe(finalize(() => {
       this.cargando = false;
       this.actualizarVista();
     })).subscribe({
-      next: eventos => this.eventos = eventos,
+      next: eventos => {
+        this.eventos = eventos;
+        this.indexarEventos();
+      },
       error: e => this.mostrarError(this.mensajeError(e))
     });
   }
 
   eventosDelDia(dia: DiaCalendario): EventoAgenda[] {
-    return this.eventos
-      .filter(e => this.eventoIncluyeFecha(e, dia.clave))
-      .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
+    return this.eventosPorFecha.get(dia.clave) ?? [];
+  }
+
+  eventosVisiblesDelDia(dia: DiaCalendario): EventoAgenda[] {
+    return this.eventosDelDia(dia).slice(0, this.maxEventosPorCelda);
+  }
+
+  eventosOcultosDelDia(dia: DiaCalendario): number {
+    return Math.max(0, this.eventosDelDia(dia).length - this.maxEventosPorCelda);
   }
 
   get eventosDelDiaActual(): EventoAgenda[] {
-    const clave = this.claveFecha(this.fechaReferencia);
-    return this.eventos
-      .filter(e => this.eventoIncluyeFecha(e, clave))
-      .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
+    return this.eventosPorFecha.get(this.claveFecha(this.fechaReferencia)) ?? [];
   }
 
   get eventosProximos(): EventoAgenda[] {
@@ -232,6 +253,32 @@ export class AgendaComponent implements OnInit, OnDestroy {
       .sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio))
       .slice(0, 8);
   }
+
+  private indexarEventos(): void {
+    const indice = new Map<string, EventoAgenda[]>();
+    for (const evento of this.eventos) {
+      let cursor = this.inicioDia(new Date(evento.fechaInicio));
+      const fin = this.inicioDia(new Date(evento.fechaFin));
+      let seguridad = 0;
+      while (cursor <= fin && seguridad < 371) {
+        const clave = this.claveFecha(cursor);
+        const lista = indice.get(clave);
+        if (lista) lista.push(evento);
+        else indice.set(clave, [evento]);
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 1);
+        seguridad++;
+      }
+    }
+    for (const lista of indice.values()) {
+      lista.sort((a, b) => a.fechaInicio.localeCompare(b.fechaInicio));
+    }
+    this.eventosPorFecha = indice;
+  }
+
+  trackByDia(_: number, dia: DiaCalendario): string { return dia.clave; }
+  trackByEvento(_: number, evento: EventoAgenda): string { return evento.uuid; }
+  trackByTipo(_: number, tipo: TipoVisual): string { return tipo.codigo; }
+  trackById(_: number, item: { id: number }): number { return item.id; }
 
   get tituloPeriodo(): string {
     if (this.vista === 'MES') {
@@ -548,7 +595,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   private refrescarDespuesDeCambio(): void {
-    forkJoin({ eventos: this.agendaService.listar({ ...this.filtroActual() }), resumen: this.agendaService.resumen() })
+    forkJoin({ eventos: this.agendaService.listar({ ...this.filtroActual() }, 500, 0), resumen: this.agendaService.resumen() })
       .subscribe({
         next: ({ eventos, resumen }) => {
           this.eventos = eventos;

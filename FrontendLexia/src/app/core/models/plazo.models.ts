@@ -78,6 +78,25 @@ export interface PlazoResumen {
   revisionProfesional: number;
 }
 
+export interface PlazoBarraSemana {
+  semana: number;
+  rojo: number;
+  naranja: number;
+  amarillo: number;
+}
+
+export interface PlazoEvolucionMes {
+  anio: number;
+  mes: number;
+  vencidos: number;
+  cumplidos: number;
+}
+
+export interface PlazoAnalitica {
+  semanas: PlazoBarraSemana[];
+  evolucion: PlazoEvolucionMes[];
+}
+
 export interface PlazoExpedienteOpcion {
   id: number;
   codigo: string;
@@ -184,4 +203,7 @@ export interface PlazoFiltro {
   requiereRevision?: boolean | null;
   desde?: string;
   hasta?: string;
+  fechaNotificacion?: string;
+  limite?: number;
+  desplazamiento?: number;
 }

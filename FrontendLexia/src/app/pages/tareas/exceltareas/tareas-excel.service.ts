@@ -1,131 +1,303 @@
 import { Injectable } from '@angular/core';
-import * as ExcelJS from 'exceljs';
+import writeExcelFile, { Cell } from 'write-excel-file/browser';
 import { TareaExcelFila } from '../../../core/models/tarea.models';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class TareasExcelService {
+
   async exportar(tareas: TareaExcelFila[]): Promise<void> {
-    const workbook = new ExcelJS.Workbook();
-    workbook.creator = 'LEXIA';
-    workbook.company = 'LEXIA';
-    workbook.created = new Date();
-
-    const worksheet = workbook.addWorksheet('Tareas', {
-      views: [{ state: 'frozen', ySplit: 2 }],
-      pageSetup: {
-        orientation: 'landscape',
-        fitToPage: true,
-        fitToWidth: 1,
-        fitToHeight: 0,
-        margins: { left: 0.3, right: 0.3, top: 0.5, bottom: 0.5, header: 0.2, footer: 0.2 }
-      }
-    });
-
-    const c = {
-      primario: 'FF6366F1',
-      primarioOscuro: 'FF4338CA',
-      oscuro: 'FF0F172A',
-      claro: 'FFEEF2FF',
-      alterno: 'FFF8FAFC',
-      borde: 'FFCBD5E1',
-      texto: 'FF1E293B',
-      blanco: 'FFFFFFFF'
-    };
-
-    worksheet.mergeCells('A1:H1');
-    const titulo = worksheet.getCell('A1');
-    titulo.value = `LEXIA - REPORTE DE TAREAS - ${this.fechaHora(new Date(), true)}`;
-    titulo.font = { bold: true, size: 16, color: { argb: c.blanco } };
-    titulo.alignment = { horizontal: 'center', vertical: 'middle' };
-    titulo.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: c.oscuro } };
-    titulo.border = this.borde(c.oscuro);
-    worksheet.getRow(1).height = 32;
-
-    const encabezados = ['Tarea', 'Expediente', 'Responsable', 'Supervisor', 'Prioridad', 'Estado', 'Etapa', 'Vencimiento'];
-    const filaEncabezado = worksheet.getRow(2);
-    filaEncabezado.values = encabezados;
-    filaEncabezado.height = 28;
-    filaEncabezado.eachCell((cell: ExcelJS.Cell) => {
-      cell.font = { bold: true, size: 11, color: { argb: c.blanco } };
-      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: c.primario } };
-      cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      cell.border = this.borde(c.primarioOscuro);
-    });
-
-    tareas.forEach((t, index) => {
-      const fila = worksheet.addRow([
-        t.titulo,
-        t.expedienteCodigo,
-        t.responsable,
-        t.supervisor || '—',
-        this.texto(t.prioridad),
-        this.estado(t.estado),
-        this.texto(t.etapaFlujo),
-        this.fechaHora(new Date(t.fechaLimite))
-      ]);
-      fila.height = 24;
-      fila.eachCell((cell: ExcelJS.Cell) => {
-        cell.font = { size: 10, color: { argb: c.texto } };
-        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: index % 2 === 0 ? c.claro : c.alterno } };
-        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
-        cell.border = this.borde(c.borde);
-      });
-      [2, 5, 6, 7, 8].forEach(col => {
-        fila.getCell(col).alignment = { horizontal: 'center', vertical: 'middle', wrapText: true };
-      });
-    });
-
-    worksheet.columns = [
-      { key: 'tarea', width: 35 }, { key: 'expediente', width: 20 }, { key: 'responsable', width: 27 },
-      { key: 'supervisor', width: 27 }, { key: 'prioridad', width: 14 }, { key: 'estado', width: 18 },
-      { key: 'etapa', width: 20 }, { key: 'vencimiento', width: 22 }
-    ];
-    worksheet.autoFilter = { from: 'A2', to: 'H2' };
-    worksheet.headerFooter.oddFooter = '&LLEXIA&CReporte de tareas&RPágina &P de &N';
+    if (!tareas || tareas.length === 0) {
+      return;
+    }
 
     const ahora = new Date();
-    const nombre = `tareas_${this.archivoFecha(ahora)}.xlsx`;
-    const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const enlace = document.createElement('a');
-    enlace.href = url;
-    enlace.download = nombre;
-    document.body.appendChild(enlace);
-    enlace.click();
-    enlace.remove();
-    URL.revokeObjectURL(url);
+
+    const nombreArchivo =
+      `tareas_${this.archivoFecha(ahora)}.xlsx`;
+
+    const filas: Cell[][] = [];
+
+    // =========================================================
+    // TÍTULO
+    // =========================================================
+
+    filas.push([
+      {
+        value: `LEXIA - REPORTE DE TAREAS - ${this.fechaHora(ahora, true)}`,
+        fontWeight: 'bold',
+        fontSize: 16,
+        textColor: '#FFFFFF',
+        backgroundColor: '#0F172A',
+        align: 'center',
+        alignVertical: 'center',
+        columnSpan: 8,
+        height: 32,
+        wrap: true
+      },
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]);
+
+    // =========================================================
+    // ENCABEZADOS
+    // =========================================================
+
+    filas.push([
+      this.celdaEncabezado('Tarea'),
+      this.celdaEncabezado('Expediente'),
+      this.celdaEncabezado('Responsable'),
+      this.celdaEncabezado('Supervisor'),
+      this.celdaEncabezado('Prioridad'),
+      this.celdaEncabezado('Estado'),
+      this.celdaEncabezado('Etapa'),
+      this.celdaEncabezado('Vencimiento')
+    ]);
+
+    // =========================================================
+    // DATOS
+    // =========================================================
+
+    tareas.forEach((tarea, index) => {
+
+      const fondo =
+        index % 2 === 0
+          ? '#EEF2FF'
+          : '#F8FAFC';
+
+      filas.push([
+        this.celdaDato(
+          tarea.titulo,
+          fondo,
+          'left'
+        ),
+
+        this.celdaDato(
+          tarea.expedienteCodigo,
+          fondo,
+          'center'
+        ),
+
+        this.celdaDato(
+          tarea.responsable,
+          fondo,
+          'left'
+        ),
+
+        this.celdaDato(
+          tarea.supervisor || '—',
+          fondo,
+          'left'
+        ),
+
+        this.celdaDato(
+          this.texto(tarea.prioridad),
+          fondo,
+          'center'
+        ),
+
+        this.celdaDato(
+          this.estado(tarea.estado),
+          fondo,
+          'center'
+        ),
+
+        this.celdaDato(
+          this.texto(tarea.etapaFlujo),
+          fondo,
+          'center'
+        ),
+
+        this.celdaDato(
+          this.fechaHora(
+            new Date(tarea.fechaLimite)
+          ),
+          fondo,
+          'center'
+        )
+      ]);
+    });
+
+    // =========================================================
+    // GENERAR EXCEL
+    // =========================================================
+
+    const archivo = writeExcelFile(
+      filas,
+      {
+        sheet: 'Tareas',
+
+        columns: [
+          { width: 35 }, // Tarea
+          { width: 20 }, // Expediente
+          { width: 27 }, // Responsable
+          { width: 27 }, // Supervisor
+          { width: 14 }, // Prioridad
+          { width: 18 }, // Estado
+          { width: 20 }, // Etapa
+          { width: 22 }  // Vencimiento
+        ],
+
+        orientation: 'landscape',
+
+        stickyRowsCount: 2,
+
+        showGridLines: false
+      }
+    );
+
+    await archivo.toFile(nombreArchivo);
   }
 
-  private borde(argb: string): Partial<ExcelJS.Borders> {
+  // ===========================================================
+  // ESTILOS
+  // ===========================================================
+
+  private celdaEncabezado(texto: string): Cell {
     return {
-      top: { style: 'thin', color: { argb } }, left: { style: 'thin', color: { argb } },
-      bottom: { style: 'thin', color: { argb } }, right: { style: 'thin', color: { argb } }
+      value: texto,
+
+      fontWeight: 'bold',
+      fontSize: 11,
+
+      textColor: '#FFFFFF',
+      backgroundColor: '#6366F1',
+
+      align: 'center',
+      alignVertical: 'center',
+
+      height: 28,
+
+      wrap: true,
+
+      borderColor: '#4338CA',
+
+      borderStyle: 'thin'
     };
   }
 
-  private texto(valor: string): string {
-    return (valor || '').toLowerCase().replaceAll('_', ' ').replace(/^./, c => c.toUpperCase());
+  private celdaDato(
+    valor: string | number | null | undefined,
+    fondo: string,
+    alineacion: 'left' | 'center' | 'right'
+  ): Cell {
+
+    return {
+      value: valor ?? '',
+
+      fontSize: 10,
+
+      textColor: '#1E293B',
+
+      backgroundColor: fondo,
+
+      align: alineacion,
+
+      alignVertical: 'center',
+
+      height: 24,
+
+      wrap: true,
+
+      borderColor: '#CBD5E1',
+
+      borderStyle: 'thin'
+    };
   }
+
+  // ===========================================================
+  // TEXTO
+  // ===========================================================
+
+  private texto(valor: string | null | undefined): string {
+    if (!valor) {
+      return '';
+    }
+
+    return valor
+      .toLowerCase()
+      .replaceAll('_', ' ')
+      .replace(/^./, letra =>
+        letra.toUpperCase()
+      );
+  }
+
+  // ===========================================================
+  // ESTADOS
+  // ===========================================================
 
   private estado(valor: string): string {
+
     const estados: Record<string, string> = {
-      PENDIENTE: 'Pendiente', EN_PROCESO: 'En proceso', EN_REVISION: 'Revisión', OBSERVADA: 'Observada',
-      APROBADA: 'Aprobada', PRESENTADA: 'Presentada', COMPLETADA: 'Completada', CANCELADA: 'Cancelada', VENCIDA: 'Vencida'
+      PENDIENTE: 'Pendiente',
+      EN_PROCESO: 'En proceso',
+      EN_REVISION: 'Revisión',
+      OBSERVADA: 'Observada',
+      APROBADA: 'Aprobada',
+      PRESENTADA: 'Presentada',
+      COMPLETADA: 'Completada',
+      CANCELADA: 'Cancelada',
+      VENCIDA: 'Vencida'
     };
+
     return estados[valor] ?? this.texto(valor);
   }
 
-  private fechaHora(fecha: Date, segundos = false): string {
-    if (Number.isNaN(fecha.getTime())) return '';
-    return new Intl.DateTimeFormat('es-PE', {
-      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit',
-      ...(segundos ? { second: '2-digit' as const } : {}), hour12: false
-    }).format(fecha);
+  // ===========================================================
+  // FECHA Y HORA
+  // ===========================================================
+
+  private fechaHora(
+    fecha: Date,
+    segundos = false
+  ): string {
+
+    if (Number.isNaN(fecha.getTime())) {
+      return '';
+    }
+
+    return new Intl.DateTimeFormat(
+      'es-PE',
+      {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+
+        hour: '2-digit',
+        minute: '2-digit',
+
+        ...(segundos
+          ? {
+              second: '2-digit' as const
+            }
+          : {}),
+
+        hour12: false
+      }
+    ).format(fecha);
   }
 
+  // ===========================================================
+  // NOMBRE DEL ARCHIVO
+  // ===========================================================
+
   private archivoFecha(fecha: Date): string {
-    const p = (n: number) => String(n).padStart(2, '0');
-    return `${p(fecha.getDate())}-${p(fecha.getMonth() + 1)}-${fecha.getFullYear()}_${p(fecha.getHours())}-${p(fecha.getMinutes())}`;
+
+    const p = (numero: number) =>
+      String(numero).padStart(2, '0');
+
+    return (
+      `${p(fecha.getDate())}-` +
+      `${p(fecha.getMonth() + 1)}-` +
+      `${fecha.getFullYear()}_` +
+      `${p(fecha.getHours())}-` +
+      `${p(fecha.getMinutes())}`
+    );
   }
 }

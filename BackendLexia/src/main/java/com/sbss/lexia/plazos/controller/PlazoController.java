@@ -31,11 +31,16 @@ public class PlazoController {
             @RequestParam(required = false) Boolean requiereRevision,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
-            @RequestParam(defaultValue = "250") int limite,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaNotificacion,
+            @RequestParam(defaultValue = "20") int limite,
             @RequestParam(defaultValue = "0") int desplazamiento) {
         return service.listar(texto, expedienteId, responsableId, tipoPlazoId, estado, riesgo,
-                computo, requiereRevision, desde, hasta, limite, desplazamiento);
+                computo, requiereRevision, desde, hasta, fechaNotificacion, limite, desplazamiento);
     }
+
+    @GetMapping("/analitica")
+    @PreAuthorize("hasAuthority('PLAZO_LEER')")
+    public Analitica analitica() { return service.analitica(); }
 
     @GetMapping("/resumen")
     @PreAuthorize("hasAuthority('PLAZO_LEER')")
