@@ -40,6 +40,8 @@ TRUNCATE TABLE alertas;
 TRUNCATE TABLE plazos;
 TRUNCATE TABLE resoluciones;
 TRUNCATE TABLE actuaciones;
+TRUNCATE TABLE movimientos_financieros;
+TRUNCATE TABLE honorarios;
 TRUNCATE TABLE expediente_contrapartes;
 TRUNCATE TABLE expediente_equipo;
 TRUNCATE TABLE expedientes;
@@ -696,6 +698,58 @@ UPDATE resoluciones SET documento_id = 9 WHERE id = 5;
 
 INSERT INTO documento_etiquetas (documento_id, etiqueta_id, usuario_asignacion_id) VALUES
 (3,1,1),(3,2,1),(7,1,3),(8,5,6),(9,6,4),(1,5,1),(5,3,2);
+
+-- =============================================================================
+-- FACTURACION - los 12 honorarios del dump original
+-- =============================================================================
+-- V19__facturacion.sql rediseno esta tabla de cero y no Portable los datos que
+-- ya existian, asi que el Dashboard venia con "Ingresos del estudio" vacio y
+-- "Cuentas por cobrar" en cero. Estos son los 12 honorarios tal cual estaban en
+-- el dump (origin/feature/tareas-documentos-monitor:lexia_db.sql), con los
+-- nombres de columna del esquema actual:
+--
+--     dump viejo          ->  V19
+--     monto_total         ->  monto_pactado
+--     modalidad           ->  modalidad_cobro
+--     estado_facturacion  ->  estado_pago
+--     saldo_pendiente     ->  (GENERATED: monto_pactado - monto_pagado)
+--
+-- Los 220 500.00 se respetan uno por uno. No hay nada inventado:
+--
+--   * estado_pago = 'PENDIENTE' en los 12, porque asi estaban. Por eso
+--     monto_pagado = 0 y "Cobrado" da S/ 0.00: la tabla `pagos` del dump
+--     estaba VACIA, no se perdieron pagos.
+--   * sin fecha_vencimiento, porque el esquema viejo no tenia esa columna.
+--     Por eso "Vencido" da S/ 0.00 y "Vencidas" 0. Es el dato real, no un
+--     olvido: un honorario sin vencimiento no puede estar vencido.
+--   * movimientos_financieros queda vacio por lo mismo que `pagos`.
+--
+-- DOS AJUSTES DE INTEGRIDAD, inevitables (no son datos):
+--   1. expediente_id 11 y 12 no existen: la semilla crea 10 expedientes.
+--     Los honorarios 11 y 12 se reanclan al expediente 10. Se conservan monto,
+--     modalidad y cliente; solo cambia el expediente que los soporta.
+--   2. uuid no tiene DEFAULT (UUID()) en V19, a diferencia del resto del
+--     esquema (uuid_publico CHAR(36) DEFAULT (UUID())). Se escriben literales
+--     para que la semilla sea reproducible y el registro rastreable.
+--
+-- fecha_creacion es RELATIVA y va repartida en 5 meses: el esquema viejo no
+-- tenia columna de fecha, asi que concentrarla en el mes de creacion de la base
+-- deja la serie de ingresos con una sola barra. Sigue la politica de la
+-- cabecera de esta semilla: nada de fechas absolutas.
+INSERT INTO honorarios (id, uuid, cliente_id, expediente_id, modalidad_cobro,
+                        estado_pago, monto_pactado, monto_pagado, fecha_creacion) VALUES
+( 1,'3b7e1d44-9a26-4c18-b5f0-71e2d4c9a801',1, 1,'Fijo',        'PENDIENTE',12000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 2,'6c2f8a91-4d73-4b05-a8e6-93c5f1b2d702',2, 2,'Contingencia','PENDIENTE',35000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 3,'91d4e7c6-2a58-4f93-8b1d-05e6c3a7f403',3, 3,'Fijo',        'PENDIENTE', 8000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 4,'28a6b3f5-7c14-4e82-9d4a-b1f7c6e2d504',4, 4,'Mixto',       'PENDIENTE',60000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
+( 5,'7e3b9d12-5c68-4a47-83f1-0a9d2b6e8c05',5, 5,'Fijo',        'PENDIENTE', 6000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
+( 6,'b5d2f478-1e93-4c06-a7b8-64f1a3d9e706',6, 6,'Contingencia','PENDIENTE',20000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
+( 7,'0d8c6e59-4b27-4f15-8e3a-2c9b7f1d5807',7, 7,'Fijo',        'PENDIENTE', 5000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
+( 8,'f49a1c83-6e52-4b09-97d4-83a1f6c2b908',8, 8,'Mixto',       'PENDIENTE', 9500.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
+( 9,'5a7e3c16-9d40-4e88-b0f3-1c6d4a8e2909',2, 9,'Fijo',        'PENDIENTE',15000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
+(10,'8c2d4f71-3a96-4b15-9e07-72b5a1c3d610',4,10,'Contingencia','PENDIENTE',18000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
+(11,'2f6b8e04-7d51-4c73-a9e8-40d1b7c6f511',1,10,'Fijo',        'PENDIENTE',10000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
+(12,'d1937a2c-5e84-4b06-9f31-8a5c2d6b3e12',6,10,'Mixto',       'PENDIENTE',22000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH));
 
 -- =============================================================================
 -- COMENTARIOS Y NOTIFICACIONES

@@ -62,6 +62,11 @@ Desktop.ini
 # primera persona que siga esa recomendacion sube su contrasena al repo.
 .env
 .env.*
+# Salen las plantillas: no traen contrasena y sin ellas nadie sabe que
+# variables hay que rellenar.
+!.env.ejemplo
+!.env.example
+!.env.sample
 application-local.properties
 application-local.yml
 

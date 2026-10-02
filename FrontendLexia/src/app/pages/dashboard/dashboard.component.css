@@ -1,4 +1,4 @@
-/* ==========================================================
+﻿/* ==========================================================
    LAYOUT BASE
 ========================================================= */
 
@@ -36,7 +36,14 @@
   border-bottom: 1px solid #eaedf3;
   position: sticky;
   top: 0;
-  z-index: 50;
+
+  /* Por encima de .sidebar (panel.component.css, z-index 100).
+     `position: sticky` + `z-index` crea un contexto de apilamiento, asi que
+     este numero es el TECHO de todo lo que cuelga de aqui: los popovers y su
+     backdrop no pueden pasar de el, diga lo que diga su propio z-index. Con
+     50, el backdrop quedaba encerrado por debajo del menu lateral y el clic
+     fuera para cerrar el panel no llegaba nunca. */
+  z-index: 120;
 }
 
 /* BUSCADOR GENERAL */
@@ -439,6 +446,60 @@
   flex: 1;
 }
 
+/* Estado vacio de las listas y graficas del dashboard.
+   Se muestra cuando la API responde sin filas, en vez de inventar datos. */
+.empty-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 26px 18px;
+  text-align: center;
+  color: #98a1ae;
+}
+
+.empty-hint-emoji {
+  font-size: 20px;
+  line-height: 1;
+  opacity: 0.65;
+}
+
+.empty-hint strong {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6a7380;
+}
+
+.empty-hint p {
+  margin: 0;
+  max-width: 210px;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+/* Las graficas de barras centradas, para que el hueco quede alineado. */
+.chart-empty {
+  min-height: 148px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  color: #98a1ae;
+}
+
+.chart-empty strong {
+  font-size: 10px;
+  color: #6a7380;
+}
+
+.chart-empty span {
+  max-width: 220px;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
 .item-entry {
   display: flex;
   flex-direction: column;
@@ -601,7 +662,7 @@
 }
 
 /* ==========================================================
-   FILA INFERIOR: 3 GRÁFICOS
+   FILA INFERIOR: 3 GRÃFICOS
 ========================================================= */
 
 .charts-grid {
@@ -622,7 +683,7 @@
   min-height: 240px;
 }
 
-/* GRÁFICO 1: DONUT */
+/* GRÃFICO 1: DONUT */
 .donut-chart-container {
   display: flex;
   align-items: center;
@@ -699,7 +760,7 @@
   color: #0f172a;
 }
 
-/* GRÁFICO 2: BARRAS VERTICALES */
+/* GRÃFICO 2: BARRAS VERTICALES */
 .bar-chart-container {
   display: flex;
   gap: 8px;
@@ -784,7 +845,7 @@
   white-space: nowrap;
 }
 
-/* GRÁFICO 3: CARGA DE TRABAJO */
+/* GRÃFICO 3: CARGA DE TRABAJO */
 .team-carga-header {
   display: flex;
   justify-content: space-between;
@@ -877,75 +938,89 @@
    TEMA OSCURO
 ========================================================= */
 
-.tema-oscuro {
+:host-context(.tema-oscuro-global) {
   background: #0b0f19;
   color: #e2e8f0;
 }
 
-.tema-oscuro .main-content {
+:host-context(.tema-oscuro-global) .main-content {
   background: #0b0f19;
 }
 
-.tema-oscuro .topbar {
+:host-context(.tema-oscuro-global) .topbar {
   background: #111827;
   border-bottom-color: #1f2937;
 }
 
-.tema-oscuro .buscador-bar {
+:host-context(.tema-oscuro-global) .buscador-bar {
   background: #1f2937;
   border-color: #374151;
 }
 
-.tema-oscuro .input-busq {
+:host-context(.tema-oscuro-global) .input-busq {
   color: #f9fafb;
 }
 
-.tema-oscuro .kbd-badge {
+:host-context(.tema-oscuro-global) .kbd-badge {
   background: #374151;
   border-color: #4b5563;
   color: #9ca3af;
 }
 
-.tema-oscuro .buscador-dropdown {
+:host-context(.tema-oscuro-global) .buscador-dropdown {
   background: #111827;
   border-color: #374151;
 }
 
-.tema-oscuro .welcome-header h1 {
+:host-context(.tema-oscuro-global) .welcome-header h1 {
   color: #f9fafb;
 }
 
-.tema-oscuro .kpi-card,
-.tema-oscuro .card-column,
-.tema-oscuro .chart-card {
+:host-context(.tema-oscuro-global) .kpi-card,
+:host-context(.tema-oscuro-global) .card-column,
+:host-context(.tema-oscuro-global) .chart-card {
   background: #111827;
   border-color: #1f2937;
 }
 
-.tema-oscuro .kpi-number,
-.tema-oscuro .column-header h2,
-.tema-oscuro .entry-code,
-.tema-oscuro .agenda-hora,
-.tema-oscuro .agenda-titulo,
-.tema-oscuro .donut-number,
-.tema-oscuro .legend-val,
-.tema-oscuro .bar-value-top,
-.tema-oscuro .team-name,
-.tema-oscuro .team-count,
-.tema-oscuro .studio-name {
+:host-context(.tema-oscuro-global) .kpi-number,
+:host-context(.tema-oscuro-global) .column-header h2,
+:host-context(.tema-oscuro-global) .entry-code,
+:host-context(.tema-oscuro-global) .agenda-hora,
+:host-context(.tema-oscuro-global) .agenda-titulo,
+:host-context(.tema-oscuro-global) .donut-number,
+:host-context(.tema-oscuro-global) .legend-val,
+:host-context(.tema-oscuro-global) .bar-value-top,
+:host-context(.tema-oscuro-global) .team-name,
+:host-context(.tema-oscuro-global) .team-count,
+:host-context(.tema-oscuro-global) .studio-name {
   color: #f9fafb;
 }
 
-.tema-oscuro .item-entry,
-.tema-oscuro .agenda-entry {
+:host-context(.tema-oscuro-global) .item-entry,
+:host-context(.tema-oscuro-global) .agenda-entry {
   border-bottom-color: #1f2937;
 }
 
-.tema-oscuro .grid-line {
+:host-context(.tema-oscuro-global) .empty-hint,
+:host-context(.tema-oscuro-global) .chart-empty {
+  color: #7d8896;
+}
+
+:host-context(.tema-oscuro-global) .empty-hint strong,
+:host-context(.tema-oscuro-global) .chart-empty strong {
+  color: #a9b3c1;
+}
+
+:host-context(.tema-oscuro-global) .empty-hint-emoji {
+  opacity: 0.5;
+}
+
+:host-context(.tema-oscuro-global) .grid-line {
   background: #1f2937;
 }
 
-.tema-oscuro .team-bar-track {
+:host-context(.tema-oscuro-global) .team-bar-track {
   background: #1f2937;
 }
 
@@ -991,7 +1066,7 @@
 }
 
 /* ==========================================================
-   ICONOGRAFÍA UNIFICADA DEL DASHBOARD
+   ICONOGRAFíA UNIFICADA DEL DASHBOARD
 ========================================================= */
 .dashboard-icon-sprite {
   position: absolute;
@@ -1090,7 +1165,7 @@
 }
 
 /* ==========================================================
-   SEGUNDA FILA DE GRÁFICOS
+   SEGUNDA FILA DE GRÃFICOS
 ========================================================= */
 .second-row {
   margin-top: 16px;
@@ -1134,7 +1209,7 @@
   background: #fef2f2;
 }
 
-/* INGRESOS: gráfico vertical */
+/* INGRESOS: grÃ¡fico vertical */
 .ingresos-chart-wrap {
   min-height: 172px;
   display: flex;
@@ -1205,7 +1280,7 @@
   font-weight: 600;
 }
 
-/* CUENTAS POR COBRAR: gráfico horizontal */
+/* CUENTAS POR COBRAR: grÃ¡fico horizontal */
 .cobranza-chart {
   display: flex;
   flex-direction: column;
@@ -1310,15 +1385,36 @@
   font-size: 12px;
 }
 
-/* Ajustes de los nuevos gráficos en tema oscuro del dashboard */
-.tema-oscuro .chart-sub,
-.tema-oscuro .ingreso-val,
-.tema-oscuro .ingreso-mes,
-.tema-oscuro .cobranza-row-head span {
+/*
+Los dos badges del pie de "Cuentas por cobrar" son superficies de color
+claro (#fffbeb y #fef2f2) con texto tambien oscuro. En tema oscuro se
+quedaban igual: dos parches crema y rosado al pie de una tarjeta negra, y
+la unica superficie clara que quedaba en el dashboard entero.
+
+El fondo baja a #1f2937 y el texto sube a un ambar y un rojo claros, que
+se leen sobre el gris del pie. Se eligieron los lados claros de la misma
+familia de color que ya usaba cada badge, no los mismos tonos, porque un
+#92400e sobre #1f2937 no se lee.
+*/
+:host-context(.tema-oscuro-global) .cobranza-footer span {
+  background: #1f2937;
+  color: #fbbf24;
+}
+
+:host-context(.tema-oscuro-global) .cobranza-footer .cobranza-risk {
+  background: #1f2937;
+  color: #fca5a5;
+}
+
+/* Ajustes de los nuevos grÃ¡ficos en tema oscuro del dashboard */
+:host-context(.tema-oscuro-global) .chart-sub,
+:host-context(.tema-oscuro-global) .ingreso-val,
+:host-context(.tema-oscuro-global) .ingreso-mes,
+:host-context(.tema-oscuro-global) .cobranza-row-head span {
   color: #94a3b8;
 }
 
-.tema-oscuro .ingresos-bars {
+:host-context(.tema-oscuro-global) .ingresos-bars {
   border-bottom-color: #334155;
   background-image: repeating-linear-gradient(
     to top,
@@ -1328,33 +1424,33 @@
   );
 }
 
-.tema-oscuro .ingreso-bar-track,
-.tema-oscuro .cobranza-track {
+:host-context(.tema-oscuro-global) .ingreso-bar-track,
+:host-context(.tema-oscuro-global) .cobranza-track {
   background: #1f2937;
 }
 
-.tema-oscuro .cobranza-total {
+:host-context(.tema-oscuro-global) .cobranza-total {
   background: #0f172a;
   border-color: #334155;
 }
 
-.tema-oscuro .cobranza-total strong,
-.tema-oscuro .cobranza-row-head strong {
+:host-context(.tema-oscuro-global) .cobranza-total strong,
+:host-context(.tema-oscuro-global) .cobranza-row-head strong {
   color: #f8fafc;
 }
 
-.tema-oscuro .team-detail-tag {
+:host-context(.tema-oscuro-global) .team-detail-tag {
   background: #312e81;
   color: #c7d2fe;
 }
 
-.tema-oscuro .team-detail-tag.tag-red {
+:host-context(.tema-oscuro-global) .team-detail-tag.tag-red {
   background: #450a0a;
   color: #fecaca;
 }
 
 /* ==========================================================
-   TOPBAR INTERACTIVO — POPOVERS, PERFIL Y MENSAJES
+   TOPBAR INTERACTIVO â€” POPOVERS, PERFIL Y MENSAJES
    Mantiene intacto el layout base del dashboard.
 ========================================================= */
 
@@ -1380,7 +1476,7 @@
 .popover-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 95;
+  z-index: 200;
   background: transparent;
 }
 
@@ -1388,7 +1484,7 @@
   position: absolute;
   top: calc(100% + 10px);
   right: 0;
-  z-index: 110;
+  z-index: 210;
   overflow: hidden;
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -1560,7 +1656,7 @@
 
 .notif-indicator.sev-alta,
 .notif-indicator.sev-critica,
-.notif-indicator.sev-crítica {
+.notif-indicator.sev-critica {
   background: #ef4444;
 }
 
@@ -1722,12 +1818,13 @@
   color: #b91c1c;
 }
 
-/* MENSAJERÍA INTERNA */
+/* MENSAJERIA INTERNA */
 .chat-modal {
   position: fixed;
   top: 68px;
   right: 28px;
-  z-index: 115;
+  z-index: 210;
+  pointer-events: none;
   width: min(720px, calc(100vw - 56px));
   height: min(500px, calc(100vh - 92px));
   overflow: hidden;
@@ -1742,6 +1839,12 @@
   height: 100%;
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
+
+  /* El contenedor .chat-modal cubre toda la pantalla y lleva
+     `pointer-events: none` para que el clic de "cerrar" lo recoja el backdrop
+     de debajo. El hijo tiene que devolverlos o el formulario de mensaje
+     dejaria de responder. */
+  pointer-events: auto;
 }
 
 .chat-contacts-col {
@@ -2048,149 +2151,149 @@
 .icon-esp { color: #d97706; }
 
 /* TEMA OSCURO DE LOS ELEMENTOS FLOTANTES */
-.tema-oscuro .popover-panel,
-.tema-oscuro .chat-modal {
+:host-context(.tema-oscuro-global) .popover-panel,
+:host-context(.tema-oscuro-global) .chat-modal {
   background: #111827;
   border-color: #334155;
   box-shadow: 0 20px 55px rgba(0, 0, 0, .42);
 }
 
-.tema-oscuro .popover-header,
-.tema-oscuro .chat-contacts-header,
-.tema-oscuro .thread-header,
-.tema-oscuro .thread-input-row {
+:host-context(.tema-oscuro-global) .popover-header,
+:host-context(.tema-oscuro-global) .chat-contacts-header,
+:host-context(.tema-oscuro-global) .thread-header,
+:host-context(.tema-oscuro-global) .thread-input-row {
   background: #111827;
   border-color: #334155;
 }
 
-.tema-oscuro .popover-title-row strong,
-.tema-oscuro .perfil-user-details strong,
-.tema-oscuro .chat-contacts-header strong,
-.tema-oscuro .thread-user strong,
-.tema-oscuro .contact-name {
+:host-context(.tema-oscuro-global) .popover-title-row strong,
+:host-context(.tema-oscuro-global) .perfil-user-details strong,
+:host-context(.tema-oscuro-global) .chat-contacts-header strong,
+:host-context(.tema-oscuro-global) .thread-user strong,
+:host-context(.tema-oscuro-global) .contact-name {
   color: #f8fafc;
 }
 
-.tema-oscuro .notif-card-item {
+:host-context(.tema-oscuro-global) .notif-card-item {
   background: #111827;
   border-bottom-color: #263244;
 }
 
-.tema-oscuro .notif-card-item:hover {
+:host-context(.tema-oscuro-global) .notif-card-item:hover {
   background: #172033;
 }
 
-.tema-oscuro .notif-card-item.no-leida {
+:host-context(.tema-oscuro-global) .notif-card-item.no-leida {
   background: rgba(124, 58, 237, .09);
 }
 
-.tema-oscuro .notif-headline strong,
-.tema-oscuro .chat-bubble p {
+:host-context(.tema-oscuro-global) .notif-headline strong,
+:host-context(.tema-oscuro-global) .chat-bubble p {
   color: #e5e7eb;
 }
 
-.tema-oscuro .notif-desc,
-.tema-oscuro .notif-time,
-.tema-oscuro .perfil-email,
-.tema-oscuro .contact-last-msg,
-.tema-oscuro .thread-status {
+:host-context(.tema-oscuro-global) .notif-desc,
+:host-context(.tema-oscuro-global) .notif-time,
+:host-context(.tema-oscuro-global) .perfil-email,
+:host-context(.tema-oscuro-global) .contact-last-msg,
+:host-context(.tema-oscuro-global) .thread-status {
   color: #94a3b8;
 }
 
-.tema-oscuro .perfil-card-header {
+:host-context(.tema-oscuro-global) .perfil-card-header {
   background: linear-gradient(135deg, #172033, #111827 72%);
   border-bottom-color: #334155;
 }
 
-.tema-oscuro .perfil-role-tag {
+:host-context(.tema-oscuro-global) .perfil-role-tag {
   background: rgba(99, 102, 241, .16);
   color: #c7d2fe;
 }
 
-.tema-oscuro .perfil-menu-item {
+:host-context(.tema-oscuro-global) .perfil-menu-item {
   color: #cbd5e1;
 }
 
-.tema-oscuro .perfil-menu-item:hover {
+:host-context(.tema-oscuro-global) .perfil-menu-item:hover {
   background: #172033;
   color: #ffffff;
 }
 
-.tema-oscuro .perfil-divider {
+:host-context(.tema-oscuro-global) .perfil-divider {
   background: #334155;
 }
 
-.tema-oscuro .btn-logout {
+:host-context(.tema-oscuro-global) .btn-logout {
   color: #fca5a5;
 }
 
-.tema-oscuro .btn-logout:hover {
+:host-context(.tema-oscuro-global) .btn-logout:hover {
   background: rgba(239, 68, 68, .1);
   color: #fecaca;
 }
 
-.tema-oscuro .chat-contacts-col {
+:host-context(.tema-oscuro-global) .chat-contacts-col {
   background: #0f172a;
   border-right-color: #334155;
 }
 
-.tema-oscuro .contact-item {
+:host-context(.tema-oscuro-global) .contact-item {
   border-bottom-color: #263244;
 }
 
-.tema-oscuro .contact-item:hover {
+:host-context(.tema-oscuro-global) .contact-item:hover {
   background: #172033;
 }
 
-.tema-oscuro .contact-item.activo {
+:host-context(.tema-oscuro-global) .contact-item.activo {
   background: rgba(99, 102, 241, .14);
 }
 
-.tema-oscuro .contact-avatar {
+:host-context(.tema-oscuro-global) .contact-avatar {
   background: rgba(139, 92, 246, .16);
   color: #c4b5fd;
 }
 
-.tema-oscuro .online-dot {
+:host-context(.tema-oscuro-global) .online-dot {
   border-color: #0f172a;
 }
 
-.tema-oscuro .chat-thread-col {
+:host-context(.tema-oscuro-global) .chat-thread-col {
   background: #111827;
 }
 
-.tema-oscuro .thread-messages {
+:host-context(.tema-oscuro-global) .thread-messages {
   background: #0b0f19;
 }
 
-.tema-oscuro .chat-bubble {
+:host-context(.tema-oscuro-global) .chat-bubble {
   background: #172033;
   border-color: #334155;
 }
 
-.tema-oscuro .chat-bubble-row.mio .chat-bubble {
+:host-context(.tema-oscuro-global) .chat-bubble-row.mio .chat-bubble {
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   border-color: #6366f1;
 }
 
-.tema-oscuro .chat-bubble-row.mio .chat-bubble p {
+:host-context(.tema-oscuro-global) .chat-bubble-row.mio .chat-bubble p {
   color: #ffffff;
 }
 
-.tema-oscuro .chat-input {
+:host-context(.tema-oscuro-global) .chat-input {
   background: #0f172a;
   border-color: #334155;
   color: #f8fafc;
 }
 
-.tema-oscuro .chip-match {
+:host-context(.tema-oscuro-global) .chip-match {
   background: #1e293b;
   color: #cbd5e1;
 }
 
-.tema-oscuro .buscador-vacio,
-.tema-oscuro .busq-grupo-conteo,
-.tema-oscuro .busq-flecha {
+:host-context(.tema-oscuro-global) .buscador-vacio,
+:host-context(.tema-oscuro-global) .busq-grupo-conteo,
+:host-context(.tema-oscuro-global) .busq-flecha {
   color: #94a3b8;
 }
 

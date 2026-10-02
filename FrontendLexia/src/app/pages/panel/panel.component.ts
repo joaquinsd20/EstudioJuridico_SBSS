@@ -25,6 +25,13 @@ export class PanelComponent {
 
   readonly temaOscuro = this.tema.oscuro;
 
+  /**
+   * El selector de tema vive aqui y no en el dashboard. El sidebar es el
+   * unico elemento presente en los 16 modulos, asi que es el unico sitio
+   * desde el que se puede cambiar el tema sin volver al dashboard.
+   */
+  readonly tema = inject(TemaService);
+
   /** Usuario en sesion, para pintar nombre/rol reales en el sidebar. */
   readonly usuario = this.auth.usuario;
 

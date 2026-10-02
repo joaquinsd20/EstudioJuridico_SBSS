@@ -1,4 +1,4 @@
-<div class="layout-wrapper" [class.tema-oscuro]="temaOscuro()">
+<div class="layout-wrapper">
 
   <svg class="dashboard-icon-sprite" aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none">
     <symbol id="lexia-i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></symbol>
@@ -150,6 +150,12 @@
                       <p class="notif-desc">{{ n.mensaje }}</p>
                     </div>
                   </div>
+                } @empty {
+                  <div class="empty-hint">
+                    <span class="empty-hint-emoji">🔔</span>
+                    <strong>Sin novedades</strong>
+                    <p>No tienes notificaciones pendientes. Aquí aparecerán las resoluciones y plazos nuevos.</p>
+                  </div>
                 }
               </div>
             </div>
@@ -190,9 +196,9 @@
                       >
                         <div class="contact-avatar-wrap">
                           <span class="contact-avatar">{{ c.avatar }}</span>
-                          @if (c.enLinea) {
-                            <span class="online-dot" title="En línea"></span>
-                          }
+                          <!-- El puntito de "en linea" no se pinta: no hay
+                                  presencia en el backend, asi que siempre
+                                  saldria apagado y no aportaria nada. -->
                         </div>
                         <div class="contact-meta">
                           <div class="contact-top">
@@ -201,7 +207,7 @@
                               <span class="chat-unread-badge">{{ c.noLeidos }}</span>
                             }
                           </div>
-                          <span class="contact-last-msg">{{ c.ultimoMensaje }}</span>
+                          <span class="contact-last-msg">{{ c.ultimoMensaje || 'Aún no hay mensajes' }}</span>
                         </div>
                       </div>
                     }
@@ -216,7 +222,12 @@
                         <span class="contact-avatar sm">{{ contacto.avatar }}</span>
                         <div>
                           <strong>{{ contacto.nombre }}</strong>
-                          <span class="thread-status"><span class="presence-dot" [class.online]="contacto.enLinea"></span>{{ contacto.enLinea ? 'En línea' : 'Desconectado' }} · {{ contacto.rol }}</span>
+                          <!-- Solo el cargo, que viene del backend. El "en linea"
+                               no se muestra porque no hay presencia: se
+                               pondria "desconectado" a todos y "en linea" a
+                               ninguno, que es informacion inventada. Si se
+                               quiere, hace falta un /usuarios/{id}/presencia. -->
+                          <span class="thread-status">{{ contacto.rol || 'Colega del estudio' }}</span>
                         </div>
                       </div>
                       <button type="button" class="btn-close-chat" (click)="mensajesAbierto.set(false)">✕</button>
@@ -229,6 +240,12 @@
                             <p>{{ msg.texto }}</p>
                             <span class="chat-time">{{ msg.fechaHora }}</span>
                           </div>
+                        </div>
+                      } @empty {
+                        <div class="empty-hint">
+                          <span class="empty-hint-emoji">✉️</span>
+                          <strong>Conversación vacía</strong>
+                          <p>Escribe el primer mensaje para {{ contacto.nombre }}. Solo lo ustedes dos pueden verlo.</p>
                         </div>
                       }
                     </div>
@@ -244,6 +261,12 @@
                       <button type="button" class="btn-send" (click)="enviarMensaje()">
                         <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ui-icon send-icon" aria-hidden="true"><use href="#lexia-i-send"></use></svg>Enviar
                       </button>
+                    </div>
+                  } @else {
+                    <div class="empty-hint">
+                      <span class="empty-hint-emoji">💬</span>
+                      <strong>Elige una conversación</strong>
+                      <p>Selecciona un contacto de la lista para ver el historial y escribirle.</p>
                     </div>
                   }
                 </div>
@@ -418,6 +441,12 @@
                 {{ item.alerta }}
               </div>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">✓</span>
+              <strong>Nada requiere atención</strong>
+              <p>Aquí aparecerán los expedientes críticos y los que llevan más de 30 días sin movimiento.</p>
+            </div>
           }
         </div>
 
@@ -443,6 +472,12 @@
               <div class="entry-materia">{{ res.numeroResolucion }}</div>
               <div class="entry-fecha">{{ res.fechaHora }}</div>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📑</span>
+              <strong>Sin resoluciones nuevas</strong>
+              <p>No hay resoluciones registradas desde tu última revisión.</p>
+            </div>
           }
         </div>
 
@@ -471,6 +506,12 @@
                 {{ ev.etiqueta }}
               </span>
             </a>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📅</span>
+              <strong>Sin eventos para hoy</strong>
+              <p>No tienes audiencias, reuniones ni vencimientos programados para la fecha de hoy.</p>
+            </div>
           }
         </div>
 
@@ -494,6 +535,7 @@
         </div>
 
         <div class="donut-chart-container">
+          @if (donutSegmentos().length) {
           <div class="donut-svg-wrap">
             <svg class="donut-svg" viewBox="0 0 180 180" aria-hidden="true">
               <circle cx="90" cy="90" r="65" fill="none" stroke="#f1f5f9" stroke-width="26" />
@@ -526,6 +568,13 @@
               </div>
             }
           </div>
+          } @else {
+            <div class="chart-empty">
+              <span class="empty-hint-emoji">📊</span>
+              <strong>Sin expedientes por estado</strong>
+              <span>Aquí aparecerá la distribución cuando se carguen los expedientes.</span>
+            </div>
+          }
         </div>
       </div>
 
@@ -538,13 +587,9 @@
 
         <div class="bar-chart-container">
           <div class="chart-y-axis">
-            <span>12</span>
-            <span>10</span>
-            <span>8</span>
-            <span>6</span>
-            <span>4</span>
-            <span>2</span>
-            <span>0</span>
+            @for (t of especialidadEscala().ticks; track $index) {
+              <span>{{ t }}</span>
+            }
           </div>
 
           <div class="chart-bars-wrap">
@@ -563,10 +608,16 @@
                   <div class="bar-track">
                     <div
                       class="bar-fill"
-                      [style.height.%]="(b.valor / 12) * 100"
+                      [style.height.%]="especialidadBarras().length ? (b.valor / especialidadEscala().maximo) * 100 : 0"
                     ></div>
                   </div>
                   <span class="bar-label-bottom">{{ b.nombre }}</span>
+                </div>
+              } @empty {
+                <div class="chart-empty">
+                  <span class="empty-hint-emoji">📅</span>
+                  <strong>Sin datos por especialidad</strong>
+                  <span>No hay expedientes clasificados por especialidad.</span>
                 </div>
               }
             </div>
@@ -601,6 +652,12 @@
               </div>
               <span class="team-count">{{ c.expedientes }}</span>
               <span class="team-percent">{{ c.porcentaje }}%</span>
+            </div>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">⚖️</span>
+              <strong>Sin carga asignada</strong>
+              <p>No hay expedientes activos repartidos entre los abogados del equipo.</p>
             </div>
           }
         </div>
@@ -638,6 +695,12 @@
               <span class="team-count" [class.text-red]="t.esVencida">{{ t.total }}</span>
               <span class="team-detail-tag" [class.tag-red]="t.esVencida">{{ t.detalle }}</span>
             </div>
+          } @empty {
+            <div class="empty-hint">
+              <span class="empty-hint-emoji">📝</span>
+              <strong>Sin tareas activas</strong>
+              <p>No hay tareas abiertas ni vencidas asignadas al equipo.</p>
+            </div>
           }
         </div>
       </div>
@@ -662,6 +725,12 @@
                   ></div>
                 </div>
                 <span class="ingreso-mes">{{ ing.mes }}</span>
+              </div>
+            } @empty {
+              <div class="chart-empty">
+                <span class="empty-hint-emoji">📈</span>
+                <strong>Sin facturación registrada</strong>
+                <span>No hay honorarios facturados en los últimos 6 meses.</span>
               </div>
             }
           </div>
@@ -691,7 +760,7 @@
               <div class="cobranza-track">
                 <div
                   class="cobranza-fill cobrado"
-                  [style.width.%]="(cobranzaVista().cobrado / cobranzaVista().facturado) * 100"
+                  [style.width.%]="porcentaje(cobranzaVista().cobrado)"
                 ></div>
               </div>
             </div>
@@ -704,7 +773,7 @@
               <div class="cobranza-track">
                 <div
                   class="cobranza-fill pendiente"
-                  [style.width.%]="(cobranzaVista().pendiente / cobranzaVista().facturado) * 100"
+                  [style.width.%]="porcentaje(cobranzaVista().pendiente)"
                 ></div>
               </div>
             </div>
@@ -717,7 +786,7 @@
               <div class="cobranza-track">
                 <div
                   class="cobranza-fill vencido"
-                  [style.width.%]="(cobranzaVista().vencido / cobranzaVista().facturado) * 100"
+                  [style.width.%]="porcentaje(cobranzaVista().vencido)"
                 ></div>
               </div>
             </div>

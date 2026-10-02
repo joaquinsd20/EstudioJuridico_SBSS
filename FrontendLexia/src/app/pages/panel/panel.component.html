@@ -184,6 +184,22 @@
   <!-- PARTE INFERIOR -->
   <div class="sidebar-bottom">
 
+    <!-- TEMA CLARO / OSCURO: disponible en todos los modulos -->
+    <button
+      class="theme-button"
+      type="button"
+      (click)="tema.alternar()"
+      [attr.aria-label]="tema.etiqueta()"
+      [attr.aria-pressed]="tema.oscuro()"
+      [title]="tema.etiqueta()"
+    >
+      <span class="theme-switch" [class.active]="tema.oscuro()" aria-hidden="true">
+        <span class="theme-switch-knob"></span>
+      </span>
+      <span class="theme-toggle-text">Tema {{ tema.oscuro() ? 'claro' : 'oscuro' }}</span>
+    </button>
+
+
     <div class="user-profile">
 
       <div class="avatar">
