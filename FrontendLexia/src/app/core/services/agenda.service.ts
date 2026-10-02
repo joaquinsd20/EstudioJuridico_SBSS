@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   AgendaCatalogos,
@@ -16,8 +16,9 @@ import {
 export class AgendaService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/agenda`;
+  private catalogosCache$?: Observable<AgendaCatalogos>;
 
-  listar(filtro: AgendaFiltro): Observable<EventoAgenda[]> {
+  listar(filtro: AgendaFiltro, limite = 500, desplazamiento = 0): Observable<EventoAgenda[]> {
     let params = new HttpParams()
       .set('desde', filtro.desde)
       .set('hasta', filtro.hasta);
@@ -27,6 +28,8 @@ export class AgendaService {
     if (filtro.estado) params = params.set('estado', filtro.estado);
     if (filtro.expedienteId) params = params.set('expedienteId', String(filtro.expedienteId));
     if (filtro.participanteId) params = params.set('participanteId', String(filtro.participanteId));
+    params = params.set('limite', String(Math.max(1, Math.min(limite, 500))));
+    params = params.set('desplazamiento', String(Math.max(0, desplazamiento)));
     return this.http.get<EventoAgenda[]>(this.base, { params });
   }
 
@@ -35,7 +38,11 @@ export class AgendaService {
   }
 
   catalogos(): Observable<AgendaCatalogos> {
-    return this.http.get<AgendaCatalogos>(`${this.base}/catalogos`);
+    if (!this.catalogosCache$) {
+      this.catalogosCache$ = this.http.get<AgendaCatalogos>(`${this.base}/catalogos`)
+        .pipe(shareReplay({ bufferSize: 1, refCount: true }));
+    }
+    return this.catalogosCache$;
   }
 
   detalle(uuid: string): Observable<EventoAgendaDetalle> {

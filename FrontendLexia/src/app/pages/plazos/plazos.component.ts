@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { finalize, forkJoin } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
 import {
   CalculoPlazo,
   EstadoPlazo,
   OrigenPlazo,
   Plazo,
+  PlazoAnalitica,
   PlazoCatalogos,
   PlazoDetalle,
   PlazoFiltro,
@@ -44,7 +45,8 @@ interface EvolucionMes {
   standalone: true,
   imports: [CommonModule, FormsModule, PanelComponent],
   templateUrl: './plazos.component.html',
-  styleUrl: './plazos.component.css'
+  styleUrl: './plazos.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PlazosComponent implements OnInit, OnDestroy {
   private readonly plazoService = inject(PlazoService);
@@ -90,6 +92,16 @@ export class PlazosComponent implements OnInit, OnDestroy {
   };
   calculo: CalculoPlazo | null = null;
 
+  readonly tamanosPagina = [10, 20, 40, 100];
+  pagina = 0;
+  tamanoPagina = 20;
+  haySiguiente = false;
+
+  analitica: PlazoAnalitica = { semanas: [], evolucion: [] };
+
+  private readonly destruir$ = new Subject<void>();
+  private readonly filtroTexto$ = new Subject<string>();
+
   // Filtros visibles de la interfaz original.
   filtroTipoPlazoId: number | null = null;
   filtroJuzgado = '';
@@ -106,7 +118,10 @@ export class PlazosComponent implements OnInit, OnDestroy {
     computo: '',
     requiereRevision: null,
     desde: '',
-    hasta: ''
+    hasta: '',
+    fechaNotificacion: '',
+    limite: this.tamanoPagina,
+    desplazamiento: 0
   };
 
   formulario: PlazoGuardar = this.formularioVacio();
@@ -120,18 +135,31 @@ export class PlazosComponent implements OnInit, OnDestroy {
   private mensajeTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
+    this.filtroTexto$
+      .pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destruir$))
+      .subscribe(() => this.aplicarFiltros(true));
+
     if (this.puedeLeer) this.cargarInicial();
   }
 
   ngOnDestroy(): void {
+    this.destruir$.next();
+    this.destruir$.complete();
     if (this.mensajeTimer) clearTimeout(this.mensajeTimer);
   }
 
+  onFiltroTextoInput(): void {
+    this.filtroTexto$.next(this.filtroJuzgado.trim());
+  }
+
   cargarInicial(): void {
+    this.pagina = 0;
+    this.sincronizarFiltros();
     this.cargando = true;
     forkJoin({
       plazos: this.plazoService.listar(this.filtros),
       resumen: this.plazoService.resumen(),
+      analitica: this.plazoService.analitica(),
       catalogos: this.plazoService.catalogos()
     }).pipe(finalize(() => {
       this.cargando = false;
@@ -139,7 +167,9 @@ export class PlazosComponent implements OnInit, OnDestroy {
     })).subscribe({
       next: r => {
         this.plazos = r.plazos;
+        this.haySiguiente = r.plazos.length === this.tamanoPagina;
         this.resumen = r.resumen;
+        this.analitica = r.analitica;
         this.catalogos = r.catalogos;
         const primero = this.plazosVista[0];
         if (primero) this.seleccionarPlazo(primero, false);
@@ -148,12 +178,53 @@ export class PlazosComponent implements OnInit, OnDestroy {
     });
   }
 
-  aplicarFiltros(): void {
-    this.filtros.tipoPlazoId = this.filtroTipoPlazoId;
-    this.filtros.texto = this.filtroJuzgado.trim();
-    this.filtros.desde = this.filtroFechaVencimiento;
-    this.filtros.hasta = this.filtroFechaVencimiento;
+  aplicarFiltros(reiniciarPagina = true): void {
+    if (reiniciarPagina) this.pagina = 0;
+    this.sincronizarFiltros();
+    this.cargarPagina();
+  }
 
+  limpiarFiltros(): void {
+    this.filtroTipoPlazoId = null;
+    this.filtroJuzgado = '';
+    this.filtroFechaNotificacion = '';
+    this.filtroFechaVencimiento = '';
+    this.pagina = 0;
+    this.aplicarFiltros(false);
+  }
+
+  cambiarTamanoPagina(valor: number | string): void {
+    this.tamanoPagina = Number(valor) || 20;
+    this.pagina = 0;
+    this.aplicarFiltros(false);
+  }
+
+  paginaAnterior(): void {
+    if (this.pagina === 0 || this.cargando) return;
+    this.pagina--;
+    this.aplicarFiltros(false);
+  }
+
+  paginaSiguiente(): void {
+    if (!this.haySiguiente || this.cargando) return;
+    this.pagina++;
+    this.aplicarFiltros(false);
+  }
+
+  private sincronizarFiltros(): void {
+    this.filtros = {
+      ...this.filtros,
+      tipoPlazoId: this.filtroTipoPlazoId,
+      texto: this.filtroJuzgado.trim(),
+      fechaNotificacion: this.filtroFechaNotificacion || '',
+      desde: this.filtroFechaVencimiento || '',
+      hasta: this.filtroFechaVencimiento || '',
+      limite: this.tamanoPagina,
+      desplazamiento: this.pagina * this.tamanoPagina
+    };
+  }
+
+  private cargarPagina(): void {
     this.cargando = true;
     this.plazoService.listar(this.filtros)
       .pipe(finalize(() => {
@@ -163,26 +234,20 @@ export class PlazosComponent implements OnInit, OnDestroy {
       .subscribe({
         next: r => {
           this.plazos = r;
-          const visible = this.plazosVista;
-          if (visible.length && !visible.some(p => p.uuid === this.detalle?.plazo.uuid)) {
-            this.seleccionarPlazo(visible[0], false);
+          this.haySiguiente = r.length === this.tamanoPagina;
+          if (this.pagina > 0 && r.length === 0) {
+            this.pagina--;
+            this.aplicarFiltros(false);
+            return;
           }
-          if (!visible.length) this.detalle = null;
+          if (r.length && !r.some(p => p.uuid === this.detalle?.plazo.uuid)) {
+            this.seleccionarPlazo(r[0], false);
+          } else if (!r.length) {
+            this.detalle = null;
+          }
         },
         error: e => this.mostrarError(e)
       });
-  }
-
-  limpiarFiltros(): void {
-    this.filtroTipoPlazoId = null;
-    this.filtroJuzgado = '';
-    this.filtroFechaNotificacion = '';
-    this.filtroFechaVencimiento = '';
-    this.filtros = {
-      texto: '', expedienteId: null, responsableId: null, tipoPlazoId: null,
-      estado: '', riesgo: '', computo: '', requiereRevision: null, desde: '', hasta: ''
-    };
-    this.aplicarFiltros();
   }
 
   seleccionarPlazo(plazo: Plazo, mostrarCarga = true): void {
@@ -432,13 +497,17 @@ export class PlazosComponent implements OnInit, OnDestroy {
   }
 
   cargarDatos(reseleccionar = true): void {
+    this.sincronizarFiltros();
     forkJoin({
       plazos: this.plazoService.listar(this.filtros),
-      resumen: this.plazoService.resumen()
+      resumen: this.plazoService.resumen(),
+      analitica: this.plazoService.analitica()
     }).subscribe({
       next: r => {
         this.plazos = r.plazos;
+        this.haySiguiente = r.plazos.length === this.tamanoPagina;
         this.resumen = r.resumen;
+        this.analitica = r.analitica;
         if (reseleccionar && this.detalle) {
           const mismo = this.plazos.find(p => p.uuid === this.detalle?.plazo.uuid);
           if (mismo) this.seleccionarPlazo(mismo, false);
@@ -454,10 +523,7 @@ export class PlazosComponent implements OnInit, OnDestroy {
   }
 
   get plazosVista(): Plazo[] {
-    return this.plazos
-      .filter(p => !this.filtroFechaNotificacion || p.fechaNotificacion === this.filtroFechaNotificacion)
-      .slice()
-      .sort((a, b) => this.compararPrioridad(a, b));
+    return this.plazos.slice().sort((a, b) => this.compararPrioridad(a, b));
   }
 
   get proximosSemana(): Plazo[] {
@@ -475,22 +541,16 @@ export class PlazosComponent implements OnInit, OnDestroy {
   }
 
   get graficoSemanas(): BarraSemana[] {
-    const barras: BarraSemana[] = Array.from({ length: 12 }, (_, i) => ({
-      etiqueta: `Sem. ${i + 1}`,
-      rojo: 0,
-      naranja: 0,
-      amarillo: 0
-    }));
-
-    for (const p of this.plazos) {
-      if (['CUMPLIDO', 'CANCELADO'].includes(p.estado) || p.diasRestantes < 0 || p.diasRestantes > 83) continue;
-      const indice = Math.min(11, Math.floor(p.diasRestantes / 7));
-      const dentroSemana = p.diasRestantes - indice * 7;
-      if (dentroSemana <= 1) barras[indice].rojo += 1;
-      else if (dentroSemana <= 4) barras[indice].naranja += 1;
-      else barras[indice].amarillo += 1;
-    }
-    return barras;
+    const porSemana = new Map(this.analitica.semanas.map(s => [s.semana, s]));
+    return Array.from({ length: 12 }, (_, i) => {
+      const s = porSemana.get(i);
+      return {
+        etiqueta: `Sem. ${i + 1}`,
+        rojo: s?.rojo ?? 0,
+        naranja: s?.naranja ?? 0,
+        amarillo: s?.amarillo ?? 0
+      };
+    });
   }
 
   alturaBarra(valor: number): number {
@@ -499,19 +559,15 @@ export class PlazosComponent implements OnInit, OnDestroy {
 
   get evolucionMensual(): EvolucionMes[] {
     const ahora = new Date();
+    const mapa = new Map(this.analitica.evolucion.map(m => [`${m.anio}-${m.mes}`, m]));
     const meses: EvolucionMes[] = [];
     for (let i = 7; i >= 0; i--) {
       const d = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const delMes = this.plazos.filter(p => {
-        const f = new Date(`${p.fechaVencimiento}T00:00:00`);
-        return f.getFullYear() === y && f.getMonth() === m;
-      });
+      const dato = mapa.get(`${d.getFullYear()}-${d.getMonth() + 1}`);
       meses.push({
         etiqueta: new Intl.DateTimeFormat('es-PE', { month: 'short' }).format(d).replace('.', ''),
-        vencidos: delMes.filter(p => p.estado === 'VENCIDO').length,
-        cumplidos: delMes.filter(p => p.estado === 'CUMPLIDO').length
+        vencidos: dato?.vencidos ?? 0,
+        cumplidos: dato?.cumplidos ?? 0
       });
     }
     return meses;
@@ -635,6 +691,11 @@ export class PlazosComponent implements OnInit, OnDestroy {
     if (aPorVencer && bPorVencer) return a.diasRestantes - b.diasRestantes;
     return b.diasRestantes - a.diasRestantes;
   }
+
+  trackByPlazo(_: number, plazo: Plazo): string { return plazo.uuid; }
+  trackById(_: number, item: { id: number }): number { return item.id; }
+  trackBySemana(_: number, item: BarraSemana): string { return item.etiqueta; }
+  trackByMes(_: number, item: EvolucionMes): string { return item.etiqueta; }
 
   private formularioVacio(): PlazoGuardar {
     return {

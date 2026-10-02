@@ -1,6 +1,9 @@
 <aside class="sidebar">
 
+  <!-- ===================================================== -->
   <!-- PARTE SUPERIOR -->
+  <!-- ===================================================== -->
+
   <div class="sidebar-top">
 
     <!-- LOGO -->
@@ -19,7 +22,10 @@
     </div>
 
 
+    <!-- =================================================== -->
     <!-- MENÚ -->
+    <!-- =================================================== -->
+
     <ul class="menu">
 
 
@@ -154,9 +160,9 @@
       </li>
 
 
-      <!-- USUARIOS: solo quien puede administrarlos. El backend lo exige
-           igual; esto evita llevar a los demas a una pantalla sin acceso. -->
+      <!-- USUARIOS -->
       @if (puedeGestionarUsuarios()) {
+
         <li
           class="menu-item"
           routerLink="/usuarios"
@@ -164,6 +170,7 @@
         >
           Usuarios
         </li>
+
       }
 
 
@@ -181,30 +188,23 @@
   </div>
 
 
+  <!-- ===================================================== -->
   <!-- PARTE INFERIOR -->
+  <!-- ===================================================== -->
+
   <div class="sidebar-bottom">
 
-    <!-- TEMA CLARO / OSCURO: disponible en todos los modulos -->
-    <button
-      class="theme-button"
-      type="button"
-      (click)="tema.alternar()"
-      [attr.aria-label]="tema.etiqueta()"
-      [attr.aria-pressed]="tema.oscuro()"
-      [title]="tema.etiqueta()"
-    >
-      <span class="theme-switch" [class.active]="tema.oscuro()" aria-hidden="true">
-        <span class="theme-switch-knob"></span>
-      </span>
-      <span class="theme-toggle-text">Tema {{ tema.oscuro() ? 'claro' : 'oscuro' }}</span>
-    </button>
 
+    <!-- =================================================== -->
+    <!-- PERFIL -->
+    <!-- =================================================== -->
 
     <div class="user-profile">
 
       <div class="avatar">
         {{ iniciales() }}
       </div>
+
 
       <div class="user-info">
 
@@ -221,20 +221,59 @@
     </div>
 
 
+    <!-- =================================================== -->
+    <!-- TEMA CLARO / OSCURO -->
+    <!-- SOLO UN BOTÓN -->
+    <!-- =================================================== -->
+
     <button
       class="theme-button"
       type="button"
       (click)="alternarTema()"
       [attr.aria-pressed]="temaOscuro()"
-      [attr.aria-label]="temaOscuro() ? 'Activar tema claro' : 'Activar tema oscuro'"
+      [attr.aria-label]="
+        temaOscuro()
+          ? 'Activar tema claro'
+          : 'Activar tema oscuro'
+      "
+      [title]="
+        temaOscuro()
+          ? 'Activar tema claro'
+          : 'Activar tema oscuro'
+      "
     >
-      <span class="theme-switch" [class.active]="temaOscuro()" aria-hidden="true">
-        <span class="theme-switch-knob"></span>
+
+      <span
+        class="theme-switch"
+        [class.active]="temaOscuro()"
+        aria-hidden="true"
+      >
+
+        <span
+          class="theme-switch-knob"
+        ></span>
+
       </span>
-      <span>{{ temaOscuro() ? 'Tema oscuro' : 'Tema claro' }}</span>
+
+
+      <span class="theme-toggle-text">
+
+        Tema
+        {{
+          temaOscuro()
+            ? 'oscuro'
+            : 'claro'
+        }}
+
+      </span>
+
     </button>
 
-    <!-- CAMBIAR CONTRASEÑA: voluntario. Cierra las demas sesiones abiertas -->
+
+    <!-- =================================================== -->
+    <!-- CAMBIAR CONTRASEÑA -->
+    <!-- =================================================== -->
+
     <a
       class="password-link"
       routerLink="/cambiar-password"
@@ -243,7 +282,10 @@
     </a>
 
 
-    <!-- CERRAR SESION: borra el token, no solo navega -->
+    <!-- =================================================== -->
+    <!-- CERRAR SESIÓN -->
+    <!-- =================================================== -->
+
     <button
       class="logout-button"
       type="button"
@@ -251,6 +293,7 @@
     >
       Cerrar sesión
     </button>
+
 
   </div>
 

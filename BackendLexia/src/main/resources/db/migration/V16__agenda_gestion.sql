@@ -37,3 +37,12 @@ CREATE TABLE evento_reprogramaciones (
         ON DELETE SET NULL ON UPDATE CASCADE,
     CONSTRAINT ck_reprogramaciones_fechas CHECK (fecha_fin_nueva >= fecha_inicio_nueva)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- Indices de escalabilidad para consultas por rango y filtros de agenda.
+ALTER TABLE eventos_agenda
+    ADD KEY ix_eventos_rango (estudio_id, activo, fecha_inicio, fecha_fin, estado),
+    ADD KEY ix_eventos_tipo_estado_fecha (estudio_id, tipo, estado, fecha_inicio);
+
+ALTER TABLE evento_participantes
+    ADD KEY ix_participantes_usuario_evento (usuario_id, evento_id);

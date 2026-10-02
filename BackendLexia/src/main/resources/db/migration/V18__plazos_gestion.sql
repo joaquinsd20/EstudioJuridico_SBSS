@@ -22,3 +22,10 @@ UPDATE plazos
 UPDATE plazos
    SET origen = 'RESOLUCION'
  WHERE resolucion_id IS NOT NULL;
+
+
+-- Indices de escalabilidad para filtros del listado paginado de plazos.
+ALTER TABLE plazos
+    ADD KEY ix_plazos_notificacion (fecha_notificacion, activo, expediente_id),
+    ADD KEY ix_plazos_tipo_estado_venc (tipo_plazo_id, estado, fecha_vencimiento),
+    ADD KEY ix_plazos_riesgo_estado_venc (nivel_riesgo, estado, fecha_vencimiento);

@@ -9,7 +9,6 @@ import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
 import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
 import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
 import com.sbss.lexia.agenda.repository.AgendaRepositoryJdbc;
-import com.sbss.lexia.shared.dto.Limites;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
@@ -61,6 +60,9 @@ public class AgendaService {
             hasta = hoy.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
         }
         if (hasta.isBefore(desde)) throw new ParametroInvalidoException("La fecha final no puede ser anterior a la inicial");
+        if (desde.plusDays(370).isBefore(hasta)) {
+            throw new ParametroInvalidoException("El rango de agenda no puede superar 370 días");
+        }
         if (tipo != null && !tipo.isBlank() && !TIPOS.contains(normalizar(tipo))) {
             throw new ParametroInvalidoException("Tipo de evento no válido");
         }
@@ -73,26 +75,7 @@ public class AgendaService {
 
     @Transactional(readOnly = true)
     public Resumen resumen() {
-        LocalDate hoy = LocalDate.now();
-        LocalDateTime inicioMes = hoy.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime finMes = hoy.with(TemporalAdjusters.lastDayOfMonth()).atTime(LocalTime.MAX);
-        // Sin cota a proposito: el resumen cuenta sobre el mes completo, y
-        // acotarlo a 500 daria cifras falsas en un estudio con volumen.
-        List<EventoLista> mes = repository.listar(inicioMes, finMes, null, null, null, null, null,
-                verTodos(), verConfidenciales(), Limites.SIN_COTA, 0);
-        LocalDateTime ahora = LocalDateTime.now();
-        List<EventoLista> proximos = repository.listar(ahora, ahora.plusDays(7), null, null, null, null, null,
-                verTodos(), verConfidenciales(), Limites.SIN_COTA, 0);
-
-        long hoyCount = mes.stream()
-                .filter(e -> !"CANCELADO".equals(e.estado()))
-                .filter(e -> !e.fechaInicio().toLocalDate().isAfter(hoy) && !e.fechaFin().toLocalDate().isBefore(hoy))
-                .count();
-        long proximosCount = proximos.stream().filter(e -> !"CANCELADO".equals(e.estado())).count();
-        long audiencias = mes.stream().filter(e -> "AUDIENCIA".equals(e.tipo()) && !"CANCELADO".equals(e.estado())).count();
-        long verificar = mes.stream().filter(EventoLista::requiereVerificacion).count();
-        long total = mes.stream().filter(e -> !"CANCELADO".equals(e.estado())).count();
-        return new Resumen(hoyCount, proximosCount, audiencias, verificar, total);
+        return repository.resumen(verTodos(), verConfidenciales());
     }
 
     @Transactional(readOnly = true)

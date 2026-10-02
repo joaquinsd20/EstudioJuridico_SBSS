@@ -35,7 +35,7 @@ public class PlazoService {
     @Transactional(readOnly = true)
     public List<PlazoLista> listar(String texto, Long expedienteId, Long responsableId, Long tipoPlazoId, String estado,
             String riesgo, String computo, Boolean requiereRevision, LocalDate desde, LocalDate hasta,
-            int limite, int desplazamiento) {
+            LocalDate fechaNotificacion, int limite, int desplazamiento) {
         String e = normalizarOpcional(estado);
         String r = normalizarOpcional(riesgo);
         String c = normalizarOpcional(computo);
@@ -44,8 +44,11 @@ public class PlazoService {
         if (c != null && !COMPUTOS.contains(c)) throw new ParametroInvalidoException("Tipo de computo invalido");
         if (desde != null && hasta != null && hasta.isBefore(desde)) throw new ParametroInvalidoException("La fecha hasta no puede ser anterior a la fecha desde");
         return repository.listar(texto, expedienteId, responsableId, tipoPlazoId, e, r, c,
-                requiereRevision, desde, hasta, limite, desplazamiento);
+                requiereRevision, desde, hasta, fechaNotificacion, limite, desplazamiento);
     }
+
+    @Transactional(readOnly = true)
+    public Analitica analitica() { return repository.analitica(); }
 
     @Transactional(readOnly = true)
     public Resumen resumen() { return repository.resumen(); }

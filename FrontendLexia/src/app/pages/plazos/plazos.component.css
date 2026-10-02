@@ -2523,3 +2523,46 @@ select {
 :host-context(.tema-oscuro-global) .no-access-card p {
   color: #cbd5e1;
 }
+
+/* Paginación escalable: la tabla nunca necesita renderizar miles de filas. */
+.table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px 18px;
+  border-top: 1px solid rgba(148, 163, 184, .2);
+}
+
+.page-size,
+.page-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.page-size select {
+  min-width: 72px;
+}
+
+.page-actions button {
+  border: 1px solid rgba(148, 163, 184, .35);
+  border-radius: 8px;
+  padding: 7px 12px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.page-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 720px) {
+  .table-pagination {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

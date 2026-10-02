@@ -20,7 +20,7 @@
         <div class="filter-control">
           <select [(ngModel)]="filtroTipoPlazoId" (change)="aplicarFiltros()">
             <option [ngValue]="null">Tipo de Plazo</option>
-            <option *ngFor="let tipo of catalogos.tiposPlazo" [ngValue]="tipo.id">
+            <option *ngFor="let tipo of catalogos.tiposPlazo; trackBy: trackById" [ngValue]="tipo.id">
               {{ tipo.nombre }}
             </option>
           </select>
@@ -30,8 +30,8 @@
           <input
             type="text"
             [(ngModel)]="filtroJuzgado"
+            (input)="onFiltroTextoInput()"
             (keyup.enter)="aplicarFiltros()"
-            (blur)="aplicarFiltros()"
             placeholder="Juzgado / Fiscalía">
         </div>
 
@@ -68,7 +68,7 @@
               </div>
 
               <div class="critical-bars">
-                <div class="week-bar" *ngFor="let semana of graficoSemanas">
+                <div class="week-bar" *ngFor="let semana of graficoSemanas; trackBy: trackBySemana">
                   <div class="stack">
                     <span class="bar-segment red-segment" [style.height.px]="alturaBarra(semana.rojo)"></span>
                     <span class="bar-segment orange-segment" [style.height.px]="alturaBarra(semana.naranja)"></span>
@@ -113,7 +113,7 @@
 
                 <tbody>
                   <tr
-                    *ngFor="let plazo of plazosVista"
+                    *ngFor="let plazo of plazosVista; trackBy: trackByPlazo"
                     [class.selected-row]="detalle?.plazo?.uuid === plazo.uuid"
                     (click)="seleccionarPlazo(plazo)">
                     <td>
@@ -172,6 +172,22 @@
                 </tbody>
               </table>
             </div>
+
+            <div class="table-pagination" *ngIf="!cargando">
+              <div class="page-size">
+                <span>Mostrar</span>
+                <select [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)">
+                  <option *ngFor="let size of tamanosPagina" [ngValue]="size">{{ size }}</option>
+                </select>
+                <span>por página</span>
+              </div>
+
+              <div class="page-actions">
+                <button type="button" (click)="paginaAnterior()" [disabled]="pagina === 0">Anterior</button>
+                <span>Página {{ pagina + 1 }}</span>
+                <button type="button" (click)="paginaSiguiente()" [disabled]="!haySiguiente">Siguiente</button>
+              </div>
+            </div>
           </section>
 
           <!-- ZONA INFERIOR ORIGINAL -->
@@ -202,7 +218,7 @@
                   </svg>
 
                   <div class="month-labels">
-                    <span *ngFor="let mes of evolucionMensual">{{ mes.etiqueta }}</span>
+                    <span *ngFor="let mes of evolucionMensual; trackBy: trackByMes">{{ mes.etiqueta }}</span>
                   </div>
                 </div>
               </div>
@@ -399,7 +415,7 @@
                 <span>Tipo de plazo *</span>
                 <select [(ngModel)]="formulario.tipoPlazoId" (change)="onTipoPlazoChange()">
                   <option [ngValue]="null">Seleccionar tipo</option>
-                  <option *ngFor="let tipo of catalogos.tiposPlazo" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
+                  <option *ngFor="let tipo of catalogos.tiposPlazo; trackBy: trackById" [ngValue]="tipo.id">{{ tipo.nombre }}</option>
                 </select>
               </label>
 

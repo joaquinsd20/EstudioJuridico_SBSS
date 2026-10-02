@@ -20,6 +20,22 @@ public final class PlazoDtos {
             long criticos,
             long revisionProfesional) {}
 
+    public record BarraSemana(
+            int semana,
+            long rojo,
+            long naranja,
+            long amarillo) {}
+
+    public record EvolucionMes(
+            int anio,
+            int mes,
+            long vencidos,
+            long cumplidos) {}
+
+    public record Analitica(
+            List<BarraSemana> semanas,
+            List<EvolucionMes> evolucion) {}
+
     public record PlazoLista(
             String uuid,
             String origen,
