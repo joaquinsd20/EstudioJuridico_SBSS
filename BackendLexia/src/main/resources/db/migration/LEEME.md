@@ -68,12 +68,39 @@ Al final del archivo, comentada: qué hay que consultar para saber que la
 migración hizo lo que dice, con el resultado esperado. Y si tiene sentido, una
 **prueba negativa**: un INSERT que la base tiene que rechazar.
 
-## Y una que no es del nombre
+## Una migración ya publicada no se edita nunca (ni para añadirle un índice)
 
-**Una migración ya aplicada no se edita nunca.** Cambia su checksum y el
-arranque de quien ya la tenía falla con `Migration checksum mismatch`. Se
-corrige con la siguiente.
+Cambia su checksum y el arranque de quien ya la tenga falla con
+`Migration checksum mismatch`. Ya pasó con V10 y, el 2026-10-01, con V16 y V18:
+se les añadieron índices "de optimización" dentro del propio archivo. Un índice
+también es un cambio: va en una migración **nueva**.
+
+Esto ahora lo comprueba una prueba que no necesita base de datos:
+`GuardiasDelRepositorioTest` compara cada migración con su huella en
+`BackendLexia/src/test/resources/migraciones.sha256` y falla si alguna cambió.
+
+**Después de mergear una migración nueva** hay que congelarla, o la prueba no la
+protege:
+
+```bash
+# desde la raíz del repositorio
+bash scripts/congelar-migraciones.sh
+```
+
+El script solo **añade** las que faltan; nunca reescribe una huella existente.
 
 La excepción es una que **nunca** se aplicó en ninguna base —porque Flyway la
 estaba ignorando, o porque no se ha subido todavía—: esa sí se corrige en su
-sitio, y es mejor que arrastrar el error en un parche.
+sitio, y es mejor que arrastrar el error en un parche. En ese caso, congélala
+solo cuando ya esté en `main`.
+
+## Si añades una tabla o un permiso, actualiza `scripts/verificar-bd.sh`
+
+Comprueba el número de tablas, de permisos y de pares rol-permiso. Si no se
+actualiza en el mismo PR, falla para todo el equipo. V23 (mensajería) añadió 2
+tablas y 2 permisos y el script no se tocó.
+
+Las demás guardias de esa prueba también te afectan: migraciones sin `USE`, ningún
+`password:` escrito en un `application*.yml`, todo endpoint con `@PreAuthorize`, y
+ningún repositorio con el filtro de visibilidad de expedientes escrito a mano
+(usa `VisibilidadExpedientes.sql("e")`).
