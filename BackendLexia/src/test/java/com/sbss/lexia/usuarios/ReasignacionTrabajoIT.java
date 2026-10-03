@@ -234,7 +234,7 @@ class ReasignacionTrabajoIT {
         mockMvc.perform(get("/api/v1/expedientes/" + exp0088).with(authentication(como(MARIA))))
                 .andExpect(status().isOk());
         mockMvc.perform(get("/api/v1/expedientes").with(authentication(como(MARIA))))
-                .andExpect(jsonPath("$[?(@.uuid == '%s' || @.uuidPublico == '%s')]".formatted(exp0088, exp0088))
+                .andExpect(jsonPath("$.contenido[?(@.uuid == '%s' || @.uuidPublico == '%s')]".formatted(exp0088, exp0088))
                         .isNotEmpty());
 
         mockMvc.perform(get("/api/v1/expedientes/" + exp0088).with(authentication(como(JUAN))))

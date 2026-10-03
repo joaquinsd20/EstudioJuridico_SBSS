@@ -247,9 +247,12 @@ class VisibilidadExpedientesIT {
         mockMvc.perform(get("/api/v1/plazos").param("limite", "2").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(2)));
-        mockMvc.perform(get("/api/v1/expedientes").param("limite", "3").with(authentication(como(ADMIN))))
+        // Desde #49 el listado de expedientes es paginado (PaginaDto): se acota con
+        // `size` y las filas viven en `contenido`. `$.length()` de ese objeto cuenta
+        // sus propiedades (6), no las filas, y por eso esta prueba dejo de cumplirse.
+        mockMvc.perform(get("/api/v1/expedientes").param("size", "3").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(3)));
+                .andExpect(jsonPath("$.contenido.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(3)));
         mockMvc.perform(get("/api/v1/agenda").param("limite", "1").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)));
