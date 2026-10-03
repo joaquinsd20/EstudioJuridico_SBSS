@@ -6,6 +6,8 @@
   <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
 
+    <ng-container *ngIf="puedeLeer; else sinAcceso">
+
 
     <!-- ===================================================== -->
     <!-- ENCABEZADO -->
@@ -287,8 +289,7 @@
           </h2>
 
           <p>
-            {{ honorarios.length }}
-            registros financieros encontrados
+            {{ honorarios.length }} registros en esta página
           </p>
 
         </div>
@@ -615,7 +616,40 @@
 
       </div>
 
+      <div class="pagination-bar" *ngIf="!loading">
+        <div class="pagination-info">
+          <span>Página {{ pagina + 1 }}</span>
+          <label>
+            Registros por página
+            <select [(ngModel)]="tamanoPagina" (change)="cambiarTamanoPagina()">
+              <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">
+                {{ tamano }}
+              </option>
+            </select>
+          </label>
+        </div>
+
+        <div class="pagination-actions">
+          <button type="button" (click)="paginaAnterior()" [disabled]="pagina === 0 || loading">
+            Anterior
+          </button>
+          <button type="button" (click)="paginaSiguiente()" [disabled]="!haySiguiente || loading">
+            Siguiente
+          </button>
+        </div>
+      </div>
+
     </section>
+
+    </ng-container>
+
+    <ng-template #sinAcceso>
+      <section class="no-access-card">
+        <div class="no-access-icon">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso FACTURACION_LEER para consultar este módulo.</p>
+      </section>
+    </ng-template>
 
   </main>
 
