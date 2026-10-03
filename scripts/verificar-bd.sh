@@ -40,12 +40,14 @@ MIN=$(q "SELECT IF(VERSION() >= '8.0.16', 'SI', 'NO');")
 check "Version >= 8.0.16 (los CHECK se aplican)" "$MIN" "SI"
 
 titulo "2. Inventario del esquema"
-check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "44"
+check "Tablas"                "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE' AND table_name <> 'flyway_schema_history';")" "46"
 check "Roles del sistema (V12)"      "$(q "SELECT COUNT(*) FROM roles;")" "8"
-# 31 de V12 + 2 de V17 (MONITOR_*) + 4 de V20 (FACTURACION_*)
-check "Permisos del sistema"         "$(q "SELECT COUNT(*) FROM permisos;")" "37"
+# 31 de V12 + 2 de V17 (MONITOR_*) + 4 de V20 (FACTURACION_*) + 2 de V23 (MENSAJERIA_*)
+check "Permisos del sistema"         "$(q "SELECT COUNT(*) FROM permisos;")" "39"
 # 123 de V12 + 10 de V17 (2 permisos x 5 roles) + 12 de V20 (4 x 3 roles)
-check "Pares rol-permiso"            "$(q "SELECT COUNT(*) FROM roles_permisos;")" "145"
+# + 14 de V23 (2 permisos x 7 roles). Medido en una base nueva, no calculado: la
+# primera cuenta a mano dio 153 por leer solo cuatro de los siete roles de V23.
+check "Pares rol-permiso"            "$(q "SELECT COUNT(*) FROM roles_permisos;")" "159"
 # V19 se llamaba V19_facturacion.sql, con un solo guion bajo: Flyway la saltaba
 # con una linea en INFO y estas dos tablas no existian en ninguna base.
 # V22 agrego tarea_historial y la etapa del flujo de aprobacion.
@@ -53,6 +55,9 @@ check "Etapa de flujo en tareas (V22)"  "$(q "SELECT COUNT(*) FROM information_s
 check "Tablas de facturacion (V19)"  "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_name IN ('honorarios','movimientos_financieros');")" "2"
 # Nadie operativo ni el portal llega al dinero (V20).
 check "Roles sin acceso a facturacion" "$(q "SELECT COUNT(*) FROM roles_permisos rp JOIN roles r ON r.id=rp.rol_id JOIN permisos p ON p.id=rp.permiso_id WHERE p.modulo='FACTURACION' AND r.codigo IN ('ABOGADO','ABOGADO_AUXILIAR','ASISTENTE_LEGAL','RECEPCIONISTA','CLIENTE');")" "0"
+# V23: el chat interno. V24: los seis indices que #52 habia metido dentro de V16 y V18.
+check "Tablas de mensajeria (V23)"   "$(q "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_name IN ('conversaciones','mensajes');")" "2"
+check "Indices de agenda y plazos (V24)" "$(q "SELECT COUNT(DISTINCT index_name) FROM information_schema.statistics WHERE table_schema='${BASE}' AND index_name IN ('ix_eventos_rango','ix_eventos_tipo_estado_fecha','ix_participantes_usuario_evento','ix_plazos_notificacion','ix_plazos_tipo_estado_venc','ix_plazos_riesgo_estado_venc');")" "6"
 check "Funciones de plazos"   "$(q "SELECT COUNT(*) FROM information_schema.routines WHERE routine_schema='${BASE}';")" "4"
 check "Motor InnoDB en todas" "$(q "SELECT COUNT(DISTINCT engine) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE';")" "1"
 check "Una sola collation"    "$(q "SELECT COUNT(DISTINCT table_collation) FROM information_schema.tables WHERE table_schema='${BASE}' AND table_type='BASE TABLE';")" "1"
