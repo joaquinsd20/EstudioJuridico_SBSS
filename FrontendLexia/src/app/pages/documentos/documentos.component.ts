@@ -56,7 +56,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
   documentos: Documento[] = [];
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   readonly tamanosPagina = [10, 20, 40, 100];
   hayPaginaSiguiente = false;
   private solicitudListado = 0;

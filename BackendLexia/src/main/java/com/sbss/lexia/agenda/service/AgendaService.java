@@ -1,17 +1,5 @@
 package com.sbss.lexia.agenda.service;
 
-import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
-import com.sbss.lexia.agenda.dto.AgendaDtos.EventoDetalle;
-import com.sbss.lexia.agenda.dto.AgendaDtos.EventoLista;
-import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
-import com.sbss.lexia.agenda.repository.AgendaRepositoryJdbc;
-import com.sbss.lexia.shared.exception.ParametroInvalidoException;
-import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
-import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -21,11 +9,25 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
+import com.sbss.lexia.agenda.dto.AgendaDtos.EventoDetalle;
+import com.sbss.lexia.agenda.dto.AgendaDtos.EventoLista;
+import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.PaginaEventos;
+import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
+import com.sbss.lexia.agenda.repository.AgendaRepositoryJdbc;
+import com.sbss.lexia.shared.exception.ParametroInvalidoException;
+import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
+import com.sbss.lexia.shared.security.VisibilidadExpedientes;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -52,8 +54,8 @@ public class AgendaService {
     private final AgendaRepositoryJdbc repository;
 
     @Transactional(readOnly = true)
-    public List<EventoLista> listar(LocalDateTime desde, LocalDateTime hasta, String texto, String tipo,
-            String estado, Long expedienteId, Long participanteId, int limite, int desplazamiento) {
+    public PaginaEventos listar(LocalDateTime desde, LocalDateTime hasta, String texto, String tipo,
+            String estado, Long expedienteId, Long participanteId, int pagina, int tamano) {
         if (desde == null || hasta == null) {
             LocalDate hoy = LocalDate.now();
             desde = hoy.withDayOfMonth(1).atStartOfDay();
@@ -69,8 +71,19 @@ public class AgendaService {
         if (estado != null && !estado.isBlank() && !ESTADOS.contains(normalizar(estado))) {
             throw new ParametroInvalidoException("Estado de evento no válido");
         }
-        return repository.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
-                verTodos(), verConfidenciales(), limite, desplazamiento);
+        if (pagina < 0) throw new ParametroInvalidoException("La página no puede ser negativa");
+        if (!Set.of(10, 20, 40, 100).contains(tamano)) {
+            throw new ParametroInvalidoException("El tamaño de página debe ser 10, 20, 40 o 100");
+        }
+        boolean todos = verTodos();
+        boolean confidenciales = verConfidenciales();
+        long total = repository.contar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
+                todos, confidenciales);
+        int totalPaginas = total == 0 ? 0 : (int) Math.ceil((double) total / tamano);
+        int desplazamiento = pagina * tamano;
+        List<EventoLista> contenido = repository.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
+                todos, confidenciales, tamano, desplazamiento);
+        return new PaginaEventos(contenido, pagina, tamano, total, totalPaginas);
     }
 
     @Transactional(readOnly = true)
