@@ -1,5 +1,6 @@
 import { HonorarioLista, ResumenBackend, ResumenFacturacion, Opcion, CatalogosFacturacion, RegistroMovimientoDTO, MovimientoResponse, ActualizarHonorarioDTO, PagoHonorarioDetalle, DetalleHonorario } from '../../core/models/facturacion.models';
 import { FacturacionService } from '../../core/services/facturacion.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   ChangeDetectorRef,
   Component,
@@ -42,6 +43,16 @@ export class FacturacionComponent
   implements OnInit, OnDestroy {
 
   private routerSubscription?: Subscription;
+
+  // Control de acceso: mismo patrón utilizado por el módulo Plazos.
+  readonly puedeLeer: boolean;
+
+  // Paginación real: el backend ya soporta LIMIT/OFFSET.
+  readonly tamanosPagina = [10, 20, 40, 100];
+  pagina = 0;
+  tamanoPagina = 20;
+  haySiguiente = false;
+
   honorarios: HonorarioLista[] = [];
 
 
@@ -89,11 +100,20 @@ export class FacturacionComponent
   constructor(
     private service: FacturacionService,
     private router: Router,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private auth: AuthService
+  ) {
+    this.puedeLeer = this.auth.tienePermiso('FACTURACION_LEER');
+  }
 
 
   ngOnInit(): void {
+    // Si no posee FACTURACION_LEER, se muestra Acceso restringido y
+    // no se realizan peticiones que terminarían en 403 Forbidden.
+    if (!this.puedeLeer) {
+      return;
+    }
+
     this.refrescarFacturacion();
     this.routerSubscription =
       this.router.events
@@ -143,7 +163,7 @@ export class FacturacionComponent
 
     this.cargarResumen();
     this.cargarCatalogos();
-    this.aplicarFiltros();
+    this.aplicarFiltros(false);
   }
 
   /* =======================================================
@@ -420,7 +440,15 @@ export class FacturacionComponent
      CONSULTAR HONORARIOS
      ======================================================= */
 
-  aplicarFiltros(): void {
+  aplicarFiltros(reiniciarPagina: boolean = true): void {
+
+    if (!this.puedeLeer) {
+      return;
+    }
+
+    if (reiniciarPagina) {
+      this.pagina = 0;
+    }
 
     this.loading = true;
 
@@ -481,6 +509,12 @@ export class FacturacionComponent
     }
 
 
+    // Se solicita un registro adicional para saber si existe una página
+    // siguiente sin descargar toda la tabla desde el servidor.
+    params = params
+      .set('limite', (this.tamanoPagina + 1).toString())
+      .set('desplazamiento', (this.pagina * this.tamanoPagina).toString());
+
     this.service.listar(params)
       .subscribe({
 
@@ -492,16 +526,13 @@ export class FacturacionComponent
           );
 
 
-          this.honorarios =
+          const recibidos = Array.isArray(data) ? data : [];
 
-            Array.isArray(data)
+          this.haySiguiente = recibidos.length > this.tamanoPagina;
 
-              ? data.map(
-                  item =>
-                    this.normalizarHonorario(item)
-                )
-
-              : [];
+          this.honorarios = recibidos
+            .slice(0, this.tamanoPagina)
+            .map(item => this.normalizarHonorario(item));
 
 
           console.log(
@@ -533,6 +564,7 @@ export class FacturacionComponent
 
 
           this.honorarios = [];
+          this.haySiguiente = false;
 
 
           this.loading = false;
@@ -651,6 +683,27 @@ export class FacturacionComponent
 
   }
 
+
+  /* =======================================================
+     PAGINACIÓN
+     ======================================================= */
+
+  paginaAnterior(): void {
+    if (this.pagina <= 0 || this.loading) return;
+    this.pagina--;
+    this.aplicarFiltros(false);
+  }
+
+  paginaSiguiente(): void {
+    if (!this.haySiguiente || this.loading) return;
+    this.pagina++;
+    this.aplicarFiltros(false);
+  }
+
+  cambiarTamanoPagina(): void {
+    this.pagina = 0;
+    this.aplicarFiltros(false);
+  }
 
   /* =======================================================
      LIMPIAR FILTROS

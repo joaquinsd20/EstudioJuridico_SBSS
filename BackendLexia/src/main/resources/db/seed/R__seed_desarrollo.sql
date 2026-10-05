@@ -738,18 +738,18 @@ INSERT INTO documento_etiquetas (documento_id, etiqueta_id, usuario_asignacion_i
 -- cabecera de esta semilla: nada de fechas absolutas.
 INSERT INTO honorarios (id, uuid, cliente_id, expediente_id, modalidad_cobro,
                         estado_pago, monto_pactado, monto_pagado, fecha_creacion) VALUES
-( 1,'3b7e1d44-9a26-4c18-b5f0-71e2d4c9a801',1, 1,'Fijo',        'PENDIENTE',12000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
-( 2,'6c2f8a91-4d73-4b05-a8e6-93c5f1b2d702',2, 2,'Contingencia','PENDIENTE',35000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
-( 3,'91d4e7c6-2a58-4f93-8b1d-05e6c3a7f403',3, 3,'Fijo',        'PENDIENTE', 8000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
-( 4,'28a6b3f5-7c14-4e82-9d4a-b1f7c6e2d504',4, 4,'Mixto',       'PENDIENTE',60000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
-( 5,'7e3b9d12-5c68-4a47-83f1-0a9d2b6e8c05',5, 5,'Fijo',        'PENDIENTE', 6000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
-( 6,'b5d2f478-1e93-4c06-a7b8-64f1a3d9e706',6, 6,'Contingencia','PENDIENTE',20000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
-( 7,'0d8c6e59-4b27-4f15-8e3a-2c9b7f1d5807',7, 7,'Fijo',        'PENDIENTE', 5000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
-( 8,'f49a1c83-6e52-4b09-97d4-83a1f6c2b908',8, 8,'Mixto',       'PENDIENTE', 9500.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
-( 9,'5a7e3c16-9d40-4e88-b0f3-1c6d4a8e2909',2, 9,'Fijo',        'PENDIENTE',15000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
-(10,'8c2d4f71-3a96-4b15-9e07-72b5a1c3d610',4,10,'Contingencia','PENDIENTE',18000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
-(11,'2f6b8e04-7d51-4c73-a9e8-40d1b7c6f511',1,10,'Fijo',        'PENDIENTE',10000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
-(12,'d1937a2c-5e84-4b06-9f31-8a5c2d6b3e12',6,10,'Mixto',       'PENDIENTE',22000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH));
+( 1,'3b7e1d44-9a26-4c18-b5f0-71e2d4c9a801',1, 1,'Monto Fijo / Global', 'PENDIENTE',12000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 2,'6c2f8a91-4d73-4b05-a8e6-93c5f1b2d702',2, 2,'Cuota Litis / Éxito', 'PENDIENTE',35000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 3,'91d4e7c6-2a58-4f93-8b1d-05e6c3a7f403',3, 3,'Monto Fijo / Global', 'PENDIENTE', 8000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 0 MONTH)),
+( 4,'28a6b3f5-7c14-4e82-9d4a-b1f7c6e2d504',4, 4,'Mixta',              'PENDIENTE',60000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
+( 5,'7e3b9d12-5c68-4a47-83f1-0a9d2b6e8c05',5, 5,'Monto Fijo / Global', 'PENDIENTE', 6000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 1 MONTH)),
+( 6,'b5d2f478-1e93-4c06-a7b8-64f1a3d9e706',6, 6,'Cuota Litis / Éxito', 'PENDIENTE',20000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
+( 7,'0d8c6e59-4b27-4f15-8e3a-2c9b7f1d5807',7, 7,'Monto Fijo / Global', 'PENDIENTE', 5000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 2 MONTH)),
+( 8,'f49a1c83-6e52-4b09-97d4-83a1f6c2b908',8, 8,'Mixta',              'PENDIENTE', 9500.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
+( 9,'5a7e3c16-9d40-4e88-b0f3-1c6d4a8e2909',2, 9,'Monto Fijo / Global', 'PENDIENTE',15000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 3 MONTH)),
+(10,'8c2d4f71-3a96-4b15-9e07-72b5a1c3d610',4,10,'Cuota Litis / Éxito', 'PENDIENTE',18000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
+(11,'2f6b8e04-7d51-4c73-a9e8-40d1b7c6f511',1,10,'Monto Fijo / Global', 'PENDIENTE',10000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH)),
+(12,'d1937a2c-5e84-4b06-9f31-8a5c2d6b3e12',6,10,'Mixta',              'PENDIENTE',22000.00,0.00,DATE_SUB(CURDATE(), INTERVAL 4 MONTH));
 
 -- =============================================================================
 -- COMENTARIOS Y NOTIFICACIONES

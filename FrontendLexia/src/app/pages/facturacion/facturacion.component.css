@@ -1898,3 +1898,109 @@ textarea.custom-input {
 :host-context(.tema-oscuro-global) .detail-payments-table-wrapper::-webkit-scrollbar-thumb {
   background: #172033;
 }
+
+/* =========================================================
+   ACCESO POR ROLES - MISMO PATRÓN VISUAL QUE PLAZOS
+   ========================================================= */
+.no-access-card {
+  max-width: 600px;
+  margin: 115px auto 0;
+  padding: 42px 32px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.no-access-icon {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.no-access-card h1 {
+  margin: 0 0 14px;
+  color: #1e293b;
+  font-size: 24px;
+}
+
+.no-access-card p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* =========================================================
+   PAGINACIÓN DE FACTURACIÓN
+   ========================================================= */
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.pagination-info,
+.pagination-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pagination-info label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.pagination-info select {
+  padding: 7px 9px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.pagination-actions button {
+  padding: 8px 14px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+
+.pagination-actions button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+:host-context(.tema-oscuro-global) .no-access-card,
+:host-context(.tema-oscuro-global) .pagination-actions button,
+:host-context(.tema-oscuro-global) .pagination-info select {
+  background: #111827;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .no-access-card h1 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .pagination-bar {
+  border-top-color: #334155;
+}
+
+@media (max-width: 720px) {
+  .pagination-bar,
+  .pagination-info {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .pagination-actions {
+    justify-content: space-between;
+  }
+}
