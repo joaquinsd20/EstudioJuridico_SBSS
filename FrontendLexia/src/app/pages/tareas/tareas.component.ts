@@ -30,6 +30,7 @@ export class TareasComponent implements OnInit, OnDestroy {
   private readonly service = inject(TareaService);
   private readonly documentos = inject(DocumentoService);
   readonly auth = inject(AuthService);
+  readonly puedeLeer = this.auth.tienePermiso('TAREA_LEER');
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly excel = inject(TareasExcelService);
   private readonly busqueda$ = new Subject<string>();
@@ -38,7 +39,7 @@ export class TareasComponent implements OnInit, OnDestroy {
   tareas: Tarea[] = [];
 
   pagina = 0;
-  tamanoPagina = 24;
+  tamanoPagina = 10;
   totalElementos = 0;
   totalPaginas = 0;
 
@@ -118,6 +119,11 @@ export class TareasComponent implements OnInit, OnDestroy {
   ];
 
   ngOnInit(): void {
+    // Evita llamadas 403 cuando el usuario no tiene acceso al módulo.
+    if (!this.puedeLeer) {
+      return;
+    }
+
     this.subs.add(
       this.busqueda$
         .pipe(debounceTime(350), distinctUntilChanged())

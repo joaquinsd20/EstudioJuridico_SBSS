@@ -1,6 +1,7 @@
 <div class="layout-wrapper">
   <app-panel></app-panel>
   <main class="main-content">
+    <ng-container *ngIf="puedeLeer; else sinAcceso">
     <header class="page-header">
       <div><span class="eyebrow">Panel de trabajo</span><h1>Panel de tareas</h1><p class="fecha-hoy">Gestión, seguimiento y flujo de aprobación</p></div>
       <div class="header-actions"><button class="btn-primary" type="button" (click)="nueva()" *ngIf="auth.tienePermiso('TAREA_CREAR')"><span class="plus">+</span>Nueva tarea</button></div>
@@ -52,10 +53,10 @@
         <div class="paginacion-controles">
           <label>Por página
             <select [(ngModel)]="tamanoPagina" (change)="cambiarTamanoPagina()">
-              <option [ngValue]="12">12</option>
-              <option [ngValue]="24">24</option>
-              <option [ngValue]="48">48</option>
-              <option [ngValue]="96">96</option>
+              <option [ngValue]="10">10</option>
+              <option [ngValue]="20">20</option>
+              <option [ngValue]="40">40</option>
+              <option [ngValue]="100">100</option>
             </select>
           </label>
           <button type="button" (click)="cambiarPagina(pagina - 1)" [disabled]="pagina === 0">Anterior</button>
@@ -63,10 +64,19 @@
         </div>
       </div>
     </section>
+    </ng-container>
+
+    <ng-template #sinAcceso>
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de TAREAS para consultar este módulo.</p>
+      </section>
+    </ng-template>
   </main>
 </div>
 
-<div class="modal-backdrop" *ngIf="modal" (click)="cerrar()">
+<div class="modal-backdrop" *ngIf="modal && puedeLeer" (click)="cerrar()">
   <section class="task-modal" (click)="$event.stopPropagation()">
     <button class="modal-x" (click)="cerrar()">×</button>
     <ng-container *ngIf="!detalle || modoEditar; else detalleTpl">
