@@ -2511,9 +2511,44 @@ select {
   color: #cbd5e1;
 }
 
+/* =========================================================
+   ACCESO POR ROLES
+   ========================================================= */
+.no-access-card {
+  max-width: 600px;
+  margin: 123px auto 0;
+  padding: 42px 32px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+
+.no-access-icon {
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.no-access-card h1 {
+  margin: 0 0 14px;
+  color: #1e293b;
+  font-size: 24px;
+}
+
+.no-access-card p {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* =========================================================
+   MODO OSCURO - ACCESO RESTRINGIDO
+   ========================================================= */
 :host-context(.tema-oscuro-global) .no-access-card {
-  border: 1px solid #334155;
   background: #111827;
+  border-color: #334155;
+  color: #e5e7eb;
 }
 
 :host-context(.tema-oscuro-global) .no-access-card h1 {
@@ -2521,7 +2556,7 @@ select {
 }
 
 :host-context(.tema-oscuro-global) .no-access-card p {
-  color: #cbd5e1;
+  color: #94a3b8;
 }
 
 /* Paginación escalable: la tabla nunca necesita renderizar miles de filas. */
