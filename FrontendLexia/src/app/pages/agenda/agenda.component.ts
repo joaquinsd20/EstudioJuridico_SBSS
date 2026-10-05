@@ -76,6 +76,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
   ];
 
   readonly diasSemana = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
+  readonly puedeLeer = this.auth.tienePermiso('AGENDA_LEER');
   readonly puedeGestionar = this.auth.tienePermiso('AGENDA_CREAR');
 
   vista: VistaAgenda = 'MES';
@@ -102,6 +103,12 @@ export class AgendaComponent implements OnInit, OnDestroy {
   filtroExpediente: number | null = null;
   filtroParticipante: number | null = null;
 
+  paginaActual = 0;
+  tamanoPagina = 10;
+  readonly tamanosPagina = [10, 20, 40, 100];
+  totalElementos = 0;
+  totalPaginas = 0;
+
   cargando = false;
   guardando = false;
   error = '';
@@ -120,9 +127,11 @@ export class AgendaComponent implements OnInit, OnDestroy {
   private mensajeTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
+    if (!this.puedeLeer) return;
+
     this.filtroTexto$
       .pipe(debounceTime(350), distinctUntilChanged(), takeUntil(this.destruir$))
-      .subscribe(() => this.cargarEventos());
+      .subscribe(() => { this.paginaActual = 0; this.cargarEventos(); });
 
     this.reconstruirVista();
     this.cargando = true;
@@ -155,6 +164,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
   cambiarVista(vista: VistaAgenda): void {
     if (this.vista === vista) return;
     this.vista = vista;
+    this.paginaActual = 0;
     this.reconstruirVista();
     this.cargarEventos();
   }
@@ -165,6 +175,7 @@ export class AgendaComponent implements OnInit, OnDestroy {
     else if (this.vista === 'SEMANA') f.setDate(f.getDate() - 7);
     else f.setDate(f.getDate() - 1);
     this.fechaReferencia = this.inicioDia(f);
+    this.paginaActual = 0;
     this.reconstruirVista();
     this.cargarEventos();
   }
@@ -175,17 +186,20 @@ export class AgendaComponent implements OnInit, OnDestroy {
     else if (this.vista === 'SEMANA') f.setDate(f.getDate() + 7);
     else f.setDate(f.getDate() + 1);
     this.fechaReferencia = this.inicioDia(f);
+    this.paginaActual = 0;
     this.reconstruirVista();
     this.cargarEventos();
   }
 
   irHoy(): void {
     this.fechaReferencia = this.inicioDia(new Date());
+    this.paginaActual = 0;
     this.reconstruirVista();
     this.cargarEventos();
   }
 
   aplicarFiltros(): void {
+    this.paginaActual = 0;
     this.cargarEventos();
   }
 
@@ -195,11 +209,13 @@ export class AgendaComponent implements OnInit, OnDestroy {
     this.filtroEstado = '';
     this.filtroExpediente = null;
     this.filtroParticipante = null;
+    this.paginaActual = 0;
     this.cargarEventos();
   }
 
   filtrarTipo(tipo: string): void {
     this.filtroTipo = this.filtroTipo === tipo ? '' : tipo;
+    this.paginaActual = 0;
     this.cargarEventos();
   }
 
@@ -218,16 +234,45 @@ export class AgendaComponent implements OnInit, OnDestroy {
       estado: this.filtroEstado,
       expedienteId: this.filtroExpediente,
       participanteId: this.filtroParticipante
-    }, 500, 0).pipe(finalize(() => {
+    }, this.paginaActual, this.tamanoPagina).pipe(finalize(() => {
       this.cargando = false;
       this.actualizarVista();
     })).subscribe({
-      next: eventos => {
-        this.eventos = eventos;
+      next: pagina => {
+        this.eventos = pagina.contenido;
+        this.paginaActual = pagina.pagina;
+        this.tamanoPagina = pagina.tamano;
+        this.totalElementos = pagina.totalElementos;
+        this.totalPaginas = pagina.totalPaginas;
         this.indexarEventos();
       },
       error: e => this.mostrarError(this.mensajeError(e))
     });
+  }
+
+  cambiarTamanoPagina(): void {
+    this.paginaActual = 0;
+    this.cargarEventos();
+  }
+
+  paginaAnterior(): void {
+    if (this.paginaActual <= 0) return;
+    this.paginaActual--;
+    this.cargarEventos();
+  }
+
+  paginaSiguiente(): void {
+    if (this.paginaActual + 1 >= this.totalPaginas) return;
+    this.paginaActual++;
+    this.cargarEventos();
+  }
+
+  get desdeRegistro(): number {
+    return this.totalElementos === 0 ? 0 : this.paginaActual * this.tamanoPagina + 1;
+  }
+
+  get hastaRegistro(): number {
+    return Math.min((this.paginaActual + 1) * this.tamanoPagina, this.totalElementos);
   }
 
   eventosDelDia(dia: DiaCalendario): EventoAgenda[] {
@@ -595,10 +640,15 @@ export class AgendaComponent implements OnInit, OnDestroy {
   }
 
   private refrescarDespuesDeCambio(): void {
-    forkJoin({ eventos: this.agendaService.listar({ ...this.filtroActual() }, 500, 0), resumen: this.agendaService.resumen() })
+    forkJoin({ eventos: this.agendaService.listar({ ...this.filtroActual() }, this.paginaActual, this.tamanoPagina), resumen: this.agendaService.resumen() })
       .subscribe({
         next: ({ eventos, resumen }) => {
-          this.eventos = eventos;
+          this.eventos = eventos.contenido;
+          this.paginaActual = eventos.pagina;
+          this.tamanoPagina = eventos.tamano;
+          this.totalElementos = eventos.totalElementos;
+          this.totalPaginas = eventos.totalPaginas;
+          this.indexarEventos();
           this.resumen = resumen;
           this.actualizarVista();
         },

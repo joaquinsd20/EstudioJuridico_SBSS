@@ -34,7 +34,7 @@ export class ActuacionesComponent implements OnInit {
   private solicitudListado = 0;
   private solicitudDetalle = 0;
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   readonly tamanosPagina = [10, 20, 40, 100];
   hayPaginaSiguiente = false;
   private readonly cdr = inject(ChangeDetectorRef);

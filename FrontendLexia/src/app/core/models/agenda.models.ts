@@ -39,6 +39,14 @@ export interface EventoAgenda {
   participantes: number;
 }
 
+export interface AgendaPagina {
+  contenido: EventoAgenda[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
+}
+
 export interface ParticipanteAgenda {
   id: number;
   nombre: string;

@@ -2,6 +2,7 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    <ng-container *ngIf="puedeLeer; else sinAcceso">
     <header class="agenda-header">
       <div>
         <div class="eyebrow">LEXIA · CONTROL DE COMPROMISOS</div>
@@ -233,6 +234,32 @@
         </section>
       </aside>
     </div>
+
+    <section class="agenda-pagination" *ngIf="totalElementos > 0">
+      <div class="pagination-info">
+        <span>Mostrando {{ desdeRegistro }}–{{ hastaRegistro }} de {{ totalElementos }} eventos</span>
+        <label>
+          Por página
+          <select [(ngModel)]="tamanoPagina" (change)="cambiarTamanoPagina()">
+            <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+          </select>
+        </label>
+      </div>
+      <div class="pagination-actions">
+        <button type="button" (click)="paginaAnterior()" [disabled]="paginaActual === 0">Anterior</button>
+        <span>Página {{ totalPaginas === 0 ? 0 : paginaActual + 1 }} de {{ totalPaginas }}</span>
+        <button type="button" (click)="paginaSiguiente()" [disabled]="paginaActual + 1 >= totalPaginas">Siguiente</button>
+      </div>
+    </section>
+    </ng-container>
+
+    <ng-template #sinAcceso>
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de AGENDA para consultar este módulo.</p>
+      </section>
+    </ng-template>
   </main>
 </div>
 

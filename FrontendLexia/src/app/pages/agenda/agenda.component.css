@@ -1550,3 +1550,58 @@ button:disabled { cursor: not-allowed; opacity: .55; }
   cursor: pointer;
   padding: 3px 4px;
 }
+
+
+/* =========================================================
+   PAGINACIÓN DE AGENDA
+   ========================================================= */
+.agenda-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+  padding: 14px 18px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.pagination-info, .pagination-actions { display: flex; align-items: center; gap: 12px; }
+.pagination-info { color: #64748b; font-size: 13px; }
+.pagination-info label { display: flex; align-items: center; gap: 8px; }
+.pagination-info select { border: 1px solid #cbd5e1; border-radius: 8px; padding: 7px 10px; background: #fff; color: #334155; }
+.pagination-actions span { color: #64748b; font-size: 13px; }
+.pagination-actions button { border: 1px solid #cbd5e1; border-radius: 8px; padding: 8px 13px; background: #fff; color: #334155; cursor: pointer; }
+.pagination-actions button:disabled { opacity: .45; cursor: not-allowed; }
+
+/* =========================================================
+   ACCESO POR ROLES
+   ========================================================= */
+.acceso-restringido {
+  max-width: 600px;
+  margin: 115px auto 0;
+  padding: 42px 32px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(15, 23, 42, 0.04);
+}
+.acceso-restringido .acceso-icono { font-size: 22px; margin-bottom: 14px; }
+.acceso-restringido h1 { margin: 0 0 14px; color: #1e293b; font-size: 24px; }
+.acceso-restringido p { margin: 0; color: #94a3b8; font-size: 14px; }
+
+:host-context(.tema-oscuro-global) .agenda-pagination,
+:host-context(.tema-oscuro-global) .pagination-actions button,
+:host-context(.tema-oscuro-global) .pagination-info select,
+:host-context(.tema-oscuro-global) .acceso-restringido {
+  background: #111827; border-color: #334155; color: #e5e7eb;
+}
+:host-context(.tema-oscuro-global) .acceso-restringido h1 { color: #e5e7eb; }
+:host-context(.tema-oscuro-global) .acceso-restringido p { color: #94a3b8; }
+
+@media (max-width: 720px) {
+  .agenda-pagination { align-items: stretch; flex-direction: column; }
+  .pagination-info, .pagination-actions { justify-content: space-between; flex-wrap: wrap; }
+}

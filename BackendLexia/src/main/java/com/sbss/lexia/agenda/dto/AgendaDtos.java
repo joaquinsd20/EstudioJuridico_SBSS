@@ -1,11 +1,12 @@
 package com.sbss.lexia.agenda.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDateTime;
-import java.util.List;
 
 /** Contratos HTTP del módulo Agenda. El Monitor Judicial se implementa aparte. */
 public final class AgendaDtos {
@@ -19,6 +20,14 @@ public final class AgendaDtos {
             long audienciasMes,
             long pendientesVerificacion,
             long totalMes) {
+    }
+
+    public record PaginaEventos(
+            List<EventoLista> contenido,
+            int pagina,
+            int tamano,
+            long totalElementos,
+            int totalPaginas) {
     }
 
     public record EventoLista(

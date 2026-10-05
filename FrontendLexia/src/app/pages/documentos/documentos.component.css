@@ -3680,3 +3680,133 @@ button:disabled {
 :host-context(.tema-oscuro-global) .document-confirm-spinner {
   border-top-color: #334155;
 }
+
+
+/* =========================================================
+   PAGINACION - DISEÑO UNIFICADO
+   ========================================================= */
+.paginacion-documentos {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 16px;
+  margin: 0;
+  border-top: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.paginacion-documentos label,
+.paginacion-documentos .tamano-pagina {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.paginacion-documentos select {
+  min-width: 66px;
+  height: 36px;
+  padding: 0 28px 0 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+}
+
+.paginacion-documentos select:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .12);
+}
+
+.paginacion-documentos > span {
+  min-width: 110px;
+  text-align: center;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.paginacion-documentos button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, box-shadow .18s ease;
+}
+
+.paginacion-documentos button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1e293b;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, .06);
+}
+
+.paginacion-documentos button:disabled {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+  color: #a8b1bf;
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-documentos {
+  background: #111827;
+  border-top-color: #334155;
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-documentos label,
+:host-context(.tema-oscuro-global) .paginacion-documentos .tamano-pagina,
+:host-context(.tema-oscuro-global) .paginacion-documentos > span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-documentos select,
+:host-context(.tema-oscuro-global) .paginacion-documentos button {
+  background: #0f172a;
+  border-color: #334155;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-documentos button:hover:not(:disabled) {
+  background: #1e293b;
+  border-color: #475569;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-documentos button:disabled {
+  background: #111827;
+  border-color: #273449;
+  color: #64748b;
+}
+
+@media (max-width: 720px) {
+  .paginacion-documentos {
+    justify-content: center;
+    padding: 14px 12px;
+  }
+
+  .paginacion-documentos label,
+  .paginacion-documentos .tamano-pagina {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+}
+

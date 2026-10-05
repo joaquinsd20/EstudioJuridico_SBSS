@@ -2171,3 +2171,264 @@
 :host-context(.tema-oscuro-global) .acceso-restringido p {
   color: #94a3b8;
 }
+
+/* =========================================================
+   PAGINACIÓN
+   ========================================================= */
+
+.paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-top: 18px;
+  padding: 16px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+}
+
+/* REGISTROS POR PÁGINA */
+.paginacion-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #475569;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.paginacion-info select {
+  min-width: 72px;
+  height: 40px;
+  padding: 0 10px;
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.paginacion-info select:hover {
+  border-color: #94a3b8;
+}
+
+.paginacion-info select:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+}
+
+/* CONTROLES DE PAGINACIÓN */
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.paginacion-controles span {
+  color: #475569;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+
+.paginacion-controles button {
+  min-width: 100px;
+  height: 40px;
+  padding: 0 16px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #ffffff;
+  color: #334155;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.paginacion-controles button:hover:not(:disabled) {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+.paginacion-controles button:focus-visible {
+  outline: none;
+  border-color: #64748b;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+}
+
+.paginacion-controles button:disabled {
+  background: #f8fafc;
+  color: #cbd5e1;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+
+/* =========================================================
+   MODO OSCURO - PAGINACIÓN
+   ========================================================= */
+
+:host-context(.tema-oscuro-global) .paginacion {
+  background: #111827;
+  border-color: #334155;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-info,
+:host-context(.tema-oscuro-global) .paginacion-controles span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-info select {
+  background: #1e293b;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-info select:hover {
+  border-color: #64748b;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-info select:focus {
+  border-color: #94a3b8;
+  box-shadow: 0 0 0 2px rgba(148, 163, 184, 0.12);
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles button {
+  background: #1e293b;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles button:hover:not(:disabled) {
+  background: #334155;
+  border-color: #64748b;
+  color: #ffffff;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles button:disabled {
+  background: #111827;
+  color: #64748b;
+  border-color: #334155;
+  opacity: 0.8;
+}
+
+
+/* =========================================================
+   RESPONSIVE - PAGINACIÓN
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .paginacion {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .paginacion-info {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .paginacion-controles {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .paginacion-info,
+  .paginacion-controles span {
+    font-size: 15px;
+  }
+
+  .paginacion-info select,
+  .paginacion-controles button {
+    font-size: 15px;
+  }
+
+  .paginacion-controles button {
+    min-width: 95px;
+  }
+}
+
+/* TEXTO "POR PÁGINA" */
+.paginacion-controles label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #475569;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* SELECT 10, 20, 40, 100 */
+.paginacion-controles label select {
+  min-width: 72px;
+  height: 40px;
+  padding: 0 10px;
+
+  background: #ffffff;
+  color: #334155;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 7px;
+
+  font-size: 16px;
+  font-weight: 500;
+
+  cursor: pointer;
+  outline: none;
+}
+
+.paginacion-controles label select:hover {
+  border-color: #94a3b8;
+}
+
+.paginacion-controles label select:focus {
+  border-color: #64748b;
+  box-shadow: 0 0 0 2px rgba(100, 116, 139, 0.12);
+}
+
+
+/* =========================================================
+   MODO OSCURO
+   ========================================================= */
+
+:host-context(.tema-oscuro-global) .paginacion-controles label {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles label select {
+  background: #1e293b;
+  color: #e5e7eb;
+  border-color: #475569;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles label select:hover,
+:host-context(.tema-oscuro-global) .paginacion-controles label select:focus {
+  border-color: #64748b;
+}

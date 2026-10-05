@@ -1,28 +1,31 @@
 package com.sbss.lexia.agenda.repository;
 
-import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
-import com.sbss.lexia.agenda.dto.AgendaDtos.EventoLista;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ExpedienteOpcion;
-import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Participante;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Reprogramacion;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
-import com.sbss.lexia.agenda.dto.AgendaDtos.UsuarioOpcion;
-import com.sbss.lexia.shared.dto.Limites;
-import com.sbss.lexia.shared.security.SesionActual;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+
+import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
+import com.sbss.lexia.agenda.dto.AgendaDtos.EventoLista;
+import com.sbss.lexia.agenda.dto.AgendaDtos.ExpedienteOpcion;
+import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Participante;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Reprogramacion;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
+import com.sbss.lexia.agenda.dto.AgendaDtos.UsuarioOpcion;
+import com.sbss.lexia.shared.dto.Limites;
+import com.sbss.lexia.shared.security.SesionActual;
+
+import lombok.RequiredArgsConstructor;
 
 @Repository
 @RequiredArgsConstructor
@@ -98,6 +101,36 @@ public class AgendaRepositoryJdbc {
             p.addValue("desplazamiento", Limites.desplazamiento(desplazamiento));
         }
         return jdbc.query(sql.toString(), p, (rs, n) -> mapEvento(rs));
+    }
+
+    public long contar(
+            LocalDateTime desde, LocalDateTime hasta, String texto, String tipo, String estado,
+            Long expedienteId, Long participanteId, boolean verTodos, boolean verConfidenciales) {
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*)
+                  FROM eventos_agenda ev
+                  LEFT JOIN expedientes e ON e.id = ev.expediente_id
+                  LEFT JOIN clientes c ON c.id = e.cliente_id
+                 WHERE ev.estudio_id = :estudioId
+                   AND ev.activo = 1
+                   AND ev.fecha_inicio <= :hasta
+                   AND ev.fecha_fin >= :desde
+                """);
+        MapSqlParameterSource p = base().addValue("desde", desde).addValue("hasta", hasta);
+        aplicarVisibilidad(sql, p, verTodos, verConfidenciales);
+        if (texto != null && !texto.isBlank()) {
+            sql.append(" AND LOWER(CONCAT_WS(' ', ev.titulo, ev.descripcion, ev.ubicacion, e.codigo_interno, e.numero_expediente, c.nombre_busqueda)) LIKE :texto");
+            p.addValue("texto", "%" + texto.trim().toLowerCase() + "%");
+        }
+        if (tipo != null && !tipo.isBlank()) { sql.append(" AND ev.tipo = :tipo"); p.addValue("tipo", tipo.trim().toUpperCase()); }
+        if (estado != null && !estado.isBlank()) { sql.append(" AND ev.estado = :estado"); p.addValue("estado", estado.trim().toUpperCase()); }
+        if (expedienteId != null) { sql.append(" AND ev.expediente_id = :expedienteId"); p.addValue("expedienteId", expedienteId); }
+        if (participanteId != null) {
+            sql.append(" AND EXISTS (SELECT 1 FROM evento_participantes ep WHERE ep.evento_id=ev.id AND ep.usuario_id=:participanteId)");
+            p.addValue("participanteId", participanteId);
+        }
+        Long total = jdbc.queryForObject(sql.toString(), p, Long.class);
+        return total == null ? 0L : total;
     }
 
     public Resumen resumen(boolean verTodos, boolean verConfidenciales) {

@@ -53,7 +53,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   resumen: ExpedienteResumen = { total: 0, activos: 0, enTramite: 0, criticos: 0 };
   expedientes: ExpedienteLista[] = [];
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   readonly tamanosPagina = [10, 20, 40, 100];
   totalElementos = 0;
   totalPaginas = 0;

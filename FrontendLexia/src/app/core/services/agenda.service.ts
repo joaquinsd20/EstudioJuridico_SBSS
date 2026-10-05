@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import {
   AgendaCatalogos,
   AgendaFiltro,
+  AgendaPagina,
   AgendaResumen,
   EventoAgenda,
   EventoAgendaActualizar,
@@ -18,19 +19,19 @@ export class AgendaService {
   private readonly base = `${environment.apiUrl}/agenda`;
   private catalogosCache$?: Observable<AgendaCatalogos>;
 
-  listar(filtro: AgendaFiltro, limite = 500, desplazamiento = 0): Observable<EventoAgenda[]> {
+  listar(filtro: AgendaFiltro, pagina = 0, tamano = 10): Observable<AgendaPagina> {
     let params = new HttpParams()
       .set('desde', filtro.desde)
-      .set('hasta', filtro.hasta);
+      .set('hasta', filtro.hasta)
+      .set('pagina', String(Math.max(0, pagina)))
+      .set('tamano', String(tamano));
 
     if (filtro.texto?.trim()) params = params.set('texto', filtro.texto.trim());
     if (filtro.tipo) params = params.set('tipo', filtro.tipo);
     if (filtro.estado) params = params.set('estado', filtro.estado);
     if (filtro.expedienteId) params = params.set('expedienteId', String(filtro.expedienteId));
     if (filtro.participanteId) params = params.set('participanteId', String(filtro.participanteId));
-    params = params.set('limite', String(Math.max(1, Math.min(limite, 500))));
-    params = params.set('desplazamiento', String(Math.max(0, desplazamiento)));
-    return this.http.get<EventoAgenda[]>(this.base, { params });
+    return this.http.get<AgendaPagina>(this.base, { params });
   }
 
   resumen(): Observable<AgendaResumen> {

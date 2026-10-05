@@ -42,7 +42,7 @@ export class ClientesComponent implements OnInit {
 
   filtros = { documento: '', nombre: '', tipoPersona: '', estado: '' };
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   readonly tamanosPagina = [10, 20, 40, 100];
   totalPaginas = 0;
   totalElementos = 0;

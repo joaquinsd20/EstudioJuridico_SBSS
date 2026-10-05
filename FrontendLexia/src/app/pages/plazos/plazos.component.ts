@@ -94,7 +94,7 @@ export class PlazosComponent implements OnInit, OnDestroy {
 
   readonly tamanosPagina = [10, 20, 40, 100];
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   haySiguiente = false;
 
   analitica: PlazoAnalitica = { semanas: [], evolucion: [] };

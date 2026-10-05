@@ -1,18 +1,7 @@
 package com.sbss.lexia.agenda.controller;
 
-import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
-import com.sbss.lexia.agenda.dto.AgendaDtos.EventoDetalle;
-import com.sbss.lexia.agenda.dto.AgendaDtos.EventoLista;
-import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
-import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
-import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
-import com.sbss.lexia.agenda.service.AgendaService;
-import jakarta.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.List;
-import lombok.RequiredArgsConstructor;
+
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,6 +16,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sbss.lexia.agenda.dto.AgendaDtos.ActualizarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Catalogos;
+import com.sbss.lexia.agenda.dto.AgendaDtos.EventoDetalle;
+import com.sbss.lexia.agenda.dto.AgendaDtos.GuardarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.PaginaEventos;
+import com.sbss.lexia.agenda.dto.AgendaDtos.ReprogramarRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.ResultadoRequest;
+import com.sbss.lexia.agenda.dto.AgendaDtos.Resumen;
+import com.sbss.lexia.agenda.service.AgendaService;
+
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+
 @RestController
 @RequestMapping("/api/v1/agenda")
 @RequiredArgsConstructor
@@ -36,7 +38,7 @@ public class AgendaController {
 
     @GetMapping
     @PreAuthorize("hasAuthority('AGENDA_LEER')")
-    public List<EventoLista> listar(
+    public PaginaEventos listar(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime desde,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime hasta,
             @RequestParam(required = false) String texto,
@@ -44,10 +46,9 @@ public class AgendaController {
             @RequestParam(required = false) String estado,
             @RequestParam(required = false) Long expedienteId,
             @RequestParam(required = false) Long participanteId,
-            @RequestParam(defaultValue = "250") int limite,
-            @RequestParam(defaultValue = "0") int desplazamiento) {
-        return service.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId,
-                limite, desplazamiento);
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano) {
+        return service.listar(desde, hasta, texto, tipo, estado, expedienteId, participanteId, pagina, tamano);
     }
 
     @GetMapping("/resumen")

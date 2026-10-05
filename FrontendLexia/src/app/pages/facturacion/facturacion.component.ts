@@ -50,7 +50,7 @@ export class FacturacionComponent
   // Paginación real: el backend ya soporta LIMIT/OFFSET.
   readonly tamanosPagina = [10, 20, 40, 100];
   pagina = 0;
-  tamanoPagina = 20;
+  tamanoPagina = 10;
   haySiguiente = false;
 
   honorarios: HonorarioLista[] = [];
