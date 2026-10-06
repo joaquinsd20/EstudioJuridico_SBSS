@@ -2,13 +2,14 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    @if (puedeLeer) {
     <header class="documentos-header">
       <div>
         <h1>Gestión Documental Jurídica</h1>
         <p>Organiza, versiona, exporta y consulta los documentos vinculados a los expedientes.</p>
       </div>
 
-      <button type="button" class="btn-primary" (click)="abrirNuevo()">
+      <button *ngIf="puedeGestionar" type="button" class="btn-primary" (click)="abrirNuevo()">
         <span class="plus">+</span>
         Nuevo Documento
       </button>
@@ -235,8 +236,8 @@
 
                     <td>
                       <div class="actions" (click)="$event.stopPropagation()">
-                        <button type="button" title="Visualizar" (click)="visualizar(documento)">◉</button>
-                        <button type="button" title="Descargar" (click)="descargar(documento)">↓</button>
+                        <button *ngIf="puedeDescargar" type="button" title="Visualizar" (click)="visualizar(documento)">◉</button>
+                        <button *ngIf="puedeDescargar" type="button" title="Descargar" (click)="descargar(documento)">↓</button>
                         <button
                           type="button"
                           class="action-menu-trigger"
@@ -309,8 +310,8 @@
           </div>
 
           <div class="detail-actions">
-            <button type="button" class="btn-secondary" (click)="visualizar()">Visualizar</button>
-            <button type="button" class="btn-secondary" (click)="descargar()">Descargar</button>
+            <button *ngIf="puedeDescargar" type="button" class="btn-secondary" (click)="visualizar()">Visualizar</button>
+            <button *ngIf="puedeDescargar" type="button" class="btn-secondary" (click)="descargar()">Descargar</button>
           </div>
 
           <div class="detail-section">
@@ -340,17 +341,17 @@
           </div>
 
           <div class="detail-command-grid">
-            <button type="button" (click)="abrirEditarInformacion()">Editar información</button>
-            <button type="button"
+            <button *ngIf="puedeGestionar" type="button" (click)="abrirEditarInformacion()">Editar información</button>
+            <button *ngIf="puedeDescargar" type="button"
                     [disabled]="!puedeExportar(seleccionado)"
                     [title]="puedeExportar(seleccionado) ? 'Exportar a PDF' : 'Audio y video se descargan en su formato original'"
                     (click)="exportar(seleccionado, 'pdf')">Exportar PDF</button>
-            <button type="button"
+            <button *ngIf="puedeDescargar" type="button"
                     [disabled]="!puedeExportar(seleccionado)"
                     [title]="puedeExportar(seleccionado) ? 'Exportar a Word' : 'Audio y video se descargan en su formato original'"
                     (click)="exportar(seleccionado, 'docx')">Exportar Word</button>
             <button type="button" (click)="abrirVersiones()">Versiones</button>
-            <button type="button" (click)="abrirSubirVersion()">Nueva versión</button>
+            <button *ngIf="puedeGestionar" type="button" (click)="abrirSubirVersion()">Nueva versión</button>
           </div>
         } @else {
           <div class="empty-detail">
@@ -359,6 +360,13 @@
         }
       </aside>
     </div>
+    } @else {
+      <section class="no-access-card">
+        <div class="no-access-icon">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de DOCUMENTOS para consultar este módulo.</p>
+      </section>
+    }
   </main>
 </div>
 
@@ -370,20 +378,20 @@
     [style.left.px]="menuAccionesLeft"
     (click)="$event.stopPropagation()"
   >
-    <button type="button" (click)="visualizar(menuAccionesDocumento); cerrarMenuAcciones()">Visualizar</button>
-    <button type="button" (click)="abrirEditarInformacion(menuAccionesDocumento); cerrarMenuAcciones()">Editar información</button>
-    <button type="button" (click)="descargar(menuAccionesDocumento); cerrarMenuAcciones()">Descargar</button>
-    <button type="button"
+    <button *ngIf="puedeDescargar" type="button" (click)="visualizar(menuAccionesDocumento); cerrarMenuAcciones()">Visualizar</button>
+    <button *ngIf="puedeGestionar" type="button" (click)="abrirEditarInformacion(menuAccionesDocumento); cerrarMenuAcciones()">Editar información</button>
+    <button *ngIf="puedeDescargar" type="button" (click)="descargar(menuAccionesDocumento); cerrarMenuAcciones()">Descargar</button>
+    <button *ngIf="puedeDescargar" type="button"
             [disabled]="!puedeExportar(menuAccionesDocumento)"
             [title]="puedeExportar(menuAccionesDocumento) ? 'Exportar a PDF' : 'Audio y video se descargan en su formato original'"
             (click)="exportar(menuAccionesDocumento, 'pdf'); cerrarMenuAcciones()">Exportar PDF</button>
-    <button type="button"
+    <button *ngIf="puedeDescargar" type="button"
             [disabled]="!puedeExportar(menuAccionesDocumento)"
             [title]="puedeExportar(menuAccionesDocumento) ? 'Exportar a Word' : 'Audio y video se descargan en su formato original'"
             (click)="exportar(menuAccionesDocumento, 'docx'); cerrarMenuAcciones()">Exportar Word</button>
-    <button type="button" (click)="abrirSubirVersion(menuAccionesDocumento); cerrarMenuAcciones()">Subir nueva versión</button>
+    <button *ngIf="puedeGestionar" type="button" (click)="abrirSubirVersion(menuAccionesDocumento); cerrarMenuAcciones()">Subir nueva versión</button>
     <button type="button" (click)="abrirVersiones(menuAccionesDocumento); cerrarMenuAcciones()">Historial de versiones</button>
-    <button type="button" class="danger-link" (click)="enviarPapelera(menuAccionesDocumento); cerrarMenuAcciones()">Enviar a papelera</button>
+    <button *ngIf="puedeGestionar" type="button" class="danger-link" (click)="enviarPapelera(menuAccionesDocumento); cerrarMenuAcciones()">Enviar a papelera</button>
   </div>
 }
 
@@ -547,7 +555,7 @@
       <header class="modal-header">
         <div><h2>{{ seleccionado.nombre }}</h2><p>{{ seleccionado.nombreArchivo }}</p></div>
         <div class="header-actions">
-          <button type="button" class="btn-light" (click)="descargar()">Descargar</button>
+          <button *ngIf="puedeDescargar" type="button" class="btn-light" (click)="descargar()">Descargar</button>
           <button type="button" (click)="cerrarVisor()">×</button>
         </div>
       </header>
@@ -611,7 +619,7 @@
               @if (version.vigente) {
                 <strong>Vigente</strong>
               } @else {
-                <button type="button" class="version-restore-button" [disabled]="guardando" (click)="regresarVersion(version)">
+                <button *ngIf="puedeGestionar" type="button" class="version-restore-button" [disabled]="guardando" (click)="regresarVersion(version)">
                   Regresar a esta versión
                 </button>
               }
@@ -898,8 +906,8 @@
               <span>días restantes</span>
             </div>
             <div class="trash-actions">
-              <button type="button" class="btn-light" [disabled]="guardando" (click)="restaurar(documento)">Restaurar</button>
-              <button type="button" class="btn-danger" [disabled]="guardando" (click)="eliminarDefinitivamente(documento)">Eliminar definitivamente</button>
+              <button *ngIf="puedeGestionar" type="button" class="btn-light" [disabled]="guardando" (click)="restaurar(documento)">Restaurar</button>
+              <button *ngIf="puedeEliminarDefinitivamente" type="button" class="btn-danger" [disabled]="guardando" (click)="eliminarDefinitivamente(documento)">Eliminar definitivamente</button>
             </div>
           </article>
         } @empty {

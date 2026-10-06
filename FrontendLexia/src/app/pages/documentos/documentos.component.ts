@@ -26,6 +26,7 @@ import {
   UsuarioOpcion
 } from '../../core/models/documento.models';
 import { DocumentoService } from '../../core/services/documento.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PanelComponent } from '../panel/panel.component';
 import { environment } from '../../../environments/environment';
 
@@ -38,6 +39,11 @@ import { environment } from '../../../environments/environment';
 })
 export class DocumentosComponent implements OnInit, OnDestroy {
   private readonly documentoService = inject(DocumentoService);
+  readonly auth = inject(AuthService);
+  readonly puedeLeer = this.auth.tienePermiso('DOCUMENTO_LEER');
+  readonly puedeGestionar = this.auth.tienePermiso('DOCUMENTO_CREAR');
+  readonly puedeDescargar = this.auth.tienePermiso('DOCUMENTO_DESCARGAR');
+  readonly puedeEliminarDefinitivamente = this.auth.tieneRol('ADMINISTRADOR');
   private readonly http = inject(HttpClient);
   private readonly sanitizer = inject(DomSanitizer);
   private readonly cdr = inject(ChangeDetectorRef);
@@ -151,6 +157,11 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   private mensajeTimer: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
+    // Si no puede consultar Documentos, no hacemos llamadas que terminarían en 403.
+    if (!this.puedeLeer) {
+      return;
+    }
+
     // scroll no burbujea normalmente; con capture=true también detectamos
     // el desplazamiento interno de .table-wrapper.
     document.addEventListener('scroll', this.onAnyScroll, true);
@@ -168,6 +179,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   cargarTodo(): void {
+    if (!this.puedeLeer) return;
     const solicitud = ++this.solicitudListado;
     this.pagina = 0;
     this.cargando = true;
@@ -437,6 +449,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
 
 
   abrirNuevo(): void {
+    if (!this.puedeGestionar) return;
     this.formNuevo = this.nuevoFormulario();
     this.archivoNuevo = null;
     this.actuaciones = [];
@@ -472,6 +485,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   guardarNuevo(): void {
+    if (!this.puedeGestionar) return;
     if (!this.formNuevo.expedienteId || !this.formNuevo.nombre.trim() || !this.archivoNuevo) {
       this.mostrarError('Completa expediente, nombre y archivo.');
       return;
@@ -507,6 +521,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   abrirEditarInformacion(documento = this.seleccionado): void {
+    if (!this.puedeGestionar) return;
     if (!documento) return;
     this.seleccionado = documento;
     this.formEditar = {
@@ -532,6 +547,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   guardarEdicionInformacion(): void {
+    if (!this.puedeGestionar) return;
     if (!this.seleccionado || !this.formEditar) return;
 
     this.guardando = true;
@@ -554,6 +570,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   visualizar(documento = this.seleccionado): void {
+    if (!this.puedeDescargar) return;
     if (!documento) return;
 
     // Abrimos el visor inmediatamente. Así el primer clic siempre responde
@@ -629,6 +646,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   abrirSubirVersion(documento = this.seleccionado): void {
+    if (!this.puedeGestionar) return;
     if (!documento) return;
     this.seleccionado = documento;
     this.archivoVersion = null;
@@ -658,6 +676,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   subirVersion(): void {
+    if (!this.puedeGestionar) return;
     if (!this.seleccionado || !this.archivoVersion) {
       this.mostrarError('Selecciona el archivo de la nueva versión.');
       return;
@@ -711,6 +730,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   confirmarRegresoVersion(): void {
+    if (!this.puedeGestionar) return;
     const version = this.versionPendienteRestaurar;
     const documento = this.seleccionado;
 
@@ -745,6 +765,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   async descargar(documento = this.seleccionado): Promise<void> {
+    if (!this.puedeDescargar) return;
     if (!documento) return;
 
     this.limpiarMensajes();
@@ -769,6 +790,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   async exportar(documento: Documento | null, formato: 'pdf' | 'docx'): Promise<void> {
+    if (!this.puedeDescargar) return;
     if (!documento) return;
 
     this.limpiarMensajes();
@@ -793,6 +815,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   enviarPapelera(documento: Documento): void {
+    if (!this.puedeGestionar) return;
     if (this.guardando) return;
     this.documentoPendientePapelera = documento;
     this.modalConfirmarPapelera = true;
@@ -844,6 +867,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   restaurar(documento: Documento): void {
+    if (!this.puedeGestionar) return;
     this.guardando = true;
     this.documentoService.restaurar(documento.uuid)
       .pipe(finalize(() => {
@@ -862,6 +886,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   eliminarDefinitivamente(documento: Documento): void {
+    if (!this.puedeEliminarDefinitivamente) return;
     if (this.guardando) return;
     this.documentoPendienteEliminar = documento;
     this.modalConfirmarEliminacion = true;
@@ -876,6 +901,7 @@ export class DocumentosComponent implements OnInit, OnDestroy {
   }
 
   confirmarEliminacionDefinitiva(): void {
+    if (!this.puedeEliminarDefinitivamente) return;
     const documento = this.documentoPendienteEliminar;
     if (!documento || this.guardando) return;
 
