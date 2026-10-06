@@ -11,7 +11,13 @@
 #   3. Las restricciones se aplican de verdad (pruebas negativas)
 #   4. El computo de plazos habiles funciona
 #   5. El flujo de aprobacion del calendario funciona
-#   6. La semilla es idempotente y no depende de la fecha
+#   6. El dashboard no depende de la fecha de hoy
+#   7. El indice de plazos se usa de verdad
+#   8. Biblioteca Juridica y Monitor Judicial tienen sus datos
+#
+# El paso 6 y el 8 comparten una idea: una comprobacion que pasa hoy y falla la
+# semana siguiente no esta comprobando nada. Los contadores "de hoy" del paso 8
+# se miden sobre el ultimo dia con consultas, no sobre CURRENT_DATE.
 # =============================================================================
 set -uo pipefail
 
@@ -110,6 +116,56 @@ echo "  -> Volver a ejecutar este script dentro de una semana debe dar lo mismo.
 titulo "7. El indice caliente se usa"
 PLAN=$(q "EXPLAIN SELECT id FROM plazos WHERE fecha_vencimiento < CURRENT_DATE AND estado <> 'CUMPLIDO';" | awk -F'\t' '{print $5" via "$7}')
 echo "  Acceso: ${PLAN}   (el tipo NO debe ser 'ALL')"
+
+titulo "8. Biblioteca Juridica y Monitor Judicial"
+# Datos de R__seed_zz_biblioteca_monitor.sql: las tres tablas que V10 y V17
+# crean vacias y que ninguna otra semilla rellenaba.
+#
+# OJO con los dos ultimos: los marcadores "movimientos de hoy" y "resoluciones de
+# hoy" del Dashboard se calculan contra CURRENT_DATE, pero la semilla escribe
+# esas tres filas con NOW(3). Contado contra la fecha de HOY, este script pasaria
+# el dia de la carga y fallaria a la semana. Por eso se cuentan sobre el ultimo
+# dia con consultas, que es el dia de la ultima corrida de la semilla: dan 3 y 2
+# hoy, y siguen dando 3 y 2 dentro de un mes. Es el mismo criterio del paso 6.
+# Sin punto y coma: la variable se interpola DENTRO de un subquery, y un
+# `(SELECT ...;)` es error de sintaxis en MySQL.
+ULTIMO="SELECT MAX(DATE(fecha_consulta)) FROM monitor_consultas"
+
+check "Recursos en la biblioteca" \
+  "$(q "SELECT COUNT(*) FROM recursos_juridicos;")" "15"
+# `estado` y `activo` son dos columnas distintas a proposito: el ARCHIVADO sigue
+# activo. recursosActivos del endpoint cuenta por `estado`, no por `activo`
+# (RecursoJuridicoRepository L95), y comprobar la de `activo` daria 15 y ocultaria
+# que el ARCHIVADO dejo de hacer su trabajo.
+check "Recursos con estado ACTIVO" \
+  "$(q "SELECT COUNT(*) FROM recursos_juridicos WHERE estado='ACTIVO';")" "14"
+check "Exactamente un ARCHIVADO" \
+  "$(q "SELECT COUNT(*) FROM recursos_juridicos WHERE estado='ARCHIVADO';")" "1"
+check "Recursos con archivo" \
+  "$(q "SELECT COUNT(*) FROM recursos_juridicos WHERE nombre_archivo IS NOT NULL AND nombre_archivo <> '';")" "10"
+check "Categorias distintas" \
+  "$(q "SELECT COUNT(DISTINCT categoria) FROM recursos_juridicos;")" "9"
+check "Expedientes monitoreados" \
+  "$(q "SELECT COUNT(*) FROM monitor_expedientes WHERE activo = 1;")" "8"
+# Los tres estados del CHECK, uno por fila: sin eso el desplegable de estados
+# del Monitor se prueba con un solo valor.
+check "Monitores ACTIVO / PAUSADO / CERRADO" \
+  "$(q "SELECT COUNT(DISTINCT estado) FROM monitor_expedientes;")" "3"
+check "Consultas registradas" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas;")" "25"
+check "Consultas pendientes de verificar" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas WHERE estado_verificacion = 'PENDIENTE';")" "6"
+check "Movimientos del ultimo dia de la semilla" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas WHERE hubo_movimiento = 1 AND DATE(fecha_consulta) = (${ULTIMO});")" "3"
+check "Resoluciones del ultimo dia de la semilla" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas WHERE nueva_resolucion = 1 AND DATE(fecha_consulta) = (${ULTIMO});")" "2"
+# Cada consulta con resolucion_id apunta a la de SU expediente. Si alguien
+# reordena los IDs de la semilla principal esto es lo primero que se rompe.
+check "Consultas enlazadas a su resolucion" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas c JOIN resoluciones r ON r.id = c.resolucion_id AND r.expediente_id = c.expediente_id WHERE c.resolucion_id IS NOT NULL;")" \
+  "$(q "SELECT COUNT(*) FROM monitor_consultas WHERE resolucion_id IS NOT NULL;")"
+echo "  Los 10 con nombre_archivo viven en storage/biblioteca/BIBLIOTECA/ y NO"
+echo "  estan en git: en un clone nuevo se listan pero 'Ver PDF' da 404."
 
 printf '\n\033[1m== RESULTADO: %s comprobaciones OK, %s fallas ==\033[0m\n' "$OK" "$FALLOS"
 [ "$FALLOS" -eq 0 ] || exit 1

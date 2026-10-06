@@ -30,6 +30,10 @@ HELP.md
 # Sin esta regla vuelven solos en el primer `git add -A` de quien suba un
 # documento en local.
 BackendLexia/storage/
+# La misma carpeta, en la raiz del repo: es donde escribe el backend cuando se
+# arranca desde ahi (VS Code). Sin esta linea los PDF de la semilla de
+# Biblioteca Juridica se colaban en el primer `git add -A`.
+/storage/
 
 # =========================
 # IDEs
