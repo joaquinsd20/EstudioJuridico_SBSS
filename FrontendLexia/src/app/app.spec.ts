@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      // App inyecta Router para la barra superior movil y para cerrar el
+      // cajon al navegar; sin esto el TestBed no puede construirlo.
+      providers: [provideRouter([])]
     }).compileComponents();
   });
 

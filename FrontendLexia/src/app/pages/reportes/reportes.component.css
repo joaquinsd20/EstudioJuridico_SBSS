@@ -1204,11 +1204,74 @@
   border-color: #4b5563 !important;
 }
 
+@media (max-width: 1280px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 1200px) {
   .reportes-wrapper {
     flex-direction: column;
   }
   .details-sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 820px) {
+  .main-content {
+    padding: 20px 16px 32px;
+  }
+
+  .header-section {
+    padding: 16px;
+  }
+
+  .filters-row {
+    gap: 10px;
+  }
+
+  .filter-group {
+    flex: 1 1 150px;
+  }
+
+  .filter-group select,
+  .filter-group input {
+    width: 100%;
+  }
+
+  .btn-limpiar {
+    align-self: stretch;
+  }
+
+  .table-search-box {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .input-table-search {
+    width: 100%;
+  }
+
+  .donut-container {
+    height: auto;
+    flex-wrap: wrap;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 560px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .columns-chart {
+    height: 150px;
+  }
+
+  .modal-box,
+  .modal-box.modal-lg {
     width: 100%;
   }
 }

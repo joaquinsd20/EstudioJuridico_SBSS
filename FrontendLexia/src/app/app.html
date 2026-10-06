@@ -1,1 +1,25 @@
+@if (barraVisible()) {
+
+  <header class="topbar-movil">
+
+    <button
+      type="button"
+      class="topbar-toggle"
+      (click)="alternarMenu()"
+      [attr.aria-expanded]="menuAbierto()"
+      aria-label="Abrir o cerrar el menu de navegacion"
+    >
+      <span class="topbar-toggle-bar" [class.open]="menuAbierto()"></span>
+    </button>
+
+    <span class="topbar-brand">LEXIA</span>
+
+  </header>
+
+  @if (menuAbierto()) {
+    <div class="topbar-backdrop" (click)="cerrarMenu()"></div>
+  }
+
+}
+
 <router-outlet></router-outlet>

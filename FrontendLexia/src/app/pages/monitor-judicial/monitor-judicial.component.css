@@ -25,14 +25,14 @@ textarea {
 .main-content {
   flex: 1;
   min-width: 0;
-  padding: 28px 32px 42px;
+  padding: 32px 32px 42px;
 }
 
 .page-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 20px;
+  gap: 23px;
   margin-bottom: 18px;
 }
 
@@ -41,7 +41,7 @@ textarea {
   display: block;
   margin-bottom: 5px;
   color: #6d28d9;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: .08em;
@@ -58,7 +58,7 @@ textarea {
 .modal-header p {
   margin: 6px 0 0;
   color: #7b8493;
-  font-size: 11px;
+  font-size: 13.5px;
 }
 
 .btn-primary,
@@ -69,7 +69,7 @@ textarea {
 .action-danger,
 .verify-actions button {
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
   cursor: pointer;
   font-weight: 700;
   transition: .16s ease;
@@ -120,25 +120,25 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 18.5px;
   margin-bottom: 14px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  font-size: 11px;
+  padding: 14px 14px;
+  border-radius: 11.5px;
+  font-size: 13.5px;
 }
 
 .message > div {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 2.5px;
 }
 
 .message strong {
-  font-size: 11px;
+  font-size: 13.5px;
 }
 
 .message span {
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .message.error {
@@ -158,30 +158,30 @@ button:disabled {
   height: 28px;
   flex: 0 0 28px;
   border: 0;
-  border-radius: 7px;
+  border-radius: 8px;
   background: rgba(255, 255, 255, .65);
   color: currentColor;
   cursor: pointer;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 16px;
 }
 
 .stat-card {
-  padding: 16px;
+  padding: 18.5px;
   border: 1px solid #e1e5eb;
-  border-radius: 11px;
+  border-radius: 12.5px;
   background: #fff;
 }
 
 .stat-label {
   color: #64748b;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -194,7 +194,7 @@ button:disabled {
 
 .stat-card small {
   color: #94a3b8;
-  font-size: 9px;
+  font-size: 12.5px;
 }
 
 .stat-danger {
@@ -209,12 +209,12 @@ button:disabled {
   overflow: hidden;
   margin-bottom: 16px;
   border: 1px solid #e1e5eb;
-  border-radius: 11px;
+  border-radius: 12.5px;
   background: #fff;
 }
 
 .panel-header {
-  padding: 16px 18px 13px;
+  padding: 18.5px 18px 13px;
   border-bottom: 1px solid #eef1f5;
 }
 
@@ -222,7 +222,7 @@ button:disabled {
 .modal-header h2 {
   margin: 0;
   color: #202733;
-  font-size: 15px;
+  font-size: 16.5px;
 }
 
 /* =========================================================
@@ -230,7 +230,7 @@ button:disabled {
 ========================================================= */
 
 .filters-area {
-  padding: 14px 18px;
+  padding: 16px 18px;
   border-bottom: 1px solid #eef1f5;
   background: #fbfcff;
 }
@@ -238,19 +238,19 @@ button:disabled {
 .filters-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 11px;
+  gap: 12.5px;
 }
 
 .filter-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   min-width: 0;
 }
 
 .filter-field span {
   color: #475569;
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 750;
 }
 
@@ -259,11 +259,11 @@ button:disabled {
   height: 39px;
   padding: 0 11px;
   border: 1px solid #d9dee6;
-  border-radius: 8px;
+  border-radius: 9px;
   background: #fff;
   color: #374151;
   outline: none;
-  font-size: 10px;
+  font-size: 13px;
   transition: .15s ease;
 }
 
@@ -280,20 +280,20 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px;
   margin-top: 12px;
-  padding-top: 11px;
+  padding-top: 12.5px;
   border-top: 1px dashed #e5e7eb;
 }
 
 .filter-footer > span {
   color: #8a94a3;
-  font-size: 9px;
+  font-size: 12.5px;
 }
 
 .filter-actions {
   display: flex;
-  gap: 8px;
+  gap: 9px;
 }
 
 /* =========================================================
@@ -312,19 +312,19 @@ button:disabled {
 }
 
 .monitor-table th {
-  padding: 12px 10px;
+  padding: 14px 10px;
   background: #f8f9fb;
   color: #475569;
-  font-size: 9px;
+  font-size: 12.5px;
   text-align: left;
   white-space: nowrap;
 }
 
 .monitor-table td {
-  padding: 11px 10px;
+  padding: 12.5px 10px;
   border-top: 1px solid #eef1f5;
   color: #343b47;
-  font-size: 9.5px;
+  font-size: 12.5px;
   vertical-align: middle;
 }
 
@@ -333,7 +333,7 @@ button:disabled {
 }
 
 .empty-row {
-  padding: 28px !important;
+  padding: 32px !important;
   color: #94a3b8 !important;
   text-align: center;
 }
@@ -343,7 +343,7 @@ button:disabled {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .spinner {
@@ -371,7 +371,7 @@ button:disabled {
 .expediente-cell {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 2.5px;
 }
 
 .expediente-cell strong {
@@ -383,12 +383,12 @@ button:disabled {
   display: block;
   margin-top: 3px;
   color: #94a3b8;
-  font-size: 8px;
+  font-size: 11.5px;
 }
 
 .status-badge {
   display: inline-flex;
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 999px;
   background: #eef2ff;
   color: #4f46e5;
@@ -399,7 +399,7 @@ button:disabled {
 .lawyer-cell {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   min-width: 145px;
 }
 
@@ -411,16 +411,16 @@ button:disabled {
   border-radius: 50%;
   background: #ddd6fe;
   color: #5b21b6;
-  font-size: 8px;
+  font-size: 11.5px;
   font-weight: 800;
 }
 
 .verification {
   display: inline-flex;
   align-items: center;
-  padding: 5px 8px;
+  padding: 6px 8px;
   border-radius: 999px;
-  font-size: 8px;
+  font-size: 11.5px;
   font-weight: 800;
 }
 
@@ -441,13 +441,13 @@ button:disabled {
 
 .actions {
   display: flex;
-  gap: 6px;
+  gap: 7px;
 }
 
 .action-main,
 .action-danger {
-  padding: 7px 9px;
-  font-size: 8px;
+  padding: 8px 9px;
+  font-size: 11.5px;
   white-space: nowrap;
 }
 
@@ -464,14 +464,14 @@ button:disabled {
 .history-list {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  padding: 14px 18px 18px;
+  gap: 11.5px;
+  padding: 16px 18px 18px;
 }
 
 .history-item {
   border: 1px solid #e5e7eb;
-  border-radius: 10px;
-  padding: 13px;
+  border-radius: 11.5px;
+  padding: 15px;
   background: #fbfcfe;
 }
 
@@ -480,24 +480,24 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: 11.5px;
 }
 
 .history-top strong {
   display: block;
   color: #111827;
-  font-size: 11px;
+  font-size: 13.5px;
 }
 
 .history-top span {
   display: block;
   margin-top: 3px;
   color: #6b7280;
-  font-size: 9px;
+  font-size: 12.5px;
 }
 
 .origin {
-  padding: 4px 7px;
+  padding: 4.5px 7px;
   border-radius: 999px;
   background: #ede9fe;
   color: #5b21b6 !important;
@@ -507,10 +507,10 @@ button:disabled {
 .history-body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 7px 12px;
+  gap: 8px 12px;
   margin: 12px 0;
   color: #4b5563;
-  font-size: 9px;
+  font-size: 12.5px;
 }
 
 .history-body b {
@@ -523,14 +523,14 @@ button:disabled {
 
 .verify-actions {
   display: flex;
-  gap: 6px;
+  gap: 7px;
 }
 
 .verify-actions button {
-  padding: 6px 9px;
+  padding: 7px 9px;
   background: #dcfce7;
   color: #166534;
-  font-size: 8px;
+  font-size: 11.5px;
 }
 
 .verify-actions .reject {
@@ -540,10 +540,10 @@ button:disabled {
 
 .empty-card {
   grid-column: 1 / -1;
-  padding: 25px;
+  padding: 28.5px;
   text-align: center;
   color: #94a3b8;
-  font-size: 11px;
+  font-size: 13.5px;
 }
 
 /* =========================================================
@@ -556,7 +556,7 @@ button:disabled {
   z-index: 1000;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 27.5px;
   background: rgba(15, 23, 42, .55);
 }
 
@@ -565,7 +565,7 @@ button:disabled {
   max-height: 92vh;
   overflow-y: auto;
   border: 1px solid rgba(226, 232, 240, .9);
-  border-radius: 14px;
+  border-radius: 16px;
   background: #fff;
   box-shadow: 0 24px 60px rgba(15, 23, 42, .25);
 }
@@ -577,8 +577,8 @@ button:disabled {
 .modal-header {
   display: flex;
   justify-content: space-between;
-  gap: 16px;
-  padding: 18px 20px;
+  gap: 18.5px;
+  padding: 20.5px 20px;
   border-bottom: 1px solid #eef1f5;
 }
 
@@ -586,7 +586,7 @@ button:disabled {
   width: 34px;
   height: 34px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 9px;
   background: #f1f5f9;
   color: #475569;
   cursor: pointer;
@@ -596,8 +596,8 @@ button:disabled {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-  padding: 18px 20px;
+  gap: 16px;
+  padding: 20.5px 20px;
 }
 
 .form-grid.one {
@@ -607,9 +607,9 @@ button:disabled {
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
   color: #475569;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 700;
 }
 
@@ -622,7 +622,7 @@ button:disabled {
 .field textarea {
   width: 100%;
   border: 1px solid #d9dee6;
-  border-radius: 8px;
+  border-radius: 9px;
   background: #fff;
   color: #374151;
   outline: none;
@@ -635,7 +635,7 @@ button:disabled {
 }
 
 .field textarea {
-  padding: 10px 11px;
+  padding: 11.5px 11px;
   resize: vertical;
 }
 
@@ -649,13 +649,13 @@ button:disabled {
 .check-field {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-height: 40px;
   padding: 0 11px;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 9px;
   color: #374151;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .check-field input {
@@ -664,19 +664,19 @@ button:disabled {
 
 .ia-warning {
   margin: 0 20px 4px;
-  padding: 10px 12px;
+  padding: 11.5px 12px;
   border: 1px solid #fde68a;
-  border-radius: 8px;
+  border-radius: 9px;
   background: #fffbeb;
   color: #92400e;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 9px;
-  padding: 14px 20px 18px;
+  gap: 10.5px;
+  padding: 16px 20px 18px;
   border-top: 1px solid #eef1f5;
 }
 
@@ -684,7 +684,7 @@ button:disabled {
 .confirm-card {
   width: min(500px, 94vw);
   overflow: hidden;
-  padding-top: 24px;
+  padding-top: 27.5px;
 }
 
 .confirm-icon {
@@ -712,13 +712,13 @@ button:disabled {
 .confirm-content h2 {
   margin: 0;
   color: #1f2937;
-  font-size: 18px;
+  font-size: 18.5px;
 }
 
 .confirm-content p {
   margin: 10px 0 0;
   color: #667085;
-  font-size: 11px;
+  font-size: 13.5px;
   line-height: 1.55;
 }
 
@@ -728,12 +728,12 @@ button:disabled {
 
 .confirm-note {
   margin-top: 14px;
-  padding: 10px 12px;
+  padding: 11.5px 12px;
   border: 1px solid #e8e4f0;
-  border-radius: 9px;
+  border-radius: 10.5px;
   background: #faf9fc;
   color: #667085;
-  font-size: 10px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -754,7 +754,7 @@ button:disabled {
 
 @media (max-width: 800px) {
   .main-content {
-    padding: 20px 16px 32px;
+    padding: 23px 16px 32px;
   }
 
   .page-header {
@@ -783,6 +783,16 @@ button:disabled {
   .field.span-2,
   .span-full {
     grid-column: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .main-content {
+    padding: 20.5px 14px 30px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -1078,39 +1088,39 @@ button:disabled {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
-  padding: 12px 18px 14px;
+  gap: 16px;
+  padding: 14px 18px 14px;
   border-top: 1px solid #eef1f5;
   background: #fff;
 }
 
 .pagination-summary {
   color: #64748b;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .pagination-controls {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   color: #475569;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .pagination-controls label {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .pagination-controls select,
 .pagination-controls button {
   min-height: 32px;
   border: 1px solid #d9dee6;
-  border-radius: 7px;
+  border-radius: 8px;
   background: #fff;
   color: #334155;
-  font-size: 10px;
+  font-size: 13px;
 }
 
 .pagination-controls select {
@@ -1140,7 +1150,7 @@ button:disabled {
 
 .field-help {
   color: #94a3b8;
-  font-size: 9px;
+  font-size: 12.5px;
   font-weight: 500;
   line-height: 1.35;
 }
