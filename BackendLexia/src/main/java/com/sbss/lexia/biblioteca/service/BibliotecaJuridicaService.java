@@ -36,6 +36,7 @@ public class BibliotecaJuridicaService {
 
     private final RecursoJuridicoRepository repository;
     private final AlmacenamientoBibliotecaService almacenamientoService;
+    private final ExportacionBibliotecaService exportacionBibliotecaService;
     private final VistaPreviaBibliotecaService vistaPreviaService;
 
     // =========================================================
@@ -173,10 +174,9 @@ public class BibliotecaJuridicaService {
     /**
      * Devuelve siempre un PDF apto para vista previa.
      *
-     * - Si el recurso ya es PDF, devuelve el archivo original.
-     * - Si es Word, Excel o PowerPoint, genera una representación PDF segura
-     *   y cacheada sin modificar ni reemplazar el archivo original.
-     * - La descarga sigue entregando el archivo originalmente cargado.
+     * Los nuevos DOC/DOCX se normalizan a PDF al momento de subirlos, igual
+     * que en Panel Documentos. Si existiera un Word antiguo, el servicio de
+     * vista previa lo convierte con el mismo ExportacionDocumentoService.
      */
     @Transactional(readOnly = true)
     public Path obtenerRutaVistaPreviaPdf(String uuid) {
@@ -258,7 +258,7 @@ public class BibliotecaJuridicaService {
         if (archivo == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Debes adjuntar un documento. Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX");
+                    "Debes adjuntar un documento. Solo se aceptan PDF, DOC y DOCX");
         }
     }
 
@@ -272,8 +272,14 @@ public class BibliotecaJuridicaService {
             codigoExpediente = "BIBLIOTECA";
         }
 
+        // Igual que Panel Documentos:
+        // - PDF se conserva.
+        // - DOC/DOCX se convierten con ExportacionDocumentoService y se
+        //   almacenan ya normalizados como PDF.
+        MultipartFile archivoNormalizado = exportacionBibliotecaService.normalizarAPdf(archivo);
+
         ArchivoGuardado guardado = almacenamientoService.guardar(
-                archivo,
+                archivoNormalizado,
                 codigoExpediente,
                 recurso.getId(),
                 1);

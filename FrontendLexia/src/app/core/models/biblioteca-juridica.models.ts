@@ -1,3 +1,11 @@
+export type ExtensionBibliotecaPermitida = 'pdf' | 'doc' | 'docx';
+
+export interface ValidacionArchivoBiblioteca {
+  valido: boolean;
+  extension: ExtensionBibliotecaPermitida | null;
+  mensaje: string | null;
+}
+
 export type EstadoRecursoJuridico = 'ACTIVO' | 'ARCHIVADO';
 
 export interface Pagina<T> {

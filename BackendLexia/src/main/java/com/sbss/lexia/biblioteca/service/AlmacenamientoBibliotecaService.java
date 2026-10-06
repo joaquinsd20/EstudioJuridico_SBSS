@@ -46,26 +46,19 @@ public class AlmacenamientoBibliotecaService {
     /**
      * Formatos documentales autorizados en Biblioteca Jurídica.
      * No se permiten PHP, HTML, JS, EXE, BAT, CMD, ZIP, RAR, JAR,
-     * APK, scripts ni formatos Office con macros (.docm/.xlsm/.pptm).
+     * APK, scripts ni formatos Office con macros.
+     * Biblioteca acepta únicamente PDF, DOC y DOCX.
      */
     private static final Set<String> EXTENSIONES_PERMITIDAS = Set.of(
             "pdf",
             "doc",
-            "docx",
-            "xls",
-            "xlsx",
-            "ppt",
-            "pptx"
+            "docx"
     );
 
     private static final Map<String, String> MIME_POR_EXTENSION = Map.of(
             "pdf", "application/pdf",
             "doc", "application/msword",
-            "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "xls", "application/vnd.ms-excel",
-            "xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "ppt", "application/vnd.ms-powerpoint",
-            "pptx", "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     );
 
     private static final byte[] FIRMA_OLE = new byte[] {
@@ -338,10 +331,8 @@ public class AlmacenamientoBibliotecaService {
     private void validarContenidoReal(Path archivo, String extension) throws IOException {
         switch (extension) {
             case "pdf" -> validarPdf(archivo);
-            case "doc", "xls", "ppt" -> validarOle(archivo);
+            case "doc" -> validarOle(archivo);
             case "docx" -> validarOoxml(archivo, "word/document.xml", "DOCX");
-            case "xlsx" -> validarOoxml(archivo, "xl/workbook.xml", "XLSX");
-            case "pptx" -> validarOoxml(archivo, "ppt/presentation.xml", "PPTX");
             default -> throw badRequest("Formato de archivo no permitido");
         }
     }
@@ -367,7 +358,7 @@ public class AlmacenamientoBibliotecaService {
 
         if (!empiezaCon(cabecera, FIRMA_OLE)) {
             throw badRequest(
-                    "El contenido no corresponde a un documento Office válido (.doc, .xls o .ppt)");
+                    "El contenido no corresponde a un documento Word DOC válido");
         }
     }
 
@@ -391,8 +382,8 @@ public class AlmacenamientoBibliotecaService {
                 String nombre = entry.getName();
                 String nombreLower = nombre.toLowerCase(Locale.ROOT);
 
-                // Biblioteca admite Office sin macros. Un .docm/.xlsm/.pptm
-                // renombrado a .docx/.xlsx/.pptx queda bloqueado aquí.
+                // Biblioteca admite DOCX sin macros. Un DOCM renombrado
+                // a .docx queda bloqueado aquí.
                 if (nombreLower.endsWith("vbaproject.bin")
                         || nombreLower.contains("/activex/")
                         || nombreLower.startsWith("activex/")) {
@@ -507,7 +498,7 @@ public class AlmacenamientoBibliotecaService {
     private static void validarExtension(String extension) {
         if (!EXTENSIONES_PERMITIDAS.contains(extension)) {
             throw badRequest(
-                    "Formato no permitido. Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX");
+                    "Formato no permitido. Solo se aceptan PDF, DOC y DOCX");
         }
     }
 
