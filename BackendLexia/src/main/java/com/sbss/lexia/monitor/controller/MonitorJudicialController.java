@@ -8,6 +8,7 @@ import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.RegistrarConsultaRequest;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.Resumen;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.VerificarRequest;
 import com.sbss.lexia.monitor.service.MonitorJudicialService;
+import com.sbss.lexia.shared.dto.PaginaDto;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
@@ -34,6 +35,10 @@ public class MonitorJudicialController {
 
     private final MonitorJudicialService service;
 
+    /**
+     * Compatibilidad con consumidores antiguos que esperan un array.
+     * Para la pantalla principal se usa /pagina.
+     */
     @GetMapping
     @PreAuthorize("hasAuthority('MONITOR_LEER')")
     public List<ExpedienteMonitor> listar(
@@ -50,18 +55,42 @@ public class MonitorJudicialController {
                 limite, desplazamiento);
     }
 
+    /** Listado escalable con total real y paginacion de servidor. */
+    @GetMapping("/pagina")
+    @PreAuthorize("hasAuthority('MONITOR_LEER')")
+    public PaginaDto<ExpedienteMonitor> listarPagina(
+            @RequestParam(required = false) String expediente,
+            @RequestParam(required = false) String cliente,
+            @RequestParam(required = false) String abogado,
+            @RequestParam(required = false) String organo,
+            @RequestParam(required = false) String estadoProcesal,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano) {
+        return service.listarPagina(expediente, cliente, abogado, organo, estadoProcesal, desde, hasta,
+                pagina, tamano);
+    }
+
     @GetMapping("/resumen")
     @PreAuthorize("hasAuthority('MONITOR_LEER')")
     public Resumen resumen() {
         return service.resumen();
     }
 
+    /**
+     * Catalogo limitado y buscable. Evita descargar todos los expedientes del
+     * estudio para llenar un select.
+     */
     @GetMapping("/catalogos")
     @PreAuthorize("hasAuthority('MONITOR_LEER')")
-    public Catalogos catalogos() {
-        return service.catalogos();
+    public Catalogos catalogos(
+            @RequestParam(required = false) String busqueda,
+            @RequestParam(defaultValue = "50") int limite) {
+        return service.catalogos(busqueda, limite);
     }
 
+    /** Compatibilidad con Dashboard y otros consumidores existentes. */
     @GetMapping("/consultas")
     @PreAuthorize("hasAuthority('MONITOR_LEER')")
     public List<Consulta> consultas(
@@ -74,6 +103,21 @@ public class MonitorJudicialController {
             @RequestParam(defaultValue = "0") int desplazamiento) {
         return service.consultas(expedienteId, tipoMovimiento, estadoVerificacion, desde, hasta,
                 limite, desplazamiento);
+    }
+
+    /** Historial paginado para la pantalla del Monitor Judicial. */
+    @GetMapping("/consultas/pagina")
+    @PreAuthorize("hasAuthority('MONITOR_LEER')")
+    public PaginaDto<Consulta> consultasPagina(
+            @RequestParam(required = false) Long expedienteId,
+            @RequestParam(required = false) String tipoMovimiento,
+            @RequestParam(required = false) String estadoVerificacion,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate desde,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate hasta,
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "20") int tamano) {
+        return service.consultasPagina(expedienteId, tipoMovimiento, estadoVerificacion, desde, hasta,
+                pagina, tamano);
     }
 
     @PostMapping

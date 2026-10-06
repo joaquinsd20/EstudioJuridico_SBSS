@@ -1,12 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   OnDestroy,
   OnInit,
   inject
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import {
@@ -27,17 +30,32 @@ import { PanelComponent } from '../panel/panel.component';
   standalone: true,
   imports: [CommonModule, FormsModule, PanelComponent],
   templateUrl: './monitor-judicial.component.html',
-  styleUrl: './monitor-judicial.component.css'
+  styleUrl: './monitor-judicial.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MonitorJudicialComponent implements OnInit, OnDestroy {
   private readonly api = inject(MonitorJudicialService);
   private readonly auth = inject(AuthService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
 
   private filtroTimer: ReturnType<typeof setTimeout> | null = null;
+  private catalogoTimer: ReturnType<typeof setTimeout> | null = null;
   private exitoTimer: ReturnType<typeof setTimeout> | null = null;
 
+  private readonly formatoFechaHora = new Intl.DateTimeFormat('es-PE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+
+  readonly tamanosPagina = [10, 20, 40, 100];
+
   cargando = false;
+  cargandoConsultas = false;
+  cargandoCatalogo = false;
   guardando = false;
   eliminando = false;
 
@@ -56,6 +74,18 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
   catalogos: MonitorCatalogos = { expedientes: [] };
 
   filtro: MonitorFiltro = {};
+
+  paginaMonitoreados = 0;
+  tamanoMonitoreados = 20;
+  totalMonitoreados = 0;
+  totalPaginasMonitoreados = 0;
+
+  paginaConsultas = 0;
+  tamanoConsultas = 20;
+  totalConsultas = 0;
+  totalPaginasConsultas = 0;
+
+  busquedaCatalogo = '';
 
   modalAgregar = false;
   modalConsulta = false;
@@ -108,10 +138,7 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     return [
       ...new Set(
         this.catalogos.expedientes
-          .flatMap(exp => [
-            exp.codigoInterno,
-            exp.numeroExpediente ?? ''
-          ])
+          .flatMap(exp => [exp.codigoInterno, exp.numeroExpediente ?? ''])
           .filter(Boolean)
       )
     ].sort();
@@ -147,6 +174,32 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     ].sort();
   }
 
+  get inicioMonitoreados(): number {
+    return this.totalMonitoreados === 0
+      ? 0
+      : this.paginaMonitoreados * this.tamanoMonitoreados + 1;
+  }
+
+  get finMonitoreados(): number {
+    return Math.min(
+      (this.paginaMonitoreados + 1) * this.tamanoMonitoreados,
+      this.totalMonitoreados
+    );
+  }
+
+  get inicioConsultas(): number {
+    return this.totalConsultas === 0
+      ? 0
+      : this.paginaConsultas * this.tamanoConsultas + 1;
+  }
+
+  get finConsultas(): number {
+    return Math.min(
+      (this.paginaConsultas + 1) * this.tamanoConsultas,
+      this.totalConsultas
+    );
+  }
+
   ngOnInit(): void {
     this.cargarTodo();
   }
@@ -155,37 +208,56 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     if (this.filtroTimer) {
       clearTimeout(this.filtroTimer);
     }
-
+    if (this.catalogoTimer) {
+      clearTimeout(this.catalogoTimer);
+    }
     if (this.exitoTimer) {
       clearTimeout(this.exitoTimer);
     }
   }
 
+  /** Carga inicial en paralelo; despues cada accion refresca solo lo necesario. */
   cargarTodo(): void {
     this.cargando = true;
+    this.cargandoConsultas = true;
+    this.cargandoCatalogo = true;
     this.error = '';
     this.actualizarVista();
 
     forkJoin({
       resumen: this.api.resumen(),
-      monitoreados: this.api.listar(this.filtro),
-      consultas: this.api.consultas(),
-      catalogos: this.api.catalogos()
-    }).subscribe({
-      next: data => {
-        this.resumen = data.resumen;
-        this.monitoreados = data.monitoreados;
-        this.consultas = data.consultas;
-        this.catalogos = data.catalogos;
-        this.cargando = false;
-        this.actualizarVista();
-      },
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.cargando = false;
-        this.actualizarVista();
-      }
-    });
+      monitoreados: this.api.listarPagina(
+        this.filtro,
+        this.paginaMonitoreados,
+        this.tamanoMonitoreados
+      ),
+      consultas: this.api.consultasPagina(
+        {},
+        this.paginaConsultas,
+        this.tamanoConsultas
+      ),
+      catalogos: this.api.catalogos('', 50)
+    })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: data => {
+          this.resumen = data.resumen;
+          this.asignarPaginaMonitoreados(data.monitoreados);
+          this.asignarPaginaConsultas(data.consultas);
+          this.catalogos = data.catalogos;
+          this.cargando = false;
+          this.cargandoConsultas = false;
+          this.cargandoCatalogo = false;
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.cargando = false;
+          this.cargandoConsultas = false;
+          this.cargandoCatalogo = false;
+          this.actualizarVista();
+        }
+      });
   }
 
   programarFiltro(): void {
@@ -194,27 +266,16 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     }
 
     this.filtroTimer = setTimeout(() => {
-      this.aplicarFiltros();
+      this.paginaMonitoreados = 0;
+      this.aplicarFiltros(false);
     }, 350);
   }
 
-  aplicarFiltros(): void {
-    this.cargando = true;
-    this.error = '';
-    this.actualizarVista();
-
-    this.api.listar(this.filtro).subscribe({
-      next: datos => {
-        this.monitoreados = datos;
-        this.cargando = false;
-        this.actualizarVista();
-      },
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.cargando = false;
-        this.actualizarVista();
-      }
-    });
+  aplicarFiltros(reiniciarPagina = true): void {
+    if (reiniciarPagina) {
+      this.paginaMonitoreados = 0;
+    }
+    this.cargarMonitoreados();
   }
 
   limpiarFiltros(): void {
@@ -224,17 +285,80 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     }
 
     this.filtro = {};
-    this.aplicarFiltros();
+    this.paginaMonitoreados = 0;
+    this.cargarMonitoreados();
+  }
+
+  paginaAnteriorMonitoreados(): void {
+    if (this.paginaMonitoreados <= 0 || this.cargando) {
+      return;
+    }
+    this.paginaMonitoreados--;
+    this.cargarMonitoreados();
+  }
+
+  paginaSiguienteMonitoreados(): void {
+    if (
+      this.cargando ||
+      this.totalPaginasMonitoreados === 0 ||
+      this.paginaMonitoreados >= this.totalPaginasMonitoreados - 1
+    ) {
+      return;
+    }
+    this.paginaMonitoreados++;
+    this.cargarMonitoreados();
+  }
+
+  cambiarTamanoMonitoreados(): void {
+    this.paginaMonitoreados = 0;
+    this.cargarMonitoreados();
+  }
+
+  paginaAnteriorConsultas(): void {
+    if (this.paginaConsultas <= 0 || this.cargandoConsultas) {
+      return;
+    }
+    this.paginaConsultas--;
+    this.cargarConsultas();
+  }
+
+  paginaSiguienteConsultas(): void {
+    if (
+      this.cargandoConsultas ||
+      this.totalPaginasConsultas === 0 ||
+      this.paginaConsultas >= this.totalPaginasConsultas - 1
+    ) {
+      return;
+    }
+    this.paginaConsultas++;
+    this.cargarConsultas();
+  }
+
+  cambiarTamanoConsultas(): void {
+    this.paginaConsultas = 0;
+    this.cargarConsultas();
+  }
+
+  programarBusquedaCatalogo(): void {
+    if (this.catalogoTimer) {
+      clearTimeout(this.catalogoTimer);
+    }
+
+    this.catalogoTimer = setTimeout(() => {
+      this.cargarCatalogos(this.busquedaCatalogo);
+    }, 300);
   }
 
   abrirAgregar(): void {
     this.error = '';
     this.exito = '';
+    this.busquedaCatalogo = '';
     this.agregarForm = {
       expedienteId: null,
       fuentePlataforma: 'CEJ - Poder Judicial'
     };
     this.modalAgregar = true;
+    this.cargarCatalogos('');
   }
 
   guardarSeguimiento(): void {
@@ -242,8 +366,7 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
       !this.agregarForm.expedienteId ||
       !this.agregarForm.fuentePlataforma.trim()
     ) {
-      this.error =
-        'Selecciona un expediente e indica la fuente o plataforma.';
+      this.error = 'Selecciona un expediente e indica la fuente o plataforma.';
       this.actualizarVista();
       return;
     }
@@ -257,17 +380,16 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
         expedienteId: this.agregarForm.expedienteId,
         fuentePlataforma: this.agregarForm.fuentePlataforma.trim()
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
           this.guardando = false;
           this.modalAgregar = false;
           this.mostrarExito('Expediente añadido al Monitor Judicial.');
-
-          // En Angular 21 el proyecto trabaja sin Zone.js.
-          // Notificamos el cambio para que el modal se cierre inmediatamente.
+          this.paginaMonitoreados = 0;
+          this.cargarMonitoreados();
+          this.cargarResumen();
           this.actualizarVista();
-
-          this.cargarTodo();
         },
         error: e => {
           this.error = this.mensajeError(e);
@@ -332,23 +454,26 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     this.error = '';
     this.actualizarVista();
 
-    this.api.registrarConsulta(this.consultaForm).subscribe({
-      next: () => {
-        this.guardando = false;
-        this.modalConsulta = false;
-        this.mostrarExito('Consulta judicial registrada correctamente.');
-
-        // Evita que el botón se quede en "Guardando..." hasta hacer otro clic.
-        this.actualizarVista();
-
-        this.cargarTodo();
-      },
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.guardando = false;
-        this.actualizarVista();
-      }
-    });
+    this.api
+      .registrarConsulta(this.consultaForm)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.guardando = false;
+          this.modalConsulta = false;
+          this.mostrarExito('Consulta judicial registrada correctamente.');
+          this.paginaConsultas = 0;
+          this.cargarConsultas();
+          this.cargarMonitoreados();
+          this.cargarResumen();
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.guardando = false;
+          this.actualizarVista();
+        }
+      });
   }
 
   verificar(
@@ -357,23 +482,27 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
   ): void {
     this.error = '';
 
-    this.api.verificar(consulta.uuid, estado).subscribe({
-      next: () => {
-        consulta.estadoVerificacion = estado;
-        this.mostrarExito(
-          estado === 'VERIFICADA'
-            ? 'Información verificada.'
-            : 'Información rechazada.'
-        );
-
-        this.actualizarVista();
-        this.cargarTodo();
-      },
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.actualizarVista();
-      }
-    });
+    this.api
+      .verificar(consulta.uuid, estado)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          consulta.estadoVerificacion = estado;
+          this.mostrarExito(
+            estado === 'VERIFICADA'
+              ? 'Información verificada.'
+              : 'Información rechazada.'
+          );
+          this.cargarConsultas();
+          this.cargarMonitoreados();
+          this.cargarResumen();
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.actualizarVista();
+        }
+      });
   }
 
   solicitarQuitar(item: ExpedienteMonitor): void {
@@ -402,44 +531,38 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     this.error = '';
     this.actualizarVista();
 
-    this.api.quitar(item.uuid).subscribe({
-      next: () => {
-        // Actualización inmediata de la tabla.
-        this.monitoreados = this.monitoreados.filter(
-          actual => actual.uuid !== item.uuid
-        );
+    this.api
+      .quitar(item.uuid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.modalConfirmarQuitar = false;
+          this.itemAQuitar = null;
+          this.eliminando = false;
+          this.mostrarExito('Expediente retirado del Monitor Judicial.');
 
-        this.resumen = {
-          ...this.resumen,
-          expedientesMonitoreados: Math.max(
-            0,
-            this.resumen.expedientesMonitoreados - 1
-          )
-        };
-
-        this.modalConfirmarQuitar = false;
-        this.itemAQuitar = null;
-        this.eliminando = false;
-        this.mostrarExito('Expediente retirado del Monitor Judicial.');
-
-        this.actualizarVista();
-
-        // Luego sincronizamos con la base de datos.
-        this.cargarTodo();
-      },
-      error: e => {
-        this.error = this.mensajeError(e);
-        this.eliminando = false;
-        this.actualizarVista();
-      }
-    });
+          if (this.monitoreados.length === 1 && this.paginaMonitoreados > 0) {
+            this.paginaMonitoreados--;
+          }
+          this.cargarMonitoreados();
+          this.cargarResumen();
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.eliminando = false;
+          this.actualizarVista();
+        }
+      });
   }
 
   nombreExpediente(id: number): string {
-    const expediente = this.catalogos.expedientes.find(
-      item => item.id === id
-    );
+    const monitor = this.monitoreados.find(item => item.expedienteId === id);
+    if (monitor) {
+      return `${monitor.codigoInterno} · ${monitor.cliente}`;
+    }
 
+    const expediente = this.catalogos.expedientes.find(item => item.id === id);
     return expediente
       ? `${expediente.codigoInterno} · ${expediente.cliente}`
       : `Expediente #${id}`;
@@ -450,13 +573,10 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
       return '—';
     }
 
-    return new Intl.DateTimeFormat('es-PE', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(new Date(fecha));
+    const valor = new Date(fecha);
+    return Number.isNaN(valor.getTime())
+      ? '—'
+      : this.formatoFechaHora.format(valor);
   }
 
   iniciales(nombre: string | null): string {
@@ -465,11 +585,7 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     }
 
     const partes = nombre.trim().split(/\s+/);
-
-    return (
-      (partes[0]?.[0] ?? '') +
-      (partes[1]?.[0] ?? '')
-    ).toUpperCase();
+    return ((partes[0]?.[0] ?? '') + (partes[1]?.[0] ?? '')).toUpperCase();
   }
 
   cerrarModales(): void {
@@ -498,6 +614,129 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
     this.actualizarVista();
   }
 
+  private cargarMonitoreados(): void {
+    this.cargando = true;
+    this.error = '';
+    this.actualizarVista();
+
+    this.api
+      .listarPagina(this.filtro, this.paginaMonitoreados, this.tamanoMonitoreados)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: pagina => {
+          if (
+            pagina.totalPaginas > 0 &&
+            this.paginaMonitoreados >= pagina.totalPaginas
+          ) {
+            this.paginaMonitoreados = Math.max(0, pagina.totalPaginas - 1);
+            this.cargando = false;
+            this.cargarMonitoreados();
+            return;
+          }
+          this.asignarPaginaMonitoreados(pagina);
+          this.cargando = false;
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.cargando = false;
+          this.actualizarVista();
+        }
+      });
+  }
+
+  private cargarConsultas(): void {
+    this.cargandoConsultas = true;
+    this.error = '';
+    this.actualizarVista();
+
+    this.api
+      .consultasPagina({}, this.paginaConsultas, this.tamanoConsultas)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: pagina => {
+          if (
+            pagina.totalPaginas > 0 &&
+            this.paginaConsultas >= pagina.totalPaginas
+          ) {
+            this.paginaConsultas = Math.max(0, pagina.totalPaginas - 1);
+            this.cargandoConsultas = false;
+            this.cargarConsultas();
+            return;
+          }
+          this.asignarPaginaConsultas(pagina);
+          this.cargandoConsultas = false;
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.cargandoConsultas = false;
+          this.actualizarVista();
+        }
+      });
+  }
+
+  private cargarResumen(): void {
+    this.api
+      .resumen()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: resumen => {
+          this.resumen = resumen;
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.actualizarVista();
+        }
+      });
+  }
+
+  private cargarCatalogos(busqueda: string): void {
+    this.cargandoCatalogo = true;
+    this.actualizarVista();
+
+    this.api
+      .catalogos(busqueda, 50)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: catalogos => {
+          this.catalogos = catalogos;
+          this.cargandoCatalogo = false;
+          this.actualizarVista();
+        },
+        error: e => {
+          this.error = this.mensajeError(e);
+          this.cargandoCatalogo = false;
+          this.actualizarVista();
+        }
+      });
+  }
+
+  private asignarPaginaMonitoreados(pagina: {
+    contenido: ExpedienteMonitor[];
+    pagina: number;
+    totalElementos: number;
+    totalPaginas: number;
+  }): void {
+    this.monitoreados = pagina.contenido;
+    this.paginaMonitoreados = pagina.pagina;
+    this.totalMonitoreados = pagina.totalElementos;
+    this.totalPaginasMonitoreados = pagina.totalPaginas;
+  }
+
+  private asignarPaginaConsultas(pagina: {
+    contenido: ConsultaMonitor[];
+    pagina: number;
+    totalElementos: number;
+    totalPaginas: number;
+  }): void {
+    this.consultas = pagina.contenido;
+    this.paginaConsultas = pagina.pagina;
+    this.totalConsultas = pagina.totalElementos;
+    this.totalPaginasConsultas = pagina.totalPaginas;
+  }
+
   private mostrarExito(mensaje: string, duracionMs = 3000): void {
     this.exito = mensaje;
 
@@ -515,9 +754,6 @@ export class MonitorJudicialComponent implements OnInit, OnDestroy {
   }
 
   private actualizarVista(): void {
-    // Angular 21 funciona sin Zone.js por defecto.
-    // markForCheck notifica a Angular que debe volver a renderizar
-    // los cambios realizados dentro de las suscripciones HTTP.
     this.cdr.markForCheck();
   }
 

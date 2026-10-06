@@ -14,6 +14,29 @@
         Agregar recurso
       </button>
     </header>
+
+    <!-- NOTIFICACIÓN PROPIA DE LEXIA: nunca usa alert()/confirm() del navegador -->
+    <div
+      class="system-notice"
+      *ngIf="avisoSistema && !mostrarModalCrear && !mostrarModalDetalle && !mostrarConfirmacionEliminar"
+      [ngClass]="'notice-' + avisoSistema.tipo.toLowerCase()"
+      role="status"
+      aria-live="polite">
+      <div class="system-notice-icon" aria-hidden="true">
+        <ng-container [ngSwitch]="avisoSistema.tipo">
+          <span *ngSwitchCase="'EXITO'">✓</span>
+          <span *ngSwitchCase="'ERROR'">!</span>
+          <span *ngSwitchCase="'ADVERTENCIA'">!</span>
+          <span *ngSwitchDefault>i</span>
+        </ng-container>
+      </div>
+      <div class="system-notice-copy">
+        <strong>{{ avisoSistema.titulo }}</strong>
+        <span>{{ avisoSistema.mensaje }}</span>
+      </div>
+      <button type="button" class="system-notice-close" (click)="cerrarAviso()" aria-label="Cerrar notificación">×</button>
+    </div>
+
     <!-- RESUMEN DINÁMICO -->
     <section class="stats-grid">
       <article class="stat-card">
@@ -53,7 +76,7 @@
           <span>⌕</span>
           <input
             type="search"
-            placeholder="Buscar por título, autor, descripción o tags"
+            placeholder="Buscar por título, descripción o expediente"
             [(ngModel)]="filtros.busqueda"
             (input)="aplicarFiltros()">
         </div>
@@ -95,6 +118,14 @@
           <option value="ACTIVO">Activo</option>
           <option value="ARCHIVADO">Archivado</option>
         </select>
+        <select
+          aria-label="Filtrar por archivo"
+          [(ngModel)]="filtros.conArchivo"
+          (change)="aplicarFiltros()">
+          <option value="">Todos los archivos</option>
+          <option value="true">Con archivo</option>
+          <option value="false">Sin archivo</option>
+        </select>
       </div>
       <div class="stats-mini">
         <span><strong>{{ totalRecursos }}</strong> recursos totales</span>
@@ -118,7 +149,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of recursosFiltrados">
+            <tr *ngFor="let item of recursos; trackBy: trackByUuid">
               <td>
                 <div class="person-cell">
                   <span
@@ -184,6 +215,29 @@
           </tbody>
         </table>
       </div>
+
+      <div class="biblioteca-estado" *ngIf="cargando">Cargando recursos...</div>
+      <div class="biblioteca-estado error" *ngIf="!cargando && error">{{ error }}</div>
+      <div class="biblioteca-estado" *ngIf="!cargando && !error && recursos.length === 0">
+        No se encontraron recursos con los filtros seleccionados.
+      </div>
+
+      <div class="biblioteca-paginacion" *ngIf="!cargando && totalPaginas > 0">
+        <div class="paginacion-resumen">
+          Mostrando {{ desdeRegistro }}-{{ hastaRegistro }} de {{ totalElementos }} recursos
+        </div>
+        <div class="paginacion-controles">
+          <label>
+            Mostrar
+            <select [ngModel]="tamanoPagina" (ngModelChange)="cambiarTamanoPagina($event)">
+              <option *ngFor="let tamano of tamanosPagina" [ngValue]="tamano">{{ tamano }}</option>
+            </select>
+          </label>
+          <button type="button" (click)="cambiarPagina(-1)" [disabled]="pagina === 0">Anterior</button>
+          <span>Página {{ pagina + 1 }} de {{ totalPaginas }}</span>
+          <button type="button" (click)="cambiarPagina(1)" [disabled]="pagina + 1 >= totalPaginas">Siguiente</button>
+        </div>
+      </div>
     </section>
     <!-- ====================================================== -->
     <!-- RECURSOS DESTACADOS (DINÁMICOS) -->
@@ -199,7 +253,7 @@
       </div>
       <div class="cards-grid">
         <!-- Renderizado dinámico según los datos filtrados -->
-        <article class="recurso-card" *ngFor="let item of recursosFiltrados">
+        <article class="recurso-card" *ngFor="let item of recursosDestacados; trackBy: trackByUuid">
           <div class="card-top">
             <span class="card-icon" [ngClass]="item.tipo.toLowerCase()">
               <ng-container [ngSwitch]="item.tipo">
@@ -245,7 +299,7 @@
           </div>
         </article>
         <!-- Mensaje si la búsqueda no arroja resultados -->
-        <div class="no-results" *ngIf="recursosFiltrados.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #64748b;">
+        <div class="no-results" *ngIf="recursosDestacados.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 20px; color: #64748b;">
           <p>No se encontraron recursos destacados que coincidan con los criterios de búsqueda.</p>
         </div>
       </div>
@@ -273,6 +327,28 @@
         ×
       </button>
     </div>
+
+    <div
+      class="system-notice modal-notice"
+      *ngIf="avisoSistema"
+      [ngClass]="'notice-' + avisoSistema.tipo.toLowerCase()"
+      role="status"
+      aria-live="polite">
+      <div class="system-notice-icon" aria-hidden="true">
+        <ng-container [ngSwitch]="avisoSistema.tipo">
+          <span *ngSwitchCase="'EXITO'">✓</span>
+          <span *ngSwitchCase="'ERROR'">!</span>
+          <span *ngSwitchCase="'ADVERTENCIA'">!</span>
+          <span *ngSwitchDefault>i</span>
+        </ng-container>
+      </div>
+      <div class="system-notice-copy">
+        <strong>{{ avisoSistema.titulo }}</strong>
+        <span>{{ avisoSistema.mensaje }}</span>
+      </div>
+      <button type="button" class="system-notice-close" (click)="cerrarAviso()" aria-label="Cerrar notificación">×</button>
+    </div>
+
     <!-- FORMULARIO -->
     <form (ngSubmit)="guardarNuevoRecurso()">
       <!-- TÍTULO -->
@@ -353,7 +429,7 @@
           type="file"
           class="file-input-hidden"
           (change)="seleccionarArchivo($event)"
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt">
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
         
         <!-- CAJA PARA SUBIR ARCHIVO -->
         <div
@@ -364,7 +440,7 @@
             class="upload-info"
             *ngIf="!archivoSeleccionado">
             <strong>Selecciona un documento</strong>
-            <span>PDF, Word, Excel, PowerPoint o TXT</span>
+            <span>PDF, Word, Excel o PowerPoint · máximo 50 MB</span>
           </div>
           <!-- ARCHIVO SELECCIONADO -->
           <div
@@ -404,7 +480,7 @@
       <!-- INFORMACIÓN -->
       <div class="upload-hint">
         <span>ⓘ</span>
-        <p>El documento seleccionado se asociará al recurso jurídico.</p>
+        <p>Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX. El servidor valida también el contenido real del archivo.</p>
       </div>
       <!-- BOTONES -->
       <div class="modal-actions">
@@ -416,9 +492,10 @@
         </button>
         <button
           type="submit"
-          class="btn-save">
-          <span>✓</span>
-          Guardar recurso
+          class="btn-save"
+          [disabled]="guardando">
+          <span>{{ guardando ? '…' : '✓' }}</span>
+          {{ guardando ? 'Guardando...' : 'Guardar recurso' }}
         </button>
       </div>
     </form>
@@ -446,6 +523,28 @@
         ×
       </button>
     </div>
+
+    <div
+      class="system-notice modal-notice"
+      *ngIf="avisoSistema"
+      [ngClass]="'notice-' + avisoSistema.tipo.toLowerCase()"
+      role="status"
+      aria-live="polite">
+      <div class="system-notice-icon" aria-hidden="true">
+        <ng-container [ngSwitch]="avisoSistema.tipo">
+          <span *ngSwitchCase="'EXITO'">✓</span>
+          <span *ngSwitchCase="'ERROR'">!</span>
+          <span *ngSwitchCase="'ADVERTENCIA'">!</span>
+          <span *ngSwitchDefault>i</span>
+        </ng-container>
+      </div>
+      <div class="system-notice-copy">
+        <strong>{{ avisoSistema.titulo }}</strong>
+        <span>{{ avisoSistema.mensaje }}</span>
+      </div>
+      <button type="button" class="system-notice-close" (click)="cerrarAviso()" aria-label="Cerrar notificación">×</button>
+    </div>
+
     <!-- INFORMACIÓN -->
     <div class="detail-list">
       <div class="detail-item">
@@ -454,11 +553,11 @@
       </div>
       <div class="detail-item">
         <span>Tipo</span>
-        <strong>{{ recursoDetalle.tipo }}</strong>
+        <strong>{{ etiquetaTipo(recursoDetalle.tipo) }}</strong>
       </div>
       <div class="detail-item">
         <span>Categoría</span>
-        <strong>{{ recursoDetalle.categoria }}</strong>
+        <strong>{{ etiquetaCategoria(recursoDetalle.categoria) }}</strong>
       </div>
       <div class="detail-item">
         <span>Expediente</span>
@@ -467,6 +566,10 @@
       <div class="detail-item">
         <span>Archivo</span>
         <strong>{{ recursoDetalle.nombreArchivo || 'Sin archivo' }}</strong>
+      </div>
+      <div class="detail-item" *ngIf="recursoDetalle.tamanioBytes">
+        <span>Tamaño</span>
+        <strong>{{ obtenerTamanoArchivo(recursoDetalle.tamanioBytes || 0) }}</strong>
       </div>
     </div>
     <!-- BOTONES ÚNICAMENTE VISTA PREVIA, DESCARGAR Y ELIMINAR -->
@@ -499,4 +602,63 @@
       </button>
     </div>
   </div>
+</div>
+
+<!-- ====================================================== -->
+<!-- CONFIRMACIÓN PROPIA DE LEXIA: RETIRAR RECURSO -->
+<!-- ====================================================== -->
+<div
+  class="modal-overlay confirm-overlay"
+  *ngIf="mostrarConfirmacionEliminar && recursoPendienteEliminar"
+  (mousedown)="cancelarEliminacion()">
+  <section
+    class="modal-content confirm-card"
+    role="alertdialog"
+    aria-modal="true"
+    aria-labelledby="biblioteca-confirm-title"
+    (mousedown)="$event.stopPropagation()">
+
+    <div class="confirm-icon" aria-hidden="true">!</div>
+
+    <div class="confirm-content">
+      <span class="modal-kicker">Confirmar acción</span>
+      <h3 id="biblioteca-confirm-title">¿Retirar recurso de la Biblioteca Jurídica?</h3>
+      <p>
+        Se retirará <strong>“{{ recursoPendienteEliminar.titulo }}”</strong> del catálogo visible.
+      </p>
+      <div class="confirm-note">
+        El registro y su documento se conservarán para mantener la trazabilidad jurídica.
+      </div>
+
+      <div
+        class="system-notice modal-notice confirm-notice"
+        *ngIf="avisoSistema"
+        [ngClass]="'notice-' + avisoSistema.tipo.toLowerCase()"
+        role="status"
+        aria-live="polite">
+        <div class="system-notice-icon" aria-hidden="true">!</div>
+        <div class="system-notice-copy">
+          <strong>{{ avisoSistema.titulo }}</strong>
+          <span>{{ avisoSistema.mensaje }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <button
+        type="button"
+        class="btn-cancel"
+        [disabled]="eliminando"
+        (click)="cancelarEliminacion()">
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="btn-danger"
+        [disabled]="eliminando"
+        (click)="confirmarEliminacion()">
+        {{ eliminando ? 'Retirando...' : 'Retirar recurso' }}
+      </button>
+    </div>
+  </section>
 </div>

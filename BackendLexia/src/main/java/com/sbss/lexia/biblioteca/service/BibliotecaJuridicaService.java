@@ -1,15 +1,12 @@
 package com.sbss.lexia.biblioteca.service;
 
-import java.net.MalformedURLException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,262 +15,328 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.sbss.lexia.biblioteca.dto.BibliotecaEstadisticasResponse;
 import com.sbss.lexia.biblioteca.dto.RecursoCrearRequest;
+import com.sbss.lexia.biblioteca.dto.RecursoDetalleResponse;
 import com.sbss.lexia.biblioteca.dto.RecursoFiltroRequest;
+import com.sbss.lexia.biblioteca.dto.RecursoListaResponse;
 import com.sbss.lexia.biblioteca.entity.RecursoJuridico;
 import com.sbss.lexia.biblioteca.repository.RecursoJuridicoRepository;
+import com.sbss.lexia.biblioteca.repository.RecursoJuridicoRepository.EstadisticasProjection;
 import com.sbss.lexia.documental.service.AlmacenamientoDocumentoService.ArchivoGuardado;
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.shared.security.SesionActual;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BibliotecaJuridicaService {
 
+    private static final Set<Integer> TAMANOS_PERMITIDOS = Set.of(10, 20, 40, 100);
+
     private final RecursoJuridicoRepository repository;
     private final AlmacenamientoBibliotecaService almacenamientoService;
+    private final VistaPreviaBibliotecaService vistaPreviaService;
 
     // =========================================================
-    // ESTADÍSTICAS
+    // ESTADÍSTICAS: UNA SOLA CONSULTA AGREGADA
     // =========================================================
+
+    @Transactional(readOnly = true)
     public BibliotecaEstadisticasResponse obtenerEstadisticas() {
-        Integer estudioId = SesionActual.estudioId();
+        EstadisticasProjection p = repository.estadisticas(SesionActual.estudioId());
+
         return BibliotecaEstadisticasResponse.builder()
-                .recursosTotales(repository.countByEstudioId(estudioId))
-                .recursosActivos(repository.countByEstudioIdAndEstado(estudioId, "ACTIVO"))
-                .conArchivo(repository.countConArchivoDelEstudio(estudioId))
-                .totalCategorias(repository.countCategoriasUnicasDelEstudio(estudioId))
+                .recursosTotales(valor(p.getRecursosTotales()))
+                .recursosActivos(valor(p.getRecursosActivos()))
+                .conArchivo(valor(p.getConArchivo()))
+                .totalCategorias(valor(p.getTotalCategorias()))
                 .build();
     }
 
     // =========================================================
-    // LISTAR RECURSOS
+    // LISTADO PAGINADO + FILTROS EN BD + DTO LIGERO
     // =========================================================
-    public Page<RecursoJuridico> listar(
+
+    @Transactional(readOnly = true)
+    public PaginaDto<RecursoListaResponse> listar(
             RecursoFiltroRequest filtro,
             Pageable pageable) {
-        Integer estudioId = SesionActual.estudioId();
-        Specification<RecursoJuridico> spec = (root, query, cb) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            // Obligatorio y primero: la frontera entre estudios. Sin esto, los
-            // demas filtros consultarian la biblioteca de todos los estudios.
-            predicates.add(cb.equal(root.get("estudioId"), estudioId));
-            if (filtro.getBusqueda() != null && !filtro.getBusqueda().isBlank()) {
-                String likePattern = "%" + filtro.getBusqueda().toLowerCase() + "%";
-                predicates.add(cb.or(
-                        cb.like(cb.lower(root.get("titulo")), likePattern),
-                        cb.like(cb.lower(root.get("subtituloDescripcion")), likePattern),
-                        cb.like(cb.lower(root.get("expedienteCodigo")), likePattern)
-                ));
-            }
-            if (filtro.getTipo() != null && !filtro.getTipo().isBlank()) {
-                predicates.add(cb.equal(root.get("tipo"), filtro.getTipo()));
-            }
-            if (filtro.getCategoria() != null && !filtro.getCategoria().isBlank()) {
-                predicates.add(cb.equal(root.get("categoria"), filtro.getCategoria()));
-            }
-            if (filtro.getEstado() != null && !filtro.getEstado().isBlank()) {
-                predicates.add(cb.equal(root.get("estado"), filtro.getEstado()));
-            }
-            if (filtro.getConArchivo() != null) {
-                if (filtro.getConArchivo()) {
-                    predicates.add(cb.isNotNull(root.get("nombreArchivo")));
-                } else {
-                    predicates.add(cb.isNull(root.get("nombreArchivo")));
-                }
-            }
-            return cb.and(predicates.toArray(Predicate[]::new));
-        };
-        return repository.findAll(spec, pageable);
+
+        RecursoFiltroRequest f = filtro == null ? new RecursoFiltroRequest() : filtro;
+        Pageable paginaSegura = paginaSegura(pageable);
+
+        Page<RecursoListaResponse> pagina = repository.buscar(
+                SesionActual.estudioId(),
+                texto(f.getBusqueda()),
+                codigo(f.getTipo()),
+                codigo(f.getCategoria()),
+                codigo(f.getEstado()),
+                f.getConArchivo(),
+                f.getAnio(),
+                paginaSegura);
+
+        return PaginaDto.desde(pagina);
     }
 
     // =========================================================
-    // OBTENER POR ID
+    // DETALLE BAJO DEMANDA
     // =========================================================
-    public RecursoJuridico obtenerPorId(Long id) {
-        // findByIdAndEstudioId y no findById: un recurso de otro estudio debe
-        // verse igual que uno inexistente.
-        return repository.findByIdAndEstudioId(id, SesionActual.estudioId())
-                .orElseThrow(() -> new EntityNotFoundException(
-                        "Recurso jurídico no encontrado con ID: " + id
-                ));
+
+    @Transactional(readOnly = true)
+    public RecursoDetalleResponse obtener(String uuid) {
+        return aDetalle(buscar(uuid));
     }
 
     // =========================================================
-    // CREAR RECURSO
+    // CREAR
     // =========================================================
-    public RecursoJuridico crear(
+
+    @Transactional
+    public RecursoDetalleResponse crear(
             RecursoCrearRequest request,
             MultipartFile archivo) {
+
+        validarRequest(request);
+        validarArchivoNuevo(archivo);
+
         RecursoJuridico recurso = RecursoJuridico.builder()
                 .estudioId(SesionActual.estudioId())
-                .titulo(request.getTitulo())
-                .subtituloDescripcion(request.getSubtituloDescripcion())
-                .tipo(request.getTipo())
-                .categoria(request.getCategoria())
+                .titulo(request.getTitulo().trim())
+                .subtituloDescripcion(texto(request.getSubtituloDescripcion()))
+                .tipo(codigo(request.getTipo()))
+                .categoria(codigo(request.getCategoria()))
                 .anio(request.getAnio())
-                .expedienteCodigo(request.getExpedienteCodigo())
-                .estado(request.getEstado() != null ? request.getEstado() : "ACTIVO")
+                .expedienteCodigo(texto(request.getExpedienteCodigo()))
+                .estado(codigo(request.getEstado()) == null ? "ACTIVO" : codigo(request.getEstado()))
                 .build();
 
-        recurso = repository.save(recurso);
+        recurso = repository.saveAndFlush(recurso);
 
-        if (archivo != null && !archivo.isEmpty()) {
-            // Toma el código enviado en la Request o usa "BIBLIOTECA" por defecto si viene nulo
-            String codigoExpediente = (request.getExpedienteCodigo() != null && !request.getExpedienteCodigo().isBlank()) 
-                    ? request.getExpedienteCodigo() 
-                    : "BIBLIOTECA";
+        // El archivo es obligatorio al crear. Se llama siempre al almacenamiento
+        // para que también se rechacen archivos vacíos (MultipartFile.isEmpty()).
+        // Antes, un PHP de 0 bytes podía saltarse la validación y crear el registro.
+        aplicarArchivo(recurso, archivo, request.getExpedienteCodigo());
+        recurso = repository.saveAndFlush(recurso);
 
-            ArchivoGuardado guardado = almacenamientoService.guardar(
-                    archivo,
-                    codigoExpediente, // <-- Ahora coincide con el String expedienteCodigo
-                    recurso.getId(),
-                    1
-            );
-            recurso.setNombreArchivo(guardado.nombreOriginal());
-            recurso.setRutaArchivo(guardado.rutaRelativa());
-            recurso.setTamanioBytes(guardado.tamanoBytes());
-            recurso.setExtension(guardado.extension());
-
-            recurso = repository.save(recurso);
-        }
-        return recurso;
+        return aDetalle(recurso);
     }
 
     // =========================================================
-    // ACTUALIZAR RECURSO
+    // ACTUALIZAR
     // =========================================================
-    public RecursoJuridico actualizar(
-            Long id,
+
+    @Transactional
+    public RecursoDetalleResponse actualizar(
+            String uuid,
             RecursoCrearRequest request,
             MultipartFile archivo) {
-        RecursoJuridico recurso = obtenerPorId(id);
-        recurso.setTitulo(request.getTitulo());
-        recurso.setSubtituloDescripcion(request.getSubtituloDescripcion());
-        recurso.setTipo(request.getTipo());
-        recurso.setCategoria(request.getCategoria());
-        recurso.setAnio(request.getAnio());
-        recurso.setExpedienteCodigo(request.getExpedienteCodigo());
 
-        if (request.getEstado() != null) {
-            recurso.setEstado(request.getEstado());
+        validarRequest(request);
+
+        RecursoJuridico recurso = buscar(uuid);
+        recurso.setTitulo(request.getTitulo().trim());
+        recurso.setSubtituloDescripcion(texto(request.getSubtituloDescripcion()));
+        recurso.setTipo(codigo(request.getTipo()));
+        recurso.setCategoria(codigo(request.getCategoria()));
+        recurso.setAnio(request.getAnio());
+        recurso.setExpedienteCodigo(texto(request.getExpedienteCodigo()));
+
+        if (codigo(request.getEstado()) != null) {
+            recurso.setEstado(codigo(request.getEstado()));
         }
 
-        if (archivo != null && !archivo.isEmpty()) {
-            if (recurso.getRutaArchivo() != null && !recurso.getRutaArchivo().isBlank()) {
+        if (archivo != null) {
+            String rutaAnterior = recurso.getRutaArchivo();
+            aplicarArchivo(recurso, archivo, request.getExpedienteCodigo());
+
+            // El nuevo archivo se guarda primero. Solo después intentamos borrar
+            // el anterior, evitando dejar el recurso sin archivo ante un fallo.
+            if (rutaAnterior != null && !rutaAnterior.isBlank()
+                    && !rutaAnterior.equals(recurso.getRutaArchivo())) {
                 try {
-                    almacenamientoService.eliminar(recurso.getRutaArchivo());
-                } catch (Exception e) {
-                    log.warn("No se pudo eliminar el archivo anterior en actualización: {}", e.getMessage());
+                    almacenamientoService.eliminar(rutaAnterior);
+                } catch (Exception ignored) {
+                    // El registro ya apunta al archivo nuevo. Un residuo físico
+                    // puede limpiarse después sin romper la biblioteca.
                 }
             }
-
-            String codigoExpediente = (request.getExpedienteCodigo() != null && !request.getExpedienteCodigo().isBlank()) 
-                    ? request.getExpedienteCodigo() 
-                    : "BIBLIOTECA";
-
-            ArchivoGuardado guardado = almacenamientoService.guardar(
-                    archivo,
-                    codigoExpediente, // <-- Cambio a String
-                    recurso.getId(),
-                    1
-            );
-
-            recurso.setNombreArchivo(guardado.nombreOriginal());
-            recurso.setRutaArchivo(guardado.rutaRelativa());
-            recurso.setTamanioBytes(guardado.tamanoBytes());
-            recurso.setExtension(guardado.extension());
         }
-        return repository.save(recurso);
+
+        return aDetalle(repository.saveAndFlush(recurso));
     }
 
     // =========================================================
-    // OBTENER RECURSO FÍSICO
+    // ARCHIVOS
     // =========================================================
-    public Resource obtenerArchivoResource(Long id) {
-        RecursoJuridico recurso = obtenerPorId(id);
+
+    /**
+     * Devuelve siempre un PDF apto para vista previa.
+     *
+     * - Si el recurso ya es PDF, devuelve el archivo original.
+     * - Si es Word, Excel o PowerPoint, genera una representación PDF segura
+     *   y cacheada sin modificar ni reemplazar el archivo original.
+     * - La descarga sigue entregando el archivo originalmente cargado.
+     */
+    @Transactional(readOnly = true)
+    public Path obtenerRutaVistaPreviaPdf(String uuid) {
+        RecursoJuridico recurso = buscar(uuid);
 
         if (recurso.getRutaArchivo() == null || recurso.getRutaArchivo().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "El recurso no tiene archivo adjunto"
-            );
+                    "El recurso no tiene archivo adjunto");
         }
 
-        Path rutaFisica = almacenamientoService.resolver(recurso.getRutaArchivo());
+        Path original = almacenamientoService.resolver(recurso.getRutaArchivo());
 
-        try {
-            Resource resource = new UrlResource(rutaFisica.toUri());
+        // Conservamos la validación de seguridad antes de convertir o servir.
+        almacenamientoService.validarArchivoExistente(
+                original,
+                recurso.getNombreArchivo(),
+                recurso.getExtension());
 
-            if (resource.exists() && resource.isReadable()) {
-                return resource;
-            } else {
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND,
-                        "No se pudo leer el archivo físico en la ruta: " + rutaFisica.toAbsolutePath()
-                );
-            }
-        } catch (MalformedURLException e) {
-            throw new ResponseStatusException(
-                    HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al generar la ruta del archivo",
-                    e
-            );
-        }
+        return vistaPreviaService.obtenerPdf(
+                original,
+                recurso.getExtension(),
+                recurso.getNombreArchivo());
     }
 
-    // =========================================================
-    // OBTENER RUTA FÍSICA
-    // =========================================================
-    public Path obtenerRutaArchivo(Long id) {
-        RecursoJuridico recurso = obtenerPorId(id);
+    @Transactional(readOnly = true)
+    public Path obtenerRutaArchivo(String uuid) {
+        RecursoJuridico recurso = buscar(uuid);
+
         if (recurso.getRutaArchivo() == null || recurso.getRutaArchivo().isBlank()) {
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND,
-                    "El recurso no tiene archivo adjunto"
-            );
+                    "El recurso no tiene archivo adjunto");
         }
-        return almacenamientoService.resolver(recurso.getRutaArchivo());
+
+        Path ruta = almacenamientoService.resolver(recurso.getRutaArchivo());
+
+        // También se validan archivos antiguos antes de servirlos. Esto evita que
+        // un recurso inseguro cargado antes del parche pueda descargarse/abrirse.
+        almacenamientoService.validarArchivoExistente(
+                ruta,
+                recurso.getNombreArchivo(),
+                recurso.getExtension());
+
+        return ruta;
     }
 
     // =========================================================
-    // DESCARGAR
+    // BORRADO LÓGICO
     // =========================================================
-    public Resource descargarArchivo(Long id) {
-        return obtenerArchivoResource(id);
-    }
 
-    // =========================================================
-    // ELIMINAR (BLINDADO)
-    // =========================================================
     @Transactional
-    public void eliminar(Long id) {
-        RecursoJuridico recurso = obtenerPorId(id);
+    public void eliminar(String uuid) {
+        RecursoJuridico recurso = buscar(uuid);
 
-        // 1. Intento seguro de borrado físico
-        if (recurso.getRutaArchivo() != null && !recurso.getRutaArchivo().isBlank()) {
-            try {
-                almacenamientoService.eliminar(recurso.getRutaArchivo());
-            } catch (Throwable e) {
-                log.error("Excepción ignorada al eliminar archivo en disco para el recurso {}: {}", id, e.getMessage());
-            }
+        // En un sistema jurídico el registro y el archivo se conservan para
+        // trazabilidad. Se retiran del catálogo mediante activo = false.
+        recurso.setActivo(false);
+        repository.saveAndFlush(recurso);
+    }
+
+    // =========================================================
+    // HELPERS
+    // =========================================================
+
+    private RecursoJuridico buscar(String uuid) {
+        if (uuid == null || uuid.isBlank()) {
+            throw new EntityNotFoundException("Recurso jurídico no encontrado");
         }
 
-        // 2. Borrado garantizado en Base de Datos
-        try {
-            repository.delete(recurso);
-            repository.flush();
-        } catch (Exception e) {
-            log.error("Error al eliminar el registro en BD: {}", e.getMessage());
+        return repository.findByUuidPublicoAndEstudioIdAndActivoTrue(
+                        uuid.trim(),
+                        SesionActual.estudioId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Recurso jurídico no encontrado"));
+    }
+
+    private void validarArchivoNuevo(MultipartFile archivo) {
+        if (archivo == null) {
             throw new ResponseStatusException(
-                    HttpStatus.CONFLICT,
-                    "No se puede eliminar el recurso porque está referenciado en otras tablas de la base de datos.",
-                    e
-            );
+                    HttpStatus.BAD_REQUEST,
+                    "Debes adjuntar un documento. Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX");
         }
+    }
+
+    private void aplicarArchivo(
+            RecursoJuridico recurso,
+            MultipartFile archivo,
+            String expedienteCodigo) {
+
+        String codigoExpediente = texto(expedienteCodigo);
+        if (codigoExpediente == null) {
+            codigoExpediente = "BIBLIOTECA";
+        }
+
+        ArchivoGuardado guardado = almacenamientoService.guardar(
+                archivo,
+                codigoExpediente,
+                recurso.getId(),
+                1);
+
+        recurso.setNombreArchivo(guardado.nombreOriginal());
+        recurso.setRutaArchivo(guardado.rutaRelativa());
+        recurso.setTamanioBytes(guardado.tamanoBytes());
+        recurso.setExtension(guardado.extension());
+    }
+
+    private RecursoDetalleResponse aDetalle(RecursoJuridico r) {
+        return new RecursoDetalleResponse(
+                r.getUuidPublico(),
+                r.getTitulo(),
+                r.getSubtituloDescripcion(),
+                r.getTipo(),
+                r.getCategoria(),
+                r.getAnio(),
+                r.getExpedienteCodigo(),
+                r.getNombreArchivo(),
+                r.getExtension(),
+                r.getTamanioBytes(),
+                r.getEstado(),
+                r.getFechaCreacion(),
+                r.getFechaModificacion());
+    }
+
+    private Pageable paginaSegura(Pageable pageable) {
+        int pagina = pageable == null ? 0 : Math.max(pageable.getPageNumber(), 0);
+        int solicitado = pageable == null ? 20 : pageable.getPageSize();
+        int tamano = TAMANOS_PERMITIDOS.contains(solicitado) ? solicitado : 20;
+
+        // Orden estable para que un registro no salte entre páginas cuando hay
+        // varias altas con la misma fecha.
+        Sort orden = Sort.by(
+                Sort.Order.desc("fechaCreacion"),
+                Sort.Order.desc("id"));
+
+        return PageRequest.of(pagina, tamano, orden);
+    }
+
+    private void validarRequest(RecursoCrearRequest request) {
+        if (request == null || request.getTitulo() == null || request.getTitulo().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El título es obligatorio");
+        }
+        if (codigo(request.getTipo()) == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "El tipo es obligatorio");
+        }
+        if (codigo(request.getCategoria()) == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "La categoría es obligatoria");
+        }
+    }
+
+    private static String texto(String valor) {
+        return valor == null || valor.isBlank() ? null : valor.trim();
+    }
+
+    private static String codigo(String valor) {
+        String limpio = texto(valor);
+        return limpio == null ? null : limpio.toUpperCase();
+    }
+
+    private static long valor(Long valor) {
+        return valor == null ? 0L : valor;
     }
 }
