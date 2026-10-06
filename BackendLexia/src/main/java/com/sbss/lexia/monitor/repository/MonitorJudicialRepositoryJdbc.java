@@ -7,6 +7,7 @@ import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.ExpedienteOpcion;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.RegistrarConsultaRequest;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.Resumen;
 import com.sbss.lexia.shared.dto.Limites;
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.sql.ResultSet;
@@ -26,83 +27,175 @@ import org.springframework.stereotype.Repository;
 @RequiredArgsConstructor
 public class MonitorJudicialRepositoryJdbc {
 
+    private static final int TAMANO_PAGINA_MAXIMO = 100;
+    private static final int CATALOGO_MAXIMO = 50;
+
     private final NamedParameterJdbcTemplate jdbc;
 
+    /**
+     * Endpoint compatible con clientes antiguos que esperan un array.
+     * Internamente usa la misma consulta optimizada del listado paginado.
+     */
     public List<ExpedienteMonitor> listar(String expediente, String cliente, String abogado,
             String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
             int limite, int desplazamiento) {
-
-        StringBuilder sql = new StringBuilder("""
-                SELECT m.uuid_publico, e.id expediente_id, e.codigo_interno, e.numero_expediente,
-                       c.nombre_busqueda cliente, o.nombre organo, ee.nombre estado_procesal,
-                       u.nombre_completo abogado_responsable, m.fuente_plataforma,
-                       m.estado estado_monitor, m.fecha_creacion, m.ultima_consulta,
-                       (SELECT COUNT(*) FROM monitor_consultas mc
-                         WHERE mc.monitor_id=m.id) total_consultas,
-                       (SELECT COUNT(*) FROM monitor_consultas mc
-                         WHERE mc.monitor_id=m.id AND mc.hubo_movimiento=1) movimientos,
-                       (SELECT COUNT(*) FROM monitor_consultas mc
-                         WHERE mc.monitor_id=m.id AND mc.estado_verificacion='PENDIENTE') pendientes_verificacion,
-                       (SELECT COALESCE(mc.tipo_movimiento,
-                               CASE WHEN mc.nueva_resolucion=1 THEN CONCAT('Resolución ', COALESCE(mc.numero_resolucion,'')) ELSE 'Consulta sin novedad' END)
-                          FROM monitor_consultas mc
-                         WHERE mc.monitor_id=m.id
-                         ORDER BY mc.fecha_consulta DESC, mc.id DESC LIMIT 1) ultimo_movimiento,
-                       (SELECT mc.fecha_consulta FROM monitor_consultas mc
-                         WHERE mc.monitor_id=m.id AND mc.hubo_movimiento=1
-                         ORDER BY mc.fecha_consulta DESC, mc.id DESC LIMIT 1) fecha_ultimo_movimiento
-                  FROM monitor_expedientes m
-                  JOIN expedientes e ON e.id=m.expediente_id
-                  JOIN clientes c ON c.id=e.cliente_id
-                  LEFT JOIN organos_jurisdiccionales o ON o.id=e.organo_id
-                  LEFT JOIN estados_expediente ee ON ee.id=e.estado_id
-                  LEFT JOIN usuarios u ON u.id=e.abogado_responsable_id
-                 WHERE m.estudio_id=:estudioId
-                   AND m.activo=1
-                   AND e.activo=1
-                """);
-        MapSqlParameterSource p = base();
-        aplicarVisibilidad(sql, p);
-
-        if (expediente != null && !expediente.isBlank()) {
-            sql.append(" AND LOWER(CONCAT_WS(' ',e.codigo_interno,e.numero_expediente)) LIKE :expediente");
-            p.addValue("expediente", "%" + expediente.trim().toLowerCase() + "%");
-        }
-        if (cliente != null && !cliente.isBlank()) {
-            sql.append(" AND LOWER(c.nombre_busqueda) LIKE :cliente");
-            p.addValue("cliente", "%" + cliente.trim().toLowerCase() + "%");
-        }
-        if (abogado != null && !abogado.isBlank()) {
-            sql.append(" AND LOWER(COALESCE(u.nombre_completo,'')) LIKE :abogado");
-            p.addValue("abogado", "%" + abogado.trim().toLowerCase() + "%");
-        }
-        if (organo != null && !organo.isBlank()) {
-            sql.append(" AND LOWER(COALESCE(o.nombre,'')) LIKE :organo");
-            p.addValue("organo", "%" + organo.trim().toLowerCase() + "%");
-        }
-        if (estadoProcesal != null && !estadoProcesal.isBlank()) {
-            sql.append(" AND LOWER(COALESCE(ee.nombre,'')) LIKE :estadoProcesal");
-            p.addValue("estadoProcesal", "%" + estadoProcesal.trim().toLowerCase() + "%");
-        }
-        if (desde != null || hasta != null) {
-            sql.append(" AND EXISTS (SELECT 1 FROM monitor_consultas f WHERE f.monitor_id=m.id");
-            if (desde != null) {
-                sql.append(" AND DATE(f.fecha_consulta)>=:desde");
-                p.addValue("desde", desde);
-            }
-            if (hasta != null) {
-                sql.append(" AND DATE(f.fecha_consulta)<=:hasta");
-                p.addValue("hasta", hasta);
-            }
-            sql.append(")");
-        }
-        sql.append(" ORDER BY COALESCE(m.ultima_consulta,m.fecha_creacion) DESC, e.codigo_interno DESC");
-        acotar(sql, p, limite, desplazamiento);
-        return jdbc.query(sql.toString(), p, (rs, n) -> mapMonitor(rs));
+        int limiteSeguro = Limites.limite(limite);
+        int desplazamientoSeguro = Limites.desplazamiento(desplazamiento);
+        return ejecutarListado(expediente, cliente, abogado, organo, estadoProcesal,
+                desde, hasta, limiteSeguro, desplazamientoSeguro);
     }
 
+    /**
+     * Listado real paginado. Solo agrega las consultas de los monitores de la
+     * pagina visible; evita ejecutar varios subqueries correlacionados por cada
+     * fila del monitor cuando la tabla historica crece.
+     */
+    public PaginaDto<ExpedienteMonitor> listarPagina(String expediente, String cliente, String abogado,
+            String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
+            int pagina, int tamano) {
+        int paginaSegura = Math.max(0, pagina);
+        int tamanoSeguro = tamanoPagina(tamano);
+
+        MapSqlParameterSource conteoParams = base();
+        StringBuilder conteoSql = new StringBuilder("SELECT COUNT(*) ");
+        appendMonitorFromWhere(conteoSql, conteoParams, expediente, cliente, abogado,
+                organo, estadoProcesal, desde, hasta);
+        Long total = jdbc.queryForObject(conteoSql.toString(), conteoParams, Long.class);
+        long totalSeguro = nvl(total);
+
+        long desplazamiento = (long) paginaSegura * tamanoSeguro;
+        List<ExpedienteMonitor> contenido = desplazamiento >= totalSeguro
+                ? List.of()
+                : ejecutarListado(expediente, cliente, abogado, organo, estadoProcesal,
+                        desde, hasta, tamanoSeguro, desplazamiento);
+
+        return pagina(contenido, paginaSegura, tamanoSeguro, totalSeguro);
+    }
+
+    private List<ExpedienteMonitor> ejecutarListado(String expediente, String cliente, String abogado,
+            String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
+            int limite, long desplazamiento) {
+
+        MapSqlParameterSource p = base();
+        StringBuilder fromWhere = new StringBuilder();
+        appendMonitorFromWhere(fromWhere, p, expediente, cliente, abogado,
+                organo, estadoProcesal, desde, hasta);
+        p.addValue("limite", limite);
+        p.addValue("desplazamiento", desplazamiento);
+
+        String sql = """
+                WITH pagina AS (
+                    SELECT m.id monitor_id,
+                           m.uuid_publico,
+                           e.id expediente_id,
+                           e.codigo_interno,
+                           e.numero_expediente,
+                           c.nombre_busqueda cliente,
+                           o.nombre organo,
+                           ee.nombre estado_procesal,
+                           u.nombre_completo abogado_responsable,
+                           m.fuente_plataforma,
+                           m.estado estado_monitor,
+                           m.fecha_creacion,
+                           m.ultima_consulta,
+                           COALESCE(m.ultima_consulta, m.fecha_creacion) orden_fecha
+                    %s
+                    ORDER BY COALESCE(m.ultima_consulta, m.fecha_creacion) DESC,
+                             e.codigo_interno DESC,
+                             m.id DESC
+                    LIMIT :limite OFFSET :desplazamiento
+                ),
+                estadisticas AS (
+                    SELECT mc.monitor_id,
+                           COUNT(*) total_consultas,
+                           SUM(CASE WHEN mc.hubo_movimiento = 1 THEN 1 ELSE 0 END) movimientos,
+                           SUM(CASE WHEN mc.estado_verificacion = 'PENDIENTE' THEN 1 ELSE 0 END) pendientes_verificacion,
+                           MAX(CASE WHEN mc.hubo_movimiento = 1 THEN mc.fecha_consulta END) fecha_ultimo_movimiento
+                    FROM monitor_consultas mc
+                    JOIN pagina pg ON pg.monitor_id = mc.monitor_id
+                    GROUP BY mc.monitor_id
+                ),
+                ultima AS (
+                    SELECT monitor_id, ultimo_movimiento
+                    FROM (
+                        SELECT mc.monitor_id,
+                               COALESCE(NULLIF(mc.tipo_movimiento, ''),
+                                   CASE
+                                       WHEN mc.nueva_resolucion = 1
+                                           THEN CONCAT('Resolución ', COALESCE(mc.numero_resolucion, ''))
+                                       ELSE 'Consulta sin novedad'
+                                   END
+                               ) ultimo_movimiento,
+                               ROW_NUMBER() OVER (
+                                   PARTITION BY mc.monitor_id
+                                   ORDER BY mc.fecha_consulta DESC, mc.id DESC
+                               ) rn
+                        FROM monitor_consultas mc
+                        JOIN pagina pg ON pg.monitor_id = mc.monitor_id
+                    ) ordenadas
+                    WHERE rn = 1
+                )
+                SELECT pg.uuid_publico,
+                       pg.expediente_id,
+                       pg.codigo_interno,
+                       pg.numero_expediente,
+                       pg.cliente,
+                       pg.organo,
+                       pg.estado_procesal,
+                       pg.abogado_responsable,
+                       pg.fuente_plataforma,
+                       pg.estado_monitor,
+                       pg.fecha_creacion,
+                       pg.ultima_consulta,
+                       COALESCE(es.total_consultas, 0) total_consultas,
+                       COALESCE(es.movimientos, 0) movimientos,
+                       COALESCE(es.pendientes_verificacion, 0) pendientes_verificacion,
+                       ul.ultimo_movimiento,
+                       es.fecha_ultimo_movimiento
+                FROM pagina pg
+                LEFT JOIN estadisticas es ON es.monitor_id = pg.monitor_id
+                LEFT JOIN ultima ul ON ul.monitor_id = pg.monitor_id
+                ORDER BY pg.orden_fecha DESC, pg.codigo_interno DESC, pg.monitor_id DESC
+                """.formatted(fromWhere);
+
+        return jdbc.query(sql, p, (rs, n) -> mapMonitor(rs));
+    }
+
+    /** Cliente antiguo: array acotado. */
     public List<Consulta> listarConsultas(Long expedienteId, String tipoMovimiento, String estadoVerificacion,
             LocalDate desde, LocalDate hasta, int limite, int desplazamiento) {
+        int limiteSeguro = Limites.limite(limite);
+        int desplazamientoSeguro = Limites.desplazamiento(desplazamiento);
+        return ejecutarConsultas(expedienteId, tipoMovimiento, estadoVerificacion,
+                desde, hasta, limiteSeguro, desplazamientoSeguro);
+    }
+
+    /** Historial paginado para la pantalla del Monitor Judicial. */
+    public PaginaDto<Consulta> listarConsultasPagina(Long expedienteId, String tipoMovimiento,
+            String estadoVerificacion, LocalDate desde, LocalDate hasta, int pagina, int tamano) {
+        int paginaSegura = Math.max(0, pagina);
+        int tamanoSeguro = tamanoPagina(tamano);
+
+        MapSqlParameterSource conteoParams = base();
+        StringBuilder conteoSql = new StringBuilder("SELECT COUNT(*) ");
+        appendConsultaFromWhere(conteoSql, conteoParams, expedienteId, tipoMovimiento,
+                estadoVerificacion, desde, hasta);
+        Long total = jdbc.queryForObject(conteoSql.toString(), conteoParams, Long.class);
+        long totalSeguro = nvl(total);
+
+        long desplazamiento = (long) paginaSegura * tamanoSeguro;
+        List<Consulta> contenido = desplazamiento >= totalSeguro
+                ? List.of()
+                : ejecutarConsultas(expedienteId, tipoMovimiento, estadoVerificacion,
+                        desde, hasta, tamanoSeguro, desplazamiento);
+
+        return pagina(contenido, paginaSegura, tamanoSeguro, totalSeguro);
+    }
+
+    private List<Consulta> ejecutarConsultas(Long expedienteId, String tipoMovimiento,
+            String estadoVerificacion, LocalDate desde, LocalDate hasta,
+            int limite, long desplazamiento) {
+        MapSqlParameterSource p = base();
         StringBuilder sql = new StringBuilder("""
                 SELECT mc.uuid_publico, e.id expediente_id, e.codigo_interno, e.numero_expediente,
                        c.nombre_busqueda cliente, mc.fecha_consulta, us.id usuario_id,
@@ -112,103 +205,215 @@ public class MonitorJudicialRepositoryJdbc {
                        mc.documento_descargado, mc.notificacion, mc.plazo, mc.observaciones,
                        mc.origen_informacion, mc.estado_verificacion,
                        uv.nombre_completo verificado_por, mc.fecha_verificacion
-                  FROM monitor_consultas mc
-                  JOIN monitor_expedientes m ON m.id=mc.monitor_id
-                  JOIN expedientes e ON e.id=mc.expediente_id
-                  JOIN clientes c ON c.id=e.cliente_id
-                  JOIN usuarios us ON us.id=mc.usuario_id
-                  LEFT JOIN usuarios uv ON uv.id=mc.usuario_verificacion_id
-                 WHERE m.estudio_id=:estudioId
-                   AND e.activo=1
                 """);
-        MapSqlParameterSource p = base();
-        aplicarVisibilidad(sql, p);
-        if (expedienteId != null) {
-            sql.append(" AND e.id=:expedienteId");
-            p.addValue("expedienteId", expedienteId);
-        }
-        if (tipoMovimiento != null && !tipoMovimiento.isBlank()) {
-            sql.append(" AND mc.tipo_movimiento=:tipoMovimiento");
-            p.addValue("tipoMovimiento", tipoMovimiento.trim().toUpperCase());
-        }
-        if (estadoVerificacion != null && !estadoVerificacion.isBlank()) {
-            sql.append(" AND mc.estado_verificacion=:estadoVerificacion");
-            p.addValue("estadoVerificacion", estadoVerificacion.trim().toUpperCase());
-        }
-        if (desde != null) {
-            sql.append(" AND DATE(mc.fecha_consulta)>=:desde");
-            p.addValue("desde", desde);
-        }
-        if (hasta != null) {
-            sql.append(" AND DATE(mc.fecha_consulta)<=:hasta");
-            p.addValue("hasta", hasta);
-        }
-        // El LIMIT 200 estaba escrito a mano y no se podia pasar de ahi. El
-        // historial de consultas judiciales crece una fila por revision: con
-        // 500 expedientes revisados a diario son ~180.000 filas al ano.
-        sql.append(" ORDER BY mc.fecha_consulta DESC, mc.id DESC");
-        acotar(sql, p, limite, desplazamiento);
+        appendConsultaFromWhere(sql, p, expedienteId, tipoMovimiento,
+                estadoVerificacion, desde, hasta);
+        sql.append(" ORDER BY mc.fecha_consulta DESC, mc.id DESC LIMIT :limite OFFSET :desplazamiento");
+        p.addValue("limite", limite);
+        p.addValue("desplazamiento", desplazamiento);
         return jdbc.query(sql.toString(), p, (rs, n) -> mapConsulta(rs));
     }
 
+    /**
+     * Una sola ida a MySQL para las cuatro tarjetas. La consulta usa un CTE de
+     * monitores visibles y recorre su historial una sola vez.
+     */
     public Resumen resumen() {
-        StringBuilder filtro = new StringBuilder("""
-                FROM monitor_expedientes m
-                JOIN expedientes e ON e.id=m.expediente_id
-               WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
-                """);
         MapSqlParameterSource p = base();
-        aplicarVisibilidad(filtro, p);
-        String condicion = filtro.toString();
+        StringBuilder visibles = new StringBuilder("""
+                SELECT m.id
+                  FROM monitor_expedientes m
+                  JOIN expedientes e ON e.id = m.expediente_id
+                 WHERE m.estudio_id = :estudioId
+                   AND m.activo = 1
+                   AND e.activo = 1
+                """);
+        aplicarVisibilidad(visibles, p);
 
-        Long monitoreados = jdbc.queryForObject("SELECT COUNT(*) " + condicion, p, Long.class);
-        Long movimientos = jdbc.queryForObject("""
-                SELECT COUNT(*) FROM monitor_consultas mc
-                JOIN monitor_expedientes m ON m.id=mc.monitor_id
-                JOIN expedientes e ON e.id=m.expediente_id
-                WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
-                  AND mc.hubo_movimiento=1 AND DATE(mc.fecha_consulta)=CURRENT_DATE
-                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
-        Long resoluciones = jdbc.queryForObject("""
-                SELECT COUNT(*) FROM monitor_consultas mc
-                JOIN monitor_expedientes m ON m.id=mc.monitor_id
-                JOIN expedientes e ON e.id=m.expediente_id
-                WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
-                  AND mc.nueva_resolucion=1 AND DATE(mc.fecha_consulta)=CURRENT_DATE
-                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
-        Long pendientes = jdbc.queryForObject("""
-                SELECT COUNT(*) FROM monitor_consultas mc
-                JOIN monitor_expedientes m ON m.id=mc.monitor_id
-                JOIN expedientes e ON e.id=m.expediente_id
-                WHERE m.estudio_id=:estudioId AND m.activo=1 AND e.activo=1
-                  AND mc.estado_verificacion='PENDIENTE'
-                """ + VisibilidadExpedientes.sql("e"), p, Long.class);
-        return new Resumen(nvl(monitoreados), nvl(movimientos), nvl(resoluciones), nvl(pendientes));
+        String sql = """
+                WITH visibles AS (
+                    %s
+                ),
+                metricas AS (
+                    SELECT
+                        COALESCE(SUM(CASE
+                            WHEN mc.hubo_movimiento = 1
+                             AND mc.fecha_consulta >= CURRENT_DATE
+                             AND mc.fecha_consulta < DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)
+                            THEN 1 ELSE 0 END), 0) movimientos_hoy,
+                        COALESCE(SUM(CASE
+                            WHEN mc.nueva_resolucion = 1
+                             AND mc.fecha_consulta >= CURRENT_DATE
+                             AND mc.fecha_consulta < DATE_ADD(CURRENT_DATE, INTERVAL 1 DAY)
+                            THEN 1 ELSE 0 END), 0) resoluciones_hoy,
+                        COALESCE(SUM(CASE
+                            WHEN mc.estado_verificacion = 'PENDIENTE'
+                            THEN 1 ELSE 0 END), 0) pendientes
+                    FROM monitor_consultas mc
+                    JOIN visibles v ON v.id = mc.monitor_id
+                )
+                SELECT (SELECT COUNT(*) FROM visibles) expedientes_monitoreados,
+                       metricas.movimientos_hoy,
+                       metricas.resoluciones_hoy,
+                       metricas.pendientes
+                  FROM metricas
+                """.formatted(visibles);
+
+        return jdbc.queryForObject(sql, p, (rs, n) -> new Resumen(
+                rs.getLong("expedientes_monitoreados"),
+                rs.getLong("movimientos_hoy"),
+                rs.getLong("resoluciones_hoy"),
+                rs.getLong("pendientes")));
     }
 
-    public Catalogos catalogos() {
+    /**
+     * Selector bajo demanda: ya no descarga miles de expedientes cada vez que
+     * se abre el Monitor Judicial. El frontend consulta como maximo 50.
+     */
+    public Catalogos catalogos(String busqueda, int limite) {
         StringBuilder sql = new StringBuilder("""
-                SELECT DISTINCT e.id, e.codigo_interno, e.numero_expediente,
+                SELECT e.id, e.codigo_interno, e.numero_expediente,
                        c.nombre_busqueda cliente, o.nombre organo,
                        u.nombre_completo abogado_responsable
                   FROM expedientes e
-                  JOIN clientes c ON c.id=e.cliente_id
-                  LEFT JOIN organos_jurisdiccionales o ON o.id=e.organo_id
-                  LEFT JOIN usuarios u ON u.id=e.abogado_responsable_id
-                 WHERE e.estudio_id=:estudioId AND e.activo=1
+                  JOIN clientes c ON c.id = e.cliente_id
+                  LEFT JOIN organos_jurisdiccionales o ON o.id = e.organo_id
+                  LEFT JOIN usuarios u ON u.id = e.abogado_responsable_id
+                 WHERE e.estudio_id = :estudioId
+                   AND e.activo = 1
                 """);
         MapSqlParameterSource p = base();
         aplicarVisibilidad(sql, p);
-        sql.append(" ORDER BY e.codigo_interno DESC");
+
+        if (busqueda != null && !busqueda.isBlank()) {
+            sql.append(" AND LOWER(CONCAT_WS(' ', e.codigo_interno, e.numero_expediente, c.nombre_busqueda)) LIKE :busqueda");
+            p.addValue("busqueda", "%" + busqueda.trim().toLowerCase() + "%");
+        }
+
+        int limiteSeguro = Math.max(1, Math.min(limite, CATALOGO_MAXIMO));
+        sql.append(" ORDER BY e.codigo_interno DESC, e.id DESC LIMIT :limite");
+        p.addValue("limite", limiteSeguro);
+
         List<ExpedienteOpcion> expedientes = jdbc.query(sql.toString(), p, (rs, n) -> new ExpedienteOpcion(
                 rs.getLong("id"), rs.getString("codigo_interno"), rs.getString("numero_expediente"),
                 rs.getString("cliente"), rs.getString("organo"), rs.getString("abogado_responsable")));
         return new Catalogos(expedientes);
     }
 
+    /** Validacion O(1) en SQL; antes cargaba todo el catalogo y hacia stream(). */
     public boolean expedienteVisible(Long expedienteId) {
-        if (expedienteId == null) return false;
-        return catalogos().expedientes().stream().anyMatch(e -> e.id().equals(expedienteId));
+        if (expedienteId == null) {
+            return false;
+        }
+        StringBuilder sql = new StringBuilder("""
+                SELECT COUNT(*)
+                  FROM expedientes e
+                 WHERE e.id = :expedienteId
+                   AND e.estudio_id = :estudioId
+                   AND e.activo = 1
+                """);
+        MapSqlParameterSource p = base().addValue("expedienteId", expedienteId);
+        aplicarVisibilidad(sql, p);
+        Integer total = jdbc.queryForObject(sql.toString(), p, Integer.class);
+        return total != null && total > 0;
+    }
+
+    private void appendMonitorFromWhere(StringBuilder sql, MapSqlParameterSource p,
+            String expediente, String cliente, String abogado, String organo,
+            String estadoProcesal, LocalDate desde, LocalDate hasta) {
+        sql.append("""
+                 FROM monitor_expedientes m
+                 JOIN expedientes e ON e.id = m.expediente_id
+                 JOIN clientes c ON c.id = e.cliente_id
+                 LEFT JOIN organos_jurisdiccionales o ON o.id = e.organo_id
+                 LEFT JOIN estados_expediente ee ON ee.id = e.estado_id
+                 LEFT JOIN usuarios u ON u.id = e.abogado_responsable_id
+                WHERE m.estudio_id = :estudioId
+                  AND m.activo = 1
+                  AND e.activo = 1
+                """);
+        aplicarVisibilidad(sql, p);
+
+        if (expediente != null && !expediente.isBlank()) {
+            sql.append(" AND LOWER(CONCAT_WS(' ', e.codigo_interno, e.numero_expediente)) LIKE :expediente");
+            p.addValue("expediente", "%" + expediente.trim().toLowerCase() + "%");
+        }
+        if (cliente != null && !cliente.isBlank()) {
+            sql.append(" AND LOWER(c.nombre_busqueda) LIKE :cliente");
+            p.addValue("cliente", "%" + cliente.trim().toLowerCase() + "%");
+        }
+        if (abogado != null && !abogado.isBlank()) {
+            sql.append(" AND LOWER(COALESCE(u.nombre_completo, '')) LIKE :abogado");
+            p.addValue("abogado", "%" + abogado.trim().toLowerCase() + "%");
+        }
+        if (organo != null && !organo.isBlank()) {
+            sql.append(" AND LOWER(COALESCE(o.nombre, '')) LIKE :organo");
+            p.addValue("organo", "%" + organo.trim().toLowerCase() + "%");
+        }
+        if (estadoProcesal != null && !estadoProcesal.isBlank()) {
+            sql.append(" AND LOWER(COALESCE(ee.nombre, '')) LIKE :estadoProcesal");
+            p.addValue("estadoProcesal", "%" + estadoProcesal.trim().toLowerCase() + "%");
+        }
+        if (desde != null || hasta != null) {
+            sql.append(" AND EXISTS (SELECT 1 FROM monitor_consultas f WHERE f.monitor_id = m.id");
+            if (desde != null) {
+                sql.append(" AND f.fecha_consulta >= :desde");
+                p.addValue("desde", desde);
+            }
+            if (hasta != null) {
+                sql.append(" AND f.fecha_consulta < DATE_ADD(:hasta, INTERVAL 1 DAY)");
+                p.addValue("hasta", hasta);
+            }
+            sql.append(")");
+        }
+    }
+
+    private void appendConsultaFromWhere(StringBuilder sql, MapSqlParameterSource p,
+            Long expedienteId, String tipoMovimiento, String estadoVerificacion,
+            LocalDate desde, LocalDate hasta) {
+        sql.append("""
+                  FROM monitor_consultas mc
+                  JOIN monitor_expedientes m ON m.id = mc.monitor_id
+                  JOIN expedientes e ON e.id = mc.expediente_id
+                  JOIN clientes c ON c.id = e.cliente_id
+                  JOIN usuarios us ON us.id = mc.usuario_id
+                  LEFT JOIN usuarios uv ON uv.id = mc.usuario_verificacion_id
+                 WHERE m.estudio_id = :estudioId
+                   AND m.activo = 1
+                   AND e.activo = 1
+                """);
+        aplicarVisibilidad(sql, p);
+
+        if (expedienteId != null) {
+            sql.append(" AND e.id = :expedienteId");
+            p.addValue("expedienteId", expedienteId);
+        }
+        if (tipoMovimiento != null && !tipoMovimiento.isBlank()) {
+            sql.append(" AND mc.tipo_movimiento = :tipoMovimiento");
+            p.addValue("tipoMovimiento", tipoMovimiento.trim().toUpperCase());
+        }
+        if (estadoVerificacion != null && !estadoVerificacion.isBlank()) {
+            sql.append(" AND mc.estado_verificacion = :estadoVerificacion");
+            p.addValue("estadoVerificacion", estadoVerificacion.trim().toUpperCase());
+        }
+        if (desde != null) {
+            sql.append(" AND mc.fecha_consulta >= :desde");
+            p.addValue("desde", desde);
+        }
+        if (hasta != null) {
+            sql.append(" AND mc.fecha_consulta < DATE_ADD(:hasta, INTERVAL 1 DAY)");
+            p.addValue("hasta", hasta);
+        }
+    }
+
+    private static <T> PaginaDto<T> pagina(List<T> contenido, int pagina, int tamano, long total) {
+        int totalPaginas = total == 0 ? 0 : (int) Math.ceil((double) total / tamano);
+        boolean ultima = totalPaginas == 0 || pagina >= totalPaginas - 1;
+        return new PaginaDto<>(contenido, pagina, tamano, total, totalPaginas, ultima);
+    }
+
+    private static int tamanoPagina(int tamano) {
+        return Math.max(1, Math.min(tamano, TAMANO_PAGINA_MAXIMO));
     }
 
     public String agregarExpediente(Long expedienteId, String fuentePlataforma) {

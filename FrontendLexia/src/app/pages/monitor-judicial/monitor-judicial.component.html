@@ -372,6 +372,53 @@
           </tbody>
         </table>
       </div>
+
+      <div class="pagination-bar">
+        <span class="pagination-summary">
+          Mostrando {{ inicioMonitoreados }}-{{ finMonitoreados }} de
+          {{ totalMonitoreados }} expedientes
+        </span>
+
+        <div class="pagination-controls">
+          <label>
+            <span>Mostrar</span>
+            <select
+              [(ngModel)]="tamanoMonitoreados"
+              (ngModelChange)="cambiarTamanoMonitoreados()"
+              [disabled]="cargando"
+            >
+              @for (tamano of tamanosPagina; track tamano) {
+                <option [ngValue]="tamano">{{ tamano }}</option>
+              }
+            </select>
+          </label>
+
+          <button
+            type="button"
+            [disabled]="paginaMonitoreados <= 0 || cargando"
+            (click)="paginaAnteriorMonitoreados()"
+          >
+            Anterior
+          </button>
+
+          <strong>
+            Página {{ totalPaginasMonitoreados ? paginaMonitoreados + 1 : 0 }}
+            de {{ totalPaginasMonitoreados }}
+          </strong>
+
+          <button
+            type="button"
+            [disabled]="
+              cargando ||
+              totalPaginasMonitoreados === 0 ||
+              paginaMonitoreados >= totalPaginasMonitoreados - 1
+            "
+            (click)="paginaSiguienteMonitoreados()"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </section>
 
     <section class="panel history-panel">
@@ -389,7 +436,14 @@
       </div>
 
       <div class="history-list">
-        @if (!consultas.length) {
+        @if (cargandoConsultas) {
+          <div class="empty-card">
+            <div class="table-loading">
+              <span class="spinner"></span>
+              Cargando historial...
+            </div>
+          </div>
+        } @else if (!consultas.length) {
           <div class="empty-card">
             Todavía no existen consultas judiciales registradas.
           </div>
@@ -543,6 +597,53 @@
           }
         }
       </div>
+
+      <div class="pagination-bar history-pagination">
+        <span class="pagination-summary">
+          Mostrando {{ inicioConsultas }}-{{ finConsultas }} de
+          {{ totalConsultas }} consultas
+        </span>
+
+        <div class="pagination-controls">
+          <label>
+            <span>Mostrar</span>
+            <select
+              [(ngModel)]="tamanoConsultas"
+              (ngModelChange)="cambiarTamanoConsultas()"
+              [disabled]="cargandoConsultas"
+            >
+              @for (tamano of tamanosPagina; track tamano) {
+                <option [ngValue]="tamano">{{ tamano }}</option>
+              }
+            </select>
+          </label>
+
+          <button
+            type="button"
+            [disabled]="paginaConsultas <= 0 || cargandoConsultas"
+            (click)="paginaAnteriorConsultas()"
+          >
+            Anterior
+          </button>
+
+          <strong>
+            Página {{ totalPaginasConsultas ? paginaConsultas + 1 : 0 }}
+            de {{ totalPaginasConsultas }}
+          </strong>
+
+          <button
+            type="button"
+            [disabled]="
+              cargandoConsultas ||
+              totalPaginasConsultas === 0 ||
+              paginaConsultas >= totalPaginasConsultas - 1
+            "
+            (click)="paginaSiguienteConsultas()"
+          >
+            Siguiente
+          </button>
+        </div>
+      </div>
     </section>
   </main>
 </div>
@@ -577,6 +678,19 @@
 
       <div class="form-grid one">
         <label class="field">
+          <span>Buscar expediente</span>
+          <input
+            [(ngModel)]="busquedaCatalogo"
+            (ngModelChange)="programarBusquedaCatalogo()"
+            placeholder="Código, número o cliente"
+            autocomplete="off"
+          >
+          <small class="field-help">
+            Se consultan hasta 50 coincidencias para no cargar todo el estudio.
+          </small>
+        </label>
+
+        <label class="field">
           <span>Expediente *</span>
 
           <select
@@ -585,7 +699,11 @@
             "
           >
             <option [ngValue]="null">
-              Seleccione un expediente
+              {{
+                cargandoCatalogo
+                  ? 'Buscando expedientes...'
+                  : 'Seleccione un expediente'
+              }}
             </option>
 
             @for (

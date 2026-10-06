@@ -2020,3 +2020,500 @@ tbody tr:hover {
 :host-context(.tema-oscuro-global) .detail-item strong {
   color: #e5e7eb;
 }
+
+/* =========================================================
+   PAGINACIÓN ESCALABLE — Biblioteca Jurídica
+========================================================= */
+
+.biblioteca-estado {
+  padding: 14px 18px;
+  border-top: 1px solid #eef1f5;
+  color: #64748b;
+  font-size: 10px;
+  text-align: center;
+}
+
+.biblioteca-estado.error {
+  color: #b91c1c;
+  background: #fef2f2;
+}
+
+.biblioteca-paginacion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 18px 14px;
+  border-top: 1px solid light-dark(#eef1f5, #334155);
+  background: light-dark(#ffffff, #111827);
+  color: light-dark(#475569, #cbd5e1);
+}
+
+.paginacion-resumen {
+  color: light-dark(#64748b, #94a3b8);
+  font-size: 9px;
+}
+
+.paginacion-controles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: light-dark(#475569, #cbd5e1);
+  font-size: 9px;
+}
+
+.paginacion-controles label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.paginacion-controles select,
+.paginacion-controles button {
+  height: 30px;
+  border: 1px solid light-dark(#d9dee6, #334155);
+  border-radius: 6px;
+  background: light-dark(#ffffff, #172033);
+  color: light-dark(#475569, #e5e7eb);
+  font-size: 8px;
+}
+
+.paginacion-controles select {
+  padding: 0 7px;
+}
+
+.paginacion-controles button {
+  padding: 0 10px;
+  cursor: pointer;
+}
+
+.paginacion-controles button:hover:not(:disabled) {
+  border-color: #7461d7;
+  color: #4f46e5;
+}
+
+.paginacion-controles button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .biblioteca-paginacion {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .paginacion-controles {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+/* =========================================================
+   NOTIFICACIONES PROPIAS DE LEXIA
+   Reemplazan alert()/confirm() nativos del navegador.
+========================================================= */
+.system-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border: 1px solid #dbe3ee;
+  border-radius: 10px;
+  background: #ffffff;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, .05);
+}
+
+.system-notice.modal-notice {
+  margin: 14px 24px 0;
+  box-shadow: none;
+}
+
+.system-notice-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.system-notice-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.system-notice-copy strong {
+  color: #1e293b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.system-notice-copy span {
+  color: #64748b;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.system-notice-close {
+  width: 26px;
+  height: 26px;
+  flex: 0 0 26px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.system-notice-close:hover {
+  background: rgba(148, 163, 184, .12);
+  color: #475569;
+}
+
+.notice-exito {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.notice-exito .system-notice-icon {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.notice-error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.notice-error .system-notice-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.notice-advertencia {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.notice-advertencia .system-notice-icon {
+  background: #fef3c7;
+  color: #a16207;
+}
+
+.notice-info {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.notice-info .system-notice-icon {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.btn-save:disabled,
+.btn-danger:disabled,
+.btn-cancel:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================
+   CONFIRMACIÓN PROPIA DE LEXIA
+========================================================= */
+.confirm-overlay {
+  z-index: 10020;
+}
+
+.confirm-card {
+  max-width: 520px;
+  overflow: hidden;
+}
+
+.confirm-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  margin: 24px auto 12px;
+  border-radius: 14px;
+  background: #fff1f2;
+  color: #be123c;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.confirm-content {
+  padding: 0 26px 20px;
+  text-align: center;
+}
+
+.confirm-content h3 {
+  margin: 4px 0 10px;
+  color: #172033;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.confirm-content p {
+  margin: 0;
+  color: #64748b;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.confirm-content p strong {
+  color: #334155;
+}
+
+.confirm-note {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 8px;
+  line-height: 1.5;
+}
+
+.confirm-notice {
+  margin: 14px 0 0 !important;
+  text-align: left;
+}
+
+.confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid #eef1f5;
+  background: #fafbfc;
+}
+
+.btn-danger {
+  min-height: 35px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 8px;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: .18s ease;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #b91c1c;
+  transform: translateY(-1px);
+}
+
+/* =========================================================
+   TEMA OSCURO — NOTIFICACIONES Y CONFIRMACIÓN
+========================================================= */
+:host-context(.tema-oscuro-global) .system-notice {
+  border-color: #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .system-notice-copy strong {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .system-notice-copy span {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .system-notice-close {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .notice-exito {
+  border-color: #24543b;
+  background: #10251b;
+}
+
+:host-context(.tema-oscuro-global) .notice-exito .system-notice-icon {
+  background: #173b29;
+  color: #86efac;
+}
+
+:host-context(.tema-oscuro-global) .notice-error {
+  border-color: #5f2b32;
+  background: #2a1519;
+}
+
+:host-context(.tema-oscuro-global) .notice-error .system-notice-icon {
+  background: #471d24;
+  color: #fca5a5;
+}
+
+:host-context(.tema-oscuro-global) .notice-advertencia {
+  border-color: #5c4b22;
+  background: #292313;
+}
+
+:host-context(.tema-oscuro-global) .notice-advertencia .system-notice-icon {
+  background: #453817;
+  color: #fde68a;
+}
+
+:host-context(.tema-oscuro-global) .notice-info {
+  border-color: #27446d;
+  background: #132136;
+}
+
+:host-context(.tema-oscuro-global) .notice-info .system-notice-icon {
+  background: #1c3355;
+  color: #93c5fd;
+}
+
+:host-context(.tema-oscuro-global) .confirm-icon {
+  background: #3a1d24;
+  color: #fda4af;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content h3 {
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content p,
+:host-context(.tema-oscuro-global) .confirm-note {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .confirm-content p strong {
+  color: #f1f5f9;
+}
+
+:host-context(.tema-oscuro-global) .confirm-note {
+  border-color: #334155;
+  background: #172033;
+}
+
+:host-context(.tema-oscuro-global) .confirm-actions {
+  border-top-color: #334155;
+  background: #111827;
+}
+
+@media (max-width: 650px) {
+  .system-notice.modal-notice {
+    margin: 12px 18px 0;
+  }
+
+  .confirm-actions {
+    flex-direction: column-reverse;
+  }
+
+  .confirm-actions .btn-cancel,
+  .confirm-actions .btn-danger {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   TEMA OSCURO — PAGINACIÓN BIBLIOTECA JURÍDICA
+   Corrige la franja clara del pie de la tabla en modo oscuro.
+========================================================= */
+:host-context(.tema-oscuro-global) .biblioteca-paginacion {
+  border-top-color: #334155;
+  background: #111827;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-resumen {
+  color: #94a3b8;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles {
+  color: #cbd5e1;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles select,
+:host-context(.tema-oscuro-global) .paginacion-controles button {
+  border-color: #334155;
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles select:hover,
+:host-context(.tema-oscuro-global) .paginacion-controles select:focus {
+  border-color: #6366f1;
+  outline: none;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles select option {
+  background: #172033;
+  color: #e5e7eb;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles button:hover:not(:disabled) {
+  border-color: #6366f1;
+  background: #1e293b;
+  color: #c7d2fe;
+}
+
+:host-context(.tema-oscuro-global) .paginacion-controles button:disabled {
+  border-color: #273449;
+  background: #0f172a;
+  color: #64748b;
+  opacity: 1;
+}
+
+
+/* =========================================================
+   CORRECCIÓN DEFINITIVA — PIE / PAGINACIÓN EN TEMA OSCURO
+   TemaService aplica `tema-oscuro-global` y color-scheme al <html>.
+   Se usa :host-context(html...) + !important como fallback adicional.
+========================================================= */
+:host-context(html.tema-oscuro-global) .biblioteca-paginacion {
+  background: #111827 !important;
+  border-top-color: #334155 !important;
+  color: #cbd5e1 !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-resumen {
+  color: #94a3b8 !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-controles,
+:host-context(html.tema-oscuro-global) .paginacion-controles label,
+:host-context(html.tema-oscuro-global) .paginacion-controles span {
+  color: #cbd5e1 !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-controles select,
+:host-context(html.tema-oscuro-global) .paginacion-controles button {
+  background: #172033 !important;
+  border-color: #334155 !important;
+  color: #e5e7eb !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-controles select option {
+  background: #172033 !important;
+  color: #e5e7eb !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-controles button:hover:not(:disabled) {
+  background: #1e293b !important;
+  border-color: #6366f1 !important;
+  color: #c7d2fe !important;
+}
+
+:host-context(html.tema-oscuro-global) .paginacion-controles button:disabled {
+  background: #0f172a !important;
+  border-color: #273449 !important;
+  color: #64748b !important;
+  opacity: 1 !important;
+}

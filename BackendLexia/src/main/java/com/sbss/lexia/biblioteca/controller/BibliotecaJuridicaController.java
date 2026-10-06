@@ -1,11 +1,11 @@
 package com.sbss.lexia.biblioteca.controller;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
@@ -26,9 +26,11 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.sbss.lexia.biblioteca.dto.BibliotecaEstadisticasResponse;
 import com.sbss.lexia.biblioteca.dto.RecursoCrearRequest;
+import com.sbss.lexia.biblioteca.dto.RecursoDetalleResponse;
 import com.sbss.lexia.biblioteca.dto.RecursoFiltroRequest;
-import com.sbss.lexia.biblioteca.entity.RecursoJuridico;
+import com.sbss.lexia.biblioteca.dto.RecursoListaResponse;
 import com.sbss.lexia.biblioteca.service.BibliotecaJuridicaService;
+import com.sbss.lexia.shared.dto.PaginaDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -39,178 +41,175 @@ public class BibliotecaJuridicaController {
 
     private final BibliotecaJuridicaService servicio;
 
-    // =========================================================
-    // ESTADÍSTICAS
-    // =========================================================
-
     @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/estadisticas")
-    public ResponseEntity<BibliotecaEstadisticasResponse> obtenerEstadisticas() {
-        return ResponseEntity.ok(servicio.obtenerEstadisticas());
+    public BibliotecaEstadisticasResponse obtenerEstadisticas() {
+        return servicio.obtenerEstadisticas();
     }
-
-    // =========================================================
-    // LISTAR RECURSOS
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
     @GetMapping("/recursos")
-    public ResponseEntity<Page<RecursoJuridico>> listarRecursos(
+    public PaginaDto<RecursoListaResponse> listarRecursos(
             RecursoFiltroRequest filtro,
             Pageable pageable) {
-
-        return ResponseEntity.ok(servicio.listar(filtro, pageable));
+        return servicio.listar(filtro, pageable);
     }
-
-    // =========================================================
-    // OBTENER POR ID
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
-    @GetMapping("/recursos/{id}")
-    public ResponseEntity<RecursoJuridico> obtenerPorId(@PathVariable Long id) {
-        return ResponseEntity.ok(servicio.obtenerPorId(id));
+    @GetMapping("/recursos/{uuid}")
+    public RecursoDetalleResponse obtener(@PathVariable String uuid) {
+        return servicio.obtener(uuid);
     }
-
-    // =========================================================
-    // CREAR RECURSO
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
-    @PostMapping(
-            value = "/recursos",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public ResponseEntity<RecursoJuridico> crearRecurso(
+    @PostMapping(value = "/recursos", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RecursoDetalleResponse crear(
             @RequestPart("data") RecursoCrearRequest request,
             @RequestPart(value = "archivo", required = false) MultipartFile archivo) {
-
-        return ResponseEntity.ok(servicio.crear(request, archivo));
+        return servicio.crear(request, archivo);
     }
-
-    // =========================================================
-    // ACTUALIZAR RECURSO
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
-    @PutMapping(
-            value = "/recursos/{id}",
-            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
-    )
-    public ResponseEntity<RecursoJuridico> actualizarRecurso(
-            @PathVariable Long id,
+    @PutMapping(value = "/recursos/{uuid}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RecursoDetalleResponse actualizar(
+            @PathVariable String uuid,
             @RequestPart("data") RecursoCrearRequest request,
             @RequestPart(value = "archivo", required = false) MultipartFile archivo) {
-
-        return ResponseEntity.ok(servicio.actualizar(id, request, archivo));
+        return servicio.actualizar(uuid, request, archivo);
     }
-
-    // =========================================================
-    // VISTA PREVIA
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
-    @GetMapping("/recursos/{id}/ver")
-    public ResponseEntity<Resource> verArchivo(@PathVariable Long id) {
-        return respuestaArchivo(id, true);
+    @GetMapping("/recursos/{uuid}/ver")
+    public ResponseEntity<Resource> verArchivo(@PathVariable String uuid) {
+        RecursoDetalleResponse recurso = servicio.obtener(uuid);
+        Path pdf = servicio.obtenerRutaVistaPreviaPdf(uuid);
+        String nombrePdf = nombreBase(recurso.nombreArchivo(), recurso.titulo()) + ".pdf";
+        return respuestaPdfInline(pdf, nombrePdf);
     }
-
-    // =========================================================
-    // DESCARGAR
-    // =========================================================
 
     @PreAuthorize("hasAuthority('BIBLIOTECA_LEER')")
-    @GetMapping("/recursos/{id}/descargar")
-    public ResponseEntity<Resource> descargarArchivo(@PathVariable Long id) {
-        return respuestaArchivo(id, false);
+    @GetMapping("/recursos/{uuid}/descargar")
+    public ResponseEntity<Resource> descargarArchivo(@PathVariable String uuid) {
+        return respuestaOriginal(uuid);
     }
 
-    // =========================================================
-    // RESPUESTA DEL ARCHIVO (STREAMING EFICIENTE CON RESOURCE)
-    // =========================================================
-        private ResponseEntity<Resource> respuestaArchivo(Long id, boolean inline) {
-        RecursoJuridico recurso = servicio.obtenerPorId(id);
-        Path rutaArchivo = servicio.obtenerRutaArchivo(id);
+    @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
+    @DeleteMapping("/recursos/{uuid}")
+    public ResponseEntity<Void> eliminar(@PathVariable String uuid) {
+        servicio.eliminar(uuid);
+        return ResponseEntity.noContent().build();
+    }
 
+    private ResponseEntity<Resource> respuestaPdfInline(Path ruta, String nombrePdf) {
         try {
-            Resource resource = new UrlResource(rutaArchivo.toUri());
-
+            Resource resource = new UrlResource(ruta.toUri());
             if (!resource.exists() || !resource.isReadable()) {
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
-                        "El archivo físico no existe o no se puede leer"
-                );
+                        "La vista previa PDF no existe o no se puede leer");
             }
 
-            // Detección del MIME Type directo desde el archivo en disco
-            String mimeType = java.nio.file.Files.probeContentType(rutaArchivo);
-            if (mimeType == null) {
-                mimeType = obtenerMimeType(recurso);
-            }
-
-            ContentDisposition disposition = (inline ? ContentDisposition.inline() : ContentDisposition.attachment())
-                    .filename(
-                            recurso.getNombreArchivo() != null ? recurso.getNombreArchivo() : "archivo",
-                            StandardCharsets.UTF_8
-                    )
+            ContentDisposition disposition = ContentDisposition.inline()
+                    .filename(nombrePdf, StandardCharsets.UTF_8)
                     .build();
 
             return ResponseEntity.ok()
-                    .contentType(MediaType.parseMediaType(mimeType))
+                    .contentType(MediaType.APPLICATION_PDF)
                     .contentLength(resource.contentLength())
                     .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header(HttpHeaders.CACHE_CONTROL, "private, max-age=300")
+                    .header("Content-Security-Policy", "sandbox")
                     .body(resource);
 
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR,
-                    "Error al procesar el archivo del recurso",
-                    e
-            );
+                    "Error al procesar la vista previa PDF",
+                    e);
         }
     }
 
-        // =========================================================
-        // MIME TYPE MEJORADO
-        // =========================================================
+    private ResponseEntity<Resource> respuestaOriginal(String uuid) {
+        RecursoDetalleResponse recurso = servicio.obtener(uuid);
+        Path ruta = servicio.obtenerRutaArchivo(uuid);
 
-    private String obtenerMimeType(RecursoJuridico recurso) {
-        String extension = recurso.getExtension();
+        try {
+            Resource resource = new UrlResource(ruta.toUri());
+            if (!resource.exists() || !resource.isReadable()) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "El archivo físico no existe o no se puede leer");
+            }
 
-        // Si extension viene nula o vacía, la extraemos del nombre del archivo
-        if ((extension == null || extension.isBlank()) && recurso.getNombreArchivo() != null) {
-            int i = recurso.getNombreArchivo().lastIndexOf('.');
-            if (i > 0) {
-                extension = recurso.getNombreArchivo().substring(i + 1);
+            String mime = Files.probeContentType(ruta);
+            if (mime == null) {
+                mime = mimePorExtension(recurso.extension(), recurso.nombreArchivo());
+            }
+
+            ContentDisposition disposition = ContentDisposition.attachment()
+                    .filename(
+                            recurso.nombreArchivo() == null ? "archivo" : recurso.nombreArchivo(),
+                            StandardCharsets.UTF_8)
+                    .build();
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(mime))
+                    .contentLength(resource.contentLength())
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                    .header("X-Content-Type-Options", "nosniff")
+                    .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
+                    .body(resource);
+
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Error al descargar el archivo original del recurso",
+                    e);
+        }
+    }
+
+    private String nombreBase(String nombreArchivo, String titulo) {
+        String nombre = nombreArchivo;
+        if (nombre == null || nombre.isBlank()) {
+            nombre = titulo == null || titulo.isBlank() ? "vista-previa" : titulo.trim();
+        }
+
+        int punto = nombre.lastIndexOf('.');
+        if (punto > 0) {
+            nombre = nombre.substring(0, punto);
+        }
+
+        nombre = nombre.replaceAll("[\\/:*?\"<>|\r\n]+", "_").trim();
+        return nombre.isBlank() ? "vista-previa" : nombre;
+    }
+
+    private String mimePorExtension(String extension, String nombreArchivo) {
+        String ext = extension;
+        if ((ext == null || ext.isBlank()) && nombreArchivo != null) {
+            int i = nombreArchivo.lastIndexOf('.');
+            if (i >= 0 && i + 1 < nombreArchivo.length()) {
+                ext = nombreArchivo.substring(i + 1);
             }
         }
 
-        if (extension == null || extension.isBlank()) {
-            return "application/octet-stream";
+        if (ext == null || ext.isBlank()) {
+            return MediaType.APPLICATION_OCTET_STREAM_VALUE;
         }
 
-        // Limpieza de formato
-        String extLimpia = extension.toLowerCase().replace(".", "").trim();
-
-        return switch (extLimpia) {
+        return switch (ext.toLowerCase().replace(".", "").trim()) {
             case "pdf" -> "application/pdf";
             case "doc" -> "application/msword";
             case "docx" -> "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-            case "txt" -> "text/plain";
-            case "png" -> "image/png";
-            case "jpg", "jpeg" -> "image/jpeg";
-            default -> "application/octet-stream";
+            case "xls" -> "application/vnd.ms-excel";
+            case "xlsx" -> "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+            case "ppt" -> "application/vnd.ms-powerpoint";
+            case "pptx" -> "application/vnd.openxmlformats-officedocument.presentationml.presentation";
+            default -> MediaType.APPLICATION_OCTET_STREAM_VALUE;
         };
-    }
-
-    // =========================================================
-    // ELIMINAR
-    // =========================================================
-
-    @PreAuthorize("hasAuthority('BIBLIOTECA_GESTIONAR')")
-    @DeleteMapping("/recursos/{id}")
-    public ResponseEntity<Void> eliminarRecurso(@PathVariable Long id) {
-        servicio.eliminar(id);
-        return ResponseEntity.noContent().build();
     }
 }

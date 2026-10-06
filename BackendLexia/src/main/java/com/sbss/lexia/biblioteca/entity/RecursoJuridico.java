@@ -44,10 +44,8 @@ public class RecursoJuridico extends EntidadAuditable {
     /**
      * Identificador publico. Lo genera la base con DEFAULT (UUID()).
      *
-     * La API de este modulo todavia expone el id numerico en la URL
-     * (/recursos/{id}); la convencion del proyecto es que el BIGINT nunca sale
-     * del backend. La columna queda lista para esa migracion, que conviene
-     * hacer junto con los DTO de respuesta.
+     * La API expone este UUID y mantiene el BIGINT como identificador interno
+     * exclusivo de persistencia.
      */
     @Generated(event = EventType.INSERT)
     @Column(name = "uuid_publico", insertable = false, updatable = false)

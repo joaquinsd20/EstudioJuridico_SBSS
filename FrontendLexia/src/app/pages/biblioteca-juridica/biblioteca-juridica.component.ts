@@ -1,16 +1,26 @@
-import { RecursoJuridico } from '../../core/models/biblioteca-juridica.models';
-import { BibliotecaJuridicaService } from '../../core/services/biblioteca-juridica.service';
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  ElementRef,
+  OnInit,
+  ViewChild,
+  inject
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { Subject, catchError, debounceTime, of, switchMap } from 'rxjs';
+
+import {
+  BibliotecaEstadisticas,
+  FiltrosBiblioteca,
+  RecursoJuridico
+} from '../../core/models/biblioteca-juridica.models';
+import { BibliotecaJuridicaService } from '../../core/services/biblioteca-juridica.service';
 import { PanelComponent } from '../panel/panel.component';
 
-/**
- * La base guarda CODIGOS en MAYUSCULAS (convencion del proyecto: se puede
- * renombrar la etiqueta sin migrar filas). Estos mapas los traducen a lo que
- * ve el usuario. Si llega un codigo no listado se muestra tal cual, para que
- * un valor nuevo sea visible en vez de desaparecer.
- */
 export const ETIQUETA_TIPO: Record<string, string> = {
   JURISPRUDENCIA: 'Jurisprudencia',
   LEGISLACION: 'Legislación',
@@ -40,126 +50,175 @@ export const ETIQUETA_ESTADO: Record<string, string> = {
   ARCHIVADO: 'Archivado'
 };
 
+type TipoAvisoSistema = 'EXITO' | 'ERROR' | 'ADVERTENCIA' | 'INFO';
 
+interface AvisoSistema {
+  tipo: TipoAvisoSistema;
+  titulo: string;
+  mensaje: string;
+}
 
 @Component({
   selector: 'app-biblioteca-juridica',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    PanelComponent
-  ],
+  imports: [CommonModule, FormsModule, PanelComponent],
   templateUrl: './biblioteca-juridica.component.html',
-  styleUrl: './biblioteca-juridica.component.css'
+  styleUrl: './biblioteca-juridica.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BibliotecaJuridicaComponent implements OnInit {
+  private readonly service = inject(BibliotecaJuridicaService);
+  private readonly cdr = inject(ChangeDetectorRef);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly cambiosFiltro$ = new Subject<void>();
 
-  /** La base guarda codigos; la pantalla muestra la etiqueta. */
-  etiquetaTipo(codigo: string): string { return ETIQUETA_TIPO[codigo] ?? codigo; }
-  etiquetaCategoria(codigo: string): string { return ETIQUETA_CATEGORIA[codigo] ?? codigo; }
-  etiquetaEstado(codigo: string): string { return ETIQUETA_ESTADO[codigo] ?? codigo; }
+  private readonly extensionesPermitidas = new Set([
+    'pdf',
+    'doc',
+    'docx',
+    'xls',
+    'xlsx',
+    'ppt',
+    'pptx'
+  ]);
 
-  
+  private readonly maxArchivoBytes = 50 * 1024 * 1024;
+  private temporizadorAviso: ReturnType<typeof setTimeout> | null = null;
+
+  @ViewChild('archivoInput') archivoInput?: ElementRef<HTMLInputElement>;
 
   recursos: RecursoJuridico[] = [];
-  recursosFiltrados: RecursoJuridico[] = [];
-
-  filtros = {
-    busqueda: '',
-    tipo: '',
-    categoria: '',
-    estado: '',
-    conArchivo: ''
+  estadisticas: BibliotecaEstadisticas = {
+    recursosTotales: 0,
+    recursosActivos: 0,
+    conArchivo: 0,
+    totalCategorias: 0
   };
 
-  mostrarModalCrear: boolean = false;
-  mostrarModalDetalle: boolean = false;
+  filtros: FiltrosBiblioteca = this.filtrosIniciales();
+
+  pagina = 0;
+  tamanoPagina = 20;
+  readonly tamanosPagina = [10, 20, 40, 100];
+  totalPaginas = 0;
+  totalElementos = 0;
+
+  cargando = false;
+  guardando = false;
+  eliminando = false;
+  error = '';
+
+  avisoSistema: AvisoSistema | null = null;
+
+  mostrarModalCrear = false;
+  mostrarModalDetalle = false;
+  mostrarConfirmacionEliminar = false;
+
   recursoDetalle?: RecursoJuridico;
+  recursoPendienteEliminar?: RecursoJuridico;
 
   nuevoRecurso: Partial<RecursoJuridico> = {};
   archivoSeleccionado: File | null = null;
 
-  // Inyectamos ChangeDetectorRef
-  constructor(
-    private service: BibliotecaJuridicaService,
-    private cdr: ChangeDetectorRef
-  ) {}
-
-  ngOnInit(): void {
-    this.filtros = {
-      busqueda: '',
-      tipo: '',
-      categoria: '',
-      estado: '',
-      conArchivo: ''
-    };
-
-    this.obtenerRecursos();
-  }
-
-  // =========================================================
-  // OBTENER RECURSOS (CON DETECCIÓN DE CAMBIOS FORZADA)
-  // =========================================================
-  obtenerRecursos(): void {
-    this.service.listar().subscribe({
-      next: (response) => {
-        const data = Array.isArray(response) ? response : response.content;
-        this.recursos = Array.isArray(data) ? data : [];
-        
-        // Copia directa e inmediata para la vista
-        this.recursosFiltrados = [...this.recursos];
-
-        // Reaplicar filtros si hay búsquedas activas
-        this.aplicarFiltros();
-
-        // Forzar a Angular a pintar los datos inmediatamente en el HTML
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        console.error('Error al cargar recursos:', err);
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      if (this.temporizadorAviso) {
+        clearTimeout(this.temporizadorAviso);
       }
     });
   }
 
-  // =========================================================
-  // FILTROS
-  // =========================================================
-  aplicarFiltros(): void {
-    if (!this.recursos || this.recursos.length === 0) {
-      this.recursosFiltrados = [];
-      return;
-    }
+  ngOnInit(): void {
+    this.cambiosFiltro$
+      .pipe(
+        debounceTime(300),
+        switchMap(() => {
+          this.cargando = true;
+          this.error = '';
+          this.cdr.markForCheck();
 
-    this.recursosFiltrados = this.recursos.filter(item => {
-      const busquedaLower = this.filtros.busqueda ? this.filtros.busqueda.toLowerCase().trim() : '';
-      
-      const coincideTexto = !busquedaLower ||
-        (item.titulo && item.titulo.toLowerCase().includes(busquedaLower)) ||
-        (item.subtituloDescripcion && item.subtituloDescripcion.toLowerCase().includes(busquedaLower)) ||
-        (item.expedienteCodigo && item.expedienteCodigo.toLowerCase().includes(busquedaLower));
+          return this.service.listar(this.filtros, this.pagina, this.tamanoPagina).pipe(
+            catchError(err => {
+              console.error('Error al cargar recursos:', err);
+              this.error = 'No se pudo cargar la biblioteca jurídica.';
+              this.cargando = false;
+              this.cdr.markForCheck();
+              return of(null);
+            })
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(respuesta => {
+        if (!respuesta) return;
+        this.aplicarPagina(respuesta);
+      });
 
-      const coincideTipo = !this.filtros.tipo || item.tipo === this.filtros.tipo;
-      const coincideCategoria = !this.filtros.categoria || item.categoria === this.filtros.categoria;
-      const coincideEstado = !this.filtros.estado || item.estado === this.filtros.estado;
-      
-      const coincideArchivo = !this.filtros.conArchivo ||
-        (this.filtros.conArchivo === 'Si' && !!item.nombreArchivo) ||
-        (this.filtros.conArchivo === 'No' && !item.nombreArchivo);
-
-      return coincideTexto && coincideTipo && coincideCategoria && coincideEstado && coincideArchivo;
-    });
+    this.cargarEstadisticas();
+    this.cambiosFiltro$.next();
   }
 
-  get totalRecursos(): number { return this.recursos.length; }
-  get totalActivos(): number { return this.recursos.filter(r => r.estado === 'ACTIVO').length; }
-  get totalConArchivo(): number { return this.recursos.filter(r => r.nombreArchivo && r.nombreArchivo.trim() !== '').length; }
-  get totalCategorias(): number { return new Set(this.recursos.map(r => r.categoria)).size; }
+  etiquetaTipo(codigo: string | null | undefined): string {
+    return codigo ? (ETIQUETA_TIPO[codigo] ?? codigo) : '—';
+  }
 
-  // =========================================================
-  // MODALES Y SELECCIÓN DE ARCHIVOS
-  // =========================================================
+  etiquetaCategoria(codigo: string | null | undefined): string {
+    return codigo ? (ETIQUETA_CATEGORIA[codigo] ?? codigo) : '—';
+  }
+
+  etiquetaEstado(codigo: string | null | undefined): string {
+    return codigo ? (ETIQUETA_ESTADO[codigo] ?? codigo) : '—';
+  }
+
+  get totalRecursos(): number { return this.estadisticas.recursosTotales; }
+  get totalActivos(): number { return this.estadisticas.recursosActivos; }
+  get totalConArchivo(): number { return this.estadisticas.conArchivo; }
+  get totalCategorias(): number { return this.estadisticas.totalCategorias; }
+
+  get recursosDestacados(): RecursoJuridico[] {
+    return this.recursos.slice(0, 6);
+  }
+
+  get desdeRegistro(): number {
+    return this.totalElementos === 0 ? 0 : this.pagina * this.tamanoPagina + 1;
+  }
+
+  get hastaRegistro(): number {
+    return Math.min((this.pagina + 1) * this.tamanoPagina, this.totalElementos);
+  }
+
+  aplicarFiltros(): void {
+    this.pagina = 0;
+    this.cambiosFiltro$.next();
+  }
+
+  limpiarFiltros(): void {
+    this.filtros = this.filtrosIniciales();
+    this.pagina = 0;
+    this.cambiosFiltro$.next();
+  }
+
+  cambiarTamanoPagina(valor: number | string): void {
+    const tamano = Number(valor);
+    if (!this.tamanosPagina.includes(tamano) || tamano === this.tamanoPagina) return;
+    this.tamanoPagina = tamano;
+    this.pagina = 0;
+    this.cargarPagina();
+  }
+
+  cambiarPagina(delta: number): void {
+    const nueva = this.pagina + delta;
+    if (this.cargando || nueva < 0 || nueva >= this.totalPaginas) return;
+    this.pagina = nueva;
+    this.cargarPagina();
+  }
+
+  trackByUuid(_: number, item: RecursoJuridico): string {
+    return item.uuid;
+  }
+
   abrirModalCrear(): void {
+    this.cerrarAviso();
     this.nuevoRecurso = {
       titulo: '',
       subtituloDescripcion: '',
@@ -171,192 +230,436 @@ export class BibliotecaJuridicaComponent implements OnInit {
     };
     this.archivoSeleccionado = null;
     this.mostrarModalCrear = true;
+    this.cdr.markForCheck();
   }
 
   seleccionarArchivo(event: Event): void {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.archivoSeleccionado = input.files[0];
-      this.nuevoRecurso.nombreArchivo = this.archivoSeleccionado.name;
+    const archivo = input.files?.[0] ?? null;
+
+    if (!archivo) {
+      this.quitarArchivo();
+      return;
     }
+
+    const errorArchivo = this.validarArchivoCliente(archivo);
+    if (errorArchivo) {
+      this.archivoSeleccionado = null;
+      this.nuevoRecurso.nombreArchivo = null;
+      input.value = '';
+      this.mostrarAviso(
+        'ERROR',
+        'Archivo rechazado',
+        errorArchivo,
+        7000
+      );
+      return;
+    }
+
+    this.archivoSeleccionado = archivo;
+    this.nuevoRecurso.nombreArchivo = archivo.name;
+    this.cerrarAviso();
+    this.cdr.markForCheck();
   }
 
   quitarArchivo(): void {
     this.archivoSeleccionado = null;
-    this.nuevoRecurso.nombreArchivo = '';
+    this.nuevoRecurso.nombreArchivo = null;
+    if (this.archivoInput?.nativeElement) {
+      this.archivoInput.nativeElement.value = '';
+    }
+    this.cdr.markForCheck();
   }
 
-  // =========================================================
-  // GUARDAR RECURSO
-  // =========================================================
   guardarNuevoRecurso(): void {
+    if (this.guardando) return;
+
     if (!this.nuevoRecurso.titulo?.trim()) {
-      alert('Por favor, ingresa el título.');
+      this.mostrarAviso('ADVERTENCIA', 'Falta información', 'Por favor, ingresa el título.');
       return;
     }
-
-  // Validación para exigir tipo y categoría
     if (!this.nuevoRecurso.tipo) {
-      alert('Debes seleccionar un Tipo.');
+      this.mostrarAviso('ADVERTENCIA', 'Falta información', 'Debes seleccionar un tipo.');
       return;
     }
-
     if (!this.nuevoRecurso.categoria) {
-      alert('Debes seleccionar una Categoría.');
+      this.mostrarAviso('ADVERTENCIA', 'Falta información', 'Debes seleccionar una categoría.');
+      return;
+    }
+    if (!this.archivoSeleccionado) {
+      this.mostrarAviso('ADVERTENCIA', 'Documento requerido', 'Selecciona un archivo permitido para el recurso.');
       return;
     }
 
-    // 3. Validar Archivo Obligatorio
-    if (!this.archivoSeleccionado) {
-      alert('No estas subiendo ningún archivo existente, por favor selecciona uno');
+    const errorArchivo = this.validarArchivoCliente(this.archivoSeleccionado);
+    if (errorArchivo) {
+      this.mostrarAviso('ERROR', 'Archivo rechazado', errorArchivo, 7000);
+      this.quitarArchivo();
       return;
     }
 
     const formData = new FormData();
-
     const dtoData = {
-      titulo: this.nuevoRecurso.titulo,
+      titulo: this.nuevoRecurso.titulo.trim(),
       subtituloDescripcion: this.nuevoRecurso.subtituloDescripcion || '',
-      tipo: this.nuevoRecurso.tipo || 'DOCTRINA',
-      categoria: this.nuevoRecurso.categoria || 'DERECHO_SOCIAL',
+      tipo: this.nuevoRecurso.tipo,
+      categoria: this.nuevoRecurso.categoria,
       anio: this.nuevoRecurso.anio || new Date().getFullYear(),
       expedienteCodigo: this.nuevoRecurso.expedienteCodigo || '',
       estado: this.nuevoRecurso.estado || 'ACTIVO'
     };
 
-    const dataBlob = new Blob([JSON.stringify(dtoData)], { type: 'application/json' });
-    formData.append('data', dataBlob);
+    formData.append(
+      'data',
+      new Blob([JSON.stringify(dtoData)], { type: 'application/json' })
+    );
+    formData.append('archivo', this.archivoSeleccionado, this.archivoSeleccionado.name);
 
-    if (this.archivoSeleccionado) {
-      formData.append('archivo', this.archivoSeleccionado);
-    }
+    this.guardando = true;
+    this.cdr.markForCheck();
 
-    this.service.crear(formData).subscribe({
-      next: () => {
-        alert('Recurso agregado correctamente.');
-        this.obtenerRecursos();
-        this.cerrarModales();
-      },
-      error: (err) => {
-        console.error('Error al guardar el recurso:', err);
-        alert('Error al guardar el recurso en el servidor.');
-      }
-    });
+    this.service.crear(formData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.guardando = false;
+          this.cerrarModales();
+          this.mostrarAviso('EXITO', 'Recurso registrado', 'El recurso jurídico fue agregado correctamente.');
+          this.pagina = 0;
+          this.cargarPagina();
+          this.cargarEstadisticas();
+        },
+        error: err => {
+          this.guardando = false;
+          console.error('Error al guardar el recurso:', err);
+          this.mostrarAviso(
+            'ERROR',
+            'No se pudo registrar el recurso',
+            this.mensajeHttp(err, 'El servidor rechazó el recurso. Verifica el archivo e inténtalo nuevamente.'),
+            8000
+          );
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   verDetalle(item: RecursoJuridico): void {
-    this.recursoDetalle = item;
-    this.mostrarModalDetalle = true;
+    this.cerrarAviso();
+    this.service.obtener(item.uuid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: detalle => {
+          this.recursoDetalle = detalle;
+          this.mostrarModalDetalle = true;
+          this.cdr.markForCheck();
+        },
+        error: err => {
+          console.error('Error al cargar el detalle:', err);
+          this.mostrarAviso(
+            'ERROR',
+            'Detalle no disponible',
+            this.mensajeHttp(err, 'No se pudo cargar el detalle del recurso.')
+          );
+        }
+      });
   }
 
-  // =========================================================
-  // VISTA PREVIA
-  // =========================================================
   verVistaPrevia(item: RecursoJuridico): void {
-    const extension = item.extension?.toLowerCase() || '';
-    const nombre = item.nombreArchivo?.toLowerCase() || '';
-
-    if (extension.includes('doc') || nombre.endsWith('.doc') || nombre.endsWith('.docx')) {
-      alert('Los documentos en formato Word (.docx) no se pueden previsualizar en el navegador. Se iniciará la descarga.');
-      this.descargarDocumento(item.id, item.nombreArchivo || 'documento.docx');
-      return;
-    }
-
+    // El backend siempre responde un PDF para vista previa:
+    // - PDF -> se sirve directamente.
+    // - DOC/DOCX/XLS/XLSX/PPT/PPTX -> se convierte a PDF y se cachea.
+    // La descarga conserva el archivo original.
     const nuevaPestana = window.open('about:blank', '_blank');
 
-    this.service.ver(item.id).subscribe({
-      next: (blob: Blob) => {
-        if (blob.type === 'application/json') {
+    this.service.ver(item.uuid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => {
+          const pdf = blob.type === 'application/pdf'
+            ? blob
+            : new Blob([blob], { type: 'application/pdf' });
+
+          const url = URL.createObjectURL(pdf);
+
+          if (nuevaPestana) {
+            nuevaPestana.location.href = url;
+          } else {
+            // Si el navegador bloqueó el popup, abrimos el PDF al terminar la petición.
+            window.open(url, '_blank', 'noopener,noreferrer');
+          }
+
+          setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
+        },
+        error: err => {
           nuevaPestana?.close();
-          alert('El archivo no está disponible o ocurrió un error en el servidor.');
-          return;
+          console.error('Error al abrir la vista previa:', err);
+          this.mostrarAviso(
+            'ERROR',
+            'Vista previa no disponible',
+            this.mensajeHttp(
+              err,
+              'No se pudo convertir o abrir el documento como PDF.'
+            )
+          );
         }
-
-        if (blob.type.includes('wordprocessingml') || blob.type.includes('msword')) {
-          nuevaPestana?.close();
-          alert('Los documentos en formato Word (.docx) no se pueden previsualizar en el navegador. Se iniciará la descarga.');
-          this.descargarDocumento(item.id, item.nombreArchivo || 'documento.docx');
-          return;
-        }
-
-        const fileBlob = new Blob([blob], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(fileBlob);
-
-        if (nuevaPestana) {
-          nuevaPestana.location.href = fileURL;
-        }
-      },
-      error: (err) => {
-        nuevaPestana?.close();
-        console.error('Error al abrir la vista previa:', err);
-        alert('No se pudo abrir la vista previa. Verifica que el archivo exista en el servidor.');
-      }
-    });
+      });
   }
 
-  // =========================================================
-  // DESCARGA
-  // =========================================================
-  descargarDocumento(id: number, nombreArchivo: string): void {
-    this.service.descargar(id).subscribe({
-      next: (blob: Blob) => {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = nombreArchivo || 'documento';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      },
-      error: (err) => {
-        console.error('Error al descargar el archivo:', err);
-        alert('No se pudo descargar el documento.');
-      }
-    });
+  descargarDocumento(uuid: string, nombreArchivo: string): void {
+    this.service.descargar(uuid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = nombreArchivo || 'documento';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          URL.revokeObjectURL(url);
+          this.mostrarAviso('EXITO', 'Descarga iniciada', 'El documento se descargó correctamente.');
+        },
+        error: err => {
+          console.error('Error al descargar el archivo:', err);
+          this.mostrarAviso(
+            'ERROR',
+            'Descarga no disponible',
+            this.mensajeHttp(err, 'No se pudo descargar el documento.')
+          );
+        }
+      });
   }
 
   descargar(item: RecursoJuridico): void {
-    if (item.nombreArchivo && item.nombreArchivo.trim() !== '') {
-      this.descargarDocumento(item.id, item.nombreArchivo);
-    } else {
-      alert('Este recurso no tiene un archivo adjunto disponible para descargar.');
+    if (!item.nombreArchivo?.trim()) {
+      this.mostrarAviso(
+        'ADVERTENCIA',
+        'Sin documento adjunto',
+        'Este recurso no tiene un archivo disponible para descargar.'
+      );
+      return;
     }
+    this.descargarDocumento(item.uuid, item.nombreArchivo);
+  }
+
+  eliminar(item: RecursoJuridico): void {
+    if (this.eliminando) return;
+    this.cerrarAviso();
+    this.recursoPendienteEliminar = item;
+    this.mostrarConfirmacionEliminar = true;
+    this.cdr.markForCheck();
+  }
+
+  cancelarEliminacion(): void {
+    if (this.eliminando) return;
+    this.mostrarConfirmacionEliminar = false;
+    this.recursoPendienteEliminar = undefined;
+    this.cerrarAviso();
+    this.cdr.markForCheck();
+  }
+
+  confirmarEliminacion(): void {
+    const item = this.recursoPendienteEliminar;
+    if (!item || this.eliminando) return;
+
+    this.eliminando = true;
+    this.cdr.markForCheck();
+
+    this.service.eliminar(item.uuid)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.eliminando = false;
+          this.mostrarConfirmacionEliminar = false;
+          this.recursoPendienteEliminar = undefined;
+          this.cerrarModales();
+
+          if (this.recursos.length === 1 && this.pagina > 0) {
+            this.pagina--;
+          }
+
+          this.mostrarAviso(
+            'EXITO',
+            'Recurso retirado',
+            'El recurso fue retirado del catálogo y se conserva para trazabilidad.'
+          );
+          this.cargarPagina();
+          this.cargarEstadisticas();
+        },
+        error: err => {
+          this.eliminando = false;
+          console.error('Error al retirar el recurso:', err);
+          this.mostrarAviso(
+            'ERROR',
+            'No se pudo retirar el recurso',
+            this.mensajeHttp(err, 'Ocurrió un error al intentar retirar el recurso.')
+          );
+          this.cdr.markForCheck();
+        }
+      });
   }
 
   cerrarModales(): void {
+    if (this.guardando || this.eliminando) return;
     this.mostrarModalCrear = false;
     this.mostrarModalDetalle = false;
     this.recursoDetalle = undefined;
     this.archivoSeleccionado = null;
+    if (this.archivoInput?.nativeElement) {
+      this.archivoInput.nativeElement.value = '';
+    }
+    this.cdr.markForCheck();
+  }
+
+  cerrarAviso(): void {
+    if (this.temporizadorAviso) {
+      clearTimeout(this.temporizadorAviso);
+      this.temporizadorAviso = null;
+    }
+    this.avisoSistema = null;
+    this.cdr.markForCheck();
   }
 
   obtenerTamanoArchivo(bytes: number): string {
-    if (!bytes || bytes === 0) return '0 Bytes';
+    if (!bytes) return '0 Bytes';
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const i = Math.min(Math.floor(Math.log(bytes) / Math.log(k)), sizes.length - 1);
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
-  // =========================================================
-  // ELIMINAR RECURSO
-  // =========================================================
-  eliminar(item: RecursoJuridico): void {
-    const confirmacion = confirm(`¿Estás seguro de eliminar el recurso "${item.titulo}"? Esta acción no se puede deshacer.`);
-    
-    if (!confirmacion) return;
+  private validarArchivoCliente(archivo: File): string | null {
+    const extension = this.extensionDe(archivo.name);
 
-    this.service.eliminar(item.id).subscribe({
-      next: () => {
-        alert('Recurso eliminado correctamente.');
-        this.cerrarModales();
-        this.obtenerRecursos();
-      },
-      error: (err) => {
-        console.error('Error al eliminar el recurso:', err);
-        alert('Ocurrió un error al intentar eliminar el recurso.');
-      }
-    });
+    if (!extension || !this.extensionesPermitidas.has(extension)) {
+      return 'Formato no permitido. Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX.';
+    }
+
+    if (archivo.size <= 0) {
+      return 'El archivo está vacío. Selecciona un documento válido.';
+    }
+
+    if (archivo.size > this.maxArchivoBytes) {
+      return 'El archivo supera el límite de 50 MB.';
+    }
+
+    const tipo = (archivo.type || '').toLowerCase();
+    const tiposPeligrosos = [
+      'php',
+      'javascript',
+      'text/html',
+      'x-msdownload',
+      'x-sh',
+      'x-shellscript'
+    ];
+
+    if (tiposPeligrosos.some(valor => tipo.includes(valor))) {
+      return 'El tipo real informado por el navegador no corresponde a un documento permitido.';
+    }
+
+    return null;
+  }
+
+  private extensionDe(nombre: string): string {
+    const limpio = (nombre || '').trim().toLowerCase();
+    const punto = limpio.lastIndexOf('.');
+    return punto >= 0 && punto + 1 < limpio.length
+      ? limpio.substring(punto + 1)
+      : '';
+  }
+
+  private mostrarAviso(
+    tipo: TipoAvisoSistema,
+    titulo: string,
+    mensaje: string,
+    duracionMs = 5000
+  ): void {
+    if (this.temporizadorAviso) {
+      clearTimeout(this.temporizadorAviso);
+    }
+
+    this.avisoSistema = { tipo, titulo, mensaje };
+    this.cdr.markForCheck();
+
+    this.temporizadorAviso = setTimeout(() => {
+      this.avisoSistema = null;
+      this.temporizadorAviso = null;
+      this.cdr.markForCheck();
+    }, duracionMs);
+  }
+
+  private mensajeHttp(err: any, fallback: string): string {
+    const cuerpo = err?.error;
+
+    if (typeof cuerpo === 'string' && cuerpo.trim()) {
+      return cuerpo.trim();
+    }
+
+    const mensaje =
+      cuerpo?.detail ||
+      cuerpo?.message ||
+      cuerpo?.error ||
+      err?.message;
+
+    return typeof mensaje === 'string' && mensaje.trim()
+      ? mensaje.trim()
+      : fallback;
+  }
+
+  private cargarPagina(): void {
+    this.cargando = true;
+    this.error = '';
+    this.cdr.markForCheck();
+
+    this.service.listar(this.filtros, this.pagina, this.tamanoPagina)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: respuesta => this.aplicarPagina(respuesta),
+        error: err => {
+          console.error('Error al cargar recursos:', err);
+          this.cargando = false;
+          this.error = 'No se pudo cargar la biblioteca jurídica.';
+          this.cdr.markForCheck();
+        }
+      });
+  }
+
+  private cargarEstadisticas(): void {
+    this.service.estadisticas()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: estadisticas => {
+          this.estadisticas = estadisticas;
+          this.cdr.markForCheck();
+        },
+        error: err => console.error('Error al cargar estadísticas:', err)
+      });
+  }
+
+  private aplicarPagina(respuesta: {
+    contenido: RecursoJuridico[];
+    pagina: number;
+    tamano: number;
+    totalElementos: number;
+    totalPaginas: number;
+  }): void {
+    this.recursos = respuesta.contenido ?? [];
+    this.pagina = respuesta.pagina;
+    this.tamanoPagina = respuesta.tamano;
+    this.totalElementos = respuesta.totalElementos;
+    this.totalPaginas = respuesta.totalPaginas;
+    this.cargando = false;
+    this.cdr.markForCheck();
+  }
+
+  private filtrosIniciales(): FiltrosBiblioteca {
+    return {
+      busqueda: '',
+      tipo: '',
+      categoria: '',
+      estado: '',
+      conArchivo: ''
+    };
   }
 }

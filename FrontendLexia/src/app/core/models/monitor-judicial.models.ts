@@ -8,6 +8,15 @@ export interface MonitorResumen {
   pendientesVerificacion: number;
 }
 
+export interface PaginaMonitor<T> {
+  contenido: T[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
+  esUltima: boolean;
+}
+
 export interface ExpedienteMonitor {
   uuid: string;
   expedienteId: number;
@@ -74,6 +83,14 @@ export interface MonitorFiltro {
   abogado?: string;
   organo?: string;
   estadoProcesal?: string;
+  desde?: string;
+  hasta?: string;
+}
+
+export interface ConsultaMonitorFiltro {
+  expedienteId?: number;
+  tipoMovimiento?: string;
+  estadoVerificacion?: EstadoVerificacionMonitor | '';
   desde?: string;
   hasta?: string;
 }
