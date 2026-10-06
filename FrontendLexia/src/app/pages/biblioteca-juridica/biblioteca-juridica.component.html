@@ -429,7 +429,7 @@
           type="file"
           class="file-input-hidden"
           (change)="seleccionarArchivo($event)"
-          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx">
+          [accept]="acceptArchivos">
         
         <!-- CAJA PARA SUBIR ARCHIVO -->
         <div
@@ -440,7 +440,7 @@
             class="upload-info"
             *ngIf="!archivoSeleccionado">
             <strong>Selecciona un documento</strong>
-            <span>PDF, Word, Excel o PowerPoint · máximo 50 MB</span>
+            <span>{{ formatosArchivoPermitidos }} · máximo 50 MB</span>
           </div>
           <!-- ARCHIVO SELECCIONADO -->
           <div
@@ -602,6 +602,62 @@
       </button>
     </div>
   </div>
+</div>
+
+<!-- ====================================================== -->
+<!-- VISOR PDF - MISMO COMPORTAMIENTO DEL PANEL DOCUMENTOS -->
+<!-- ====================================================== -->
+<div
+  class="modal-overlay viewer-overlay"
+  *ngIf="mostrarVisor && recursoVisor"
+  (click)="cerrarVisor()">
+  <section
+    class="modal-content viewer-card"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="biblioteca-viewer-title"
+    (click)="$event.stopPropagation()">
+
+    <header class="modal-header viewer-header">
+      <div class="viewer-title">
+        <span class="modal-kicker">Biblioteca Jurídica</span>
+        <h3 id="biblioteca-viewer-title">{{ recursoVisor.titulo }}</h3>
+        <p>{{ recursoVisor.nombreArchivo }}</p>
+      </div>
+
+      <div class="viewer-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          [disabled]="visorCargando"
+          (click)="descargar(recursoVisor)">
+          ↓ Descargar
+        </button>
+
+        <button
+          type="button"
+          class="modal-close"
+          (click)="cerrarVisor()"
+          aria-label="Cerrar visor">
+          ×
+        </button>
+      </div>
+    </header>
+
+    <div class="viewer-body">
+      <div class="viewer-loading" *ngIf="visorCargando">
+        <span class="viewer-spinner" aria-hidden="true"></span>
+        <strong>Cargando documento...</strong>
+        <small>Preparando la vista previa PDF.</small>
+      </div>
+
+      <iframe
+        *ngIf="!visorCargando && visorPdfUrl"
+        [src]="visorPdfUrl"
+        title="Visor PDF de Biblioteca Jurídica">
+      </iframe>
+    </div>
+  </section>
 </div>
 
 <!-- ====================================================== -->

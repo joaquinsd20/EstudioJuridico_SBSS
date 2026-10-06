@@ -5,15 +5,97 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   BibliotecaEstadisticas,
+  ExtensionBibliotecaPermitida,
   FiltrosBiblioteca,
   Pagina,
-  RecursoJuridico
+  RecursoJuridico,
+  ValidacionArchivoBiblioteca
 } from '../models/biblioteca-juridica.models';
 
 @Injectable({ providedIn: 'root' })
 export class BibliotecaJuridicaService {
   private readonly http = inject(HttpClient);
   private readonly apiUrl = `${environment.apiUrl}/biblioteca`;
+
+  /**
+   * Restricción del cliente. El backend sigue siendo la autoridad de seguridad
+   * y debe volver a validar extensión, firma/contenido y tamaño.
+   */
+  readonly extensionesPermitidas: ReadonlySet<ExtensionBibliotecaPermitida> =
+    new Set<ExtensionBibliotecaPermitida>(['pdf', 'doc', 'docx']);
+
+  readonly acceptArchivos = '.pdf,.doc,.docx';
+  readonly maxArchivoBytes = 50 * 1024 * 1024;
+
+  validarArchivo(archivo: File): ValidacionArchivoBiblioteca {
+    const extension = this.extensionDe(archivo.name);
+
+    if (!extension || !this.esExtensionPermitida(extension)) {
+      return {
+        valido: false,
+        extension: null,
+        mensaje: 'Formato no permitido. Solo se aceptan archivos PDF, DOC y DOCX.'
+      };
+    }
+
+    if (archivo.size <= 0) {
+      return {
+        valido: false,
+        extension,
+        mensaje: 'El archivo está vacío. Selecciona un documento válido.'
+      };
+    }
+
+    if (archivo.size > this.maxArchivoBytes) {
+      return {
+        valido: false,
+        extension,
+        mensaje: 'El archivo supera el límite de 50 MB.'
+      };
+    }
+
+    const mime = (archivo.type || '').trim().toLowerCase();
+    if (mime && !this.mimeCompatible(extension, mime)) {
+      return {
+        valido: false,
+        extension,
+        mensaje: 'El tipo informado por el navegador no corresponde al formato seleccionado.'
+      };
+    }
+
+    return { valido: true, extension, mensaje: null };
+  }
+
+  private esExtensionPermitida(extension: string): extension is ExtensionBibliotecaPermitida {
+    return this.extensionesPermitidas.has(extension as ExtensionBibliotecaPermitida);
+  }
+
+  private extensionDe(nombre: string): string {
+    const limpio = (nombre || '').trim().toLowerCase();
+    const punto = limpio.lastIndexOf('.');
+    return punto >= 0 && punto + 1 < limpio.length
+      ? limpio.substring(punto + 1)
+      : '';
+  }
+
+  private mimeCompatible(extension: ExtensionBibliotecaPermitida, mime: string): boolean {
+    const compatibles: Record<ExtensionBibliotecaPermitida, readonly string[]> = {
+      pdf: ['application/pdf'],
+      doc: [
+        'application/msword',
+        'application/vnd.ms-word',
+        'application/octet-stream'
+      ],
+      docx: [
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/zip',
+        'application/x-zip-compressed',
+        'application/octet-stream'
+      ]
+    };
+
+    return compatibles[extension].includes(mime);
+  }
 
   listar(
     filtros: FiltrosBiblioteca,

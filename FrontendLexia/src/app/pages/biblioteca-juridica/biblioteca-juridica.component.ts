@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { Subject, catchError, debounceTime, of, switchMap } from 'rxjs';
 
 import {
@@ -70,19 +71,11 @@ export class BibliotecaJuridicaComponent implements OnInit {
   private readonly service = inject(BibliotecaJuridicaService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly sanitizer = inject(DomSanitizer);
   private readonly cambiosFiltro$ = new Subject<void>();
 
-  private readonly extensionesPermitidas = new Set([
-    'pdf',
-    'doc',
-    'docx',
-    'xls',
-    'xlsx',
-    'ppt',
-    'pptx'
-  ]);
-
-  private readonly maxArchivoBytes = 50 * 1024 * 1024;
+  readonly acceptArchivos = this.service.acceptArchivos;
+  readonly formatosArchivoPermitidos = 'PDF, DOC y DOCX';
   private temporizadorAviso: ReturnType<typeof setTimeout> | null = null;
 
   @ViewChild('archivoInput') archivoInput?: ElementRef<HTMLInputElement>;
@@ -114,8 +107,15 @@ export class BibliotecaJuridicaComponent implements OnInit {
   mostrarModalDetalle = false;
   mostrarConfirmacionEliminar = false;
 
+  // Visor igual al Panel Documentos: modal interno + iframe PDF.
+  mostrarVisor = false;
+  visorCargando = false;
+  visorPdfUrl: SafeResourceUrl | null = null;
+  private visorObjectUrl = '';
+
   recursoDetalle?: RecursoJuridico;
   recursoPendienteEliminar?: RecursoJuridico;
+  recursoVisor?: RecursoJuridico;
 
   nuevoRecurso: Partial<RecursoJuridico> = {};
   archivoSeleccionado: File | null = null;
@@ -125,6 +125,7 @@ export class BibliotecaJuridicaComponent implements OnInit {
       if (this.temporizadorAviso) {
         clearTimeout(this.temporizadorAviso);
       }
+      this.liberarVisor();
     });
   }
 
@@ -242,15 +243,15 @@ export class BibliotecaJuridicaComponent implements OnInit {
       return;
     }
 
-    const errorArchivo = this.validarArchivoCliente(archivo);
-    if (errorArchivo) {
+    const validacion = this.service.validarArchivo(archivo);
+    if (!validacion.valido) {
       this.archivoSeleccionado = null;
       this.nuevoRecurso.nombreArchivo = null;
       input.value = '';
       this.mostrarAviso(
         'ERROR',
         'Archivo rechazado',
-        errorArchivo,
+        validacion.mensaje ?? 'El archivo seleccionado no es válido.',
         7000
       );
       return;
@@ -291,9 +292,14 @@ export class BibliotecaJuridicaComponent implements OnInit {
       return;
     }
 
-    const errorArchivo = this.validarArchivoCliente(this.archivoSeleccionado);
-    if (errorArchivo) {
-      this.mostrarAviso('ERROR', 'Archivo rechazado', errorArchivo, 7000);
+    const validacion = this.service.validarArchivo(this.archivoSeleccionado);
+    if (!validacion.valido) {
+      this.mostrarAviso(
+        'ERROR',
+        'Archivo rechazado',
+        validacion.mensaje ?? 'El archivo seleccionado no es válido.',
+        7000
+      );
       this.quitarArchivo();
       return;
     }
@@ -365,11 +371,14 @@ export class BibliotecaJuridicaComponent implements OnInit {
   }
 
   verVistaPrevia(item: RecursoJuridico): void {
-    // El backend siempre responde un PDF para vista previa:
-    // - PDF -> se sirve directamente.
-    // - DOC/DOCX/XLS/XLSX/PPT/PPTX -> se convierte a PDF y se cachea.
-    // La descarga conserva el archivo original.
-    const nuevaPestana = window.open('about:blank', '_blank');
+    // Mismo comportamiento visual que Panel Documentos:
+    // el visor se abre inmediatamente y el PDF se carga dentro de un iframe.
+    this.liberarVisor();
+    this.recursoVisor = item;
+    this.mostrarVisor = true;
+    this.visorCargando = true;
+    this.cerrarAviso();
+    this.cdr.markForCheck();
 
     this.service.ver(item.uuid)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -379,30 +388,38 @@ export class BibliotecaJuridicaComponent implements OnInit {
             ? blob
             : new Blob([blob], { type: 'application/pdf' });
 
-          const url = URL.createObjectURL(pdf);
-
-          if (nuevaPestana) {
-            nuevaPestana.location.href = url;
-          } else {
-            // Si el navegador bloqueó el popup, abrimos el PDF al terminar la petición.
-            window.open(url, '_blank', 'noopener,noreferrer');
-          }
-
-          setTimeout(() => URL.revokeObjectURL(url), 5 * 60_000);
+          this.visorObjectUrl = URL.createObjectURL(pdf);
+          this.visorPdfUrl = this.sanitizer.bypassSecurityTrustResourceUrl(
+            this.visorObjectUrl
+          );
+          this.visorCargando = false;
+          this.cdr.markForCheck();
         },
         error: err => {
-          nuevaPestana?.close();
           console.error('Error al abrir la vista previa:', err);
+          this.visorCargando = false;
+          this.mostrarVisor = false;
+          this.recursoVisor = undefined;
+          this.liberarVisor();
           this.mostrarAviso(
             'ERROR',
             'Vista previa no disponible',
             this.mensajeHttp(
               err,
-              'No se pudo convertir o abrir el documento como PDF.'
+              'No se pudo preparar el documento como PDF.'
             )
           );
+          this.cdr.markForCheck();
         }
       });
+  }
+
+  cerrarVisor(): void {
+    this.mostrarVisor = false;
+    this.visorCargando = false;
+    this.recursoVisor = undefined;
+    this.liberarVisor();
+    this.cdr.markForCheck();
   }
 
   descargarDocumento(uuid: string, nombreArchivo: string): void {
@@ -529,45 +546,6 @@ export class BibliotecaJuridicaComponent implements OnInit {
     return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
   }
 
-  private validarArchivoCliente(archivo: File): string | null {
-    const extension = this.extensionDe(archivo.name);
-
-    if (!extension || !this.extensionesPermitidas.has(extension)) {
-      return 'Formato no permitido. Solo se aceptan PDF, DOC, DOCX, XLS, XLSX, PPT y PPTX.';
-    }
-
-    if (archivo.size <= 0) {
-      return 'El archivo está vacío. Selecciona un documento válido.';
-    }
-
-    if (archivo.size > this.maxArchivoBytes) {
-      return 'El archivo supera el límite de 50 MB.';
-    }
-
-    const tipo = (archivo.type || '').toLowerCase();
-    const tiposPeligrosos = [
-      'php',
-      'javascript',
-      'text/html',
-      'x-msdownload',
-      'x-sh',
-      'x-shellscript'
-    ];
-
-    if (tiposPeligrosos.some(valor => tipo.includes(valor))) {
-      return 'El tipo real informado por el navegador no corresponde a un documento permitido.';
-    }
-
-    return null;
-  }
-
-  private extensionDe(nombre: string): string {
-    const limpio = (nombre || '').trim().toLowerCase();
-    const punto = limpio.lastIndexOf('.');
-    return punto >= 0 && punto + 1 < limpio.length
-      ? limpio.substring(punto + 1)
-      : '';
-  }
 
   private mostrarAviso(
     tipo: TipoAvisoSistema,
@@ -605,6 +583,14 @@ export class BibliotecaJuridicaComponent implements OnInit {
     return typeof mensaje === 'string' && mensaje.trim()
       ? mensaje.trim()
       : fallback;
+  }
+
+  private liberarVisor(): void {
+    if (this.visorObjectUrl) {
+      URL.revokeObjectURL(this.visorObjectUrl);
+    }
+    this.visorObjectUrl = '';
+    this.visorPdfUrl = null;
   }
 
   private cargarPagina(): void {
