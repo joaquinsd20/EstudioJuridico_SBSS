@@ -176,3 +176,33 @@
   font-size: 13px;
   line-height: 1.4;
 }
+
+/* =========================================================
+   RESPONSIVE
+   La tarjeta se pega a los bordes en telefonos; se le da aire
+   y se reduce el relleno para que quepan los campos.
+========================================================= */
+
+@media (max-width: 480px) {
+  .login-wrapper {
+    padding: 18px 14px;
+  }
+
+  .login-card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .brand-logo {
+    width: 100px;
+  }
+
+  .brand-title {
+    font-size: 24px;
+  }
+
+  .brand-subtitle {
+    font-size: 13px;
+    margin-bottom: 22px;
+  }
+}

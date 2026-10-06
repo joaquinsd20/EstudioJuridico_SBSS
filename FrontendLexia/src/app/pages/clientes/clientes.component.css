@@ -469,3 +469,381 @@
   }
 }
 
+
+/* =========================================================
+   RESPONSIVIDAD MEJORADA — CLIENTES
+   ========================================================= */
+
+/* — 1024 px — */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 16px 14px;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-panel {
+    order: -1;
+  }
+
+  .detail-content {
+    max-height: none;
+  }
+
+  .filters-card {
+    grid-template-columns: 1fr 1fr;
+    flex-wrap: wrap;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-card table {
+    min-width: 700px;
+  }
+}
+
+/* — 768 px — */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px 10px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .page-header h1 {
+    font-size: 18px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .filters-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .icon-clear {
+    display: none;
+  }
+
+  .content-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-card table {
+    min-width: 600px;
+    font-size: 11px;
+  }
+
+  .table-card th,
+  .table-card td {
+    padding: 8px 9px;
+  }
+
+  .form-grid.cols-2,
+  .form-grid.cols-3,
+  .form-grid.cols-4 {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: auto;
+  }
+
+  .modal-backdrop {
+    padding: 8px;
+    align-items: flex-end;
+  }
+
+  .modal {
+    max-height: 96vh;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .conflict-search {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    justify-content: center;
+    padding: 12px 10px;
+  }
+
+  .pagination label,
+  .pagination .tamano-pagina {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+}
+
+/* — 480 px — */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px 8px;
+  }
+
+  .page-header h1 {
+    font-size: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .stat-card {
+    padding: 11px;
+  }
+
+  .table-card table {
+    min-width: 520px;
+    font-size: 10.5px;
+  }
+
+  .table-card th,
+  .table-card td {
+    padding: 7px 8px;
+  }
+
+  .modal {
+    width: 100% !important;
+    border-radius: 14px 14px 0 0;
+    max-height: 98vh;
+  }
+
+  .modal-backdrop {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .btn {
+    padding: 8px 11px;
+    font-size: 11px;
+  }
+
+  .row-actions button {
+    width: 24px;
+    height: 24px;
+  }
+
+  .profile-avatar {
+    width: 38px;
+    height: 38px;
+    font-size: 12px;
+  }
+
+  .pagination button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+}
+
+/* =========================================================
+   DARK MODE COMPLEMENTARIO — ELEMENTOS FALTANTES
+   ========================================================= */
+
+/* Textos principales en cards */
+:host-context(.tema-oscuro-global) .card-header h2,
+:host-context(.tema-oscuro-global) .detail-header h2 {
+  color: #f9fafb !important;
+}
+
+:host-context(.tema-oscuro-global) .card-header span {
+  color: #9ca3af !important;
+}
+
+:host-context(.tema-oscuro-global) .detail-header button {
+  color: #9ca3af !important;
+}
+
+/* KPI / stat values */
+:host-context(.tema-oscuro-global) .stat-card strong {
+  color: #f9fafb !important;
+}
+
+/* KV detail pairs */
+:host-context(.tema-oscuro-global) .kv strong {
+  color: #f9fafb !important;
+}
+
+:host-context(.tema-oscuro-global) .kv span {
+  color: #9ca3af !important;
+}
+
+/* Profile */
+:host-context(.tema-oscuro-global) .profile h3 {
+  color: #f9fafb !important;
+}
+
+/* Detail section */
+:host-context(.tema-oscuro-global) .detail-section h4 {
+  color: #e5e7eb !important;
+}
+
+/* Timeline item text */
+:host-context(.tema-oscuro-global) .timeline-item strong {
+  color: #f9fafb !important;
+}
+
+/* Mini / case card titles */
+:host-context(.tema-oscuro-global) .mini-card strong,
+:host-context(.tema-oscuro-global) .case-card strong {
+  color: #f9fafb !important;
+}
+
+/* Conflict list article */
+:host-context(.tema-oscuro-global) .conflict-top strong {
+  color: #f9fafb !important;
+}
+
+/* Modal header h2 */
+:host-context(.tema-oscuro-global) .modal header h2 {
+  color: #f9fafb !important;
+}
+
+:host-context(.tema-oscuro-global) .modal header > button {
+  color: #9ca3af !important;
+}
+
+/* Modal footer background */
+:host-context(.tema-oscuro-global) .modal footer {
+  background: #1f2937 !important;
+  border-top-color: #374151 !important;
+}
+
+/* Modal backdrop */
+:host-context(.tema-oscuro-global) .modal-backdrop {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+
+/* Form section h3 */
+:host-context(.tema-oscuro-global) .form-section h3 {
+  color: #e5e7eb !important;
+}
+
+/* Table tbody text */
+:host-context(.tema-oscuro-global) .table-card td {
+  color: #e2e8f0 !important;
+}
+
+/* Wrapper overflow in dark */
+:host-context(.tema-oscuro-global) .table-wrapper {
+  background: #111827;
+}
+
+/* Card / detail panel text */
+:host-context(.tema-oscuro-global) .card,
+:host-context(.tema-oscuro-global) .detail-panel {
+  color: #e2e8f0 !important;
+}
+
+/* Muted / observations */
+:host-context(.tema-oscuro-global) .muted {
+  color: #9ca3af !important;
+}
+
+:host-context(.tema-oscuro-global) .observations {
+  color: #d1d5db !important;
+}
+
+/* Btn secondary dark fill */
+:host-context(.tema-oscuro-global) .btn.secondary {
+  background: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+/* Pagination select dark */
+:host-context(.tema-oscuro-global) .pagination select {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+/* tema-oscuro class (non-global variant) */
+.tema-oscuro .layout-wrapper,
+.tema-oscuro .main-content {
+  background: #0b0f19 !important;
+}
+
+.tema-oscuro .card,
+.tema-oscuro .detail-panel,
+.tema-oscuro .stat-card,
+.tema-oscuro .filters-card,
+.tema-oscuro .modal {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #e2e8f0 !important;
+}
+
+.tema-oscuro .table-card th {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+  border-bottom-color: #374151 !important;
+}
+
+.tema-oscuro .table-card td {
+  border-bottom-color: #374151 !important;
+  color: #e2e8f0 !important;
+}
+
+.tema-oscuro .filters-card input,
+.tema-oscuro .filters-card select,
+.tema-oscuro .form-grid input,
+.tema-oscuro .form-grid select,
+.tema-oscuro .form-grid textarea,
+.tema-oscuro .full textarea,
+.tema-oscuro .conflict-search input {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .modal header,
+.tema-oscuro .modal footer {
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .modal footer {
+  background: #1f2937 !important;
+}
+
+.tema-oscuro .pagination {
+  background: #111827 !important;
+  border-top-color: #374151 !important;
+  color: #cbd5e1 !important;
+}
+
+.tema-oscuro .pagination button,
+.tema-oscuro .pagination select {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
+}

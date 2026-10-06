@@ -786,6 +786,16 @@ button:disabled {
   }
 }
 
+@media (max-width: 560px) {
+  .main-content {
+    padding: 18px 14px 30px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 /* =========================================================
    TEMA OSCURO ADAPTADO A ESTE MÓDULO

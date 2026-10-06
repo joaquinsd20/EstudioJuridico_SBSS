@@ -3513,3 +3513,998 @@ button:disabled {
   }
 }
 
+
+
+/* ============================================================
+   MEJORAS RESPONSIVAS Y DARK MODE — ACTUALIZACIÓN GLOBAL
+   Expedientes · Compatibilidad total con módulo de referencia
+============================================================ */
+
+/* ----------------------------------------------------------
+   BREAKPOINT 1024px — tablets landscape / laptops pequeños
+---------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 16px 14px;
+  }
+
+  /* Panel de detalle lateral: colapsar en pantallas medianas */
+  .expedientes-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-panel {
+    display: none;
+  }
+
+  /* Stats grid en 2 columnas */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Filtros en 2 columnas */
+  .filters-card {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .clear-button {
+    display: none;
+  }
+
+  /* Botón inferior tabla */
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tabla: garantizar scroll horizontal */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .expedientes-table {
+    min-width: 800px;
+  }
+
+  /* Sidebar lateral del layout: colapsar */
+  .layout-wrapper > app-panel {
+    width: 200px;
+    min-width: 200px;
+    max-width: 200px;
+    flex: 0 0 200px;
+  }
+}
+
+/* ----------------------------------------------------------
+   BREAKPOINT 768px — tablets portrait / móviles grandes
+---------------------------------------------------------- */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px 10px;
+  }
+
+  /* Header del módulo en columna */
+  .expedientes-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .expedientes-header h1 {
+    font-size: 20px;
+  }
+
+  .btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Stats: 2 columnas */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* Filtros: 1 columna, flex-wrap para fluir */
+  .filters-card {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .search-control,
+  .filter-control {
+    width: 100%;
+  }
+
+  .clear-button {
+    display: none;
+  }
+
+  /* Tabla */
+  .table-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .expedientes-table {
+    min-width: 700px;
+    font-size: 11px;
+  }
+
+  .expedientes-table th,
+  .expedientes-table td {
+    padding: 6px 8px;
+  }
+
+  /* Header de la tabla */
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+
+  /* Gráficas: 1 columna */
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Modal detalle completo: 1 columna */
+  .full-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .data-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Formulario */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .checkbox-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .span-2 {
+    grid-column: auto;
+  }
+
+  /* Paginación */
+  .paginacion-expedientes {
+    justify-content: center;
+    flex-wrap: wrap;
+    padding: 12px 10px;
+  }
+
+  .paginacion-expedientes label,
+  .paginacion-expedientes .tamano-pagina {
+    width: 100%;
+    justify-content: center;
+    margin-right: 0;
+  }
+}
+
+/* ----------------------------------------------------------
+   BREAKPOINT 480px — móviles pequeños
+---------------------------------------------------------- */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 10px 8px;
+  }
+
+  .expedientes-header h1 {
+    font-size: 17px;
+  }
+
+  /* Stats: 1 columna */
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tabla */
+  .expedientes-table {
+    min-width: 600px;
+  }
+
+  /* Modales: fullscreen en móvil */
+  .modal-overlay {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .expediente-modal,
+  .form-modal {
+    width: 100%;
+    max-height: 95vh;
+    border-radius: 14px 14px 0 0;
+  }
+
+  .modal-header {
+    padding: 12px 14px;
+    min-height: auto;
+  }
+
+  .modal-header h2 {
+    font-size: 15px;
+  }
+
+  .form-scroll {
+    padding: 12px;
+  }
+
+  .modal-footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .modal-footer button,
+  .modal-footer .secondary-button,
+  .modal-footer .form-save {
+    width: 100%;
+    min-width: 0;
+    justify-content: center;
+  }
+
+  /* Data grid 1 columna */
+  .data-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Paginación compacta */
+  .paginacion-expedientes {
+    gap: 6px;
+    padding: 10px 8px;
+  }
+
+  .paginacion-expedientes button {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  /* Sidebar: ocultar completamente en móvil */
+  .layout-wrapper > app-panel {
+    display: none;
+  }
+}
+
+/* ----------------------------------------------------------
+   DARK MODE — Clase .tema-oscuro directa (complementa
+   el :host-context ya existente para mayor cobertura)
+---------------------------------------------------------- */
+.tema-oscuro .layout-wrapper,
+.tema-oscuro .main-content {
+  background: #0b0f19 !important;
+  color: #e2e8f0 !important;
+}
+
+.tema-oscuro .expedientes-header h1 {
+  color: #e5e7eb !important;
+}
+
+.tema-oscuro .expedientes-header p {
+  color: #9ca3af !important;
+}
+
+/* KPI / Stat cards */
+.tema-oscuro .stat-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .stat-information span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .stat-information strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .stat-information small {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .stat-icon.purple {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .stat-icon.green {
+  background: #1f2937 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .stat-icon.red {
+  background: #1f2937 !important;
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .stat-icon.blue {
+  background: #1f2937 !important;
+  color: #93c5fd !important;
+}
+
+/* Filtros */
+.tema-oscuro .filters-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .search-control,
+.tema-oscuro .filter-control {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .search-control input,
+.tema-oscuro .filter-control input,
+.tema-oscuro .filter-control select {
+  color: #f9fafb !important;
+  background: transparent !important;
+}
+
+.tema-oscuro .search-control input::placeholder,
+.tema-oscuro .filter-control input::placeholder {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .search-icon {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .clear-button {
+  color: #9ca3af !important;
+}
+
+/* Card y panel detalle */
+.tema-oscuro .card,
+.tema-oscuro .detail-panel {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+/* Header tabla */
+.tema-oscuro .table-header {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .table-tools button {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+/* Tabla de expedientes */
+.tema-oscuro .expedientes-table thead {
+  background: #1f2937 !important;
+}
+
+.tema-oscuro .expedientes-table th {
+  color: #9ca3af !important;
+  border-bottom-color: #374151 !important;
+}
+
+.tema-oscuro .expedientes-table td {
+  color: #f9fafb !important;
+  border-top-color: #1f2937 !important;
+}
+
+.tema-oscuro .expedientes-table tbody tr {
+  background: #111827 !important;
+}
+
+.tema-oscuro .expedientes-table tbody tr:hover {
+  background: #1a2235 !important;
+}
+
+.tema-oscuro .expedientes-table tbody tr.selected-row {
+  background: linear-gradient(90deg, #1f2937, #111827) !important;
+}
+
+/* Badges de materia */
+.tema-oscuro .matter-badge.family {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .matter-badge.civil {
+  background: #1f2937 !important;
+  color: #93c5fd !important;
+}
+
+.tema-oscuro .matter-badge.labor {
+  background: #1f2937 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .matter-badge.criminal {
+  background: #1f2937 !important;
+  color: #fca5a5 !important;
+}
+
+/* Badges de riesgo */
+.tema-oscuro .risk-low {
+  background: #1f2937 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .risk-medium {
+  background: #1f2937 !important;
+  color: #fbbf24 !important;
+}
+
+.tema-oscuro .risk-high {
+  background: #1f2937 !important;
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .risk-critical {
+  background: #7f1d1d !important;
+  color: #fecaca !important;
+}
+
+/* Estados */
+.tema-oscuro .status.active {
+  background: #1f2937 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .status.process {
+  background: #1f2937 !important;
+  color: #93c5fd !important;
+}
+
+.tema-oscuro .status.suspended {
+  background: #1f2937 !important;
+  color: #fbbf24 !important;
+}
+
+.tema-oscuro .status.archived {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+/* Celdas de tabla */
+.tema-oscuro .expediente-cell strong {
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .expediente-cell span,
+.tema-oscuro .client-cell span,
+.tema-oscuro .court-cell span {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .client-cell strong,
+.tema-oscuro .court-cell strong,
+.tema-oscuro .responsible-cell strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .exp-icon {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .client-avatar {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .client-avatar.company {
+  background: #1f2937 !important;
+  color: #93c5fd !important;
+}
+
+.tema-oscuro .responsible-avatar {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .actions button {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .actions button:hover {
+  background: #1f2937 !important;
+}
+
+/* Gráficas */
+.tema-oscuro .chart-header {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .chart-header h3 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .chart-icon {
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .donut-chart::after {
+  background: #111827 !important;
+}
+
+.tema-oscuro .donut-center strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .donut-center span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .chart-legend > div {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .bar-chart {
+  background: repeating-linear-gradient(
+    to top,
+    transparent,
+    transparent 30px,
+    #1f2937 31px
+  ) !important;
+}
+
+.tema-oscuro .bar-item strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .bar-item span {
+  color: #9ca3af !important;
+}
+
+/* Panel detalle lateral */
+.tema-oscuro .detail-header h2 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .detail-header button {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .detail-title {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .detail-exp-icon {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .detail-title h3 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .detail-title span {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .detail-status-row {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .detail-status-row > span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .detail-status {
+  background: #1f2937 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .detail-section h4 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .information-row {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .information-row span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .information-row strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .counter {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .event-item strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .event-item span {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .purple-event {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .orange-event {
+  background: #1f2937 !important;
+  color: #fbbf24 !important;
+}
+
+.tema-oscuro .red-event {
+  background: #1f2937 !important;
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .document-icon {
+  background: #1f2937 !important;
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .document-icon.word {
+  background: #1f2937 !important;
+  color: #93c5fd !important;
+}
+
+.tema-oscuro .document-item strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .document-item span {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .download-icon {
+  color: #c4b5fd !important;
+}
+
+/* Estados vacíos / loading */
+.tema-oscuro .empty-state {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .empty-state strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .loading-inline {
+  color: #a78bfa !important;
+}
+
+.tema-oscuro .table-secondary {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .detail-loading,
+.tema-oscuro .detail-empty {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .detail-empty strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .muted-text {
+  color: #6b7280 !important;
+}
+
+/* Modales */
+.tema-oscuro .expediente-modal {
+  background: #0f172a !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .modal-header {
+  background: #111827 !important;
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .modal-header h2 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .modal-header p {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .modal-kicker {
+  color: #a78bfa !important;
+}
+
+.tema-oscuro .modal-close {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .modal-footer {
+  background: #111827 !important;
+  border-top-color: #1f2937 !important;
+}
+
+.tema-oscuro .secondary-button {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+/* Modal detalle completo */
+.tema-oscuro .detail-card-block {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .detail-card-block h3 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .block-title > span:not(.status-large) {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .data-grid > div {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .data-grid span,
+.tema-oscuro .case-summary > span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .data-grid strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .data-grid small {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .case-summary {
+  background: #1f2937 !important;
+}
+
+.tema-oscuro .case-summary p {
+  color: #d1d5db !important;
+}
+
+/* Timeline */
+.tema-oscuro .timeline-entry:not(:last-child)::before {
+  background: #374151 !important;
+}
+
+.tema-oscuro .timeline-body {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .timeline-type {
+  color: #a78bfa !important;
+}
+
+.tema-oscuro .timeline-entry h4 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .timeline-entry time {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .timeline-entry p {
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .timeline-meta {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .relation-chip {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+/* Personas */
+.tema-oscuro .person-row > span {
+  background: #1f2937 !important;
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .person-row strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .person-row small {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .neutral-avatar > span {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .quick-info > div {
+  border-top-color: #1f2937 !important;
+}
+
+.tema-oscuro .quick-info span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .quick-info strong {
+  color: #f9fafb !important;
+}
+
+/* Formulario */
+.tema-oscuro .form-modal {
+  background: #111827 !important;
+}
+
+.tema-oscuro .form-section-title {
+  border-bottom-color: #1f2937 !important;
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .form-grid label > span,
+.tema-oscuro .textarea-label > span,
+.tema-oscuro .checkbox-panel > strong {
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .form-grid input,
+.tema-oscuro .form-grid select,
+.tema-oscuro .textarea-label textarea {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .form-grid input:focus,
+.tema-oscuro .form-grid select:focus,
+.tema-oscuro .textarea-label textarea:focus {
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, .12) !important;
+}
+
+.tema-oscuro .checkbox-panel {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .check-option {
+  background: #111827 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .confidential-toggle {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .confidential-toggle strong {
+  color: #c4b5fd !important;
+}
+
+.tema-oscuro .confidential-toggle small {
+  color: #9ca3af !important;
+}
+
+/* Feedbacks */
+.tema-oscuro .error-feedback {
+  background: #1f2937 !important;
+  border-color: #7f1d1d !important;
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .success-feedback {
+  background: #1f2937 !important;
+  border-color: #166534 !important;
+  color: #86efac !important;
+}
+
+.tema-oscuro .inline-warning {
+  background: #1f2937 !important;
+  color: #fbbf24 !important;
+}
+
+.tema-oscuro .compact-loading {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .modal-state-message {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .modal-state-message strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .modal-state-message span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .modal-state-message.error-state strong {
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .detail-load-error {
+  color: #fca5a5 !important;
+}
+
+.tema-oscuro .detail-load-error span {
+  color: #9ca3af !important;
+}
+
+/* Requirement / status catalog */
+.tema-oscuro .status-catalog-card,
+.tema-oscuro .requirement-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .status-catalog span {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .requirement-content strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .requirement-content p {
+  color: #d1d5db !important;
+}
+
+/* Paginación */
+.tema-oscuro .paginacion-expedientes {
+  background: #111827 !important;
+  border-top-color: #1f2937 !important;
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .paginacion-expedientes label,
+.tema-oscuro .paginacion-expedientes .tamano-pagina,
+.tema-oscuro .paginacion-expedientes > span {
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .paginacion-expedientes select,
+.tema-oscuro .paginacion-expedientes button {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .paginacion-expedientes button:hover:not(:disabled) {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+.tema-oscuro .paginacion-expedientes button:disabled {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #4b5563 !important;
+}
+
+/* Detail card-block dark mode (complemento) */
+.tema-oscuro .detail-client-avatar,
+.tema-oscuro .lawyer-avatar {
+  background: #1f2937 !important;
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .detail-client strong,
+.tema-oscuro .lawyer-detail strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .detail-client span,
+.tema-oscuro .lawyer-detail span {
+  color: #6b7280 !important;
+}

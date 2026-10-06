@@ -2004,3 +2004,617 @@ textarea.custom-input {
     justify-content: space-between;
   }
 }
+
+
+/* =========================================================
+   MEJORAS RESPONSIVAS Y MODO OSCURO — BLOQUE AGREGADO
+   Cubre: layout base, tabs, KPI, tabla, modales, badges,
+   dark mode (.tema-oscuro + :host-context), media queries.
+   ========================================================= */
+
+/* — Layout base normalizado — */
+.layout-wrapper {
+  font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f8fafc;
+}
+
+.main-content {
+  padding: 24px 28px;
+  overflow-y: auto;
+}
+
+/* — KPI grid responsivo con auto-fit — */
+.kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+/* =========================================================
+   TABS DE NAVEGACIÓN (pendiente / pagado / vencido)
+   Clases típicas: .tabs-bar, .tab-btn, .tab-btn.active,
+   .tab-item, .nav-tabs, .tab-link, .tab-link.active
+   ========================================================= */
+
+.tabs-bar,
+.nav-tabs,
+.tabs-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+  border-bottom: 2px solid #eaedf3;
+  flex-wrap: nowrap;
+}
+
+.tabs-bar::-webkit-scrollbar,
+.nav-tabs::-webkit-scrollbar,
+.tabs-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn,
+.tab-item,
+.tab-link {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: #64748b;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  margin-bottom: -2px;
+}
+
+.tab-btn:hover,
+.tab-item:hover,
+.tab-link:hover {
+  color: #6366f1;
+}
+
+.tab-btn.active,
+.tab-btn.selected,
+.tab-item.active,
+.tab-link.active,
+.tab-link.selected {
+  color: #6366f1;
+  border-bottom-color: #6366f1;
+  font-weight: 700;
+}
+
+/* Contadores de items en tabs (badge numérico) */
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  margin-left: 5px;
+  border-radius: 9px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   TABLA — asegurar overflow-x
+   ========================================================= */
+
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* =========================================================
+   BADGES DE ESTADO — refuerzo de estilos
+   ========================================================= */
+
+.badge,
+.status-paid,
+.status-partial,
+.status-pending,
+.status-overdue,
+.badge-success,
+.badge-pending,
+.badge-danger {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   MODO OSCURO — .tema-oscuro (clase directa en :host)
+   ========================================================= */
+
+.tema-oscuro,
+:host-context(.tema-oscuro-global) .layout-wrapper {
+  background: #0b0f19 !important;
+  color: #e2e8f0 !important;
+}
+
+/* Layout y fondo principal */
+.tema-oscuro .layout-wrapper,
+.tema-oscuro .main-content {
+  background: #0b0f19 !important;
+}
+
+/* Header de facturación */
+.tema-oscuro .facturacion-header h1 {
+  color: #f9fafb !important;
+}
+.tema-oscuro .facturacion-header p {
+  color: #9ca3af !important;
+}
+
+/* KPI cards */
+.tema-oscuro .kpi-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+  color: #e2e8f0 !important;
+}
+.tema-oscuro .kpi-label {
+  color: #9ca3af !important;
+}
+.tema-oscuro .kpi-value {
+  color: #f9fafb !important;
+}
+
+/* Card panels */
+.tema-oscuro .card-panel {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+.tema-oscuro .panel-heading {
+  border-bottom-color: #1f2937 !important;
+}
+.tema-oscuro .panel-heading h2 {
+  color: #f9fafb !important;
+}
+.tema-oscuro .panel-heading p {
+  color: #9ca3af !important;
+}
+
+/* Inputs y selects */
+.tema-oscuro .custom-input,
+.tema-oscuro .custom-select {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #f9fafb !important;
+}
+.tema-oscuro .custom-input::placeholder {
+  color: #6b7280 !important;
+}
+.tema-oscuro .form-group label {
+  color: #d1d5db !important;
+}
+
+/* Tabla principal */
+.tema-oscuro .custom-table th {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+  border-bottom-color: #374151 !important;
+}
+.tema-oscuro .custom-table td {
+  color: #e5e7eb !important;
+  border-bottom-color: #1f2937 !important;
+}
+.tema-oscuro .custom-table tbody tr {
+  background: #111827 !important;
+}
+.tema-oscuro .custom-table tbody tr:hover {
+  background: #1f2937 !important;
+}
+
+/* Expediente y cliente */
+.tema-oscuro .expediente-code {
+  color: #a5b4fc !important;
+}
+.tema-oscuro .client-avatar {
+  background: #1f2937 !important;
+  color: #a5b4fc !important;
+}
+.tema-oscuro .client-cell strong {
+  color: #f9fafb !important;
+}
+.tema-oscuro .client-cell small {
+  color: #6b7280 !important;
+}
+
+/* Tipos de facturación */
+.tema-oscuro .billing-type {
+  background: #1f2937 !important;
+  color: #d1d5db !important;
+}
+
+/* Montos */
+.tema-oscuro .amount-cell { color: #e5e7eb !important; }
+.tema-oscuro .amount-paid { color: #6ee7b7 !important; }
+.tema-oscuro .amount-pending { color: #fca5a5 !important; }
+.tema-oscuro .amount-zero { color: #6ee7b7 !important; }
+.tema-oscuro .text-success { color: #6ee7b7 !important; }
+.tema-oscuro .text-danger { color: #fca5a5 !important; }
+.tema-oscuro .text-warning { color: #fcd34d !important; }
+.tema-oscuro .text-indigo { color: #a5b4fc !important; }
+
+/* ── TABS — modo oscuro ── */
+.tema-oscuro .tabs-bar,
+.tema-oscuro .nav-tabs,
+.tema-oscuro .tabs-nav,
+:host-context(.tema-oscuro-global) .tabs-bar,
+:host-context(.tema-oscuro-global) .nav-tabs,
+:host-context(.tema-oscuro-global) .tabs-nav {
+  border-bottom-color: #1f2937 !important;
+  background: transparent !important;
+}
+
+.tema-oscuro .tab-btn,
+.tema-oscuro .tab-item,
+.tema-oscuro .tab-link,
+:host-context(.tema-oscuro-global) .tab-btn,
+:host-context(.tema-oscuro-global) .tab-item,
+:host-context(.tema-oscuro-global) .tab-link {
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .tab-btn:hover,
+.tema-oscuro .tab-item:hover,
+.tema-oscuro .tab-link:hover,
+:host-context(.tema-oscuro-global) .tab-btn:hover,
+:host-context(.tema-oscuro-global) .tab-item:hover,
+:host-context(.tema-oscuro-global) .tab-link:hover {
+  color: #a5b4fc !important;
+}
+
+.tema-oscuro .tab-btn.active,
+.tema-oscuro .tab-btn.selected,
+.tema-oscuro .tab-item.active,
+.tema-oscuro .tab-link.active,
+.tema-oscuro .tab-link.selected,
+:host-context(.tema-oscuro-global) .tab-btn.active,
+:host-context(.tema-oscuro-global) .tab-btn.selected,
+:host-context(.tema-oscuro-global) .tab-item.active,
+:host-context(.tema-oscuro-global) .tab-link.active,
+:host-context(.tema-oscuro-global) .tab-link.selected {
+  color: #818cf8 !important;
+  border-bottom-color: #818cf8 !important;
+}
+
+.tema-oscuro .tab-count,
+:host-context(.tema-oscuro-global) .tab-count {
+  background: #1f2937 !important;
+  color: #a5b4fc !important;
+}
+
+/* ── BADGES — modo oscuro ── */
+/* Pagado (verde oscuro) */
+.tema-oscuro .badge-success,
+.tema-oscuro .status-paid,
+:host-context(.tema-oscuro-global) .badge-success,
+:host-context(.tema-oscuro-global) .status-paid {
+  background: #052e16 !important;
+  color: #6ee7b7 !important;
+}
+
+/* Pendiente (amarillo oscuro) */
+.tema-oscuro .badge-pending,
+.tema-oscuro .status-partial,
+:host-context(.tema-oscuro-global) .badge-pending,
+:host-context(.tema-oscuro-global) .status-partial {
+  background: #422006 !important;
+  color: #fcd34d !important;
+}
+
+/* Vencido/Pendiente-rojo (rojo oscuro) */
+.tema-oscuro .badge-danger,
+.tema-oscuro .status-pending,
+.tema-oscuro .status-overdue,
+:host-context(.tema-oscuro-global) .badge-danger,
+:host-context(.tema-oscuro-global) .status-pending,
+:host-context(.tema-oscuro-global) .status-overdue {
+  background: #450a0a !important;
+  color: #fca5a5 !important;
+}
+
+/* ── MODAL principal — modo oscuro ── */
+.tema-oscuro .modal-backdrop,
+:host-context(.tema-oscuro-global) .modal-backdrop {
+  background: rgba(0, 0, 0, 0.65) !important;
+}
+
+.tema-oscuro .modal-dialog,
+:host-context(.tema-oscuro-global) .modal-dialog {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .modal-header,
+:host-context(.tema-oscuro-global) .modal-header {
+  background: #111827 !important;
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .modal-header h3,
+:host-context(.tema-oscuro-global) .modal-header h3 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .modal-body,
+:host-context(.tema-oscuro-global) .modal-body {
+  background: #111827 !important;
+}
+
+.tema-oscuro .modal-footer,
+:host-context(.tema-oscuro-global) .modal-footer {
+  background: #1f2937 !important;
+  border-top-color: #374151 !important;
+}
+
+.tema-oscuro .btn-close,
+:host-context(.tema-oscuro-global) .btn-close {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .btn-close:hover,
+:host-context(.tema-oscuro-global) .btn-close:hover {
+  background: #374151 !important;
+  color: #f9fafb !important;
+}
+
+/* ── MODAL DETALLE — modo oscuro ── */
+.tema-oscuro .detail-section,
+:host-context(.tema-oscuro-global) .detail-section {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .detail-section-header,
+:host-context(.tema-oscuro-global) .detail-section-header {
+  border-bottom-color: #1f2937 !important;
+}
+
+.tema-oscuro .detail-section-header h4,
+:host-context(.tema-oscuro-global) .detail-section-header h4 {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .detail-item,
+:host-context(.tema-oscuro-global) .detail-item {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .detail-item strong,
+:host-context(.tema-oscuro-global) .detail-item strong {
+  color: #e5e7eb !important;
+}
+
+.tema-oscuro .detail-financial-card,
+:host-context(.tema-oscuro-global) .detail-financial-card {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.tema-oscuro .detail-financial-card span,
+:host-context(.tema-oscuro-global) .detail-financial-card span {
+  color: #9ca3af !important;
+}
+
+.tema-oscuro .detail-financial-card strong,
+:host-context(.tema-oscuro-global) .detail-financial-card strong {
+  color: #f9fafb !important;
+}
+
+.tema-oscuro .detail-observations,
+:host-context(.tema-oscuro-global) .detail-observations {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+.tema-oscuro .detail-empty-payments,
+:host-context(.tema-oscuro-global) .detail-empty-payments {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #6b7280 !important;
+}
+
+.tema-oscuro .detail-modal-footer,
+:host-context(.tema-oscuro-global) .detail-modal-footer {
+  background: #1f2937 !important;
+  border-top-color: #374151 !important;
+}
+
+/* ── PAGINACIÓN — modo oscuro ── */
+.tema-oscuro .pagination-bar,
+:host-context(.tema-oscuro-global) .pagination-bar {
+  border-top-color: #1f2937 !important;
+}
+
+.tema-oscuro .pagination-actions button,
+.tema-oscuro .pagination-info select,
+:host-context(.tema-oscuro-global) .pagination-actions button,
+:host-context(.tema-oscuro-global) .pagination-info select {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #e5e7eb !important;
+}
+
+.tema-oscuro .pagination-info label,
+:host-context(.tema-oscuro-global) .pagination-info label {
+  color: #9ca3af !important;
+}
+
+/* ── No-access card — modo oscuro ── */
+.tema-oscuro .no-access-card,
+:host-context(.tema-oscuro-global) .no-access-card {
+  background: #111827 !important;
+  border-color: #1f2937 !important;
+}
+
+.tema-oscuro .no-access-card h1,
+:host-context(.tema-oscuro-global) .no-access-card h1 {
+  color: #f9fafb !important;
+}
+
+/* ── Botones acción — modo oscuro ── */
+.tema-oscuro .btn-icon,
+:host-context(.tema-oscuro-global) .btn-icon {
+  background: #1f2937 !important;
+  border-color: #374151 !important;
+  color: #a5b4fc !important;
+}
+
+.tema-oscuro .btn-icon:hover,
+:host-context(.tema-oscuro-global) .btn-icon:hover {
+  background: #374151 !important;
+}
+
+.tema-oscuro .btn-icon.payment,
+:host-context(.tema-oscuro-global) .btn-icon.payment {
+  color: #6ee7b7 !important;
+}
+
+.tema-oscuro .btn-icon.detail,
+:host-context(.tema-oscuro-global) .btn-icon.detail {
+  background: #1e3a5f !important;
+  border-color: #2563eb !important;
+  color: #93c5fd !important;
+}
+
+/* =========================================================
+   MEDIA QUERIES RESPONSIVOS ADICIONALES
+   ========================================================= */
+
+/* — 1024px: tablet landscape — */
+@media (max-width: 1024px) {
+  .main-content {
+    padding: 16px 14px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* — 768px: tablet portrait — */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 12px 10px;
+  }
+
+  .facturacion-header h1 {
+    font-size: 18px;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .form-grid-3 {
+    grid-template-columns: 1fr;
+  }
+
+  /* Tabs: scroll horizontal en móvil */
+  .tabs-bar,
+  .nav-tabs,
+  .tabs-nav {
+    gap: 2px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 0;
+  }
+
+  .tab-btn,
+  .tab-item,
+  .tab-link {
+    padding: 7px 12px;
+    font-size: 11.5px;
+  }
+
+  .custom-table {
+    font-size: 11px;
+  }
+
+  .custom-table th,
+  .custom-table td {
+    padding: 8px;
+  }
+}
+
+/* — 480px: mobile — */
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .facturacion-header h1 {
+    font-size: 16px;
+  }
+
+  .facturacion-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .facturacion-header .btn-primary-action {
+    width: 100%;
+  }
+
+  /* Tabs: apilados verticalmente si no caben */
+  .tabs-bar,
+  .nav-tabs,
+  .tabs-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modal-dialog {
+    margin: 4px;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .modal-dialog-detail {
+    max-width: 100%;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .detail-financial-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* — 360px: small mobile — */
+@media (max-width: 360px) {
+  .tab-btn,
+  .tab-item,
+  .tab-link {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .kpi-value {
+    font-size: 16px;
+  }
+}

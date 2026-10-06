@@ -1,0 +1,122 @@
+/* =========================================================
+   BARRA SUPERIOR MOVIL
+   Solo existe por debajo de 1080px, cuando el sidebar se
+   convierte en cajon lateral (ver styles.css).
+========================================================= */
+
+.topbar-movil {
+  display: none;
+}
+
+.topbar-backdrop {
+  display: none;
+}
+
+
+@media (max-width: 1080px) {
+
+  .topbar-movil {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 1400;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    height: 56px;
+    padding: 0 12px;
+
+    background: #0f172a;
+    color: #f8fafc;
+
+    box-shadow: 0 2px 12px rgba(15, 23, 42, .28);
+  }
+
+  .topbar-brand {
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: .16em;
+  }
+
+  .topbar-backdrop {
+    position: fixed;
+    inset: 0;
+
+    z-index: 1200;
+
+    display: block;
+
+    background: rgba(15, 23, 42, .55);
+  }
+
+  .topbar-toggle {
+    position: relative;
+    flex: 0 0 40px;
+
+    width: 40px;
+    height: 40px;
+
+    padding: 0;
+    border: 0;
+    border-radius: 9px;
+
+    background: rgba(255, 255, 255, .07);
+
+    cursor: pointer;
+  }
+
+  .topbar-toggle:hover {
+    background: rgba(255, 255, 255, .13);
+  }
+
+  .topbar-toggle-bar,
+  .topbar-toggle-bar::before,
+  .topbar-toggle-bar::after {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    width: 18px;
+    height: 2px;
+
+    border-radius: 2px;
+
+    background: #e2e8f0;
+
+    transform: translateX(-50%);
+
+    transition: transform .2s ease, top .2s ease, opacity .2s ease;
+  }
+
+  .topbar-toggle-bar {
+    margin-top: -1px;
+  }
+
+  .topbar-toggle-bar::before {
+    content: '';
+    top: -6px;
+  }
+
+  .topbar-toggle-bar::after {
+    content: '';
+    top: 6px;
+  }
+
+  .topbar-toggle-bar.open {
+    background: transparent;
+  }
+
+  .topbar-toggle-bar.open::before {
+    top: 0;
+    transform: translateX(-50%) rotate(45deg);
+  }
+
+  .topbar-toggle-bar.open::after {
+    top: 0;
+    transform: translateX(-50%) rotate(-45deg);
+  }
+}
