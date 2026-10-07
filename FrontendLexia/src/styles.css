@@ -38,7 +38,13 @@ app-root {
   display: block;
 
   width: 100%;
+
+  /* 100dvh = altura visible REAL en movil: descuenta la barra inferior
+     del navegador. Con 100vh el pie del cajon (cerrar sesion) quedaba
+     detras de esa barra y, al tener html/body overflow:hidden, era
+     imposible llegar hasta el desplazandose. */
   height: 100vh;
+  height: 100dvh;
 
   overflow: hidden;
 }
@@ -53,6 +59,7 @@ app-root {
 
   width: 100% !important;
   height: 100vh !important;
+  height: 100dvh !important;
 
   min-height: 0 !important;
 
@@ -78,6 +85,7 @@ app-root {
   max-width: 250px !important;
 
   height: 100vh !important;
+  height: 100dvh !important;
 
   flex:
     0
@@ -104,6 +112,7 @@ app-root {
   width: auto !important;
 
   height: 100vh !important;
+  height: 100dvh !important;
   min-height: 0 !important;
 
   overflow-y: auto !important;

@@ -4,6 +4,7 @@
   min-width: 250px;
   max-width: 250px;
   height: 100vh;
+  height: 100dvh;
   flex: 0 0 250px;
   font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
 }
@@ -13,7 +14,9 @@
   min-width: 250px;
   max-width: 250px;
   height: 100vh;
+  height: 100dvh;
   min-height: 100vh;
+  min-height: 100dvh;
   position: sticky;
   top: 0;
   display: flex;
@@ -281,4 +284,71 @@
 
 .theme-switch.active .theme-switch-knob {
   transform: translateX(14px);
+}
+
+
+/* =========================================================
+   CAJON EN PANTALLAS ESTRECHAS (<= 1080px)
+   El pie (usuario, tema, cambiar contrasena y CERRAR SESION)
+   queda fijo en la base del cajon y solo scrollea la zona de
+   navegacion. Asi "Cerrar sesion" siempre esta a la vista: antes
+   vivia al final de un contenido de ~960px y con html/body en
+   overflow:hidden no había forma de llegar hasta el boton.
+========================================================= */
+
+@media (max-width: 1080px) {
+
+  .sidebar {
+    height: 100%;
+    min-height: 0;
+
+    justify-content: flex-start;
+
+    /* En pantallas normales no desborda (lo hace .sidebar-top), pero si
+       la altura util es minuscula (celular en horizontal con la barra del
+       navegador visible) el pie sigue accesible por aqui. */
+    overflow-y: auto;
+    overscroll-behavior: contain;
+
+    /* Deja libre la barra de gestos de iOS/Android. */
+    padding-bottom: max(16px, env(safe-area-inset-bottom, 0px));
+  }
+
+  .sidebar-top {
+    flex: 1 1 auto;
+    min-height: 0;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar-bottom {
+    flex: 0 1 auto;
+    gap: 10px;
+
+    background: #0f172a;
+    box-shadow: 0 -14px 18px -10px #0f172a;
+  }
+
+  /* Objetivo táctil: 44px es el minimo recomendado. */
+  .menu-item,
+  .logout-button,
+  .theme-button {
+    min-height: 44px;
+  }
+
+  .logout-button {
+    height: auto;
+    font-size: 13px;
+  }
+
+  .password-link {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 0;
+  }
 }
