@@ -2326,6 +2326,20 @@ familia de color que ya usaba cada badge, no los mismos tonos, porque un
     right: 12px;
     width: auto;
     max-width: none;
+
+    /* Nunca se sale por abajo: se limita a la altura visible real
+       (dvh descuenta la barra del navegador) y el contenido interno
+       scrollea, de modo que "Cerrar sesion" siempre se alcanza. */
+    max-height: calc(100vh - 76px);
+    max-height: calc(100dvh - 76px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Objetivo táctil: 44px es el minimo recomendado. */
+  .perfil-menu-item {
+    min-height: 44px;
   }
 
   .chat-modal {

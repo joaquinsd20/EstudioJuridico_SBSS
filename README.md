@@ -213,6 +213,53 @@ Alternativa con archivo (ignorado por git, ver §8): crear
 | `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | prod | — | **Sin default: la app no arranca** |
 | `JWT_SECRETO` / `CORS_ORIGENES` | prod | — | **Sin default** |
 
+### 5.5 Verlo en el celular (o desde cualquier lugar)
+
+El dev-server escucha en `0.0.0.0` (`npm start`) y `FrontendLexia/proxy.conf.js`
+reenvía `/api/**` al backend en `localhost:8080` — declarado en
+`angular.json → serve.options.proxyConfig`. Al servir app y API desde el **mismo
+origen** no hay que ampliar CORS por cada origen nuevo, y `environment.ts` usa
+por eso una URL relativa (`/api/v1`).
+
+El proxy es un `.js` y no un `.json` porque además **retira el header `Origin`**
+antes de reenviar: el navegador lo conserva con su propio host
+(`https://….trycloudflare.com`, `http://<IP-local>:4200`), mientras el proxy
+reescribe `Host` a `localhost:8080`; Spring ve los dos distintos y respondería
+`403` por CORS. Como la petición es mismo origen, el navegador no exige esas
+cabeceras, así que no hacen falta. Detalle en `proxy.conf.js:1-20`.
+
+**Arranque de una sola vez** (MySQL + backend + frontend + túnel, en ese orden):
+
+```powershell
+cd C:\Users\<tu-usuario>\EstudioJuridico_SBSS
+.\scripts\levantar-lexia.ps1
+```
+
+Cada paso arranca solo si su puerto está libre, así que se puede repetir sin
+duplicar procesos; los logs quedan en `%TEMP%\lexia-logs\`. Solo el túnel bloquea
+(`Ctrl+C` lo corta y deja el resto corriendo).
+
+O, con las dos terminales ya levantadas (§5.2 y §5.3), solo el túnel:
+
+```powershell
+cd C:\Users\<tu-usuario>\EstudioJuridico_SBSS
+.\scripts\ver-en-celular.ps1
+```
+
+El script comprueba los puertos 4200 y 8080, descarga `cloudflared` la primera
+vez, abre un túnel de Cloudflare y muestra una URL pública `https://….trycloudflare.com`
+con su QR para escanear con la cámara del celular.
+
+- Funciona desde **cualquier red** (datos móviles incluidos) **sin abrir puertos
+  en el router**: solo se publica el 4200; el backend en 8080 sigue oculto.
+- La URL es efímera, cambia en cada arranque; `Ctrl+C` cierra el túnel.
+- Si el dev-server responde `Blocked request. This host is not allowed`, el
+  hostname no está en `angular.json → serve.options.allowedHosts` (de fábrica
+  solo `.trycloudflare.com`; las IP locales están permitidas siempre).
+- **Red local sin túnel:** abre `http://<IP-del-PC>:4200` en el celular (misma
+  Wi-Fi) y deja pasar el 4200 en el firewall de Windows; el backend tampoco
+  necesita CORS porque sigue siendo mismo origen.
+
 ---
 
 ## 6. Credenciales de desarrollo
@@ -440,7 +487,7 @@ en `fecha_hora`.
 | 5 | Los tests corren destructivos contra la BD de desarrollo | falta `src/test/resources/` |
 | 6 | `verificar-bd.sh` espera 44 tablas; el esquema tiene 45 | `verificar-bd.sh:43` |
 | 7 | El proyecto Angular se llama `FrontedLexia` (falta la `n`) | `angular.json:10` |
-| 8 | Sin proxy de desarrollo: en prod hace falta un reverse proxy no documentado | `environment.prod.ts:11` |
+| 8 | Proxy de desarrollo añadido (`proxy.conf.js`, ver §5.5). En prod sigue haciendo falta un reverse proxy no documentado | `environment.prod.ts:11` |
 | 9 | `biblioteca` y `facturacion` llaman `HttpClient` desde el componente, no desde `core/services` | `biblioteca-juridica.component.ts:77`, `facturacion.component.ts:254` |
 | 10 | Sin CI, sin Docker, sin ESLint | raíz |
 | 11 | `CLAUDE.md` y `docs/` están en `.gitignore` pero el código los cita ~10 veces | `.gitignore:78-79` |

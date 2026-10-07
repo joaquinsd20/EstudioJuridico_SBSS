@@ -2,11 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { HonorarioLista, ResumenBackend, ResumenFacturacion, Opcion, CatalogosFacturacion, RegistroMovimientoDTO, MovimientoResponse, ActualizarHonorarioDTO, PagoHonorarioDetalle, DetalleHonorario } from '../models/facturacion.models';
+import { environment } from '../../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class FacturacionService {
   private readonly http = inject(HttpClient);
-  private readonly apiUrl = 'http://localhost:8080/api/v1/facturacion';
+  // Relativa a environment.apiUrl: nunca 'http://localhost:8080' a mano, que
+  // rompe al abrir la app desde el celular o desde un tunel (ver environment.ts).
+  private readonly apiUrl = `${environment.apiUrl}/facturacion`;
 
 private obtenerHeaders(): {
     headers: HttpHeaders
