@@ -209,19 +209,26 @@
             <div>
               <span class="section-kicker">Detalle</span>
               <h2 class="section-subtitle">Expedientes del Reporte</h2>
-              <p>{{ tabla().length }} expediente(s) coinciden con los filtros</p>
+              <p>{{ totalElementosDetalle() }} expediente(s) coinciden con los filtros</p>
             </div>
 
             <div class="table-search-box">
               <input type="text" class="input-table-search" placeholder="Buscar por código, cliente, materia..."
                      [value]="textoBusqueda()"
-                     (input)="textoBusqueda.set($any($event.target).value)" />
+                     (input)="actualizarBusquedaDetalle($event)" />
             </div>
 
             <span class="section-number">02</span>
           </div>
 
-          <div class="table-responsive">
+          @if (errorDetalle()) {
+            <div class="table-state table-state-error">
+              {{ errorDetalle() }}
+              <button type="button" (click)="cargarDatos()">Reintentar</button>
+            </div>
+          }
+
+          <div class="table-responsive" [class.table-loading]="cargandoDetalle()">
             <table class="custom-table">
               <thead>
                 <tr>
@@ -270,7 +277,13 @@
                     </td>
                   </tr>
                 }
-                @if (tabla().length === 0) {
+                @if (tabla().length === 0 && cargandoDetalle()) {
+                  <tr>
+                    <td colspan="7" class="text-center empty-row">
+                      Cargando expedientes...
+                    </td>
+                  </tr>
+                } @else if (tabla().length === 0) {
                   <tr>
                     <td colspan="7" class="text-center empty-row">
                       No se encontraron expedientes con los filtros seleccionados.
@@ -280,6 +293,39 @@
               </tbody>
             </table>
           </div>
+
+          @if (!errorDetalle()) {
+            <div class="report-pagination">
+              <span class="pagination-summary">
+                @if (totalElementosDetalle() > 0) {
+                  Mostrando {{ desdeDetalle() }}-{{ hastaDetalle() }} de {{ totalElementosDetalle() }} expedientes
+                } @else {
+                  Sin expedientes para mostrar
+                }
+              </span>
+
+              <div class="pagination-controls">
+                <label>
+                  Mostrar
+                  <select [value]="tamanoDetalle()" (change)="cambiarTamanoDetalle($event)" [disabled]="cargandoDetalle()">
+                    @for (tamano of tamanosDetalle; track tamano) {
+                      <option [value]="tamano">{{ tamano }}</option>
+                    }
+                  </select>
+                </label>
+
+                <button type="button" (click)="cambiarPaginaDetalle(-1)"
+                        [disabled]="cargandoDetalle() || paginaDetalle() === 0">
+                  Anterior
+                </button>
+                <span>Página {{ totalPaginasDetalle() === 0 ? 0 : paginaDetalle() + 1 }} de {{ totalPaginasDetalle() }}</span>
+                <button type="button" (click)="cambiarPaginaDetalle(1)"
+                        [disabled]="cargandoDetalle() || paginaDetalle() + 1 >= totalPaginasDetalle()">
+                  Siguiente
+                </button>
+              </div>
+            </div>
+          }
         </section>
 
       </section>
