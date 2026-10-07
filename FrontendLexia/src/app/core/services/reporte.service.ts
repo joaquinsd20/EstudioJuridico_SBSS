@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface KpiReporte {
@@ -50,6 +50,25 @@ export interface ItemReporteDetalle {
   cuantia: number;
 }
 
+export interface PaginaReporte<T> {
+  contenido: T[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
+  esUltima: boolean;
+}
+
+export interface OpcionReporte {
+  id: number;
+  nombre: string;
+}
+
+export interface CatalogosReporte {
+  materias: OpcionReporte[];
+  abogados: OpcionReporte[];
+}
+
 export interface ResumenReporteBackend {
   filtros: FiltrosReporte;
   kpis: KpiReporte;
@@ -62,58 +81,90 @@ export interface ResumenReporteBackend {
   tablaDetalle: ItemReporteDetalle[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ReporteService {
-
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/reportes`;
 
-  /** Catalogo de materias y abogados reutilizado de expedientes: evita
-   *  mantener listas de nombres escritas a mano en el reporte. */
-  readonly baseUrlCatalogo = `${environment.apiUrl}/expedientes/catalogos`;
+  private readonly catalogos$ = this.http
+    .get<CatalogosReporte>(`${this.baseUrl}/catalogos`)
+    .pipe(shareReplay({ bufferSize: 1, refCount: true }));
 
-  getResumen(filtros: { fechaInicio?: string; fechaFin?: string; materia?: string; abogadoId?: number; preset?: string }): Observable<ResumenReporteBackend | null> {
-    let params = new HttpParams();
-    if (filtros.fechaInicio) params = params.set('fechaInicio', filtros.fechaInicio);
-    if (filtros.fechaFin) params = params.set('fechaFin', filtros.fechaFin);
-    if (filtros.materia && filtros.materia !== 'todas') params = params.set('materia', filtros.materia);
-    if (filtros.abogadoId) params = params.set('abogadoId', filtros.abogadoId.toString());
+  getResumen(filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    materia?: string;
+    abogadoId?: number;
+    preset?: string;
+  }): Observable<ResumenReporteBackend> {
+    let params = this.paramsBase(filtros);
     if (filtros.preset) params = params.set('preset', filtros.preset);
-
-    return this.http.get<ResumenReporteBackend>(`${this.baseUrl}/resumen`, { params }).pipe(
-      catchError(() => of(null))
-    );
+    return this.http.get<ResumenReporteBackend>(`${this.baseUrl}/resumen`, { params });
   }
 
-  descargarExcel(filtros: { fechaInicio?: string; fechaFin?: string; materia?: string; abogadoId?: number }): Observable<Blob | null> {
-    let params = new HttpParams();
-    if (filtros.fechaInicio) params = params.set('fechaInicio', filtros.fechaInicio);
-    if (filtros.fechaFin) params = params.set('fechaFin', filtros.fechaFin);
-    if (filtros.materia && filtros.materia !== 'todas') params = params.set('materia', filtros.materia);
-    if (filtros.abogadoId) params = params.set('abogadoId', filtros.abogadoId.toString());
+  getDetalle(
+    filtros: { fechaInicio?: string; fechaFin?: string; materia?: string; abogadoId?: number },
+    pagina: number,
+    tamano: number,
+    texto = ''
+  ): Observable<PaginaReporte<ItemReporteDetalle>> {
+    let params = this.paramsBase(filtros)
+      .set('page', Math.max(0, pagina).toString())
+      .set('size', tamano.toString());
+    if (texto.trim()) params = params.set('texto', texto.trim());
+    return this.http.get<PaginaReporte<ItemReporteDetalle>>(`${this.baseUrl}/detalle`, { params });
+  }
 
+  getCatalogos(): Observable<CatalogosReporte> {
+    return this.catalogos$;
+  }
+
+  getDatosExportacion(filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    materia?: string;
+    abogadoId?: number;
+  }): Observable<ItemReporteDetalle[]> {
+    return this.http.get<ItemReporteDetalle[]>(`${this.baseUrl}/exportar/datos`, {
+      params: this.paramsBase(filtros)
+    });
+  }
+
+  descargarExcel(filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    materia?: string;
+    abogadoId?: number;
+  }): Observable<Blob> {
     return this.http.get(`${this.baseUrl}/exportar/excel`, {
-      params,
+      params: this.paramsBase(filtros),
       responseType: 'blob'
-    }).pipe(
-      catchError(() => of(null))
-    );
+    });
   }
 
-  descargarPdf(filtros: { fechaInicio?: string; fechaFin?: string; materia?: string; abogadoId?: number }): Observable<Blob | null> {
+  descargarPdf(filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    materia?: string;
+    abogadoId?: number;
+  }): Observable<Blob> {
+    return this.http.get(`${this.baseUrl}/exportar/pdf`, {
+      params: this.paramsBase(filtros),
+      responseType: 'blob'
+    });
+  }
+
+  private paramsBase(filtros: {
+    fechaInicio?: string;
+    fechaFin?: string;
+    materia?: string;
+    abogadoId?: number;
+  }): HttpParams {
     let params = new HttpParams();
     if (filtros.fechaInicio) params = params.set('fechaInicio', filtros.fechaInicio);
     if (filtros.fechaFin) params = params.set('fechaFin', filtros.fechaFin);
     if (filtros.materia && filtros.materia !== 'todas') params = params.set('materia', filtros.materia);
     if (filtros.abogadoId) params = params.set('abogadoId', filtros.abogadoId.toString());
-
-    return this.http.get(`${this.baseUrl}/exportar/pdf`, {
-      params,
-      responseType: 'blob'
-    }).pipe(
-      catchError(() => of(null))
-    );
+    return params;
   }
 }
