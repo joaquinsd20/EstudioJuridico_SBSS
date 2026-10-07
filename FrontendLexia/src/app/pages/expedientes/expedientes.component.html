@@ -2,13 +2,14 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    @if (puedeLeer) {
     <header class="expedientes-header">
       <div>
         <h1>Gestión de Expedientes Jurídicos</h1>
         <p>Consulta, registra y administra la ficha, responsables y trazabilidad completa de cada expediente.</p>
       </div>
 
-      <button type="button" class="btn-primary" (click)="nuevoExpediente()">
+      <button type="button" class="btn-primary" (click)="nuevoExpediente()" *ngIf="puedeCrear">
         <span class="plus">+</span>
         Nuevo Expediente
       </button>
@@ -208,7 +209,7 @@
                     <td>
                       <div class="actions">
                         <button type="button" title="Ver" (click)="$event.stopPropagation(); abrirDesdeLista(expediente)">◉</button>
-                        <button type="button" title="Editar" (click)="$event.stopPropagation(); editarDesdeLista(expediente)">✎</button>
+                        <button type="button" title="Editar" *ngIf="puedeEditar" (click)="$event.stopPropagation(); editarDesdeLista(expediente)">✎</button>
                       </div>
                     </td>
                   </tr>
@@ -270,7 +271,7 @@
         <div class="detail-header">
           <h2>Detalle del Expediente Seleccionado</h2>
           @if (seleccionado) {
-            <button type="button" title="Editar expediente" [disabled]="cargandoDetalle" (click)="editarExpediente()">✎</button>
+            <button type="button" title="Editar expediente" *ngIf="puedeEditar" [disabled]="cargandoDetalle" (click)="editarExpediente()">✎</button>
           }
         </div>
 
@@ -406,10 +407,17 @@
         </div>
       </aside>
     </div>
+    } @else {
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de EXPEDIENTES para consultar este módulo.</p>
+      </section>
+    }
   </main>
 </div>
 
-@if (modalDetalle && seleccionado) {
+@if (modalDetalle && seleccionado && puedeLeer) {
   <div class="modal-overlay" (mousedown)="cerrarDetalleCompleto()">
     <section class="expediente-modal detail-modal" (mousedown)="$event.stopPropagation()">
       <header class="modal-header">
@@ -419,7 +427,7 @@
           <p>{{ seleccionado.numeroExpediente || 'Sin número externo' }}</p>
         </div>
         <div class="modal-actions">
-          <button type="button" class="secondary-button" (click)="editarExpediente(); cerrarDetalleCompleto()">✎ Editar</button>
+          <button type="button" class="secondary-button" *ngIf="puedeEditar" (click)="editarExpediente(); cerrarDetalleCompleto()">✎ Editar</button>
           <button type="button" class="modal-close" (click)="cerrarDetalleCompleto()">×</button>
         </div>
       </header>
@@ -550,7 +558,7 @@
   </div>
 }
 
-@if (modalFormulario) {
+@if (modalFormulario && puedeLeer && (editandoUuid ? puedeEditar : puedeCrear)) {
   <div class="modal-overlay form-overlay" (mousedown)="cerrarFormulario()">
     <section class="expediente-modal form-modal" (mousedown)="$event.stopPropagation()">
       <header class="modal-header">

@@ -13,6 +13,7 @@ import {
   ExpedienteResumen
 } from '../../core/models/expediente.models';
 import { ExpedienteFiltros, ExpedienteService } from '../../core/services/expediente.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PanelComponent } from '../panel/panel.component';
 import { environment } from '../../../environments/environment';
 
@@ -34,6 +35,10 @@ interface PaginaExpedientes {
 })
 export class ExpedientesComponent implements OnInit, OnDestroy {
   private readonly expedienteService = inject(ExpedienteService);
+  readonly auth = inject(AuthService);
+  readonly puedeLeer = this.auth.tienePermiso('EXPEDIENTE_LEER');
+  readonly puedeCrear = this.auth.tienePermiso('EXPEDIENTE_CREAR');
+  readonly puedeEditar = this.auth.tienePermiso('EXPEDIENTE_EDITAR');
   private readonly http = inject(HttpClient);
   private readonly cdr = inject(ChangeDetectorRef);
   private filtroTimer?: ReturnType<typeof setTimeout>;
@@ -75,6 +80,12 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   formulario: ExpedienteGuardar = this.formularioVacio();
 
   ngOnInit(): void {
+    // No se realizan llamadas al backend si el usuario no puede consultar expedientes.
+    if (!this.puedeLeer) {
+      this.cargando = false;
+      return;
+    }
+
     // Mismo patrón que Documentos: se cargan los datos al entrar y cada
     // respuesta asíncrona fuerza el refresco visual en modo zoneless.
     this.cargarCatalogos();
@@ -181,6 +192,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   }
 
   reintentarCarga(): void {
+    if (!this.puedeLeer) return;
     this.cargarCatalogos();
     this.cargarResumen();
     this.cargarListado(true);
@@ -327,6 +339,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   }
 
   nuevoExpediente(): void {
+    if (!this.puedeCrear) return;
     this.editandoUuid = null;
     this.formulario = this.formularioVacio();
     const estadoActivo = this.catalogos.estados.find(e => e.codigo === 'ACTIVO') ?? this.catalogos.estados[0];
@@ -336,6 +349,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   }
 
   editarExpediente(): void {
+    if (!this.puedeEditar) return;
     if (!this.detalle) {
       if (this.seleccionado && !this.cargandoDetalle) this.cargarDetalle(this.seleccionado, 'editar');
       return;
@@ -379,6 +393,7 @@ export class ExpedientesComponent implements OnInit, OnDestroy {
   }
 
   guardarExpediente(): void {
+    if (this.editandoUuid ? !this.puedeEditar : !this.puedeCrear) return;
     if (!this.formularioValido()) return;
     this.guardando = true;
     this.error = '';
