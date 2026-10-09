@@ -2,6 +2,7 @@ package com.sbss.lexia.usuarios.service;
 
 import com.sbss.lexia.catalogos.service.ConfiguracionService;
 import com.sbss.lexia.expedientes.repository.ExpedienteRepositoryJdbc;
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
@@ -11,6 +12,7 @@ import com.sbss.lexia.usuarios.dto.UsuarioDtos.CredencialTemporal;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.GuardarUsuarioRequest;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.ReasignarRequest;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResultadoReasignacion;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResumenUsuarios;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
@@ -59,6 +61,22 @@ public class UsuarioService {
     }
 
     @Transactional(readOnly = true)
+    public PaginaDto<UsuarioLista> listarPagina(String texto, String rol, String estado, int page, int size) {
+        if (page < 0) {
+            throw new ParametroInvalidoException("La pagina no puede ser negativa");
+        }
+        if (size != 10 && size != 20 && size != 40 && size != 100) {
+            throw new ParametroInvalidoException("El tamano de pagina debe ser 10, 20, 40 o 100");
+        }
+        return repository.listarPagina(SesionActual.estudioId(), texto, rol, estado, page, size);
+    }
+
+    @Transactional(readOnly = true)
+    public ResumenUsuarios resumen() {
+        return repository.resumen(SesionActual.estudioId());
+    }
+
+    @Transactional(readOnly = true)
     public UsuarioDetalle detalle(String uuid) {
         UsuarioDetalle detalle = repository.detalle(uuid, SesionActual.estudioId());
         if (detalle == null) {
@@ -84,9 +102,16 @@ public class UsuarioService {
         List<String> roles = validarRoles(peticion.roles());
 
         String temporal = generarPasswordTemporal();
-        String uuid = repository.crear(estudioId, repository.siguienteCodigo(estudioId),
+        // Bloquea la fila del estudio durante la asignacion del codigo U-XXXX.
+        // Dos altas simultaneas del mismo estudio ya no pueden calcular el mismo MAX+1.
+        String codigo = repository.siguienteCodigoBloqueado(estudioId);
+        String uuid = repository.crear(estudioId, codigo,
                 passwordEncoder.encode(temporal), SesionActual.usuarioId(), peticion);
-        repository.reemplazarRoles(repository.idDe(uuid, estudioId), roles, SesionActual.usuarioId());
+        Long nuevoId = repository.idDe(uuid, estudioId);
+        repository.reemplazarRoles(nuevoId, roles, SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", nuevoId, null, "CREAR",
+                "Usuario creado: " + codigo + " - " + peticion.nombres().trim() + " "
+                        + peticion.apellidos().trim() + ". Roles: " + String.join(", ", roles) + ".");
 
         return new CredencialTemporal(uuid, email, temporal,
                 "Entregala en persona. No se vuelve a mostrar y debera cambiarla al entrar.");
@@ -114,6 +139,8 @@ public class UsuarioService {
 
         repository.actualizarDatos(id, SesionActual.usuarioId(), peticion);
         repository.reemplazarRoles(id, roles, SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", id, null, "ACTUALIZAR",
+                "Datos y roles del usuario actualizados. Roles: " + String.join(", ", roles) + ".");
     }
 
     /**
@@ -141,17 +168,27 @@ public class UsuarioService {
                     + ". Mientras tanto quedarian a nombre de una cuenta inactiva");
         }
         repository.cambiarActivo(id, false, SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", id, null, "ACTUALIZAR",
+                "Usuario desactivado.");
     }
 
     @Transactional
     public void activar(String uuid) {
-        repository.cambiarActivo(exigirId(uuid, SesionActual.estudioId()), true, SesionActual.usuarioId());
+        Integer estudioId = SesionActual.estudioId();
+        Long id = exigirId(uuid, estudioId);
+        repository.cambiarActivo(id, true, SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", id, null, "ACTUALIZAR",
+                "Usuario activado.");
     }
 
     /** Devuelve al trabajo a quien quedo bloqueado por intentos fallidos de login. */
     @Transactional
     public void desbloquear(String uuid) {
-        repository.desbloquear(exigirId(uuid, SesionActual.estudioId()), SesionActual.usuarioId());
+        Integer estudioId = SesionActual.estudioId();
+        Long id = exigirId(uuid, estudioId);
+        repository.desbloquear(id, SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", id, null, "ACTUALIZAR",
+                "Usuario desbloqueado y contador de intentos fallidos reiniciado.");
     }
 
     /**
@@ -167,6 +204,8 @@ public class UsuarioService {
 
         String temporal = generarPasswordTemporal();
         repository.restablecerPassword(id, passwordEncoder.encode(temporal), SesionActual.usuarioId());
+        repository.auditar(estudioId, SesionActual.usuarioId(), "usuarios", id, null, "ACTUALIZAR",
+                "Contrasena restablecida: se genero una credencial temporal y se invalidaron las sesiones anteriores.");
 
         return new CredencialTemporal(uuid, repository.emailDe(id), temporal,
                 "Sus sesiones abiertas quedaron cerradas. Debera cambiarla al entrar.");
@@ -225,7 +264,13 @@ public class UsuarioService {
         // 2. Plazos: al responsable ACTUAL de su expediente
         int plazos = 0;
         int alertas = 0;
-        for (long[] plazo : repository.plazosAbiertos(origenId, estudioId)) {
+        List<long[]> plazosAbiertos = repository.plazosAbiertos(origenId, estudioId);
+        List<long[]> actuacionesAbiertas = repository.actuacionesAbiertas(origenId, estudioId);
+        java.util.Map<Long, String> nombresDestino = new java.util.HashMap<>();
+        if (expedientesA != null) nombresDestino.put(expedientesA, repository.nombreDe(expedientesA));
+        if (tareasA != null) nombresDestino.put(tareasA, repository.nombreDe(tareasA));
+        if (clientesA != null) nombresDestino.put(clientesA, repository.nombreDe(clientesA));
+        for (long[] plazo : plazosAbiertos) {
             long plazoId = plazo[0];
             long expedienteId = plazo[1];
             long responsableExpediente = plazo[2];
@@ -237,14 +282,14 @@ public class UsuarioService {
                         + origen + ": indica a quien pasan sus expedientes");
             }
             alertas += repository.moverPlazo(plazoId, destino);
-            repository.auditar(estudioId, autorId, "plazos", plazoId, expedienteId,
-                    "Plazo reasignado de " + origen + " a " + repository.nombreDe(destino) + ".");
+            repository.auditar(estudioId, autorId, "plazos", plazoId, expedienteId, "ACTUALIZAR",
+                    "Plazo reasignado de " + origen + " a " + nombresDestino.computeIfAbsent(destino, repository::nombreDe) + ".");
             plazos++;
         }
 
         // 3. Actuaciones abiertas: misma regla que los plazos
         int actuaciones = 0;
-        for (long[] actuacion : repository.actuacionesAbiertas(origenId, estudioId)) {
+        for (long[] actuacion : actuacionesAbiertas) {
             long actuacionId = actuacion[0];
             long expedienteId = actuacion[1];
             long responsableExpediente = actuacion[2];
@@ -254,21 +299,24 @@ public class UsuarioService {
                         + origen + ": indica a quien pasan sus expedientes");
             }
             alertas += repository.moverActuacion(actuacionId, destino, origenId);
-            repository.auditar(estudioId, autorId, "actuaciones", actuacionId, expedienteId,
-                    "Actuacion reasignada de " + origen + " a " + repository.nombreDe(destino) + ".");
+            repository.auditar(estudioId, autorId, "actuaciones", actuacionId, expedienteId, "ACTUALIZAR",
+                    "Actuacion reasignada de " + origen + " a " + nombresDestino.computeIfAbsent(destino, repository::nombreDe) + ".");
             actuaciones++;
         }
 
-        // 4. Tareas y clientes
+        // 4. Tareas y clientes. Los UPDATE se envian por lote; la auditoria sigue siendo por registro.
+        repository.moverTareas(tareas, tareasA);
+        String nombreTareas = tareasA == null ? null : nombresDestino.get(tareasA);
         for (long[] tarea : tareas) {
-            repository.moverTarea(tarea[0], tareasA);
-            repository.auditar(estudioId, autorId, "tareas", tarea[0], tarea[1],
-                    "Tarea reasignada de " + origen + " a " + repository.nombreDe(tareasA) + ".");
+            repository.auditar(estudioId, autorId, "tareas", tarea[0], tarea[1], "ACTUALIZAR",
+                    "Tarea reasignada de " + origen + " a " + nombreTareas + ".");
         }
+
+        repository.moverClientes(clientes, clientesA, autorId);
+        String nombreClientes = clientesA == null ? null : nombresDestino.get(clientesA);
         for (Long clienteId : clientes) {
-            repository.moverCliente(clienteId, clientesA, autorId);
-            repository.auditar(estudioId, autorId, "clientes", clienteId, null,
-                    "Abogado responsable cambiado de " + origen + " a " + repository.nombreDe(clientesA) + ".");
+            repository.auditar(estudioId, autorId, "clientes", clienteId, null, "ACTUALIZAR",
+                    "Abogado responsable cambiado de " + origen + " a " + nombreClientes + ".");
         }
 
         // 5. Apoyo en otros equipos
@@ -279,7 +327,7 @@ public class UsuarioService {
 
         ResultadoReasignacion resultado = new ResultadoReasignacion(
                 expedientes.size(), plazos, alertas, tareas.size(), actuaciones, clientes.size(), equipos);
-        repository.auditar(estudioId, autorId, "usuarios", origenId, null,
+        repository.auditar(estudioId, autorId, "usuarios", origenId, null, "ACTUALIZAR",
                 "Reasignacion del trabajo de " + origen + ": " + resultado.expedientes() + " expediente(s), "
                         + plazos + " plazo(s), " + tareas.size() + " tarea(s), " + actuaciones
                         + " actuacion(es), " + clientes.size()

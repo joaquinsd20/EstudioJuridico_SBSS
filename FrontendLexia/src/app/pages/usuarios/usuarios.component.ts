@@ -1,12 +1,13 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, startWith, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ErrorRespuesta } from '../../core/models/auth.models';
 import {
   CargaDetallada, CredencialTemporal, FiltroEstadoUsuario, GuardarUsuario, ReasignarRequest,
-  ResultadoReasignacion, RolOpcion, UsuarioDetalle, UsuarioLista
+  ResultadoReasignacion, ResumenUsuarios, RolOpcion, UsuarioDetalle, UsuarioLista
 } from '../../core/models/usuario.models';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
@@ -44,27 +45,36 @@ function formularioVacio(): GuardarUsuario {
   standalone: true,
   imports: [PanelComponent, FormsModule, DatePipe],
   templateUrl: './usuarios.component.html',
-  styleUrl: './usuarios.component.css'
+  styleUrl: './usuarios.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UsuariosComponent implements OnInit, OnDestroy {
+export class UsuariosComponent implements OnInit {
 
   private readonly service = inject(UsuarioService);
   private readonly auth = inject(AuthService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // ---- datos ---------------------------------------------------------------
   readonly usuarios = signal<UsuarioLista[]>([]);
-  /** Todos, sin filtrar: de aqui salen las tarjetas, no de la tabla filtrada. */
-  readonly todos = signal<UsuarioLista[]>([]);
+  readonly totales = signal<ResumenUsuarios>({ total: 0, activos: 0, inactivos: 0, bloqueados: 0 });
   readonly roles = signal<RolOpcion[]>([]);
   readonly cargando = signal(true);
   readonly sinPermiso = signal(false);
   readonly errorPagina = signal<string | null>(null);
+  readonly accionEnCurso = signal(false);
 
-  // ---- filtros -------------------------------------------------------------
+  // ---- filtros / paginacion ------------------------------------------------
   texto = '';
   rol = '';
   estado: FiltroEstadoUsuario = '';
-  private readonly busqueda = new Subject<void>();
+  readonly pagina = signal(0);
+  readonly tamano = signal(20);
+  readonly totalElementos = signal(0);
+  readonly totalPaginas = signal(0);
+  readonly finPagina = computed(() => Math.min((this.pagina() + 1) * this.tamano(), this.totalElementos()));
+  readonly tamanosPagina = [10, 20, 40, 100] as const;
+  private readonly busqueda = new Subject<string>();
+  private readonly recargaTabla = new Subject<void>();
 
   // ---- modales -------------------------------------------------------------
   readonly detalle = signal<UsuarioDetalle | null>(null);
@@ -90,57 +100,107 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   // ---- derivados -----------------------------------------------------------
   readonly rolesAsignables = computed(() => this.roles().filter(r => !r.esPortalCliente));
   private readonly nombresRol = computed(() => new Map(this.roles().map(r => [r.codigo, r.nombre])));
-  readonly totales = computed(() => {
-    const t = this.todos();
-    return {
-      total: t.length,
-      activos: t.filter(u => u.activo && u.estado === 'ACTIVO').length,
-      inactivos: t.filter(u => !u.activo || u.estado === 'INACTIVO').length,
-      bloqueados: t.filter(u => u.estado === 'BLOQUEADO').length
-    };
-  });
   /** Uuid de quien esta en sesion: no se le ofrece desactivarse a si mismo. */
   readonly miUuid = computed(() => this.auth.usuario()?.uuid ?? null);
 
   ngOnInit(): void {
-    this.busqueda.pipe(debounceTime(300)).subscribe(() => this.cargarTabla());
-    this.service.roles().subscribe({
-      next: roles => this.roles.set(roles),
-      error: (e: HttpErrorResponse) => this.manejarErrorCarga(e)
+    // Una sola tuberia para la tabla: switchMap evita que una respuesta vieja
+    // reemplace a una busqueda mas reciente.
+    this.recargaTabla.pipe(
+      startWith(void 0),
+      switchMap(() => {
+        this.cargando.set(true);
+        this.errorPagina.set(null);
+        return this.service.listarPagina(
+          { texto: this.texto, rol: this.rol, estado: this.estado },
+          this.pagina(),
+          this.tamano()
+        ).pipe(
+          catchError((e: HttpErrorResponse) => {
+            this.manejarErrorCarga(e);
+            return of(null);
+          }),
+          finalize(() => this.cargando.set(false))
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(pagina => {
+      if (!pagina) return;
+      if (pagina.totalPaginas > 0 && pagina.pagina >= pagina.totalPaginas) {
+        this.pagina.set(pagina.totalPaginas - 1);
+        this.recargaTabla.next();
+        return;
+      }
+      this.usuarios.set(pagina.contenido);
+      this.totalElementos.set(pagina.totalElementos);
+      this.totalPaginas.set(pagina.totalPaginas);
+      this.pagina.set(pagina.pagina);
     });
-    this.recargar();
-  }
 
-  ngOnDestroy(): void {
-    this.busqueda.complete();
+    this.busqueda.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(() => {
+      this.pagina.set(0);
+      this.recargaTabla.next();
+    });
+
+    this.service.roles()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: roles => this.roles.set(roles),
+        error: (e: HttpErrorResponse) => this.manejarErrorCarga(e)
+      });
+
+    this.cargarResumen();
   }
 
   // ---- carga ---------------------------------------------------------------
 
   recargar(): void {
-    this.cargarTabla();
-    this.service.listar().subscribe({
-      next: lista => this.todos.set(lista),
-      error: (e: HttpErrorResponse) => this.manejarErrorCarga(e)
-    });
+    this.recargaTabla.next();
+    this.cargarResumen();
   }
 
   buscar(): void {
-    this.busqueda.next();
+    this.busqueda.next(JSON.stringify({
+      texto: this.texto.trim(),
+      rol: this.rol,
+      estado: this.estado
+    }));
   }
 
-  private cargarTabla(): void {
-    this.cargando.set(true);
-    this.service.listar({ texto: this.texto, rol: this.rol, estado: this.estado }).subscribe({
-      next: lista => {
-        this.usuarios.set(lista);
-        this.cargando.set(false);
-      },
-      error: (e: HttpErrorResponse) => {
-        this.cargando.set(false);
-        this.manejarErrorCarga(e);
-      }
-    });
+  cambiarTamano(tamano: number | string): void {
+    const valor = Number(tamano);
+    if (![10, 20, 40, 100].includes(valor)) return;
+    this.tamano.set(valor);
+    this.pagina.set(0);
+    this.recargaTabla.next();
+  }
+
+  irPagina(destino: number): void {
+    const total = this.totalPaginas();
+    if (destino < 0 || (total > 0 && destino >= total) || destino === this.pagina()) return;
+    this.pagina.set(destino);
+    this.recargaTabla.next();
+  }
+
+  limpiarFiltros(): void {
+    this.texto = '';
+    this.rol = '';
+    this.estado = '';
+    this.pagina.set(0);
+    this.buscar();
+  }
+
+  private cargarResumen(): void {
+    this.service.resumen()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: resumen => this.totales.set(resumen),
+        error: (e: HttpErrorResponse) => this.manejarErrorCarga(e)
+      });
   }
 
   private manejarErrorCarga(e: HttpErrorResponse): void {
@@ -299,14 +359,18 @@ export class UsuariosComponent implements OnInit, OnDestroy {
       boton: 'Restablecer',
       peligrosa: false,
       ejecutar: () => {
-        this.service.restablecerPassword(u.uuidPublico).subscribe({
-          next: credencial => {
-            this.confirmacion.set(null);
-            this.mostrarCredencial(credencial);
-            this.recargar();
-          },
-          error: (e: HttpErrorResponse) => this.alFallarAccion(e)
-        });
+        if (this.accionEnCurso()) return;
+        this.accionEnCurso.set(true);
+        this.service.restablecerPassword(u.uuidPublico)
+          .pipe(finalize(() => this.accionEnCurso.set(false)))
+          .subscribe({
+            next: credencial => {
+              this.confirmacion.set(null);
+              this.mostrarCredencial(credencial);
+              this.recargar();
+            },
+            error: (e: HttpErrorResponse) => this.alFallarAccion(e)
+          });
       }
     });
   }
@@ -320,8 +384,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   }
 
   private accion(peticion: ReturnType<UsuarioService['activar']>): void {
+    if (this.accionEnCurso()) return;
     this.errorPagina.set(null);
-    peticion.subscribe({
+    this.accionEnCurso.set(true);
+    peticion.pipe(finalize(() => this.accionEnCurso.set(false))).subscribe({
       next: () => {
         this.confirmacion.set(null);
         this.detalle.set(null);

@@ -1,5 +1,6 @@
 package com.sbss.lexia.usuarios.repository;
 
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.ActuacionCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CandidatoReasignacion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
@@ -10,6 +11,7 @@ import com.sbss.lexia.usuarios.dto.UsuarioDtos.ExpedienteCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.PlazoCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.TareaCarga;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResumenUsuarios;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
 import java.sql.ResultSet;
@@ -93,6 +95,101 @@ public class UsuarioGestionRepositoryJdbc {
                 rs.getBoolean("debe_cambiar_password"),
                 fecha(rs, "ultimo_acceso"),
                 roles(rs.getString("roles"))));
+    }
+
+    /**
+     * Version paginada del listado para la UI. Los roles se agregan solo para
+     * los usuarios de la pagina actual; el COUNT no arrastra JOINs innecesarios.
+     */
+    public PaginaDto<UsuarioLista> listarPagina(
+            Integer estudioId, String texto, String rol, String estado, int page, int size) {
+
+        StringBuilder filtros = new StringBuilder("""
+                 WHERE u.estudio_id = :estudioId
+                   AND u.tipo_usuario = 'INTERNO'
+                """);
+        MapSqlParameterSource p = new MapSqlParameterSource("estudioId", estudioId);
+        agregarFiltros(filtros, p, texto, rol, estado);
+
+        Long total = jdbc.queryForObject(
+                "SELECT COUNT(*) FROM usuarios u " + filtros,
+                p, Long.class);
+        long totalElementos = total == null ? 0L : total;
+        int totalPaginas = totalElementos == 0 ? 0 : (int) Math.ceil((double) totalElementos / size);
+
+        long offset = (long) page * size;
+        if (offset >= totalElementos && totalElementos > 0) {
+            return new PaginaDto<>(List.of(), page, size, totalElementos, totalPaginas, true);
+        }
+
+        String sql = """
+                SELECT u.uuid_publico, u.codigo_usuario, u.nombre_completo, u.email, u.cargo,
+                       u.estado, u.activo, u.debe_cambiar_password, u.ultimo_acceso,
+                       (SELECT GROUP_CONCAT(r.codigo ORDER BY r.nivel_acceso DESC)
+                          FROM usuarios_roles ur
+                          JOIN roles r ON r.id = ur.rol_id
+                         WHERE ur.usuario_id = u.id) roles
+                  FROM usuarios u
+                """ + filtros + """
+                 ORDER BY u.activo DESC, u.nombre_completo, u.id
+                 LIMIT :limite OFFSET :offset
+                """;
+
+        p.addValue("limite", size);
+        p.addValue("offset", offset);
+
+        List<UsuarioLista> contenido = jdbc.query(sql, p, (rs, n) -> new UsuarioLista(
+                rs.getString("uuid_publico"),
+                rs.getString("codigo_usuario"),
+                rs.getString("nombre_completo"),
+                rs.getString("email"),
+                rs.getString("cargo"),
+                rs.getString("estado"),
+                rs.getBoolean("activo"),
+                rs.getBoolean("debe_cambiar_password"),
+                fecha(rs, "ultimo_acceso"),
+                roles(rs.getString("roles"))));
+
+        boolean ultima = totalPaginas == 0 || page >= totalPaginas - 1;
+        return new PaginaDto<>(contenido, page, size, totalElementos, totalPaginas, ultima);
+    }
+
+    /** Totales globales para las cuatro tarjetas del panel. */
+    public ResumenUsuarios resumen(Integer estudioId) {
+        return jdbc.queryForObject("""
+                SELECT COUNT(*) total,
+                       COALESCE(SUM(u.activo = 1 AND u.estado = 'ACTIVO'), 0) activos,
+                       COALESCE(SUM(u.activo = 0 OR u.estado = 'INACTIVO'), 0) inactivos,
+                       COALESCE(SUM(u.estado = 'BLOQUEADO'), 0) bloqueados
+                  FROM usuarios u
+                 WHERE u.estudio_id = :estudioId
+                   AND u.tipo_usuario = 'INTERNO'
+                """, Map.of("estudioId", estudioId), (rs, n) -> new ResumenUsuarios(
+                rs.getLong("total"),
+                rs.getLong("activos"),
+                rs.getLong("inactivos"),
+                rs.getLong("bloqueados")));
+    }
+
+    private static void agregarFiltros(
+            StringBuilder sql, MapSqlParameterSource p, String texto, String rol, String estado) {
+        if (texto != null && !texto.isBlank()) {
+            sql.append(" AND (u.nombre_completo LIKE :texto OR u.email LIKE :texto"
+                    + " OR u.codigo_usuario LIKE :texto) ");
+            p.addValue("texto", "%" + texto.trim() + "%");
+        }
+        if (rol != null && !rol.isBlank()) {
+            sql.append(" AND EXISTS (SELECT 1 FROM usuarios_roles ur2 JOIN roles r2 ON r2.id = ur2.rol_id"
+                    + " WHERE ur2.usuario_id = u.id AND r2.codigo = :rol) ");
+            p.addValue("rol", rol.trim().toUpperCase());
+        }
+        if ("ACTIVOS".equalsIgnoreCase(estado)) {
+            sql.append(" AND u.activo = 1 AND u.estado = 'ACTIVO' ");
+        } else if ("INACTIVOS".equalsIgnoreCase(estado)) {
+            sql.append(" AND (u.activo = 0 OR u.estado = 'INACTIVO') ");
+        } else if ("BLOQUEADOS".equalsIgnoreCase(estado)) {
+            sql.append(" AND u.estado = 'BLOQUEADO' ");
+        }
     }
 
     public UsuarioDetalle detalle(String uuid, Integer estudioId) {
@@ -337,6 +434,17 @@ public class UsuarioGestionRepositoryJdbc {
                 Map.of("destino", destinoId, "id", tareaId));
     }
 
+    /** Misma reasignacion, enviada como batch JDBC para listas grandes. */
+    public void moverTareas(List<long[]> tareas, Long destinoId) {
+        if (tareas.isEmpty()) return;
+        MapSqlParameterSource[] lote = tareas.stream()
+                .map(t -> new MapSqlParameterSource()
+                        .addValue("destino", destinoId)
+                        .addValue("id", t[0]))
+                .toArray(MapSqlParameterSource[]::new);
+        jdbc.batchUpdate("UPDATE tareas SET usuario_responsable_id = :destino WHERE id = :id", lote);
+    }
+
     public List<Long> clientesComoResponsable(Long id, Integer estudioId) {
         return jdbc.query("""
                 SELECT id FROM clientes
@@ -351,6 +459,22 @@ public class UsuarioGestionRepositoryJdbc {
                 """, Map.of("destino", destinoId, "autor", autorId, "id", clienteId));
     }
 
+    /** Misma reasignacion de clientes, enviada como batch JDBC. */
+    public void moverClientes(List<Long> clientes, Long destinoId, Long autorId) {
+        if (clientes.isEmpty()) return;
+        MapSqlParameterSource[] lote = clientes.stream()
+                .map(id -> new MapSqlParameterSource()
+                        .addValue("destino", destinoId)
+                        .addValue("autor", autorId)
+                        .addValue("id", id))
+                .toArray(MapSqlParameterSource[]::new);
+        jdbc.batchUpdate("""
+                UPDATE clientes
+                   SET abogado_responsable_id = :destino, usuario_modificacion_id = :autor
+                 WHERE id = :id
+                """, lote);
+    }
+
     /** Expedientes donde esta en el equipo con un rol distinto de RESPONSABLE. */
     public List<Long> expedientesComoApoyo(Long id, Integer estudioId) {
         return jdbc.query("""
@@ -363,17 +487,18 @@ public class UsuarioGestionRepositoryJdbc {
 
     /** Traza de cada movimiento en `auditoria`. `expedienteId` puede ser null (clientes). */
     public void auditar(Integer estudioId, Long autorId, String entidad, Long registroId,
-                        Long expedienteId, String descripcion) {
+                        Long expedienteId, String accion, String descripcion) {
         jdbc.update("""
                 INSERT INTO auditoria
                     (estudio_id, usuario_id, entidad, registro_id, expediente_id, accion, descripcion, exito)
-                VALUES (:estudioId, :autor, :entidad, :registro, :expediente, 'ACTUALIZAR', :descripcion, 1)
+                VALUES (:estudioId, :autor, :entidad, :registro, :expediente, :accion, :descripcion, 1)
                 """, new MapSqlParameterSource()
                 .addValue("estudioId", estudioId)
                 .addValue("autor", autorId)
                 .addValue("entidad", entidad)
                 .addValue("registro", registroId)
                 .addValue("expediente", expedienteId)
+                .addValue("accion", accion)
                 .addValue("descripcion", descripcion.length() > 500 ? descripcion.substring(0, 500) : descripcion));
     }
 
@@ -428,7 +553,18 @@ public class UsuarioGestionRepositoryJdbc {
         return n != null && n > 0;
     }
 
-    /** Siguiente codigo U-0001, U-0002... dentro del estudio (uq_usuarios_codigo). */
+    /**
+     * Siguiente codigo U-0001, U-0002... serializado por estudio.
+     * UsuarioService.crear es transaccional; el FOR UPDATE retiene el bloqueo
+     * hasta el commit y evita que dos altas simultaneas calculen el mismo MAX+1.
+     */
+    public String siguienteCodigoBloqueado(Integer estudioId) {
+        jdbc.queryForObject("SELECT id FROM estudios WHERE id = :estudioId FOR UPDATE",
+                Map.of("estudioId", estudioId), Integer.class);
+        return siguienteCodigo(estudioId);
+    }
+
+    /** Calculo del siguiente codigo. Usar siguienteCodigoBloqueado al crear. */
     public String siguienteCodigo(Integer estudioId) {
         Integer max = jdbc.queryForObject("""
                 SELECT COALESCE(MAX(CAST(SUBSTRING(codigo_usuario, 3) AS UNSIGNED)), 0)
@@ -507,16 +643,18 @@ public class UsuarioGestionRepositoryJdbc {
                 .addValue("autorId", autorId));
     }
 
-    /** Reemplaza los roles del usuario por los indicados, emparejando por codigo. */
+    /** Reemplaza los roles en dos sentencias, sin un INSERT por cada rol. */
     public void reemplazarRoles(Long usuarioId, List<String> codigos, Long autorId) {
         jdbc.update("DELETE FROM usuarios_roles WHERE usuario_id = :id", Map.of("id", usuarioId));
-        for (String codigo : codigos) {
-            jdbc.update("""
-                    INSERT INTO usuarios_roles (usuario_id, rol_id, usuario_asignacion_id)
-                    SELECT :id, r.id, :autorId FROM roles r WHERE r.codigo = :codigo
-                    """, new MapSqlParameterSource()
-                    .addValue("id", usuarioId).addValue("codigo", codigo).addValue("autorId", autorId));
-        }
+        jdbc.update("""
+                INSERT INTO usuarios_roles (usuario_id, rol_id, usuario_asignacion_id)
+                SELECT :id, r.id, :autorId
+                  FROM roles r
+                 WHERE r.codigo IN (:codigos) AND r.activo = 1
+                """, new MapSqlParameterSource()
+                .addValue("id", usuarioId)
+                .addValue("codigos", codigos)
+                .addValue("autorId", autorId));
     }
 
     public void cambiarActivo(Long id, boolean activo, Long autorId) {

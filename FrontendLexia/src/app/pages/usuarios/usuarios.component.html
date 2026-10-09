@@ -69,7 +69,7 @@
         <div class="panel-header">
           <div>
             <h2>Usuarios registrados</h2>
-            <p>{{ usuarios().length }} usuario(s) encontrado(s)</p>
+            <p>{{ totalElementos() }} usuario(s) encontrado(s)</p>
           </div>
         </div>
 
@@ -97,6 +97,10 @@
             <option value="INACTIVOS">Inactivos</option>
             <option value="BLOQUEADOS">Bloqueados</option>
           </select>
+
+          @if (texto || rol || estado) {
+            <button type="button" class="btn-limpiar" (click)="limpiarFiltros()">Limpiar filtros</button>
+          }
         </div>
 
         <div class="table-wrap">
@@ -161,16 +165,16 @@
                       <button class="icon-action edit" type="button" (click)="editar(u.uuidPublico)">Editar</button>
 
                       @if (u.estado === 'BLOQUEADO') {
-                        <button class="icon-action restore" type="button" (click)="desbloquear(u)">Desbloquear</button>
+                        <button class="icon-action restore" type="button" [disabled]="accionEnCurso()" (click)="desbloquear(u)">Desbloquear</button>
                       }
 
                       @if (u.activo) {
-                        <button class="icon-action view" type="button" (click)="pedirRestablecer(u)">Restablecer</button>
+                        <button class="icon-action view" type="button" [disabled]="accionEnCurso()" (click)="pedirRestablecer(u)">Restablecer</button>
                         @if (u.uuidPublico !== miUuid()) {
-                          <button class="icon-action delete" type="button" (click)="pedirDesactivar(u)">Desactivar</button>
+                          <button class="icon-action delete" type="button" [disabled]="accionEnCurso()" (click)="pedirDesactivar(u)">Desactivar</button>
                         }
                       } @else {
-                        <button class="icon-action restore" type="button" (click)="activar(u)">Activar</button>
+                        <button class="icon-action restore" type="button" [disabled]="accionEnCurso()" (click)="activar(u)">Activar</button>
                       }
                     </div>
                   </td>
@@ -184,6 +188,43 @@
               }
             </tbody>
           </table>
+        </div>
+
+        <div class="paginacion" aria-label="Paginación de usuarios">
+          <div class="paginacion-info">
+            @if (totalElementos() > 0) {
+              <span>
+                Mostrando
+                {{ pagina() * tamano() + 1 }}–{{ finPagina() }}
+                de {{ totalElementos() }}
+              </span>
+            } @else {
+              <span>0 usuarios</span>
+            }
+
+            <label>
+              Mostrar
+              <select [ngModel]="tamano()" (ngModelChange)="cambiarTamano($event)">
+                @for (opcion of tamanosPagina; track opcion) {
+                  <option [ngValue]="opcion">{{ opcion }}</option>
+                }
+              </select>
+            </label>
+          </div>
+
+          <div class="paginacion-controles">
+            <button type="button" class="btn-pagina"
+                    [disabled]="pagina() === 0 || cargando()"
+                    (click)="irPagina(pagina() - 1)">
+              Anterior
+            </button>
+            <span>Página {{ totalPaginas() === 0 ? 0 : pagina() + 1 }} de {{ totalPaginas() }}</span>
+            <button type="button" class="btn-pagina"
+                    [disabled]="totalPaginas() === 0 || pagina() >= totalPaginas() - 1 || cargando()"
+                    (click)="irPagina(pagina() + 1)">
+              Siguiente
+            </button>
+          </div>
         </div>
       </section>
     }
@@ -253,7 +294,7 @@
 <!-- ================= ALTA / EDICIÓN ================= -->
 @if (formularioAbierto()) {
   <div class="modal-fondo">
-    <form class="modal" role="dialog" aria-modal="true" (ngSubmit)="guardar()">
+    <form class="modal" role="dialog" aria-modal="true" (ngSubmit)="guardar()" autocomplete="off">
 
       <header class="modal-cabecera">
         <div>
@@ -265,14 +306,14 @@
 
       <div class="campos">
         <label>Nombres *
-          <input name="nombres" [(ngModel)]="formulario.nombres" maxlength="100" required>
+          <input name="lexiaUsuarioNombres" [(ngModel)]="formulario.nombres" maxlength="100" autocomplete="off" required>
         </label>
         <label>Apellidos *
-          <input name="apellidos" [(ngModel)]="formulario.apellidos" maxlength="100" required>
+          <input name="lexiaUsuarioApellidos" [(ngModel)]="formulario.apellidos" maxlength="100" autocomplete="off" required>
         </label>
         <label class="ancho">Correo *
-          <input name="email" type="email" [(ngModel)]="formulario.email" maxlength="150"
-                 [readonly]="!!editando()" [class.solo-lectura]="!!editando()" required>
+          <input name="lexiaUsuarioCorreo" type="email" [(ngModel)]="formulario.email" maxlength="150"
+                 autocomplete="off" [readonly]="!!editando()" [class.solo-lectura]="!!editando()" required>
           @if (editando()) {
             <small>El correo es el usuario del login y no se puede cambiar.</small>
           } @else {
@@ -280,13 +321,13 @@
           }
         </label>
         <label>Cargo
-          <input name="cargo" [(ngModel)]="formulario.cargo" maxlength="100">
+          <input name="lexiaUsuarioCargo" [(ngModel)]="formulario.cargo" maxlength="100" autocomplete="off">
         </label>
         <label>Teléfono
-          <input name="telefono" [(ngModel)]="formulario.telefono" maxlength="20">
+          <input name="lexiaUsuarioTelefono" [(ngModel)]="formulario.telefono" maxlength="20" autocomplete="off">
         </label>
         <label>Tipo de documento
-          <select name="tipoDocumento" [(ngModel)]="formulario.tipoDocumento">
+          <select name="lexiaUsuarioTipoDocumento" [(ngModel)]="formulario.tipoDocumento" autocomplete="off">
             <option value="">—</option>
             <option value="DNI">DNI</option>
             <option value="CE">Carné de extranjería</option>
@@ -294,10 +335,10 @@
           </select>
         </label>
         <label>Número de documento
-          <input name="numeroDocumento" [(ngModel)]="formulario.numeroDocumento" maxlength="20">
+          <input name="lexiaUsuarioNumeroDocumento" [(ngModel)]="formulario.numeroDocumento" maxlength="20" autocomplete="off">
         </label>
         <label class="ancho">N.º de colegiatura
-          <input name="numeroColegiatura" [(ngModel)]="formulario.numeroColegiatura" maxlength="30">
+          <input name="lexiaUsuarioColegiatura" [(ngModel)]="formulario.numeroColegiatura" maxlength="30" autocomplete="off">
         </label>
       </div>
 
@@ -516,7 +557,7 @@
       <p class="texto-confirmacion">{{ conf.mensaje }}</p>
       <footer class="modal-pie">
         <button type="button" class="btn-secundario" (click)="cancelarConfirmacion()">Cancelar</button>
-        <button type="button" class="btn-primary" [class.btn-peligro]="conf.peligrosa" (click)="confirmar()">
+        <button type="button" class="btn-primary" [class.btn-peligro]="conf.peligrosa" [disabled]="accionEnCurso()" (click)="confirmar()">
           {{ conf.boton }}
         </button>
       </footer>

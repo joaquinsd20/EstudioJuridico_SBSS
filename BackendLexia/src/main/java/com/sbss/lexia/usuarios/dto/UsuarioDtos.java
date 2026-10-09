@@ -30,6 +30,14 @@ public final class UsuarioDtos {
             List<String> roles) {
     }
 
+    /** Totales globales del personal interno del estudio, sin depender de filtros/paginacion. */
+    public record ResumenUsuarios(
+            long total,
+            long activos,
+            long inactivos,
+            long bloqueados) {
+    }
+
     /**
      * Ficha completa. `cargaTrabajo` dice de que es responsable esta persona:
      * es lo que hay que reasignar antes de darla de baja.
