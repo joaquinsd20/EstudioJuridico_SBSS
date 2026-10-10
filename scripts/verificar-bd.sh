@@ -34,7 +34,10 @@ OK=0; FALLOS=0
 titulo() { printf '\n\033[1m== %s ==\033[0m\n' "$1"; }
 check()  { if [ "$2" = "$3" ]; then printf '  [OK]    %-46s %s\n' "$1" "$2"; OK=$((OK+1));
            else printf '  [FALLA] %-46s obtuvo:%s esperado:%s\n' "$1" "$2" "$3"; FALLOS=$((FALLOS+1)); fi; }
-q()      { mysql -u "${USUARIO}" -N -B "${BASE}" -e "$1" 2>/dev/null; }
+# Sin `2>/dev/null` a proposito: una consulta que fallaba (una conexion caida
+# un instante) salia como "esperado:" vacio y sin ninguna pista. En una corrida
+# normal no escribe nada en stderr; si escribe, es la causa del [FALLA].
+q()      { mysql -u "${USUARIO}" -N -B "${BASE}" -e "$1"; }
 rechaza(){ if mysql -u "${USUARIO}" "${BASE}" -e "$2" >/dev/null 2>&1;
            then printf '  [FALLA] %-46s la base ACEPTO datos invalidos\n' "$1"; FALLOS=$((FALLOS+1));
            else printf '  [OK]    %-46s rechazado\n' "$1"; OK=$((OK+1)); fi; }

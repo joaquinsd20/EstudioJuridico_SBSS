@@ -144,6 +144,30 @@ class GuardiasDelRepositorioTest {
                 + "(un indice tambien es un cambio).");
     }
 
+    @Test
+    @DisplayName("toda migracion V tiene su huella en el manifiesto (se congela en el mismo PR que la crea)")
+    void todaMigracionEstaCongelada() throws Exception {
+        Set<String> congeladas = new java.util.TreeSet<>();
+        for (String linea : Files.readAllLines(MANIFIESTO, StandardCharsets.UTF_8)) {
+            if (!linea.isBlank()) {
+                congeladas.add(linea.substring(linea.lastIndexOf(' ') + 1));
+            }
+        }
+
+        Set<String> sinCongelar = new java.util.TreeSet<>();
+        for (Path p : archivos(MIGRACIONES)) {
+            String nombre = p.getFileName().toString();
+            if (nombre.startsWith("V") && nombre.endsWith(".sql") && !congeladas.contains(nombre)) {
+                sinCongelar.add(nombre);
+            }
+        }
+
+        assertTrue(sinCongelar.isEmpty(), "Migraciones sin congelar: " + sinCongelar + ". Desde la raiz del "
+                + "repo: bash scripts/congelar-migraciones.sh, y sube migraciones.sha256 en el MISMO PR. Sin su "
+                + "huella nadie detecta que alguien la edite despues de aplicarse (V25 a V28 entraron asi). Si "
+                + "la corriges antes de mergear, borra su linea del manifiesto y vuelve a congelarla.");
+    }
+
     // =======================================================================
     // CONFIGURACION
     // =======================================================================

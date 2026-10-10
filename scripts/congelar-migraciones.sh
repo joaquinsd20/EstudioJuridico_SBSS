@@ -10,10 +10,12 @@
 # GuardiasDelRepositorioTest compara cada migracion contra la huella de este
 # manifiesto y falla si alguna cambio. No necesita base de datos.
 #
-# Que hacer despues de mergear una migracion nueva (por ejemplo V24):
+# Se corre en el MISMO PR que crea la migracion, desde la raiz del repo:
 #
-#   cd C:\Users\delfi\SBSS-SIGJ            (la raiz del repo)
 #   bash scripts/congelar-migraciones.sh
+#
+# y se sube el manifiesto con ella. Si falta una huella, la prueba
+# todaMigracionEstaCongelada falla (y el CI del PR con ella).
 #
 # Solo AGREGA las migraciones que aun no estan en el manifiesto. Nunca reescribe
 # una huella existente: cambiar una huella a mano es justamente lo que el
