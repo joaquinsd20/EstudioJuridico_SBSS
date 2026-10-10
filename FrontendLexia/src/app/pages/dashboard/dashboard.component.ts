@@ -111,49 +111,33 @@ export class DashboardComponent implements OnInit, OnDestroy {
   readonly cargaEquipo        = signal<CargaEquipo[]>([]);
 
   // ─── 5 Indicadores KPI ────────────────────────────────────────────────────
-  readonly kpiPlazosVencidos = computed(() => {
-    const v = this.indicadores()?.plazos?.vencidos;
-    return v !== undefined && v !== null ? v : 2;
-  });
+  // Ninguno inventa un numero. Antes, con un 0 real o con el modulo caido,
+  // mostraban 2, 5, 3, 1 y 4: los valores de la semilla de desarrollo. Un 0 se
+  // muestra como 0, y `null` (sin permiso o sin respuesta) como "—".
+  readonly kpiPlazosVencidos = computed(() => this.indicadores()?.plazos?.vencidos ?? null);
 
-  readonly kpiPlazosPorVencer = computed(() => {
-    const ind = this.indicadores()?.plazos;
-    if (ind?.venceHoy !== undefined) {
-      return ind.venceHoy + (ind.proximosSieteDias ? Math.min(ind.proximosSieteDias, 5) : 0) || 5;
-    }
-    return 5;
-  });
+  /** `proximosSieteDias` ya incluye los que vencen hoy: sumarle `venceHoy` los contaba dos veces. */
+  readonly kpiPlazosPorVencer = computed(() => this.indicadores()?.plazos?.proximosSieteDias ?? null);
 
-  readonly kpiNuevasResoluciones = computed(() => {
-    const v = this.indicadores()?.monitor?.nuevasResolucionesHoy;
-    return v !== undefined && v > 0 ? v : (this.nuevasResoluciones().length || 3);
-  });
+  readonly kpiNuevasResoluciones = computed(() => this.indicadores()?.monitor?.nuevasResolucionesHoy ?? null);
 
-  readonly kpiAudienciasProximas = computed(() => {
-    const v = this.indicadores()?.agenda?.audienciasMes;
-    return v !== undefined && v > 0 ? v : 1;
-  });
+  readonly kpiAudienciasProximas = computed(() => this.indicadores()?.agenda?.audienciasMes ?? null);
 
-  readonly kpiTareasPendientes = computed(() => {
-    const v = this.indicadores()?.tareas?.pendientes;
-    return v !== undefined && v > 0 ? v : 4;
-  });
+  readonly kpiTareasPendientes = computed(() => this.indicadores()?.tareas?.pendientes ?? null);
 
   // ─── Lista de Atención Inmediata ──────────────────────────────────────────
-  readonly listaAtencionInmediata = computed(() => {
-    const reales = this.expedientesClave();
-    if (reales.length > 0) {
-      return reales.slice(0, 3).map((e, idx) => ({
-        codigo: e.numeroExpediente || e.codigoInterno,
-        materia: e.materia || e.clienteNombre || 'Alimentos',
-        alerta: e.alertaTexto || (idx === 0 ? 'Plazo vence hoy' : idx === 1 ? 'Vencido desde ayer' : 'Audiencia mañana 09:00 AM'),
-        alertaColor: idx === 2 ? 'azul' : 'rojo',
-        badgeTexto: e.badgeDias || (idx === 1 ? 'Vencido' : '1 día'),
-        badgeTipo: e.badgeTipo || (idx === 0 ? 'critico' : idx === 1 ? 'vencido' : 'audiencia')
-      }));
-    }
-    return [];
-  });
+  // El color y la etiqueta salen del motivo de cada expediente, no de su
+  // posicion en la lista (antes el tercero era siempre "Audiencia").
+  readonly listaAtencionInmediata = computed(() =>
+    this.expedientesClave().slice(0, 3).map(e => ({
+      codigo: e.numeroExpediente || e.codigoInterno,
+      materia: e.materia || e.clienteNombre,
+      alerta: e.alertaTexto || e.motivo,
+      alertaColor: e.badgeTipo === 'critico' ? 'rojo' : 'azul',
+      badgeTexto: e.badgeDias ?? '',
+      badgeTipo: e.badgeTipo ?? 'parado'
+    }))
+  );
 
   // ─── Lista de Nuevas Resoluciones ─────────────────────────────────────────
   readonly listaNuevasResoluciones = computed(() => {
@@ -207,7 +191,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     cargaPorUsuario: [],
     tareasPorUsuario: [],
     ingresosPorMes: [],
-    cobranza: { facturado: 0, cobrado: 0, pendiente: 0, vencido: 0, cuentasPendientes: 0, cuentasVencidas: 0 }
+    cobranza: { facturado: 0, cobrado: 0, pendiente: 0, vencido: 0, cuentasPendientes: 0, cuentasVencidas: 0 },
+    puedeVerFacturacion: false
   });
 
   // 1. Resumen de expedientes (Donut chart)

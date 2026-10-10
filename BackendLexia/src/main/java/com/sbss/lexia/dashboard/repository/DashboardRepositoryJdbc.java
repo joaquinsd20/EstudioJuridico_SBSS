@@ -3,6 +3,7 @@ package com.sbss.lexia.dashboard.repository;
 import com.sbss.lexia.dashboard.dto.DashboardDtos.Barra;
 import com.sbss.lexia.dashboard.dto.DashboardDtos.EstadoCobranza;
 import com.sbss.lexia.dashboard.dto.DashboardDtos.Etiqueta;
+import com.sbss.lexia.dashboard.dto.DashboardDtos.ExpedienteAtencion;
 import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.security.VisibilidadExpedientes;
 import java.util.List;
@@ -77,9 +78,13 @@ public class DashboardRepositoryJdbc {
      * (critico=2, alto=1) y NO el numero de expedientes. El conteo crudo
      * vuelve en `detalle`: sin el, "3" al lado de una barra no se sabe si son
      * tres casos criticos o tres de tramite.
+     *
+     * Cuenta lo que el usuario puede VER, igual que expedientesPorAbogado: la
+     * regla va en el ON del LEFT JOIN, asi que quien no tiene ningun expediente
+     * visible desaparece por el HAVING en vez de salir con los ajenos.
      */
     public List<Barra> cargaPorUsuario() {
-        MapSqlParameterSource p = new MapSqlParameterSource("estudioId", SesionActual.estudioId());
+        MapSqlParameterSource p = vis().addValue("estudioId", SesionActual.estudioId());
         return jdbc.query("""
                 SELECT u.nombre_completo,
                        COUNT(e.id) total,
@@ -87,6 +92,7 @@ public class DashboardRepositoryJdbc {
                                           WHEN e.nivel_riesgo = 'ALTO' THEN 1 ELSE 0 END), 0) puntos
                   FROM usuarios u
                   LEFT JOIN expedientes e ON e.abogado_responsable_id = u.id
+                """ + VisibilidadExpedientes.sql("e") + """
                  WHERE u.estudio_id = :estudioId AND u.activo = 1
                  GROUP BY u.nombre_completo
                 HAVING total > 0
@@ -107,9 +113,11 @@ public class DashboardRepositoryJdbc {
      * APROBADA, EN_PROCESO...) y una tarea APROBADA sigue siendo trabajo sin
      * cerrar. Solo se restan las que de verdad terminaron. Quien tenga
      * vencidas pinta en rojo el mismo: es el dato que hace mirar el grafico.
+     *
+     * Misma regla de visibilidad que el modulo de tareas, que acota por el
+     * expediente de la tarea.
      */
     public List<Barra> tareasPorUsuario() {
-        MapSqlParameterSource p = new MapSqlParameterSource("estudioId", SesionActual.estudioId());
         return jdbc.query("""
                 SELECT u.nombre_completo,
                        COUNT(t.id) total,
@@ -119,11 +127,11 @@ public class DashboardRepositoryJdbc {
                   JOIN expedientes e ON e.id = t.expediente_id
                  WHERE t.activo = 1
                    AND t.estado NOT IN ('COMPLETADA','CANCELADA')
-                   AND e.estudio_id = :estudioId
+                """ + VisibilidadExpedientes.sql("e") + """
                  GROUP BY u.nombre_completo
                  ORDER BY vencidas DESC, total DESC, u.nombre_completo
                  LIMIT 10
-                """, p, (rs, i) -> new Barra(
+                """, vis(), (rs, i) -> new Barra(
                 rs.getString("nombre_completo"),
                 rs.getLong("total"),
                 rs.getLong("vencidas") > 0 ? "#EF4444" : color(i),
@@ -179,6 +187,45 @@ public class DashboardRepositoryJdbc {
                         rs.getBigDecimal("vencido"),
                         rs.getLong("cuentas_pendientes"),
                         rs.getLong("cuentas_vencidas")));
+    }
+
+    /**
+     * Los seis expedientes abiertos que mas piden atencion: primero los de
+     * riesgo critico y despues los mas tiempo sin movimiento (mas de 30 dias).
+     * "Abierto" es `es_estado_final = 0`, el mismo dato que usa Configuracion,
+     * no una lista de codigos escrita en el front.
+     */
+    public List<ExpedienteAtencion> expedientesAtencion() {
+        return jdbc.query("""
+                SELECT e.uuid_publico, e.codigo_interno, e.numero_expediente,
+                       c.nombre_busqueda cliente, COALESCE(m.nombre, esp.nombre) materia,
+                       ee.nombre estado, e.nivel_riesgo, u.nombre_completo responsable,
+                       e.es_confidencial, e.fecha_ultima_actuacion
+                  FROM expedientes e
+                  JOIN clientes c ON c.id = e.cliente_id
+                  JOIN estados_expediente ee ON ee.id = e.estado_id
+                  JOIN especialidades esp ON esp.id = e.especialidad_id
+                  LEFT JOIN materias m ON m.id = e.materia_id
+                  LEFT JOIN usuarios u ON u.id = e.abogado_responsable_id
+                 WHERE e.activo = 1
+                   AND ee.es_estado_final = 0
+                   AND (e.nivel_riesgo = 'CRITICO'
+                        OR e.fecha_ultima_actuacion < NOW() - INTERVAL 30 DAY)
+                """ + VisibilidadExpedientes.sql("e") + """
+                 ORDER BY e.nivel_riesgo = 'CRITICO' DESC, e.fecha_ultima_actuacion, e.codigo_interno
+                 LIMIT 6
+                """, vis(), (rs, i) -> new ExpedienteAtencion(
+                rs.getString("uuid_publico"),
+                rs.getString("codigo_interno"),
+                rs.getString("numero_expediente"),
+                rs.getString("cliente"),
+                rs.getString("materia"),
+                rs.getString("estado"),
+                rs.getString("nivel_riesgo"),
+                rs.getString("responsable"),
+                rs.getBoolean("es_confidencial"),
+                rs.getTimestamp("fecha_ultima_actuacion") == null
+                        ? null : rs.getTimestamp("fecha_ultima_actuacion").toLocalDateTime()));
     }
 
     private MapSqlParameterSource vis() {

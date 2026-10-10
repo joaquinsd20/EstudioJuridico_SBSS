@@ -1,6 +1,7 @@
 package com.sbss.lexia.dashboard.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public final class DashboardDtos {
@@ -16,6 +17,10 @@ public final class DashboardDtos {
      * pantalla que se ve de un vistazo seria gastar la base en una consulta
      * que el usuario apenas mira. Ademas asi el panel no puede quedar a medias
      * con un grafico dibujado y otro vacio.
+     *
+     * `puedeVerFacturacion` dice si `ingresosPorMes` y `cobranza` se consultaron:
+     * sin FACTURACION_LEER llegan vacios, y la pantalla debe OCULTAR esas dos
+     * tarjetas en vez de pintar "S/ 0" como si fuera un dato.
      */
     public record Graficos(
             List<Etiqueta> expedientesPorEstado,
@@ -24,7 +29,8 @@ public final class DashboardDtos {
             List<Barra> cargaPorUsuario,
             List<Barra> tareasPorUsuario,
             List<Barra> ingresosPorMes,
-            EstadoCobranza cobranza) {
+            EstadoCobranza cobranza,
+            boolean puedeVerFacturacion) {
     }
 
     /** Una rebanada: nombre y numero. Sin porcentaje, lo calcula el front. */
@@ -64,5 +70,29 @@ public final class DashboardDtos {
             BigDecimal vencido,
             long cuentasPendientes,
             long cuentasVencidas) {
+
+        /** Lo que recibe quien no tiene FACTURACION_LEER: sin tocar `honorarios`. */
+        public static EstadoCobranza sinAcceso() {
+            return new EstadoCobranza(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0, 0);
+        }
+    }
+
+    /**
+     * Un expediente abierto que pide mirarse hoy: riesgo critico o sin
+     * movimiento hace mas de 30 dias. Lo calcula el servidor porque
+     * GET /expedientes es paginado: filtrar en el navegador una pagina de 20
+     * perdia en silencio los criticos de las paginas siguientes.
+     */
+    public record ExpedienteAtencion(
+            String uuid,
+            String codigoInterno,
+            String numeroExpediente,
+            String clienteNombre,
+            String materia,
+            String estadoNombre,
+            String nivelRiesgo,
+            String responsable,
+            boolean confidencial,
+            LocalDateTime fechaUltimaActuacion) {
     }
 }

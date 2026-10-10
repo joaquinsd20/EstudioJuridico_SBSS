@@ -4,10 +4,10 @@ import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import { ActuacionResumen } from '../models/actuacion.models';
-import { AgendaResumen, EventoAgenda } from '../models/agenda.models';
+import { AgendaPagina, AgendaResumen, EventoAgenda } from '../models/agenda.models';
 import { ClientesResumen } from '../models/cliente.models';
 import { DocumentoEstadisticas } from '../models/documento.models';
-import { ExpedienteResumen, ExpedienteLista } from '../models/expediente.models';
+import { ExpedienteResumen } from '../models/expediente.models';
 import { MonitorResumen } from '../models/monitor-judicial.models';
 import { PlazoResumen } from '../models/plazo.models';
 import { TareaPagina, TareaResumen } from '../models/tarea.models';
@@ -89,7 +89,7 @@ export interface ExpedienteClave {
   motivo: string;
   alertaTexto?: string;
   badgeDias?: string;
-  badgeTipo?: 'critico' | 'vencido' | 'audiencia';
+  badgeTipo?: 'critico' | 'parado';
   confidencial: boolean;
 }
 
@@ -105,11 +105,22 @@ export interface ResultadoLectura {
 }
 
 /**
- * Estados en los que un expediente ya no esta en juego: no tiene sentido
- * auditar los papeles de un caso archivado o concluido, y meterlos en el
- * bloque de "pide atencion" solo resta credibilidad a la seccion.
+ * Lo que devuelve GET /dashboard/expedientes-atencion: abiertos
+ * (`es_estado_final = 0`) de riesgo critico o sin movimiento hace mas de 30
+ * dias, ya ordenados y con la regla de visibilidad aplicada en el servidor.
  */
-const ESTADOS_CERRADOS = new Set(['ARCHIVADO', 'CONCLUIDO', 'GANADO', 'PERDIDO', 'DERIVADO']);
+interface ExpedienteAtencion {
+  uuid: string;
+  codigoInterno: string;
+  numeroExpediente: string | null;
+  clienteNombre: string;
+  materia: string | null;
+  estadoNombre: string;
+  nivelRiesgo: string | null;
+  responsable: string | null;
+  confidencial: boolean;
+  fechaUltimaActuacion: string | null;
+}
 
 /**
  * Una recomendacion del panel.
@@ -205,11 +216,14 @@ export class DashboardService {
     const params = new HttpParams()
       .set('desde', `${dia}T00:00:00`)
       .set('hasta', `${dia}T23:59:59`)
-      .set('limite', '50');
+      .set('tamano', '100');
 
-    return this.http.get<EventoAgenda[]>(`${this.base}/agenda`, { params }).pipe(
-      map(eventos => {
-        const deHoy = [...(Array.isArray(eventos) ? eventos : [])].sort((a, b) =>
+    // GET /agenda es paginado desde #57: las filas vienen en `contenido`, y
+    // `tamano` admite 10, 20, 40 o 100. Leerlo como array dejaba la tarjeta
+    // vacia sin avisar.
+    return this.http.get<AgendaPagina>(`${this.base}/agenda`, { params }).pipe(
+      map(pagina => {
+        const deHoy = [...(pagina?.contenido ?? [])].sort((a, b) =>
           a.fechaInicio.localeCompare(b.fechaInicio)
         );
         const horaActual = new Date();
@@ -281,47 +295,42 @@ export class DashboardService {
 
   /**
    * Los expedientes que exigen mirar hoy: los de riesgo critico y los que no
-   * se tocan desde hace mas de 30 dias. El motivo va en palabras para que se
-   * entienda sin saber que significa el codigo de riesgo.
+   * se tocan desde hace mas de 30 dias.
+   *
+   * Los elige el servidor. Antes se filtraba aqui la primera pagina de
+   * GET /expedientes (que paso a ser paginado en #49 y quedo leyendose como
+   * array: la tarjeta salia vacia siempre), y aun leyendola bien, los criticos
+   * de las paginas siguientes se habrian perdido en silencio.
+   *
+   * El texto dice el motivo REAL. Antes un riesgo critico se anunciaba como
+   * "Plazo vence hoy" y uno parado como "Vencido", sin mirar ningun plazo: en
+   * un sistema cuyo trabajo es avisar de plazos, eso es un aviso falso.
    */
   private expedientesQueRequierenAtencion(): Observable<Lectura<ExpedienteClave[]>> {
-    return this.http.get<ExpedienteLista[]>(`${this.base}/expedientes`).pipe(
+    return this.http.get<ExpedienteAtencion[]>(`${this.base}/dashboard/expedientes-atencion`).pipe(
       map(lista => {
-        const hace30 = Date.now() - 30 * 86_400_000;
-
-        const valor: ExpedienteClave[] = (Array.isArray(lista) ? lista : [])
-          .filter(e => {
-            if (ESTADOS_CERRADOS.has(e.estadoCodigo)) {
-              return false;
-            }
-            const critico = e.nivelRiesgo === 'CRITICO';
-            const parado = e.fechaUltimaActuacion
-              ? new Date(e.fechaUltimaActuacion).getTime() < hace30
-              : false;
-            return critico || parado;
-          })
-          .slice(0, 6)
-          .map(e => {
-            const dias = e.fechaUltimaActuacion
-              ? Math.floor((Date.now() - new Date(e.fechaUltimaActuacion).getTime()) / 86_400_000)
-              : null;
-            const esCritico = e.nivelRiesgo === 'CRITICO';
-            return {
-              uuid: e.uuid,
-              codigoInterno: e.codigoInterno,
-              numeroExpediente: e.numeroExpediente || e.codigoInterno,
-              clienteNombre: e.clienteNombre,
-              materia: e.materia || e.especialidad || 'Materia General',
-              estadoNombre: e.estadoNombre,
-              nivelRiesgo: e.nivelRiesgo,
-              responsable: e.responsable,
-              confidencial: e.confidencial,
-              motivo: esCritico ? 'Plazo vence hoy' : `Sin movimiento hace ${dias ?? 0} días`,
-              alertaTexto: esCritico ? 'Plazo vence hoy' : (dias && dias > 30 ? `Vencido desde hace ${dias} días` : 'Atención requerida'),
-              badgeDias: esCritico ? '1 día' : 'Vencido',
-              badgeTipo: esCritico ? 'critico' : 'vencido'
-            };
-          });
+        const valor: ExpedienteClave[] = lista.map(e => {
+          const dias = e.fechaUltimaActuacion
+            ? Math.floor((Date.now() - new Date(e.fechaUltimaActuacion).getTime()) / 86_400_000)
+            : null;
+          const esCritico = e.nivelRiesgo === 'CRITICO';
+          const quietud = dias === null ? 'sin actuaciones registradas' : `sin movimiento hace ${dias} días`;
+          return {
+            uuid: e.uuid,
+            codigoInterno: e.codigoInterno,
+            numeroExpediente: e.numeroExpediente || e.codigoInterno,
+            clienteNombre: e.clienteNombre,
+            materia: e.materia ?? undefined,
+            estadoNombre: e.estadoNombre,
+            nivelRiesgo: e.nivelRiesgo,
+            responsable: e.responsable,
+            confidencial: e.confidencial,
+            motivo: esCritico ? 'Riesgo crítico' : `Sin movimiento hace ${dias} días`,
+            alertaTexto: esCritico ? `Riesgo crítico · ${quietud}` : `Sin movimiento hace ${dias} días`,
+            badgeDias: dias === null ? 'Sin actuaciones' : `${dias} días`,
+            badgeTipo: esCritico ? 'critico' : 'parado'
+          };
+        });
 
         return { valor, error: false };
       }),
