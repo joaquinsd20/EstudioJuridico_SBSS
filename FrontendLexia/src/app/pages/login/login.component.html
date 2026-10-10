@@ -19,7 +19,7 @@
     </p>
 
 
-    <form [formGroup]="formulario" (ngSubmit)="entrar()">
+    <form [formGroup]="formulario" (ngSubmit)="entrar()" autocomplete="on">
 
       <div class="form-group">
 
@@ -33,6 +33,7 @@
           class="input-field"
           placeholder="tucorreo@lexia.com"
           formControlName="email"
+          name="username"
           autocomplete="username"
         >
 
@@ -61,6 +62,7 @@
           class="input-field"
           placeholder="••••••••"
           formControlName="password"
+          name="password"
           autocomplete="current-password"
         >
 

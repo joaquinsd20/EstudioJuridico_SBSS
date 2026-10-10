@@ -1,10 +1,12 @@
 package com.sbss.lexia.usuarios.controller;
 
+import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CargaDetallada;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.CredencialTemporal;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.GuardarUsuarioRequest;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.ReasignarRequest;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResultadoReasignacion;
+import com.sbss.lexia.usuarios.dto.UsuarioDtos.ResumenUsuarios;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
@@ -46,6 +48,28 @@ public class UsuarioController {
             @RequestParam(required = false) String rol,
             @RequestParam(required = false) String estado) {
         return usuarioService.listar(texto, rol, estado);
+    }
+
+    /**
+     * Listado paginado para el panel. Se conserva GET /usuarios para compatibilidad
+     * con pruebas e integraciones existentes; la UI usa este endpoint escalable.
+     */
+    @GetMapping("/pagina")
+    @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
+    public PaginaDto<UsuarioLista> listarPagina(
+            @RequestParam(required = false) String texto,
+            @RequestParam(required = false) String rol,
+            @RequestParam(required = false) String estado,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        return usuarioService.listarPagina(texto, rol, estado, page, size);
+    }
+
+    /** Totales de las tarjetas, calculados directamente en SQL. */
+    @GetMapping("/resumen")
+    @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
+    public ResumenUsuarios resumen() {
+        return usuarioService.resumen();
     }
 
     /** Roles asignables, para el selector del formulario. */

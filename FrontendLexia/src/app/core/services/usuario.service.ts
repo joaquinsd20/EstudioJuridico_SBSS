@@ -1,10 +1,10 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   CargaDetallada, CredencialTemporal, FiltroEstadoUsuario, GuardarUsuario, ReasignarRequest,
-  ResultadoReasignacion, RolOpcion, UsuarioDetalle, UsuarioLista
+  PaginaUsuarios, ResultadoReasignacion, ResumenUsuarios, RolOpcion, UsuarioDetalle, UsuarioLista
 } from '../models/usuario.models';
 
 /** Personal del estudio. Todo el endpoint exige USUARIO_GESTIONAR. */
@@ -12,6 +12,9 @@ import {
 export class UsuarioService {
   private readonly http = inject(HttpClient);
   private readonly base = `${environment.apiUrl}/usuarios`;
+  private readonly rolesCache$ = this.http.get<RolOpcion[]>(`${this.base}/roles`).pipe(
+    shareReplay({ bufferSize: 1, refCount: false })
+  );
 
   listar(filtros: { texto?: string; rol?: string; estado?: FiltroEstadoUsuario } = {}): Observable<UsuarioLista[]> {
     let params = new HttpParams();
@@ -19,7 +22,23 @@ export class UsuarioService {
     return this.http.get<UsuarioLista[]>(this.base, { params });
   }
 
-  roles(): Observable<RolOpcion[]> { return this.http.get<RolOpcion[]>(`${this.base}/roles`); }
+  listarPagina(
+    filtros: { texto?: string; rol?: string; estado?: FiltroEstadoUsuario } = {},
+    page = 0,
+    size = 20
+  ): Observable<PaginaUsuarios<UsuarioLista>> {
+    let params = new HttpParams()
+      .set('page', page)
+      .set('size', size);
+    Object.entries(filtros).forEach(([k, v]) => { if (v) params = params.set(k, v); });
+    return this.http.get<PaginaUsuarios<UsuarioLista>>(`${this.base}/pagina`, { params });
+  }
+
+  resumen(): Observable<ResumenUsuarios> {
+    return this.http.get<ResumenUsuarios>(`${this.base}/resumen`);
+  }
+
+  roles(): Observable<RolOpcion[]> { return this.rolesCache$; }
   detalle(uuid: string): Observable<UsuarioDetalle> { return this.http.get<UsuarioDetalle>(`${this.base}/${uuid}`); }
   crear(datos: GuardarUsuario): Observable<CredencialTemporal> { return this.http.post<CredencialTemporal>(this.base, datos); }
   actualizar(uuid: string, datos: GuardarUsuario): Observable<void> { return this.http.put<void>(`${this.base}/${uuid}`, datos); }

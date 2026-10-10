@@ -52,6 +52,9 @@ export class CambiarPasswordComponent {
   /** Se fija al entrar: tras cambiarla la bandera pasa a false y el texto no debe saltar. */
   readonly obligatorio = this.auth.debeCambiarPassword();
 
+  /** Correo real de la sesión. Se expone al formulario solo para que el gestor de\n   * contraseñas del navegador asocie el cambio a la cuenta correcta. */
+  readonly emailSesion = this.auth.usuario()?.email ?? '';
+
   readonly cargando = signal(false);
   readonly errorActual = signal<string | null>(null);
   readonly errorNueva = signal<string | null>(null);

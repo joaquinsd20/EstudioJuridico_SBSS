@@ -13,6 +13,22 @@ export interface UsuarioLista {
   roles: string[];
 }
 
+export interface PaginaUsuarios<T> {
+  contenido: T[];
+  pagina: number;
+  tamano: number;
+  totalElementos: number;
+  totalPaginas: number;
+  esUltima: boolean;
+}
+
+export interface ResumenUsuarios {
+  total: number;
+  activos: number;
+  inactivos: number;
+  bloqueados: number;
+}
+
 /**
  * De que es responsable la persona. Las tres primeras cifras bloquean la baja
  * en el backend: son compromisos vivos que quedarian sin nadie que los mire.
