@@ -253,9 +253,15 @@ class VisibilidadExpedientesIT {
         mockMvc.perform(get("/api/v1/expedientes").param("size", "3").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.contenido.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(3)));
-        mockMvc.perform(get("/api/v1/agenda").param("limite", "1").with(authentication(como(ADMIN))))
+        // Agenda tambien es paginada desde #57 (PaginaEventos): `tamano` solo admite
+        // 10, 20, 40 o 100, y `limite` se ignora. La semilla tiene menos de 10
+        // eventos en el mes, asi que el tope lo demuestra el rechazo de un tamano
+        // grande, no el conteo de filas.
+        mockMvc.perform(get("/api/v1/agenda").param("tamano", "10").with(authentication(como(ADMIN))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(1)));
+                .andExpect(jsonPath("$.contenido.length()").value(org.hamcrest.Matchers.lessThanOrEqualTo(10)));
+        mockMvc.perform(get("/api/v1/agenda").param("tamano", "500").with(authentication(como(ADMIN))))
+                .andExpect(status().isBadRequest());
         // El historial del monitor crece una fila por revision judicial, y los
         // honorarios con la facturacion: los dos tenian que acotarse tambien.
         mockMvc.perform(get("/api/v1/monitor-judicial").param("limite", "2").with(authentication(como(ADMIN))))
