@@ -463,7 +463,7 @@
         </div>
 
         <div class="column-list">
-          @for (res of listaNuevasResoluciones(); track res.expedienteCodigo + res.numeroResolucion) {
+          @for (res of listaNuevasResoluciones(); track res.uuid) {
             <a class="item-entry" [routerLink]="['/monitor-judicial']">
               <div class="entry-line-top">
                 <strong class="entry-code">{{ res.expedienteCodigo }}</strong>
@@ -476,7 +476,7 @@
             <div class="empty-hint">
               <span class="empty-hint-emoji">📑</span>
               <strong>Sin resoluciones nuevas</strong>
-              <p>No hay resoluciones registradas desde tu última revisión.</p>
+              <p>El Monitor Judicial no registró resoluciones nuevas en los últimos 30 días.</p>
             </div>
           }
         </div>
@@ -631,6 +631,7 @@
           <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ui-icon header-icon icon-carga" aria-hidden="true"><use href="#lexia-i-users"></use></svg>
           <h2>Carga de trabajo del equipo</h2>
         </div>
+        <p class="chart-sub">La barra mide el riesgo: cada caso crítico suma 2 puntos y cada alto, 1</p>
 
         <div class="team-carga-header">
           <span>Abogado</span>
@@ -650,8 +651,8 @@
                   [style.width.%]="c.porcentaje"
                 ></div>
               </div>
-              <span class="team-count">{{ c.expedientes }}</span>
-              <span class="team-percent">{{ c.porcentaje }}%</span>
+              <span class="team-count">{{ c.expedientes ?? '—' }}</span>
+              <span class="team-percent">{{ c.puntos }} pts</span>
             </div>
           } @empty {
             <div class="empty-hint">

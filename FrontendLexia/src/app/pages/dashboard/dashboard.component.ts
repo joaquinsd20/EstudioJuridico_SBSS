@@ -45,6 +45,17 @@ interface SegmentoDonut {
   porcentaje: number;
 }
 
+/** Las etiquetas de la pantalla de Agenda (AgendaComponent.etiquetaTipo). */
+const ETIQUETA_TIPO_EVENTO: Record<string, string> = {
+  AUDIENCIA: 'Audiencia', REUNION_CLIENTE: 'Reunión', VENCIMIENTO_PLAZO: 'Vencimiento',
+  LLAMADA: 'Llamada', DILIGENCIA: 'Diligencia', PRESENTACION: 'Presentación',
+  VIDEOCONFERENCIA: 'Videoconferencia', REVISION: 'Revisión', INTERNO: 'Interno'
+};
+
+const TONO_TIPO_EVENTO: Record<string, ItemAgendaVista['tonoEtiqueta']> = {
+  AUDIENCIA: 'morado', REUNION_CLIENTE: 'naranja', VENCIMIENTO_PLAZO: 'rojo'
+};
+
 interface ItemAgendaVista {
   hora: string;
   titulo: string;
@@ -149,39 +160,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   // ─── Lista de Agenda de Hoy ───────────────────────────────────────────────
-  readonly listaAgendaHoy = computed<ItemAgendaVista[]>(() => {
-    const eventos = this.agendaHoy().eventos;
-    if (eventos.length > 0) {
-      return eventos.slice(0, 4).map(e => {
-        const hora = e.fechaInicio ? e.fechaInicio.slice(11, 16) : '09:00 AM';
-        let tono: 'morado' | 'naranja' | 'rojo' | 'azul' = 'morado';
-        let etiqueta = 'Audiencia';
-
-        if (e.tipo === 'AUDIENCIA') {
-          tono = 'morado';
-          etiqueta = 'Tenencia';
-        } else if (e.tipo === 'REUNION_CLIENTE') {
-          tono = 'naranja';
-          etiqueta = 'Reunión';
-        } else if (e.tipo === 'VENCIMIENTO_PLAZO') {
-          tono = 'rojo';
-          etiqueta = 'Plazo';
-        } else {
-          tono = 'azul';
-          etiqueta = 'Escrito';
-        }
-
-        return {
-          hora,
-          titulo: e.tipo === 'AUDIENCIA' ? 'Audiencia' : e.tipo === 'REUNION_CLIENTE' ? 'Reunión con cliente' : e.tipo === 'VENCIMIENTO_PLAZO' ? 'Vencimiento de plazo' : 'Elaborar escrito',
-          detalle: e.expedienteCodigo || e.clienteNombre || e.titulo,
-          etiqueta,
-          tonoEtiqueta: tono
-        };
-      });
-    }
-    return [];
-  });
+  // Se muestra el titulo REAL del evento. Antes el titulo salia del tipo y todo
+  // lo que no era audiencia, reunion o plazo se anunciaba "Elaborar escrito"
+  // (una reunion interna incluida), y una AUDIENCIA llevaba la etiqueta
+  // "Tenencia". Las etiquetas son las mismas de la pantalla de Agenda.
+  readonly listaAgendaHoy = computed<ItemAgendaVista[]>(() =>
+    this.agendaHoy().eventos.slice(0, 4).map(e => ({
+      hora: e.todoElDia ? 'Todo el día' : e.fechaInicio.slice(11, 16),
+      titulo: e.titulo,
+      detalle: e.expedienteCodigo || e.clienteNombre || e.ubicacion || '',
+      etiqueta: ETIQUETA_TIPO_EVENTO[e.tipo] ?? e.tipo,
+      tonoEtiqueta: TONO_TIPO_EVENTO[e.tipo] ?? 'azul'
+    }))
+  );
 
   // ─── Gráficos Completos ───────────────────────────────────────────────────
   readonly graficos = signal<GraficosDashboard>({
@@ -196,17 +187,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   // 1. Resumen de expedientes (Donut chart)
+  // Caben cuatro porciones: con mas estados, los menores se juntan en "Otros".
+  // Antes se cortaban, y el total del centro y los porcentajes contaban solo
+  // los cuatro primeros.
   readonly donutItems = computed(() => {
-    const raw = this.graficos().expedientesPorEstado;
-    if (raw && raw.length > 0) {
-      const colores = ['#6366f1', '#38bdf8', '#4ade80', '#fb923c'];
-      return raw.slice(0, 4).map((item, i) => ({
-        nombre: item.nombre,
-        valor: item.valor,
-        color: colores[i % colores.length]
-      }));
+    const raw = this.graficos().expedientesPorEstado ?? [];
+    const colores = ['#6366f1', '#38bdf8', '#4ade80', '#fb923c'];
+    const visibles = raw.length > 4 ? raw.slice(0, 3) : raw;
+    const items = visibles.map(item => ({ nombre: item.nombre, valor: item.valor }));
+    if (raw.length > 4) {
+      items.push({ nombre: 'Otros', valor: raw.slice(3).reduce((acc, r) => acc + r.valor, 0) });
     }
-    return [];
+    return items.map((item, i) => ({ ...item, color: colores[i % colores.length] }));
   });
 
   readonly totalExpedientesDonut = computed(() => {
@@ -263,17 +255,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
   });
 
   // 3. Carga de trabajo del equipo (Puntos de riesgo ponderado)
+  // `valor` son PUNTOS de riesgo (critico 2, alto 1) y el numero de expedientes
+  // viaja en `detalle` ("3 expedientes"). Antes los puntos se mostraban bajo la
+  // columna "Expedientes" y la barra tenia un minimo de 20%: quien llevaba un
+  // caso de riesgo bajo salia con "0" y una barra llena a un quinto.
   readonly cargaEquipoVista = computed(() => {
-    const raw = this.graficos().cargaPorUsuario;
-    if (raw && raw.length > 0) {
-      const maxVal = Math.max(...raw.map(r => r.valor), 1);
-      return raw.slice(0, 4).map(r => ({
+    const raw = this.graficos().cargaPorUsuario ?? [];
+    const maxVal = Math.max(...raw.map(r => r.valor), 1);
+    return raw.slice(0, 4).map(r => {
+      const expedientes = Number.parseInt(r.detalle ?? '', 10);
+      return {
         nombre: r.nombre,
-        expedientes: r.valor,
-        porcentaje: Math.round((r.valor / maxVal) * 80) + 20
-      }));
-    }
-    return [];
+        expedientes: Number.isNaN(expedientes) ? null : expedientes,
+        puntos: r.valor,
+        porcentaje: Math.round((r.valor / maxVal) * 100)
+      };
+    });
   });
 
   // 4. Tareas por usuario (Abiertas y vencidas)
