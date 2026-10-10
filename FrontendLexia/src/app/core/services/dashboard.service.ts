@@ -71,6 +71,8 @@ export interface CargaEquipo {
 
 /** Un expediente que conviene mirar hoy, con el motivo por el que aparece. */
 export interface NuevaResolucionItem {
+  /** uuid de la consulta del Monitor: lo unico que no se repite entre filas. */
+  uuid: string;
   expedienteCodigo: string;
   numeroResolucion: string;
   fechaHora: string;
@@ -102,6 +104,17 @@ export interface ResultadoLectura {
   parcialError: boolean;
   totalError: boolean;
   fecha: Date;
+}
+
+/** Lo que el panel usa de GET /monitor-judicial/consultas (MonitorJudicialDtos.Consulta). */
+interface ConsultaMonitor {
+  uuid: string;
+  codigoInterno: string;
+  numeroExpediente: string | null;
+  fechaConsulta: string;
+  nuevaResolucion: boolean;
+  numeroResolucion: string | null;
+  tipoResolucion: string | null;
 }
 
 /**
@@ -338,16 +351,48 @@ export class DashboardService {
     );
   }
 
+  /**
+   * Las resoluciones que el Monitor Judicial marco como nuevas en los ultimos
+   * 30 dias, de la mas reciente a la mas antigua.
+   *
+   * Antes se pedian las 10 ultimas consultas y se aceptaba cualquiera con
+   * numero de resolucion (aunque no fuera nueva), y lo que faltaba se
+   * rellenaba con datos inventados: 'EXP. 04521-2026', 'Resolución N.° 01' y
+   * una fecha fija de 2024. Ahora solo sale lo que la consulta dice; y la
+   * ventana de 30 dias con tope 100 evita que una nueva quede fuera por haber
+   * diez consultas mas recientes sin novedad.
+   */
   private nuevasResoluciones(): Observable<Lectura<NuevaResolucionItem[]>> {
-    return this.http.get<any[]>(`${this.base}/monitor-judicial/consultas`, { params: { limite: '10' } }).pipe(
+    const desde = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' })
+      .format(new Date(Date.now() - 30 * 86_400_000));
+    const params = new HttpParams().set('desde', desde).set('limite', '100');
+
+    return this.http.get<ConsultaMonitor[]>(`${this.base}/monitor-judicial/consultas`, { params }).pipe(
       map(consultas => {
-        const items: NuevaResolucionItem[] = (Array.isArray(consultas) ? consultas : [])
-          .filter(c => c.nuevaResolucion || c.numeroResolucion)
+        // La misma resolucion puede venir en dos consultas (se reviso dos
+        // veces): se muestra una vez, la mas reciente, que es la primera.
+        const vistas = new Set<string>();
+        const items: NuevaResolucionItem[] = consultas
+          .filter(c => c.nuevaResolucion)
+          .filter(c => {
+            if (!c.numeroResolucion) {
+              return true;
+            }
+            const clave = `${c.codigoInterno}|${c.numeroResolucion}`;
+            if (vistas.has(clave)) {
+              return false;
+            }
+            vistas.add(clave);
+            return true;
+          })
           .slice(0, 4)
           .map(c => ({
-            expedienteCodigo: c.numeroExpediente || c.codigoInterno || 'EXP. 04521-2026',
-            numeroResolucion: c.numeroResolucion ? `Resolución N.° ${c.numeroResolucion}` : (c.tipoMovimiento || 'Resolución N.° 01'),
-            fechaHora: c.fechaConsulta ? this.formatearFechaHora(c.fechaConsulta) : '28/05/2024 10:45 AM',
+            uuid: c.uuid,
+            expedienteCodigo: c.numeroExpediente || c.codigoInterno,
+            // `numeroResolucion` ya trae la etiqueta del juzgado ("Resolucion N.o 0011"):
+            // anteponerle "Resolución N.° " la duplicaba.
+            numeroResolucion: c.numeroResolucion || c.tipoResolucion || 'Resolución sin número registrado',
+            fechaHora: this.formatearFechaHora(c.fechaConsulta),
             estado: 'Nueva'
           }));
         return { valor: items, error: false };
