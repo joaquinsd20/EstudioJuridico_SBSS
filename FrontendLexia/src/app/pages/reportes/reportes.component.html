@@ -3,6 +3,13 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    @if (!puedeLeer()) {
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de REPORTES para consultar este módulo.</p>
+      </section>
+    } @else {
 
     <div class="reportes-wrapper">
       <section class="main-report-panel">
@@ -390,10 +397,11 @@
       </aside>
     </div>
 
+    }
   </main>
 
   <!-- MODAL DE EXPORTACIÓN -->
-  @if (modalExportarAbierto()) {
+  @if (puedeLeer() && modalExportarAbierto()) {
     <div class="modal-overlay" (click)="cerrarModalExportar()">
       <div class="modal-box" (click)="$event.stopPropagation()">
         <div class="modal-header">

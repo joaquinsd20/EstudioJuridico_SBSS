@@ -96,6 +96,7 @@ export class ReportesComponent implements OnInit {
   readonly cargandoCatalogos = signal(false);
 
   // ─── PERMISOS / EXPORTACIÓN ──────────────────────────────────────────────
+  readonly puedeLeer = signal(this.authSvc.tienePermiso('REPORTE_LEER'));
   readonly puedeExportar = signal(this.authSvc.tienePermiso('REPORTE_EXPORTAR'));
   readonly modalExportarAbierto = signal(false);
   readonly formatoExportacion = signal<'excel' | 'pdf'>('excel');
@@ -107,6 +108,7 @@ export class ReportesComponent implements OnInit {
   readonly toastError = signal(false);
 
   ngOnInit(): void {
+    if (!this.puedeLeer()) return;
     this.configurarFlujosReactivos();
     this.cargarCatalogos();
     this.solicitarRecargaCompleta();
