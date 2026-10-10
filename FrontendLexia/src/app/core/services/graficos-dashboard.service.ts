@@ -33,6 +33,8 @@ export interface GraficosDashboard {
   tareasPorUsuario: BarraGrafico[];
   ingresosPorMes: BarraGrafico[];
   cobranza: EstadoCobranza;
+  /** Sin FACTURACION_LEER el backend no consulta honorarios: se ocultan las dos tarjetas de dinero. */
+  puedeVerFacturacion: boolean;
 }
 
 const GRAFICOS_VACIOS: GraficosDashboard = {
@@ -45,7 +47,8 @@ const GRAFICOS_VACIOS: GraficosDashboard = {
   cobranza: {
     facturado: 0, cobrado: 0, pendiente: 0,
     vencido: 0, cuentasPendientes: 0, cuentasVencidas: 0
-  }
+  },
+  puedeVerFacturacion: false
 };
 
 @Injectable({ providedIn: 'root' })

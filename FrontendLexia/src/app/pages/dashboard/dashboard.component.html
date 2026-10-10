@@ -358,7 +358,7 @@
           </div>
           <span class="kpi-title">Plazos vencidos</span>
         </div>
-        <div class="kpi-number">{{ kpiPlazosVencidos() }}</div>
+        <div class="kpi-number">{{ kpiPlazosVencidos() ?? '—' }}</div>
         <div class="kpi-subtitle">Requieren atención inmediata</div>
       </a>
 
@@ -370,8 +370,8 @@
           </div>
           <span class="kpi-title">Plazos por vencer</span>
         </div>
-        <div class="kpi-number">{{ kpiPlazosPorVencer() }}</div>
-        <div class="kpi-subtitle">En los próximos 3 días</div>
+        <div class="kpi-number">{{ kpiPlazosPorVencer() ?? '—' }}</div>
+        <div class="kpi-subtitle">Hoy y los próximos 7 días</div>
       </a>
 
       <!-- 3. Nuevas resoluciones -->
@@ -382,8 +382,8 @@
           </div>
           <span class="kpi-title">Nuevas resoluciones</span>
         </div>
-        <div class="kpi-number">{{ kpiNuevasResoluciones() }}</div>
-        <div class="kpi-subtitle">Desde la última revisión</div>
+        <div class="kpi-number">{{ kpiNuevasResoluciones() ?? '—' }}</div>
+        <div class="kpi-subtitle">Registradas hoy</div>
       </a>
 
       <!-- 4. Audiencias próximas -->
@@ -392,10 +392,10 @@
           <div class="kpi-icon-wrap icon-blue">
             <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="ui-icon kpi-icon" aria-hidden="true"><use href="#lexia-i-scale"></use></svg>
           </div>
-          <span class="kpi-title">Audiencias próximas</span>
+          <span class="kpi-title">Audiencias del mes</span>
         </div>
-        <div class="kpi-number">{{ kpiAudienciasProximas() }}</div>
-        <div class="kpi-subtitle">En los próximos 7 días</div>
+        <div class="kpi-number">{{ kpiAudienciasProximas() ?? '—' }}</div>
+        <div class="kpi-subtitle">Este mes</div>
       </a>
 
       <!-- 5. Tareas pendientes -->
@@ -406,7 +406,7 @@
           </div>
           <span class="kpi-title">Tareas pendientes</span>
         </div>
-        <div class="kpi-number">{{ kpiTareasPendientes() }}</div>
+        <div class="kpi-number">{{ kpiTareasPendientes() ?? '—' }}</div>
         <div class="kpi-subtitle">Asignadas a tu equipo</div>
       </a>
 
@@ -432,7 +432,7 @@
                 <div class="entry-tags">
                   <span class="tag-dias">{{ item.badgeTexto }}</span>
                   <span class="badge-pill" [ngClass]="'pill-' + item.badgeTipo">
-                    {{ item.badgeTipo === 'critico' ? 'Crítico' : item.badgeTipo === 'vencido' ? 'Vencido' : 'Audiencia' }}
+                    {{ item.badgeTipo === 'critico' ? 'Crítico' : 'Sin movimiento' }}
                   </span>
                 </div>
               </div>
@@ -705,6 +705,9 @@
         </div>
       </div>
 
+      <!-- GRÁFICOS 5 y 6: solo con FACTURACION_LEER. Sin el permiso el backend
+           no consulta honorarios; pintar "S/ 0" pareceria un dato. -->
+      @if (graficos().puedeVerFacturacion) {
       <!-- GRÁFICO 5: INGRESOS POR MES -->
       <div class="chart-card">
         <div class="column-header">
@@ -798,6 +801,7 @@
           </div>
         </div>
       </div>
+      }
 
     </section>
 
