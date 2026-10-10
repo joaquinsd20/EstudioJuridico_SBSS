@@ -63,10 +63,10 @@ public class BusquedaRepositoryJdbc {
                   FROM expedientes e
                   JOIN clientes c ON c.id = e.cliente_id
                   JOIN usuarios u ON u.id = e.abogado_responsable_id
-                 WHERE e.estudio_id = :visEstudioId
-                   AND (e.codigo_interno LIKE :texto
+                 WHERE (e.codigo_interno LIKE :texto
                      OR e.numero_expediente LIKE :texto
                      OR c.nombre_busqueda LIKE :textoLargo)
+                """ + VisibilidadExpedientes.sql("e") + """
                  ORDER BY e.codigo_interno
                  LIMIT :limite
                 """, p, (rs, i) -> new Resultado(
@@ -81,21 +81,27 @@ public class BusquedaRepositoryJdbc {
                         ? null : rs.getTimestamp("fecha_ultima_actuacion").toLocalDateTime()));
     }
 
+    /**
+     * El cliente es del estudio entero (CLIENTE_LEER), pero el numero de sus
+     * expedientes cuenta solo los que el usuario puede abrir: contar tambien los
+     * confidenciales ajenos revelaria que existen.
+     */
     public List<Resultado> clientes(String texto) {
         return jdbc.query("""
                 SELECT c.uuid_publico, c.numero_documento, c.nombre_busqueda,
-                       c.tipo_persona, c.estado, e.codigo_interno,
-                       (SELECT COUNT(*) FROM expedientes ex WHERE ex.cliente_id = c.id) expedientes
+                       c.tipo_persona, c.estado,
+                       (SELECT COUNT(*) FROM expedientes ex
+                         WHERE ex.cliente_id = c.id
+                """ + VisibilidadExpedientes.sql("ex") + """
+                       ) expedientes
                   FROM clientes c
-                  LEFT JOIN expedientes e ON e.id = (
-                        SELECT id FROM expedientes WHERE cliente_id = c.id ORDER BY id LIMIT 1)
                  WHERE c.estudio_id = :estudioId
                    AND c.activo = 1
                    AND (c.numero_documento LIKE :texto
                      OR c.nombre_busqueda LIKE :textoLargo)
                  ORDER BY c.nombre_busqueda
                  LIMIT :limite
-                """, base(texto), (rs, i) -> new Resultado(
+                """, conVisibilidad(base(texto)), (rs, i) -> new Resultado(
                 "CLIENTE", "Clientes",
                 rs.getString("nombre_busqueda"),
                 rs.getString("numero_documento")
@@ -107,13 +113,25 @@ public class BusquedaRepositoryJdbc {
                 null));
     }
 
+    /**
+     * La contraparte se busca en todo el estudio: es lo que permite detectar un
+     * conflicto de intereses antes de aceptar un caso. Lo que NO puede salir es
+     * el expediente que la enlaza si el usuario no lo ve; por eso el codigo va
+     * en una subconsulta con la regla de visibilidad, y no en un LEFT JOIN, que
+     * ademas repetia la contraparte una vez por expediente.
+     */
     public List<Resultado> contrapartes(String texto) {
         return jdbc.query("""
                 SELECT cp.uuid_publico, cp.nombre_completo, cp.numero_documento,
-                       cp.abogado_contrario, cp.empresa_vinculada, e.codigo_interno
+                       cp.abogado_contrario, cp.empresa_vinculada,
+                       (SELECT e.codigo_interno
+                          FROM expediente_contrapartes ec
+                          JOIN expedientes e ON e.id = ec.expediente_id
+                         WHERE ec.contraparte_id = cp.id
+                """ + VisibilidadExpedientes.sql("e") + """
+                         ORDER BY e.codigo_interno
+                         LIMIT 1) codigo_interno
                   FROM contrapartes cp
-                  LEFT JOIN expediente_contrapartes ec ON ec.contraparte_id = cp.id
-                  LEFT JOIN expedientes e ON e.id = ec.expediente_id
                  WHERE cp.estudio_id = :estudioId
                    AND cp.activo = 1
                    AND (cp.numero_documento LIKE :texto
@@ -121,7 +139,7 @@ public class BusquedaRepositoryJdbc {
                      OR cp.abogado_contrario LIKE :textoLargo)
                  ORDER BY cp.nombre_completo
                  LIMIT :limite
-                """, base(texto), (rs, i) -> new Resultado(
+                """, conVisibilidad(base(texto)), (rs, i) -> new Resultado(
                 "CONTRAPARTE", "Contrapartes",
                 rs.getString("nombre_completo"),
                 rs.getString("abogado_contrario") != null
@@ -146,8 +164,8 @@ public class BusquedaRepositoryJdbc {
                   FROM resoluciones r
                   JOIN expedientes e ON e.id = r.expediente_id
                  WHERE r.activo = 1
-                   AND e.estudio_id = :visEstudioId
                    AND (r.numero_resolucion LIKE :texto OR r.sumilla LIKE :textoLargo)
+                """ + VisibilidadExpedientes.sql("e") + """
                  ORDER BY r.fecha_notificacion DESC
                  LIMIT :limite
                 """, p, (rs, i) -> new Resultado(
@@ -178,8 +196,8 @@ public class BusquedaRepositoryJdbc {
                   JOIN clientes c ON c.id = e.cliente_id
                   JOIN usuarios u ON u.id = a.usuario_responsable_id
                  WHERE a.activo = 1
-                   AND e.estudio_id = :visEstudioId
                    AND (a.asunto LIKE :texto OR a.descripcion LIKE :textoLargo)
+                """ + VisibilidadExpedientes.sql("e") + """
                  ORDER BY a.fecha_hora DESC
                  LIMIT :limite
                 """, p, (rs, i) -> new Resultado(
@@ -205,8 +223,9 @@ public class BusquedaRepositoryJdbc {
                   FROM documentos d
                   JOIN expedientes e ON e.id = d.expediente_id
                  WHERE d.activo = 1
-                   AND e.estudio_id = :visEstudioId
+                   AND d.en_papelera = 0
                    AND d.nombre LIKE :textoLargo
+                """ + VisibilidadExpedientes.sql("e") + """
                  ORDER BY d.nombre
                  LIMIT :limite
                 """, p, (rs, i) -> new Resultado(
@@ -220,19 +239,32 @@ public class BusquedaRepositoryJdbc {
                 null));
     }
 
+    /**
+     * Solo personal interno: las cuentas del portal del cliente tambien viven en
+     * `usuarios` y salian listadas como "Abogados". El contador sigue la regla
+     * de visibilidad, como el de clientes. Y el DNI del personal solo lo busca
+     * quien ve todo el estudio: con DASHBOARD_LEER entra hasta recepcion.
+     */
     public List<Resultado> abogados(String texto) {
+        String porDocumento = VisibilidadExpedientes.verTodos()
+                ? " OR u.numero_documento LIKE :texto"
+                : "";
         return jdbc.query("""
                 SELECT u.uuid_publico, u.nombre_completo, u.cargo, u.email,
                        (SELECT COUNT(*) FROM expedientes e
-                         WHERE e.abogado_responsable_id = u.id) expedientes
+                         WHERE e.abogado_responsable_id = u.id
+                """ + VisibilidadExpedientes.sql("e") + """
+                       ) expedientes
                   FROM usuarios u
                  WHERE u.estudio_id = :estudioId
                    AND u.activo = 1
+                   AND u.tipo_usuario = 'INTERNO'
                    AND (u.nombre_completo LIKE :textoLargo
-                     OR u.numero_documento LIKE :texto)
+                """ + porDocumento + """
+                       )
                  ORDER BY u.nombre_completo
                  LIMIT :limite
-                """, base(texto), (rs, i) -> new Resultado(
+                """, conVisibilidad(base(texto)), (rs, i) -> new Resultado(
                 "ABOGADO", "Abogados",
                 rs.getString("nombre_completo"),
                 (rs.getString("cargo") != null ? rs.getString("cargo") : "")
@@ -244,13 +276,11 @@ public class BusquedaRepositoryJdbc {
     }
 
     /**
-     * Parametros comunes a las consultas que NO tocan `expedientes`.
+     * Parametros comunes de clientes, contrapartes y abogados.
      *
-     * No llevan la regla de visibilidad: los clientes, las contrapartes y los
-     * abogados no son expedientes, y lo que los acota es `estudio_id`. Por eso
-     * aqui no se llama a `conVisibilidad()`: hacerlo anadiria parametros
-     * `vis*` que ninguna de estas consultas nombra, y NamedParameterJdbcTemplate
-     * toleraria sobrantes pero el codigo mentiria sobre lo que filtra.
+     * Esas filas son del estudio entero y las acota `estudio_id`; la regla de
+     * visibilidad entra solo en lo que cada una dice de sus EXPEDIENTES (un
+     * contador, un codigo), y por eso las tres pasan ademas por conVisibilidad().
      */
     private MapSqlParameterSource base(String texto) {
         return new MapSqlParameterSource()

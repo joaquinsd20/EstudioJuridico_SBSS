@@ -35,10 +35,8 @@ import org.junit.jupiter.api.Test;
  *  - la contrasena de MySQL escrita en application-dev.yml, dos veces;
  *  - la regla de visibilidad de expedientes (RF-02) olvidada en cinco modulos.
  *
- * Una regla se incumple todavia hoy: la visibilidad a mano en la busqueda
- * global. Se trata como un TRINQUETE: ese caso queda en una lista de
- * conocidos, de modo que NO puede aparecer ninguno nuevo, y la propia prueba
- * obliga a vaciar la lista en cuanto se arregle.
+ * Ninguna regla tiene excepciones: la ultima (la busqueda global con la
+ * visibilidad escrita a mano) se arreglo en fix/busqueda-visibilidad.
  */
 class GuardiasDelRepositorioTest {
 
@@ -58,14 +56,6 @@ class GuardiasDelRepositorioTest {
     private static final Set<String> SIN_PREAUTHORIZE_A_PROPOSITO = Set.of(
             "seguridad/controller/AuthController.java",
             "notificaciones/controller/NotificacionController.java");
-
-    /**
-     * TRINQUETE 1. Repositorios que todavia escriben a mano el filtro de
-     * visibilidad con un parametro :vis*. Quitar de aqui cuando se arreglen.
-     * Arreglo: concatenar VisibilidadExpedientes.sql("e") en vez del texto a mano.
-     */
-    private static final Set<String> VISIBILIDAD_A_MANO_CONOCIDA = Set.of(
-            "busqueda/repository/BusquedaRepositoryJdbc.java");
 
     // =======================================================================
     // MIGRACIONES
@@ -219,18 +209,10 @@ class GuardiasDelRepositorioTest {
     @DisplayName("ningun repositorio nuevo escribe a mano el filtro de visibilidad (:vis*)")
     void nadieEscribeALaManoLaVisibilidad() throws IOException {
         Set<String> infractores = repositoriosConVisibilidadAMano();
-
-        Set<String> nuevos = new java.util.TreeSet<>(infractores);
-        nuevos.removeAll(VISIBILIDAD_A_MANO_CONOCIDA);
-        assertTrue(nuevos.isEmpty(), "SQL con un parametro :vis* escrito a mano en " + nuevos + ". Eso copia el "
-                + "NOMBRE del parametro del helper pero no la REGLA: filtra solo por estudio. Usa "
+        assertTrue(infractores.isEmpty(), "SQL con un parametro :vis* escrito a mano en " + infractores + ". Eso "
+                + "copia el NOMBRE del parametro del helper pero no la REGLA: filtra solo por estudio. Usa "
                 + "VisibilidadExpedientes.sql(\"e\"). Es la quinta vez que se pierde RF-02 y la ultima "
                 + "venia camuflada: el repositorio importaba el helper, asi que un grep no lo veia.");
-
-        Set<String> yaArreglados = new java.util.TreeSet<>(VISIBILIDAD_A_MANO_CONOCIDA);
-        yaArreglados.removeAll(infractores);
-        assertTrue(yaArreglados.isEmpty(), "Ya se arreglo " + yaArreglados + ": quitalo de "
-                + "VISIBILIDAD_A_MANO_CONOCIDA para que el trinquete no se afloje.");
     }
 
     // =======================================================================
