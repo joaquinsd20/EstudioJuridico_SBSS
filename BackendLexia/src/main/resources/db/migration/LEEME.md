@@ -79,20 +79,23 @@ Esto ahora lo comprueba una prueba que no necesita base de datos:
 `GuardiasDelRepositorioTest` compara cada migración con su huella en
 `BackendLexia/src/test/resources/migraciones.sha256` y falla si alguna cambió.
 
-**Después de mergear una migración nueva** hay que congelarla, o la prueba no la
-protege:
+**Una migración nueva se congela en el mismo PR que la crea.** Si no, la prueba
+`todaMigracionEstaCongelada` falla (y con ella el CI del PR):
 
 ```bash
-# desde la raíz del repositorio
+# desde la raíz del repositorio, con la migración ya terminada
 bash scripts/congelar-migraciones.sh
 ```
 
-El script solo **añade** las que faltan; nunca reescribe una huella existente.
+y se sube `migraciones.sha256` junto con la migración. El script solo **añade**
+las que faltan; nunca reescribe una huella existente. Antes se congelaba
+"después de mergear", y nadie lo hacía: V25 a V28 llegaron a `main` sin huella,
+es decir, sin protección.
 
-La excepción es una que **nunca** se aplicó en ninguna base —porque Flyway la
-estaba ignorando, o porque no se ha subido todavía—: esa sí se corrige en su
-sitio, y es mejor que arrastrar el error en un parche. En ese caso, congélala
-solo cuando ya esté en `main`.
+Si tienes que corregir tu migración **antes** de que se mergee (todavía no se
+aplicó en ninguna base), borra su línea del manifiesto y vuelve a congelarla. Lo
+mismo vale para una que Flyway estaba ignorando: nunca se aplicó, y es mejor
+corregirla en su sitio que arrastrar el error en un parche.
 
 ## Si añades una tabla o un permiso, actualiza `scripts/verificar-bd.sh`
 

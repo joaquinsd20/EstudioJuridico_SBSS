@@ -1,0 +1,106 @@
+# LEXIA — Verificacion de cada PR contra main.
+#
+# Existe porque todo lo que rompio main en estas semanas se podia detectar antes
+# de mergear y nadie lo corria: migraciones duplicadas o editadas (V12, V16/V18),
+# una contrasena subida al yml seis veces, la regla RF-02 perdida en cinco
+# modulos, el build de produccion roto y pruebas que quedaron viejas.
+#
+# Dos trabajos en paralelo:
+#   backend  — guardias sin base, toda la suite contra un MySQL 8 real
+#              (las *IT, que en local exigen LEXIA_TEST_DB) y verificar-bd.sh
+#   frontend — pruebas unitarias y build de produccion
+#
+# El MySQL del contenedor es de usar y tirar: root sin contrasena a proposito,
+# para no escribir ninguna credencial en el repositorio.
+name: Verificacion
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verificacion-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (guardias, pruebas con MySQL, verificar-bd)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      # La zona del estudio: el computo de plazos y la semilla usan CURRENT_DATE.
+      TZ: America/Lima
+      DB_HOST: 127.0.0.1
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+          MYSQL_DATABASE: lexia_db
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Preparar MySQL
+        run: |
+          # verificar-bd.sh llama a `mysql` sin host: que vaya al contenedor.
+          printf '[client]\nhost=127.0.0.1\nport=3306\nuser=root\n' > ~/.my.cnf
+          # V8 crea funciones con el binlog activo (ERROR 1418 sin esto), y la
+          # zona del servidor tiene que ser la de Lima (sin horario de verano).
+          mysql -e "SET GLOBAL log_bin_trust_function_creators = 1; SET GLOBAL time_zone = '-05:00';"
+          mysql -N -e "SELECT VERSION(), @@global.time_zone, @@collation_server;"
+
+      - name: Guardias y pruebas sin base
+        working-directory: BackendLexia
+        run: bash ./mvnw -B -ntp test
+
+      - name: Pruebas de integracion contra MySQL
+        working-directory: BackendLexia
+        env:
+          LEXIA_TEST_DB: '1'
+        run: bash ./mvnw -B -ntp test -Dtest='*Test,*IT,*Tests' -Dsurefire.failIfNoSpecifiedTests=false
+
+      - name: verificar-bd.sh
+        # El script pide la contrasena por teclado: se le da la vacia.
+        run: printf '\n' | bash scripts/verificar-bd.sh root lexia_db
+
+  frontend:
+    name: Frontend (pruebas y build de produccion)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: FrontendLexia
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: FrontendLexia/package-lock.json
+
+      - run: npm ci
+
+      - name: Pruebas unitarias
+        run: npx ng test --watch=false
+
+      - name: Build de produccion
+        run: npx ng build --configuration production
