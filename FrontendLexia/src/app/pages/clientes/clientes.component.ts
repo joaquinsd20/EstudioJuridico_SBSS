@@ -24,6 +24,7 @@ export class ClientesComponent implements OnInit {
   private readonly service = inject(ClienteService);
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
+  readonly puedeLeer = () => this.auth.tienePermiso('CLIENTE_LEER');
 
   clientes: ClienteResumen[] = [];
   resumen: ClientesResumen = {

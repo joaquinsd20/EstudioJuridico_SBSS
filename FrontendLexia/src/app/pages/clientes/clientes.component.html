@@ -2,6 +2,13 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    @if (!puedeLeer()) {
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de CLIENTES para consultar este módulo.</p>
+      </section>
+    } @else {
     <div class="toast error" *ngIf="error">{{ error }}</div>
     <div class="toast success" *ngIf="exito">{{ exito }}</div>
 
@@ -131,11 +138,12 @@
         </div>
       </aside>
     </div>
+    }
   </main>
 </div>
 
 <!-- MODAL CLIENTE -->
-<div class="modal-backdrop" *ngIf="modalCliente">
+<div class="modal-backdrop" *ngIf="puedeLeer() && modalCliente">
   <section class="modal large">
     <header><div><h2>{{ modoEdicion ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2><p>{{ modoEdicion ? 'Actualiza la ficha y relaciones del cliente.' : 'El sistema verificará conflictos antes de registrar.' }}</p></div><button (click)="cerrarCliente()">×</button></header>
     <div class="modal-body">
@@ -160,7 +168,7 @@
 </div>
 
 <!-- MODAL CONFLICTO -->
-<div class="modal-backdrop" *ngIf="modalConflicto">
+<div class="modal-backdrop" *ngIf="puedeLeer() && modalConflicto">
   <section class="modal conflict-modal">
     <header><div><h2>Verificación de conflicto de intereses</h2><p>Busca coincidencias con clientes, representantes, contrapartes y vinculados.</p></div><button (click)="cancelarConflicto()">×</button></header>
     <div class="modal-body">
@@ -174,7 +182,7 @@
 </div>
 
 <!-- MODAL COMUNICACIÓN -->
-<div class="modal-backdrop" *ngIf="modalComunicacion">
+<div class="modal-backdrop" *ngIf="puedeLeer() && modalComunicacion">
   <section class="modal small-modal">
     <header><div><h2>Registrar comunicación</h2><p>{{ ficha?.cliente?.nombre }}</p></div><button (click)="modalComunicacion = false">×</button></header>
     <div class="modal-body"><div class="form-grid cols-2"><label><span>Tipo *</span><select [(ngModel)]="comunicacion.tipo"><option value="LLAMADA">Llamada</option><option value="EMAIL">Email</option><option value="WHATSAPP">WhatsApp</option><option value="REUNION">Reunión</option><option value="OTRO">Otro</option></select></label><label><span>Canal</span><input [(ngModel)]="comunicacion.canal"></label><label class="span-2"><span>Asunto *</span><input [(ngModel)]="comunicacion.asunto"></label><label class="span-2"><span>Detalle</span><textarea rows="4" [(ngModel)]="comunicacion.detalle"></textarea></label></div></div>

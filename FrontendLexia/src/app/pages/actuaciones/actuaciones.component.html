@@ -2,6 +2,13 @@
   <app-panel></app-panel>
 
   <main class="main-content">
+    @if (!puedeLeer()) {
+      <section class="acceso-restringido">
+        <div class="acceso-icono">🔒</div>
+        <h1>Acceso restringido</h1>
+        <p>Tu usuario no tiene el permiso de acceder al contenido de ACTUACIONES para consultar este módulo.</p>
+      </section>
+    } @else {
     <header class="page-header">
       <div>
         <h1>Gestión Integral de Actuaciones</h1>
@@ -139,10 +146,11 @@
         }
       </aside>
     </div>
+    }
   </main>
 </div>
 
-@if (modalNueva) {
+@if (puedeLeer() && modalNueva) {
   <div class="modal-backdrop" (click)="cerrarNueva()">
     <section class="modal-card" (click)="$event.stopPropagation()">
       <header class="modal-header">
