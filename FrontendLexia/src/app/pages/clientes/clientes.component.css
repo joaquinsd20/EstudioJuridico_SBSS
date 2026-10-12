@@ -847,3 +847,11 @@
   border-color: #374151 !important;
   color: #e5e7eb !important;
 }
+
+/* Tarjeta de acceso restringido */
+.acceso-restringido { max-width: 600px; margin: 122px auto 0; padding: 48px 32px; text-align: center; background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; box-shadow: 0 4px 18px rgba(15,23,42,.04); }
+.acceso-restringido .acceso-icono { font-size: 22px; margin-bottom: 14px; }
+.acceso-restringido h1 { margin: 0 0 14px; color: #1e293b; font-size: 24px; }
+.acceso-restringido p { margin: 0; color: #94a3b8; font-size: 14px; line-height: 1.5; }
+:host-context(.tema-oscuro-global) .acceso-restringido, .tema-oscuro .acceso-restringido { background: #111827; border-color: #334155; color: #e5e7eb; }
+:host-context(.tema-oscuro-global) .acceso-restringido h1, .tema-oscuro .acceso-restringido h1 { color: #e5e7eb; }

@@ -39,6 +39,7 @@ export class ActuacionesComponent implements OnInit {
   hayPaginaSiguiente = false;
   private readonly cdr = inject(ChangeDetectorRef);
   readonly auth = inject(AuthService);
+  readonly puedeLeer = () => this.auth.tienePermiso('ACTUACION_LEER');
 
   actuaciones: ActuacionLista[] = [];
   detalle: ActuacionDetalle | null = null;
@@ -66,7 +67,7 @@ export class ActuacionesComponent implements OnInit {
   readonly tiposEvento = ['AUDIENCIA', 'REUNION_CLIENTE', 'LLAMADA', 'DILIGENCIA', 'PRESENTACION', 'VIDEOCONFERENCIA', 'REVISION', 'INTERNO'];
   readonly categoriasDocumento = ['DEMANDA', 'CONTESTACION', 'RECURSO', 'ESCRITO', 'RESOLUCION', 'NOTIFICACION', 'CARGO', 'CONTRATO', 'PODER', 'PRUEBA', 'INFORME', 'MULTIMEDIA', 'CORREO', 'CLIENTE', 'OTRO'];
 
-  ngOnInit(): void { this.cargarTodo(); }
+  ngOnInit(): void { if (this.puedeLeer()) this.cargarTodo(); }
 
   cargarTodo(seleccionarUuid?: string): void {
     this.pagina = 0;
