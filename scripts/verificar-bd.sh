@@ -105,8 +105,25 @@ echo "  Sabado: $(q "SELECT fn_es_dia_habil(DATE_ADD(CURRENT_DATE, INTERVAL (7 -
 titulo "5. Flujo de aprobacion del calendario judicial"
 check "Entradas APROBADO afectan el computo" \
   "$(q "SELECT fn_es_dia_habil((SELECT fecha_inicio FROM calendario_judicial WHERE estado='APROBADO' AND tipo='FERIADO_NACIONAL' LIMIT 1), NULL);")" "0"
-check "Entradas PROPUESTO NO afectan el computo" \
-  "$(q "SELECT IFNULL((SELECT fn_es_dia_habil(fecha_inicio,'La Libertad') FROM calendario_judicial WHERE estado='PROPUESTO' LIMIT 1),1);")" "1"
+# Se prueba sobre un dia que se SABE habil, en una transaccion que se deshace.
+# Antes se miraba la suspension PROPUESTA de la semilla, que cae en "hoy + 20":
+# si ese dia era sabado, domingo o feriado, fn_es_dia_habil daba 0 con o sin la
+# suspension y esto fallaba sin que nada estuviera mal (118 de cada 366 dias; el
+# 2026-10-12 cayo en domingo 1 de noviembre, feriado). Tampoco probaba nada en
+# esos dias. Ahora la misma entrada se mira PROPUESTA (debe seguir habil) y
+# APROBADA (debe dejar de serlo): el segundo resultado es el control del primero.
+APROBACION="$(q "
+START TRANSACTION;
+SET @d := fn_siguiente_dia_habil(DATE_ADD(CURRENT_DATE, INTERVAL 19 DAY), 'La Libertad');
+INSERT INTO calendario_judicial (estudio_id, fecha_inicio, fecha_fin, tipo, descripcion, ambito, estado, usuario_registro_id)
+VALUES (1, @d, @d, 'SUSPENSION_PLAZOS', 'verificar-bd: prueba de aprobacion', 'La Libertad', 'PROPUESTO', 1);
+SET @propuesto := fn_es_dia_habil(@d, 'La Libertad');
+UPDATE calendario_judicial SET estado = 'APROBADO' WHERE id = LAST_INSERT_ID();
+SET @aprobado := fn_es_dia_habil(@d, 'La Libertad');
+ROLLBACK;
+SELECT CONCAT(@propuesto, '/', @aprobado);")"
+check "Entradas PROPUESTO NO afectan el computo" "${APROBACION%/*}" "1"
+check "La misma entrada APROBADA si lo afecta" "${APROBACION#*/}" "0"
 
 titulo "6. Dashboard — no debe depender de la fecha de hoy"
 echo "  Plazos vencidos:      $(q "SELECT COUNT(*) FROM plazos WHERE activo=1 AND fecha_vencimiento < CURRENT_DATE AND estado NOT IN ('CUMPLIDO','PRESENTADO','CANCELADO');") (esperado 2)"
