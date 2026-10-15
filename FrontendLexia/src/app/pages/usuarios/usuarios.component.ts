@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Subject, catchError, debounceTime, distinctUntilChanged, finalize, of, startWith, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -11,6 +11,7 @@ import {
 } from '../../core/models/usuario.models';
 import { AuthService } from '../../core/services/auth.service';
 import { UsuarioService } from '../../core/services/usuario.service';
+import { FotoUsuarioComponent } from '../../core/components/foto-usuario.component';
 import { PanelComponent } from '../panel/panel.component';
 
 /** Accion pendiente de confirmar: desactivar o restablecer no se hacen de un clic. */
@@ -43,12 +44,12 @@ function formularioVacio(): GuardarUsuario {
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [PanelComponent, FormsModule, DatePipe],
+  imports: [PanelComponent, FotoUsuarioComponent, FormsModule, DatePipe],
   templateUrl: './usuarios.component.html',
   styleUrl: './usuarios.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class UsuariosComponent implements OnInit {
+export class UsuariosComponent implements OnInit, OnDestroy {
 
   private readonly service = inject(UsuarioService);
   private readonly auth = inject(AuthService);
@@ -86,6 +87,219 @@ export class UsuariosComponent implements OnInit {
   readonly copiado = signal(false);
   readonly confirmacion = signal<Confirmacion | null>(null);
   formulario: GuardarUsuario = formularioVacio();
+  fotoSeleccionada: File | null = null;
+  vistaPreviaFoto: string | null = null;
+  posicionFotoX = 50;
+  posicionFotoY = 50;
+  readonly diametroRecorte = 300;
+  // Son signals porque las dimensiones se obtienen de un evento Image.onload,
+  // fuera del ciclo de detección de cambios del componente OnPush/zoneless.
+  readonly anchoFotoRender = signal(this.diametroRecorte);
+  readonly altoFotoRender = signal(this.diametroRecorte);
+  readonly anchoSuperficieFoto = computed(() => this.anchoFotoRender()
+    + Math.max(0, this.anchoFotoRender() - this.diametroRecorte) + 60);
+  readonly altoSuperficieFoto = computed(() => this.altoFotoRender()
+    + Math.max(0, this.altoFotoRender() - this.diametroRecorte) + 60);
+  readonly arrastrandoFoto = signal(false);
+  readonly procesandoEncuadre = signal(false);
+  readonly fotoAplicada = signal(false);
+
+  private urlVistaPreviaLocal: string | null = null;
+  private urlFotoAplicadaLocal: string | null = null;
+  private fotoProcesadaParaSubir: File | null = null;
+  private inicioArrastreFoto: { x: number; y: number; escala: number; posicionX: number; posicionY: number } | null = null;
+
+  ngOnDestroy(): void {
+    this.liberarVistaPreviaLocal();
+  }
+
+  /** Centra el recorte sin modificar la imagen original seleccionada. */
+  centrarFoto(): void {
+    this.posicionFotoX = 50;
+    this.posicionFotoY = 50;
+  }
+
+  /** Posición de la imagen bajo el círculo de recorte; el lienzo deja visible la foto completa. */
+  izquierdaFoto(): number {
+    return (this.anchoSuperficieFoto() - this.diametroRecorte) / 2
+      - Math.max(0, this.anchoFotoRender() - this.diametroRecorte) * this.posicionFotoX / 100;
+  }
+
+  superiorFoto(): number {
+    return (this.altoSuperficieFoto() - this.diametroRecorte) / 2
+      - Math.max(0, this.altoFotoRender() - this.diametroRecorte) * this.posicionFotoY / 100;
+  }
+
+  anchoFotoPorcentaje(): number { return this.anchoFotoRender() / this.anchoSuperficieFoto() * 100; }
+  altoFotoPorcentaje(): number { return this.altoFotoRender() / this.altoSuperficieFoto() * 100; }
+  izquierdaFotoPorcentaje(): number { return this.izquierdaFoto() / this.anchoSuperficieFoto() * 100; }
+  superiorFotoPorcentaje(): number { return this.superiorFoto() / this.altoSuperficieFoto() * 100; }
+  izquierdaMarcoPorcentaje(): number {
+    return (this.anchoSuperficieFoto() - this.diametroRecorte) / 2 / this.anchoSuperficieFoto() * 100;
+  }
+  superiorMarcoPorcentaje(): number {
+    return (this.altoSuperficieFoto() - this.diametroRecorte) / 2 / this.altoSuperficieFoto() * 100;
+  }
+  anchoMarcoPorcentaje(): number { return this.diametroRecorte / this.anchoSuperficieFoto() * 100; }
+  altoMarcoPorcentaje(): number { return this.diametroRecorte / this.altoSuperficieFoto() * 100; }
+  maxAnchoEditorFoto(): number { return Math.min(this.anchoSuperficieFoto(), 560); }
+
+  /** Inicia el arrastre con ratón, lápiz o pantalla táctil. */
+  iniciarArrastreFoto(evento: PointerEvent): void {
+    if (!this.fotoSeleccionada || (evento.pointerType === 'mouse' && evento.button !== 0)) return;
+    evento.preventDefault();
+    const objetivo = evento.currentTarget as HTMLElement | null;
+    objetivo?.setPointerCapture?.(evento.pointerId);
+    const anchoVisible = objetivo?.getBoundingClientRect().width ?? this.anchoSuperficieFoto();
+    this.inicioArrastreFoto = {
+      x: evento.clientX,
+      y: evento.clientY,
+      escala: anchoVisible > 0 ? anchoVisible / this.anchoSuperficieFoto() : 1,
+      posicionX: this.posicionFotoX,
+      posicionY: this.posicionFotoY
+    };
+    this.arrastrandoFoto.set(true);
+  }
+
+  arrastrarFoto(evento: PointerEvent): void {
+    const inicio = this.inicioArrastreFoto;
+    if (!inicio || !this.fotoSeleccionada) return;
+    const excesoX = Math.max(0, this.anchoFotoRender() - this.diametroRecorte);
+    const excesoY = Math.max(0, this.altoFotoRender() - this.diametroRecorte);
+    if (excesoX > 0) {
+      this.posicionFotoX = this.limitarPorcentaje(inicio.posicionX
+        - (((evento.clientX - inicio.x) / inicio.escala) / excesoX) * 100);
+    }
+    if (excesoY > 0) {
+      this.posicionFotoY = this.limitarPorcentaje(inicio.posicionY
+        - (((evento.clientY - inicio.y) / inicio.escala) / excesoY) * 100);
+    }
+  }
+
+  terminarArrastreFoto(evento?: PointerEvent): void {
+    if (evento) {
+      const objetivo = evento.currentTarget as HTMLElement | null;
+      if (objetivo?.hasPointerCapture?.(evento.pointerId)) objetivo.releasePointerCapture(evento.pointerId);
+    }
+    this.inicioArrastreFoto = null;
+    this.arrastrandoFoto.set(false);
+  }
+
+  private limitarPorcentaje(valor: number): number {
+    return Math.max(0, Math.min(100, valor));
+  }
+
+  private cargarDimensionesFoto(url: string): void {
+    const imagen = new Image();
+    imagen.onload = () => {
+      // Una carga antigua no debe sobreescribir las dimensiones de la última foto.
+      if (this.vistaPreviaFoto !== url) return;
+      const ladoMenor = Math.min(imagen.naturalWidth, imagen.naturalHeight);
+      if (!ladoMenor) return;
+      this.anchoFotoRender.set(this.diametroRecorte * imagen.naturalWidth / ladoMenor);
+      this.altoFotoRender.set(this.diametroRecorte * imagen.naturalHeight / ladoMenor);
+    };
+    imagen.onerror = () => {
+      if (this.vistaPreviaFoto !== url || this.fotoSeleccionada === null) return;
+      this.reiniciarFoto();
+      this.errorFormulario.set('No se pudo abrir la imagen seleccionada. Prueba con otro archivo PNG, JPG, WEBP o GIF.');
+    };
+    imagen.src = url;
+  }
+
+  private liberarVistaPreviaLocal(): void {
+    if (this.urlVistaPreviaLocal) URL.revokeObjectURL(this.urlVistaPreviaLocal);
+    if (this.urlFotoAplicadaLocal) URL.revokeObjectURL(this.urlFotoAplicadaLocal);
+    this.urlVistaPreviaLocal = null;
+    this.urlFotoAplicadaLocal = null;
+    this.fotoProcesadaParaSubir = null;
+  }
+
+  private reiniciarFoto(): void {
+    this.liberarVistaPreviaLocal();
+    this.fotoSeleccionada = null;
+    this.vistaPreviaFoto = null;
+    this.anchoFotoRender.set(this.diametroRecorte);
+    this.altoFotoRender.set(this.diametroRecorte);
+    this.fotoAplicada.set(false);
+    this.procesandoEncuadre.set(false);
+    this.centrarFoto();
+    this.terminarArrastreFoto();
+  }
+
+  /** Genera la vista previa final con el mismo recorte que se enviará al backend. */
+  aplicarEncuadreFoto(): void {
+    if (!this.fotoSeleccionada || this.procesandoEncuadre()) return;
+    const archivoOriginal = this.fotoSeleccionada;
+    this.procesandoEncuadre.set(true);
+    this.recortarFotoParaSubir(archivoOriginal)
+      .then(archivoProcesado => {
+        // Si se cerró el formulario o se eligió otra foto durante el proceso,
+        // descartamos el resultado atrasado sin crear una URL temporal huérfana.
+        if (this.fotoSeleccionada !== archivoOriginal) return;
+        if (this.urlFotoAplicadaLocal) URL.revokeObjectURL(this.urlFotoAplicadaLocal);
+        this.fotoProcesadaParaSubir = archivoProcesado;
+        this.urlFotoAplicadaLocal = URL.createObjectURL(archivoProcesado);
+        this.vistaPreviaFoto = this.urlFotoAplicadaLocal;
+        this.fotoAplicada.set(true);
+        this.errorFormulario.set(null);
+      })
+      .catch(() => this.errorFormulario.set('No se pudo aplicar el encuadre. Prueba con otra imagen.'))
+      .finally(() => this.procesandoEncuadre.set(false));
+  }
+
+  /** Permite ajustar de nuevo la foto original sin perderla ni volver a seleccionarla. */
+  editarEncuadreFoto(): void {
+    if (!this.fotoSeleccionada || !this.urlVistaPreviaLocal) return;
+    this.vistaPreviaFoto = this.urlVistaPreviaLocal;
+    this.fotoAplicada.set(false);
+    this.fotoProcesadaParaSubir = null;
+  }
+
+  private recortarFotoParaSubir(archivo: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const imagen = new Image();
+      const urlTemporal = URL.createObjectURL(archivo);
+      imagen.onload = () => {
+        try {
+          const lado = Math.min(imagen.naturalWidth, imagen.naturalHeight);
+          if (!lado || !imagen.naturalWidth || !imagen.naturalHeight) {
+            URL.revokeObjectURL(urlTemporal);
+            reject(new Error('La imagen no tiene dimensiones válidas.'));
+            return;
+          }
+          const x = (imagen.naturalWidth - lado) * this.posicionFotoX / 100;
+          const y = (imagen.naturalHeight - lado) * this.posicionFotoY / 100;
+          const canvas = document.createElement('canvas');
+          canvas.width = 512;
+          canvas.height = 512;
+          const contexto = canvas.getContext('2d');
+          if (!contexto) {
+            URL.revokeObjectURL(urlTemporal);
+            reject(new Error('No se pudo procesar la foto.'));
+            return;
+          }
+          contexto.drawImage(imagen, x, y, lado, lado, 0, 0, 512, 512);
+          canvas.toBlob(blob => {
+            URL.revokeObjectURL(urlTemporal);
+            if (!blob) {
+              reject(new Error('No se pudo procesar la foto.'));
+              return;
+            }
+            resolve(new File([blob], 'foto-usuario.jpg', { type: 'image/jpeg' }));
+          }, 'image/jpeg', 0.9);
+        } catch {
+          URL.revokeObjectURL(urlTemporal);
+          reject(new Error('No se pudo procesar la foto.'));
+        }
+      };
+      imagen.onerror = () => {
+        URL.revokeObjectURL(urlTemporal);
+        reject(new Error('No se pudo leer la imagen.'));
+      };
+      imagen.src = urlTemporal;
+    });
+  }
 
   // ---- reasignacion --------------------------------------------------------
   /** Usuario cuyo trabajo se esta reasignando (se guarda para recargar su ficha). */
@@ -251,6 +465,7 @@ export class UsuariosComponent implements OnInit {
 
   nuevo(): void {
     this.formulario = formularioVacio();
+    this.reiniciarFoto();
     this.editando.set(null);
     this.errorFormulario.set(null);
     this.formularioAbierto.set(true);
@@ -265,12 +480,69 @@ export class UsuariosComponent implements OnInit {
           tipoDocumento: d.tipoDocumento ?? '', numeroDocumento: d.numeroDocumento ?? '',
           numeroColegiatura: d.numeroColegiatura ?? '', roles: [...d.roles]
         };
+        this.reiniciarFoto();
+        this.vistaPreviaFoto = d.fotoUrl;
+        this.fotoSeleccionada = null;
         this.detalle.set(null);
         this.editando.set(uuid);
         this.errorFormulario.set(null);
         this.formularioAbierto.set(true);
       },
       error: (e: HttpErrorResponse) => this.errorPagina.set(this.mensaje(e, 'No se pudo abrir el usuario.'))
+    });
+  }
+
+  seleccionarFoto(evento: Event): void {
+    const input = evento.target as HTMLInputElement;
+    const archivo = input.files?.[0] ?? null;
+    if (!archivo) return;
+    const permitidos = ['image/png', 'image/jpeg', 'image/webp', 'image/gif'];
+    if (!permitidos.includes(archivo.type) || archivo.size > 5 * 1024 * 1024) {
+      this.errorFormulario.set('Solo se permiten imágenes PNG, JPG, WEBP o GIF de hasta 5 MB.');
+      input.value = '';
+      return;
+    }
+
+    this.liberarVistaPreviaLocal();
+    this.fotoSeleccionada = archivo;
+    this.fotoAplicada.set(false);
+    this.fotoProcesadaParaSubir = null;
+    const urlPrevia = URL.createObjectURL(archivo);
+    this.urlVistaPreviaLocal = urlPrevia;
+    this.vistaPreviaFoto = urlPrevia;
+    this.anchoFotoRender.set(this.diametroRecorte);
+    this.altoFotoRender.set(this.diametroRecorte);
+    this.centrarFoto();
+    this.terminarArrastreFoto();
+    this.cargarDimensionesFoto(urlPrevia);
+    // Permite volver a seleccionar el mismo archivo en caso de que el usuario lo cambie.
+    input.value = '';
+    this.errorFormulario.set(null);
+  }
+
+  private subirFotoSiCorresponde(
+    uuid: string,
+    alTerminar: () => void,
+    alFallar?: () => void
+  ): void {
+    if (!this.fotoSeleccionada) { alTerminar(); return; }
+    // La imagen ya fue recortada al pulsar Aplicar; se envía ese mismo archivo,
+    // evitando que el recorte de la vista previa y el archivo enviado difieran.
+    if (!this.fotoProcesadaParaSubir || !this.fotoAplicada()) {
+      this.guardando.set(false);
+      this.errorFormulario.set('Primero centra la foto y pulsa Aplicar.');
+      alFallar?.();
+      return;
+    }
+    this.service.subirFoto(uuid, this.fotoProcesadaParaSubir).subscribe({
+      next: () => {
+        if (uuid === this.miUuid()) this.auth.restaurarSesion().subscribe();
+        alTerminar();
+      },
+      error: (e: HttpErrorResponse) => {
+        this.alFallarGuardado(e);
+        alFallar?.();
+      }
     });
   }
 
@@ -286,6 +558,12 @@ export class UsuariosComponent implements OnInit {
 
   cerrarFormulario(): void {
     this.formularioAbierto.set(false);
+    this.liberarVistaPreviaLocal();
+    this.fotoSeleccionada = null;
+    this.vistaPreviaFoto = null;
+    this.fotoAplicada.set(false);
+    this.procesandoEncuadre.set(false);
+    this.terminarArrastreFoto();
   }
 
   guardar(): void {
@@ -297,6 +575,10 @@ export class UsuariosComponent implements OnInit {
       this.errorFormulario.set('Asigna al menos un rol.');
       return;
     }
+    if (this.fotoSeleccionada && !this.fotoAplicada()) {
+      this.errorFormulario.set('Centra la foto y pulsa Aplicar antes de guardar el usuario.');
+      return;
+    }
 
     this.guardando.set(true);
     this.errorFormulario.set(null);
@@ -304,14 +586,21 @@ export class UsuariosComponent implements OnInit {
 
     if (uuid) {
       this.service.actualizar(uuid, this.formulario).subscribe({
-        next: () => this.alGuardar(),
+        next: () => this.subirFotoSiCorresponde(uuid, () => this.alGuardar()),
         error: (e: HttpErrorResponse) => this.alFallarGuardado(e)
       });
     } else {
       this.service.crear(this.formulario).subscribe({
         next: credencial => {
-          this.alGuardar();
-          this.mostrarCredencial(credencial);
+          const uuidCreado = credencial.uuidPublico;
+          // Si falla la foto, el siguiente intento actualiza esa cuenta ya creada
+          // en vez de darla de alta otra vez. La clave temporal sigue disponible.
+          this.editando.set(uuidCreado);
+          this.subirFotoSiCorresponde(
+            uuidCreado,
+            () => { this.alGuardar(); this.mostrarCredencial(credencial); },
+            () => this.mostrarCredencial(credencial)
+          );
         },
         error: (e: HttpErrorResponse) => this.alFallarGuardado(e)
       });
@@ -321,6 +610,7 @@ export class UsuariosComponent implements OnInit {
   private alGuardar(): void {
     this.guardando.set(false);
     this.formularioAbierto.set(false);
+    this.liberarVistaPreviaLocal();
     this.recargar();
   }
 

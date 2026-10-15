@@ -95,6 +95,16 @@ app-root {
   overflow: hidden !important;
 }
 
+/* El ancho del contenido acompaña el estado contraído del panel en escritorio. */
+@media (min-width: 1081px) {
+  .layout-wrapper > app-panel.sidebar-collapsed {
+    width: 78px !important;
+    min-width: 78px !important;
+    max-width: 78px !important;
+    flex: 0 0 78px !important;
+  }
+}
+
 
 /* =========================================================
    PARTE BLANCA
@@ -378,14 +388,14 @@ html.tema-oscuro-global .topbar-movil {
     margin-left: 0 !important;
   }
 
-  /* Hueco para la barra movil (56px) dentro del cajon. */
+  /* La barra movil mide 56px: no agregar espacio vertical extra. */
   .layout-wrapper > app-panel .sidebar {
-    padding-top: 74px;
+    padding-top: 56px;
   }
 
-  /* La barra movil es fija: el contenido empieza por debajo. */
+  /* El contenido comienza justo debajo de la barra movil fija. */
   .layout-wrapper > .main-content {
-    padding-top: 74px !important;
+    padding-top: 56px !important;
   }
 
   /* Con el cajon abierto no se puede desplazar el fondo. */

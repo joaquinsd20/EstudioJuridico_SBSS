@@ -47,7 +47,7 @@ public class UsuarioGestionRepositoryJdbc {
      */
     public List<UsuarioLista> listar(Integer estudioId, String texto, String rol, String estado) {
         StringBuilder sql = new StringBuilder("""
-                SELECT u.uuid_publico, u.codigo_usuario, u.nombre_completo, u.email, u.cargo,
+                SELECT u.uuid_publico, u.codigo_usuario, u.nombre_completo, u.email, u.cargo, u.foto_url,
                        u.estado, u.activo, u.debe_cambiar_password, u.ultimo_acceso,
                        GROUP_CONCAT(r.codigo ORDER BY r.nivel_acceso DESC) roles
                   FROM usuarios u
@@ -90,6 +90,7 @@ public class UsuarioGestionRepositoryJdbc {
                 rs.getString("nombre_completo"),
                 rs.getString("email"),
                 rs.getString("cargo"),
+                rs.getString("foto_url"),
                 rs.getString("estado"),
                 rs.getBoolean("activo"),
                 rs.getBoolean("debe_cambiar_password"),
@@ -123,7 +124,7 @@ public class UsuarioGestionRepositoryJdbc {
         }
 
         String sql = """
-                SELECT u.uuid_publico, u.codigo_usuario, u.nombre_completo, u.email, u.cargo,
+                SELECT u.uuid_publico, u.codigo_usuario, u.nombre_completo, u.email, u.cargo, u.foto_url,
                        u.estado, u.activo, u.debe_cambiar_password, u.ultimo_acceso,
                        (SELECT GROUP_CONCAT(r.codigo ORDER BY r.nivel_acceso DESC)
                           FROM usuarios_roles ur
@@ -144,6 +145,7 @@ public class UsuarioGestionRepositoryJdbc {
                 rs.getString("nombre_completo"),
                 rs.getString("email"),
                 rs.getString("cargo"),
+                rs.getString("foto_url"),
                 rs.getString("estado"),
                 rs.getBoolean("activo"),
                 rs.getBoolean("debe_cambiar_password"),
@@ -199,7 +201,7 @@ public class UsuarioGestionRepositoryJdbc {
         }
         Map<String, Object> p = Map.of("id", id);
         return jdbc.queryForObject("""
-                SELECT u.uuid_publico, u.codigo_usuario, u.nombres, u.apellidos, u.email, u.cargo,
+                SELECT u.uuid_publico, u.codigo_usuario, u.nombres, u.apellidos, u.email, u.cargo, u.foto_url,
                        u.telefono, u.tipo_documento, u.numero_documento, u.numero_colegiatura,
                        u.estado, u.activo, u.debe_cambiar_password, u.ultimo_acceso, u.fecha_creacion,
                        (SELECT GROUP_CONCAT(r.codigo ORDER BY r.nivel_acceso DESC)
@@ -213,6 +215,7 @@ public class UsuarioGestionRepositoryJdbc {
                 rs.getString("apellidos"),
                 rs.getString("email"),
                 rs.getString("cargo"),
+                rs.getString("foto_url"),
                 rs.getString("telefono"),
                 rs.getString("tipo_documento"),
                 rs.getString("numero_documento"),
@@ -721,4 +724,12 @@ public class UsuarioGestionRepositoryJdbc {
     private static String vacioANulo(String valor) {
         return valor == null || valor.isBlank() ? null : valor.trim();
     }
+    public void actualizarFoto(String uuid, Integer estudioId, String fotoUrl, Long autorId) {
+        int actualizadas = jdbc.update("UPDATE usuarios SET foto_url = :fotoUrl, usuario_modificacion_id = :autorId " +
+                "WHERE uuid_publico = :uuid AND estudio_id = :estudioId AND tipo_usuario = 'INTERNO'",
+                new MapSqlParameterSource().addValue("fotoUrl", fotoUrl).addValue("autorId", autorId)
+                        .addValue("uuid", uuid).addValue("estudioId", estudioId));
+        if (actualizadas != 1) throw new IllegalArgumentException("No se encontró el usuario del estudio.");
+    }
+
 }
