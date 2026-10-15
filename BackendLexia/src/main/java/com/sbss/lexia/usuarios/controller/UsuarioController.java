@@ -11,10 +11,12 @@ import com.sbss.lexia.usuarios.dto.UsuarioDtos.RolOpcion;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioDetalle;
 import com.sbss.lexia.usuarios.dto.UsuarioDtos.UsuarioLista;
 import com.sbss.lexia.usuarios.service.UsuarioService;
+import com.sbss.lexia.usuarios.service.FotoUsuarioService;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.CacheControl;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Personal del estudio (RF-01).
@@ -40,6 +44,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final FotoUsuarioService fotoUsuarioService;
 
     @GetMapping
     @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
@@ -85,6 +90,18 @@ public class UsuarioController {
         return usuarioService.detalle(uuid);
     }
 
+    /** Foto de perfil protegida por JWT y validada contra el estudio de la sesión. */
+    @GetMapping("/foto/{nombre}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<byte[]> foto(@PathVariable String nombre) {
+        FotoUsuarioService.ContenidoFoto foto = fotoUsuarioService.leer(nombre);
+        return ResponseEntity.ok()
+                .contentType(foto.tipoContenido())
+                .cacheControl(CacheControl.noCache().cachePrivate())
+                .header("X-Content-Type-Options", "nosniff")
+                .body(foto.contenido());
+    }
+
     /** Alta. Devuelve la contrasena temporal UNA sola vez. */
     @PostMapping
     @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
@@ -104,6 +121,12 @@ public class UsuarioController {
      * Baja logica. No hay DELETE: un usuario es responsable de expedientes y
      * plazos con FK NOT NULL, asi que borrarlo es imposible por diseno (regla 5).
      */
+    @PostMapping(value = "/{uuid}/foto", consumes = "multipart/form-data")
+    @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
+    public java.util.Map<String, String> subirFoto(@PathVariable String uuid, @RequestPart("archivo") MultipartFile archivo) {
+        return java.util.Map.of("fotoUrl", fotoUsuarioService.guardar(uuid, archivo));
+    }
+
     @PostMapping("/{uuid}/desactivar")
     @PreAuthorize("hasAuthority('USUARIO_GESTIONAR')")
     public ResponseEntity<Void> desactivar(@PathVariable String uuid) {

@@ -124,7 +124,10 @@
 
                   <td>
                     <div class="person-cell">
-                      <div class="mini-avatar">{{ iniciales(u.nombreCompleto) }}</div>
+                      <div class="mini-avatar">
+                        <app-foto-usuario [fotoUrl]="u.fotoUrl" [alt]="'Foto de ' + u.nombreCompleto"
+                                          [iniciales]="iniciales(u.nombreCompleto)"></app-foto-usuario>
+                      </div>
                       <div>
                         <strong>{{ u.nombreCompleto }}</strong>
                         <small>{{ u.email }}</small>
@@ -237,8 +240,12 @@
   <div class="modal-fondo" (click)="cerrarDetalle()">
     <div class="modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
 
-      <header class="modal-cabecera">
-        <div>
+      <header class="modal-cabecera ficha-cabecera">
+        <div class="ficha-avatar">
+          <app-foto-usuario [fotoUrl]="d.fotoUrl" [alt]="'Foto de ' + d.nombres + ' ' + d.apellidos"
+                            [iniciales]="iniciales(d.nombres + ' ' + d.apellidos)"></app-foto-usuario>
+        </div>
+        <div class="ficha-identidad">
           <span class="eyebrow">{{ d.codigoUsuario }}</span>
           <h2>{{ d.nombres }} {{ d.apellidos }}</h2>
           <p>{{ d.email }}</p>
@@ -305,6 +312,74 @@
       </header>
 
       <div class="campos">
+        <div class="ancho foto-campo">
+          <span class="foto-titulo">Foto del usuario</span>
+
+          @if (fotoSeleccionada && vistaPreviaFoto && !fotoAplicada()) {
+            <div class="foto-editor"
+                 [style.max-width.px]="maxAnchoEditorFoto()"
+                 [style.aspect-ratio]="anchoSuperficieFoto() + ' / ' + altoSuperficieFoto()"
+                 [class.arrastrando]="arrastrandoFoto()"
+                 (pointerdown)="iniciarArrastreFoto($event)"
+                 (pointermove)="arrastrarFoto($event)"
+                 (pointerup)="terminarArrastreFoto($event)"
+                 (pointercancel)="terminarArrastreFoto($event)"
+                 role="img" aria-label="Arrastra la fotografía completa para elegir el encuadre circular">
+              <div class="foto-superficie">
+                <img class="foto-imagen-arrastrable" [src]="vistaPreviaFoto"
+                     [style.width.%]="anchoFotoPorcentaje()" [style.height.%]="altoFotoPorcentaje()"
+                     [style.left.%]="izquierdaFotoPorcentaje()" [style.top.%]="superiorFotoPorcentaje()"
+                     alt="" draggable="false" decoding="async">
+                <div class="foto-marco-circular" aria-hidden="true"
+                     [style.left.%]="izquierdaMarcoPorcentaje()"
+                     [style.top.%]="superiorMarcoPorcentaje()"
+                     [style.width.%]="anchoMarcoPorcentaje()"
+                     [style.height.%]="altoMarcoPorcentaje()">
+                  <span class="foto-linea vertical linea-uno"></span>
+                  <span class="foto-linea vertical linea-dos"></span>
+                  <span class="foto-linea horizontal linea-tres"></span>
+                  <span class="foto-linea horizontal linea-cuatro"></span>
+                </div>
+              </div>
+            </div>
+            <p class="foto-ayuda-encuadre">Arrastra la foto con el mouse. La imagen completa se mantiene visible; el círculo indica el recorte del avatar.</p>
+            <div class="controles-recorte">
+              <button type="button" class="boton-encuadre" (click)="centrarFoto()">Centrar foto</button>
+              <button type="button" class="boton-encuadre boton-encuadre-aplicar"
+                      [disabled]="procesandoEncuadre()" (click)="aplicarEncuadreFoto()">
+                {{ procesandoEncuadre() ? 'Aplicando…' : 'Aplicar' }}
+              </button>
+            </div>
+          } @else if (fotoSeleccionada && fotoAplicada() && vistaPreviaFoto) {
+            <div class="foto-aplicada">
+              <div class="foto-aplicada-avatar">
+                <img [src]="vistaPreviaFoto" alt="Vista previa de la foto recortada" decoding="async">
+              </div>
+              <div class="foto-aplicada-info">
+                <strong>Encuadre aplicado</strong>
+                <span>Esta es la foto que se enviará al guardar el usuario.</span>
+                <button type="button" class="boton-encuadre" (click)="editarEncuadreFoto()">Cambiar encuadre</button>
+              </div>
+            </div>
+          } @else if (vistaPreviaFoto) {
+            <div class="foto-existente">
+              <div class="foto-actual-avatar">
+                <app-foto-usuario [fotoUrl]="vistaPreviaFoto" alt="Foto de perfil actual"
+                                  [iniciales]="iniciales(formulario.nombres + ' ' + formulario.apellidos)"></app-foto-usuario>
+              </div>
+              <span>Foto actual. Selecciona otra imagen para cambiarla.</span>
+            </div>
+          } @else {
+            <div class="foto-existente">
+              <div class="foto-actual-avatar foto-sin-imagen">{{ iniciales(formulario.nombres + ' ' + formulario.apellidos) }}</div>
+              <span>Selecciona una foto. Podrás moverla y aplicar el encuadre antes de guardarla.</span>
+            </div>
+          }
+
+          <label class="selector-archivo" for="lexiaUsuarioFoto">{{ fotoSeleccionada ? 'Elegir otra imagen' : 'Seleccionar imagen' }}</label>
+          <input id="lexiaUsuarioFoto" class="entrada-foto" name="lexiaUsuarioFoto" type="file"
+                 accept="image/png,image/jpeg,image/webp,image/gif" (change)="seleccionarFoto($event)">
+        </div>
         <label>Nombres *
           <input name="lexiaUsuarioNombres" [(ngModel)]="formulario.nombres" maxlength="100" autocomplete="off" required>
         </label>

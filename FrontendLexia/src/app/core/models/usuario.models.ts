@@ -6,6 +6,7 @@ export interface UsuarioLista {
   nombreCompleto: string;
   email: string;
   cargo: string | null;
+  fotoUrl: string | null;
   estado: 'ACTIVO' | 'INACTIVO' | 'BLOQUEADO';
   activo: boolean;
   debeCambiarPassword: boolean;
@@ -88,6 +89,7 @@ export interface UsuarioDetalle {
   apellidos: string;
   email: string;
   cargo: string | null;
+  fotoUrl: string | null;
   telefono: string | null;
   tipoDocumento: string | null;
   numeroDocumento: string | null;

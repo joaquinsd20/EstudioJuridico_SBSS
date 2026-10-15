@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, HostBinding, computed, inject, signal } from '@angular/core';
 import {
   Router,
   RouterLink,
@@ -7,18 +7,28 @@ import {
 
 import { AuthService } from '../../core/services/auth.service';
 import { TemaService } from '../../core/services/tema.service';
+import { FotoUsuarioComponent } from '../../core/components/foto-usuario.component';
 
 @Component({
   selector: 'app-panel',
   standalone: true,
   imports: [
     RouterLink,
-    RouterLinkActive
+    RouterLinkActive,
+    FotoUsuarioComponent
   ],
   templateUrl: './panel.component.html',
   styleUrl: './panel.component.css'
 })
 export class PanelComponent {
+
+  /** Estado persistente del menú para conservar la preferencia al cambiar de módulo. */
+  readonly colapsado = signal(false);
+
+  @HostBinding('class.sidebar-collapsed')
+  get claseSidebarColapsado(): boolean {
+    return this.colapsado();
+  }
 
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
@@ -34,11 +44,28 @@ export class PanelComponent {
    */
   readonly temaOscuro = this.tema.oscuro;
 
+  constructor() {
+    try {
+      this.colapsado.set(localStorage.getItem('lexia-sidebar-collapsed') === 'true');
+    } catch {
+      // Si el almacenamiento está bloqueado, el menú sigue funcionando en memoria.
+    }
+  }
+
+  alternarSidebar(): void {
+    const siguiente = !this.colapsado();
+    this.colapsado.set(siguiente);
+    try {
+      localStorage.setItem('lexia-sidebar-collapsed', String(siguiente));
+    } catch {
+      // La preferencia no se persiste, pero el cambio visual se aplica.
+    }
+  }
+
   /**
    * Usuario actualmente autenticado.
    */
   readonly usuario = this.auth.usuario;
-
   /**
    * Controla si el usuario puede acceder al módulo Usuarios.
    */

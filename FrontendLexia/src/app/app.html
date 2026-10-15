@@ -12,7 +12,9 @@
       <span class="topbar-toggle-bar" [class.open]="menuAbierto()"></span>
     </button>
 
-    <span class="topbar-brand">LEXIA</span>
+    @if (!menuAbierto()) {
+      <span class="topbar-brand">LEXIA</span>
+    }
 
   </header>
 

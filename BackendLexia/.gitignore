@@ -36,3 +36,7 @@ build/
 # Este archivo guarda la contrasena de la base de datos de desarrollo.
 # NUNCA se versiona: es la unica razon por la que esta en el .gitignore.
 .env.local
+
+# Fotos privadas del personal (incluye la ubicacion heredada de versiones anteriores).
+storage/
+uploads/

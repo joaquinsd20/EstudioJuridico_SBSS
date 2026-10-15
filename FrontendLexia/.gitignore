@@ -1,44 +1,96 @@
-# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+# =========================
+# ANGULAR / NODE
+# =========================
+node_modules/
+dist/
+.angular/
+.cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Compiled output
-/dist
-/tmp
-/out-tsc
-/bazel-out
+# =========================
+# SPRING BOOT / MAVEN
+# =========================
+target/
+*.class
+*.jar
+*.war
+*.ear
+HELP.md
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# Node
-/node_modules
-npm-debug.log
-yarn-error.log
+# =========================
+# ARCHIVOS SUBIDOS POR LOS USUARIOS
+# =========================
+# Los documentos viven en el disco del servidor, nunca en el repositorio
+# (regla 7 de CLAUDE.md: ningun binario en la base, y tampoco en git).
+# Sin esta regla vuelven solos en el primer `git add -A` de quien suba un
+# documento en local.
+BackendLexia/storage/
+# Fotos heredadas de versiones anteriores; las cargas runtime no deben subirse.
+BackendLexia/uploads/
+# Las mismas carpetas cuando Spring se inicia desde la raiz del repositorio.
+/storage/
+/uploads/
 
-# IDEs and editors
+# =========================
+# IDEs
+# =========================
 .idea/
-.project
+*.iml
+*.iws
+*.ipr
+.vscode/
+.apt_generated
 .classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
 
-# Visual Studio Code
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/mcp.json
-.history/*
-
-# Miscellaneous
-/.angular/cache
-.sass-cache/
-/connect.lock
-/coverage
-/libpeerconnection.log
-testem.log
-/typings
-__screenshots__/
-
-# System files
-.DS_Store
+# =========================
+# WINDOWS / MACOS
+# =========================
 Thumbs.db
+Desktop.ini
+.DS_Store
+
+# =========================
+# ENVIRONMENT / SECRETS
+# =========================
+# application-local.yml es el archivo que application-dev.yml le recomienda
+# al equipo para poner sus credenciales de MySQL. Si deja de estar aqui, la
+# primera persona que siga esa recomendacion sube su contrasena al repo.
+.env
+.env.*
+# Salen las plantillas: no traen contrasena y sin ellas nadie sabe que
+# variables hay que rellenar.
+!.env.ejemplo
+!.env.example
+!.env.sample
+application-local.properties
+application-local.yml
+
+# =========================
+# LOGS
+# =========================
+*.log
+logs/
+
+# =========================
+# Local, fuera del repo compartido
+# =========================
+Claude outputs/
+docs/
+CLAUDE.md
+
+# Fotos privadas del personal: se guardan en disco y no deben subirse a Git.
+BackendLexia/storage/
+BackendLexia/uploads/
+# Rutas equivalentes cuando Spring Boot arranca desde la raiz del repositorio.
+/storage/
+/uploads/
