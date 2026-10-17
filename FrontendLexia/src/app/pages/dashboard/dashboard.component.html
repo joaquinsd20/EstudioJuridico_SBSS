@@ -282,7 +282,21 @@
                             <div class="chat-bubble-row" [class.mio]="msg.esMio">
                               <div class="chat-bubble">
                                 <p>{{ msg.texto }}</p>
-                                <span class="chat-time">{{ msg.fechaHora }}</span>
+                                <div class="chat-message-meta">
+                                  <span class="chat-time">{{ msg.fechaHora }}</span>
+                                  @if (msg.esMio) {
+                                    <span class="chat-read-status" [class.is-read]="msg.leido"
+                                          [attr.aria-label]="msg.leido ? 'Mensaje visto' : (msg.id < 0 ? 'Enviando mensaje' : 'Mensaje enviado')">
+                                      @if (msg.id < 0) {
+                                        <span class="chat-read-icon" aria-hidden="true">◷</span> Enviando
+                                      } @else if (msg.leido) {
+                                        <span class="chat-read-icon" aria-hidden="true">✓✓</span> Visto
+                                      } @else {
+                                        <span class="chat-read-icon" aria-hidden="true">✓</span> Enviado
+                                      }
+                                    </span>
+                                  }
+                                </div>
                               </div>
                             </div>
                           } @empty {

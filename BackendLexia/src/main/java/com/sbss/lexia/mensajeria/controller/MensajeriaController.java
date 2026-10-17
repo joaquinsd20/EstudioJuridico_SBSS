@@ -41,6 +41,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class MensajeriaController {
 
     private final MensajeriaService service;
+    private final com.sbss.lexia.mensajeria.service.MensajeriaEventosService eventos;
+
+    @GetMapping(value = "/eventos", produces = org.springframework.http.MediaType.TEXT_EVENT_STREAM_VALUE)
+    @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
+    public org.springframework.web.servlet.mvc.method.annotation.SseEmitter eventos() {
+        return eventos.conectar(com.sbss.lexia.shared.security.SesionActual.usuarioId());
+    }
 
     @GetMapping("/bandeja")
     @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
@@ -68,7 +75,7 @@ public class MensajeriaController {
             @RequestParam(defaultValue = "0") int pagina,
             @RequestParam(defaultValue = "10") int tamano,
             @RequestParam(required = false) String busqueda) {
-        return service.contactos(pagina, tamano, busqueda);
+        return service.contactos(Math.max(0, pagina), Math.max(1, Math.min(tamano, 100)), busqueda);
     }
 
     @GetMapping("/no-leidos")
@@ -81,7 +88,7 @@ public class MensajeriaController {
     @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
     public Conversacion conversacion(@PathVariable long id,
                                      @RequestParam(defaultValue = "100") int limite) {
-        return service.conversacion(id, limite);
+        return service.conversacion(id, Math.max(1, Math.min(limite, 100)));
     }
 
     /**
@@ -97,7 +104,7 @@ public class MensajeriaController {
     @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
     public Conversacion conversacionConContacto(@PathVariable long contactoId,
                                                @RequestParam(defaultValue = "100") int limite) {
-        return service.abrirConContacto(contactoId, limite);
+        return service.abrirConContacto(contactoId, Math.max(1, Math.min(limite, 100)));
     }
 
     @PostMapping("/mensajes")

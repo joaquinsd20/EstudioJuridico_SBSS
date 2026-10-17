@@ -66,14 +66,23 @@ public class MensajeriaRepositoryJdbc {
      * ultimos, y el front sube el scroll al final, que es donde esta lo nuevo.
      */
     /**
-     * Consulta una conversacion sin modificar el estado de lectura.
+     * Abre un chat: su cabecera y los ultimos mensajes.
      *
-     * Este metodo tambien se usa para refrescar mensajes en segundo plano; por
-     * tanto, un GET no debe marcar mensajes como leidos. La lectura se registra
-     * explicitamente al abrir el hilo, mediante PATCH /leer, o cuando llegan
-     * mensajes nuevos a un hilo que permanece visible.
+     * Marcar leido va DENTRO y ANTES de leer los mensajes, por dos motivos que
+     * apuntan en la misma direccion:
+     *
+     *  - Si se marcara despues, los mensajes devueltos dirian `leido = false`
+     *    mientras el contador de la bandeja ya dice 0. La misma conversacion
+     *    seria "leida" y "no leida" segun donde se mire.
+     *  - Abrir un chat es la accion que significa "los he visto". Exigir una
+     *    llamada aparte al endpoint /leer dejaria el aviso encendido para
+     *    siempre si el cliente no la hace.
+     *
+     * Va en transaccion con la cabecera porque son una lectura y una escritura
+     * del mismo estado: si la cabecera es de otro usuario, no se debe haber
+     * tocado nada antes de comprobarlo.
      */
-    @Transactional(readOnly = true)
+    @Transactional
     public Conversacion conversacion(long conversacionId, int limite) {
         List<Conversacion> cabecera = jdbc.query("""
                 SELECT c.id,
@@ -94,6 +103,9 @@ public class MensajeriaRepositoryJdbc {
         if (cabecera.isEmpty()) {
             throw new RecursoNoEncontradoException("La conversacion no existe o no es tuya");
         }
+
+        // Antes de leer los mensajes, no despues: ver la nota de arriba.
+        marcarLeida(conversacionId);
 
         List<Mensaje> mensajes = jdbc.query("""
                 SELECT m.id, m.conversacion_id, m.emisor_id, u.nombre_completo emisor_nombre,
@@ -188,6 +200,23 @@ public class MensajeriaRepositoryJdbc {
 
         long destino = destinos.get(0);
         return guardarMensaje(conversacionId, emisor, destino, texto);
+    }
+
+    /** Destinatario autorizado del hilo; nunca se acepta desde el cliente. */
+    public long destinatarioDeConversacion(long conversacionId) {
+        var ids = jdbc.query("""
+                SELECT CASE WHEN c.usuario_a_id = :yo THEN c.usuario_b_id ELSE c.usuario_a_id END
+                  FROM conversaciones c
+                  JOIN usuarios u ON u.id = CASE WHEN c.usuario_a_id = :yo THEN c.usuario_b_id ELSE c.usuario_a_id END
+                 WHERE c.id = :id AND c.activo = 1
+                   AND (c.usuario_a_id = :yo OR c.usuario_b_id = :yo)
+                   AND u.estudio_id = :estudio AND u.activo = 1 AND u.estado = 'ACTIVO'
+                   AND u.tipo_usuario = 'INTERNO'
+                """, new MapSqlParameterSource().addValue("yo", SesionActual.usuarioId())
+                .addValue("id", conversacionId).addValue("estudio", SesionActual.estudioId()),
+                (rs, i) -> rs.getLong(1));
+        if (ids.isEmpty()) throw new RecursoNoEncontradoException("Conversación no disponible");
+        return ids.get(0);
     }
 
     private String validarCuerpo(String cuerpo) {
@@ -313,8 +342,9 @@ public class MensajeriaRepositoryJdbc {
     private Boolean usuarioA(long conversacionId) {
         return jdbc.query("""
                 SELECT usuario_a_id FROM conversaciones
-                 WHERE id = :id AND (usuario_a_id = :yo OR usuario_b_id = :yo)
-                """, Map.of("id", conversacionId, "yo", SesionActual.usuarioId()),
+                 WHERE id = :id AND activo = 1 AND (usuario_a_id = :yo OR usuario_b_id = :yo)
+                   AND EXISTS (SELECT 1 FROM usuarios u WHERE u.id = :yo AND u.estudio_id = :estudio AND u.activo = 1)
+                """, Map.of("id", conversacionId, "yo", SesionActual.usuarioId(), "estudio", SesionActual.estudioId()),
                 (rs, i) -> (Boolean) (rs.getLong("usuario_a_id") == SesionActual.usuarioId()))
                 .stream()
                 .findFirst()
