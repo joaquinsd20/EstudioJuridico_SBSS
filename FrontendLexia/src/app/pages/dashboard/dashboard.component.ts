@@ -16,6 +16,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { PanelComponent } from '../panel/panel.component';
+import { FotoUsuarioComponent } from '../../core/components/foto-usuario.component';
 import { AuthService } from '../../core/services/auth.service';
 import {
   AgendaHoy,
@@ -67,7 +68,7 @@ interface ItemAgendaVista {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, PanelComponent],
+  imports: [CommonModule, FormsModule, RouterLink, PanelComponent, FotoUsuarioComponent],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.css'
 })
@@ -92,16 +93,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   readonly primerNombre = computed(() => {
     const nombre = this.usuario()?.nombreCompleto?.trim();
-    if (!nombre) { return 'Sofía'; }
-    return nombre.split(/\s+/)[0];
+    return nombre ? nombre.split(/\s+/)[0] : 'Usuario';
   });
 
-  readonly estudioNombre = computed(() => {
-    const u = this.usuario();
-    return u?.rolPrincipal === 'ADMINISTRADOR'
-      ? 'ESTUDIO RAMÍREZ ABOGADOS'
-      : 'ESTUDIO JURÍDICO SBSS';
+  /** Resto del nombre real de la sesión; no usar apellidos de demostración. */
+  readonly restoNombre = computed(() => {
+    const partes = this.usuario()?.nombreCompleto?.trim().split(/\s+/) ?? [];
+    return partes.slice(1).join(' ');
   });
+
+  /** Iniciales de respaldo cuando el usuario no tiene foto o no se puede cargar. */
+  readonly inicialesUsuario = computed(() => {
+    const partes = this.usuario()?.nombreCompleto?.trim().split(/\s+/).filter(Boolean) ?? [];
+    if (!partes.length) return '?';
+    return (partes[0][0] + (partes.length > 1 ? partes[partes.length - 1][0] : '')).toUpperCase();
+  });
+
+  readonly estudioNombre = computed(() => 'ESTUDIO JURÍDICO SBSS');
 
   readonly saludo = computed(() => {
     const hora = Number(
@@ -404,7 +412,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   alternarNotif(): void {
     this.notifAbierto.update(v => !v);
-    this.mensajesAbierto.set(false);
+    this.cerrarMensajes();
     this.perfilAbierto.set(false);
   }
 
@@ -435,22 +443,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // La lista de colegas se pide al ABRIR, no al montar. Es una llamada por
     // visita al dashboard para un panel que casi siempre esta cerrado.
+    this.textoNuevoMensaje = '';
     if (abre) {
       this.mensajesSvc.abrir();
+    } else {
+      this.mensajesSvc.cerrarPanel();
     }
+  }
+
+  /** Cierra la interfaz y desactiva el sondeo del servicio de mensajes. */
+  cerrarMensajes(): void {
+    this.mensajesAbierto.set(false);
+    this.mensajesSvc.cerrarPanel();
   }
 
   seleccionarChat(id: number): void {
     this.mensajesSvc.seleccionarContacto(id);
   }
 
+  buscarContacto(evento: Event): void {
+    const texto = (evento.target as HTMLInputElement).value;
+    if (texto.trim() !== this.mensajesSvc.busquedaContactos().trim()) {
+      this.textoNuevoMensaje = '';
+    }
+    this.mensajesSvc.buscarContactos(texto);
+  }
+
+  limpiarBusquedaContactos(): void {
+    this.textoNuevoMensaje = '';
+    this.mensajesSvc.buscarContactos('');
+  }
+
   enviarMensaje(): void {
     const contacto = this.mensajesSvc.contactoSeleccionado();
     const texto = this.textoNuevoMensaje;
-    if (contacto && texto.trim()) {
-      this.mensajesSvc.enviarMensaje(contacto.id, texto);
-      this.textoNuevoMensaje = '';
-    }
+    if (!contacto || !texto.trim() || this.mensajesSvc.enviando()) return;
+
+    this.mensajesSvc.enviarMensaje(contacto.id, texto).subscribe(enviado => {
+      // Conserva el texto si el backend rechaza el mensaje para que se pueda
+      // corregir o volver a intentar sin tener que escribirlo de nuevo.
+      if (enviado) this.textoNuevoMensaje = '';
+    });
   }
 
   // ─── Perfil de Usuario ────────────────────────────────────────────────────
@@ -459,10 +492,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   alternarPerfil(): void {
     this.perfilAbierto.update(v => !v);
     this.notifAbierto.set(false);
-    this.mensajesAbierto.set(false);
+    this.cerrarMensajes();
   }
 
   cerrarSesion(): void {
+    this.cerrarMensajes();
     this.auth.cerrarSesion();
     this.router.navigate(['/login']);
   }
@@ -526,6 +560,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.cerrarMensajes();
     this.destruido.next();
     this.destruido.complete();
     clearTimeout(this.busquedaTimer);

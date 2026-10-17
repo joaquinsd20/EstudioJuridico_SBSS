@@ -3,6 +3,7 @@ package com.sbss.lexia.mensajeria.controller;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Conversacion;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Contacto;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Mensaje;
+import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.PaginaContactos;
 import com.sbss.lexia.mensajeria.service.MensajeriaService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -56,7 +57,24 @@ public class MensajeriaController {
     @GetMapping("/contactos")
     @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
     public List<Contacto> contactos() {
+        // Compatibilidad con consumidores anteriores. El dashboard usa la ruta
+        // paginada para no cargar el directorio completo.
         return service.contactos();
+    }
+
+    @GetMapping("/contactos/pagina")
+    @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
+    public PaginaContactos contactosPagina(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "10") int tamano,
+            @RequestParam(required = false) String busqueda) {
+        return service.contactos(pagina, tamano, busqueda);
+    }
+
+    @GetMapping("/no-leidos")
+    @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
+    public long contarNoLeidos() {
+        return service.contarNoLeidos();
     }
 
     @GetMapping("/conversaciones/{id}")
@@ -88,6 +106,20 @@ public class MensajeriaController {
         return service.enviar(peticion.destinatarioId(), peticion.cuerpo());
     }
 
+    /**
+     * Envío vinculado explícitamente al hilo abierto. El backend valida que el
+     * usuario autenticado participe en esa conversación y deduce al destinatario
+     * del par de participantes; el cliente ya no puede cruzar un mensaje al
+     * mandar accidentalmente un ID de usuario en lugar de un ID de conversación.
+     */
+    @PostMapping("/conversaciones/{id}/mensajes")
+    @PreAuthorize("hasAuthority('MENSAJERIA_ENVIAR')")
+    public Mensaje enviarEnConversacion(
+            @PathVariable long id,
+            @Valid @RequestBody EnviarMensajeConversacionRequest peticion) {
+        return service.enviarEnConversacion(id, peticion.cuerpo());
+    }
+
     @PatchMapping("/conversaciones/{id}/leer")
     @PreAuthorize("hasAuthority('MENSAJERIA_LEER')")
     public long marcarLeida(@PathVariable long id) {
@@ -102,6 +134,12 @@ public class MensajeriaController {
     public record EnviarMensajeRequest(
             @NotNull(message = "Falta el destinatario")
             Long destinatarioId,
+            @NotBlank(message = "El mensaje no puede estar vacio")
+            @Size(max = 4000, message = "El mensaje no puede pasar de 4000 caracteres")
+            String cuerpo) {
+    }
+
+    public record EnviarMensajeConversacionRequest(
             @NotBlank(message = "El mensaje no puede estar vacio")
             @Size(max = 4000, message = "El mensaje no puede pasar de 4000 caracteres")
             String cuerpo) {

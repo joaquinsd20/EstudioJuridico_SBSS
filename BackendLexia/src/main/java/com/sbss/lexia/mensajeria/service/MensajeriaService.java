@@ -3,6 +3,7 @@ package com.sbss.lexia.mensajeria.service;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Conversacion;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Contacto;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Mensaje;
+import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.PaginaContactos;
 import com.sbss.lexia.mensajeria.repository.MensajeriaRepositoryJdbc;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,14 @@ public class MensajeriaService {
 
     public List<Contacto> contactos() {
         return repo.contactos();
+    }
+
+    public PaginaContactos contactos(int pagina, int tamano, String busqueda) {
+        return repo.contactos(pagina, tamano, busqueda);
+    }
+
+    public long contarNoLeidos() {
+        return repo.contarNoLeidos();
     }
 
     /**
@@ -46,6 +55,10 @@ public class MensajeriaService {
 
     public Mensaje enviar(long destinatarioId, String cuerpo) {
         return repo.enviar(destinatarioId, cuerpo);
+    }
+
+    public Mensaje enviarEnConversacion(long conversacionId, String cuerpo) {
+        return repo.enviarEnConversacion(conversacionId, cuerpo);
     }
 
     public long marcarLeida(long conversacionId) {

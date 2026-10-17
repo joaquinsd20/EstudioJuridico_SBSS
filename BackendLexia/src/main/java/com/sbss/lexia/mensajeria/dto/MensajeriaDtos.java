@@ -74,11 +74,25 @@ public final class MensajeriaDtos {
      */
     public record Contacto(
             Long id,
+            Long conversacionId,
             String nombre,
             String cargo,
             String foto,
             String ultimoMensaje,
             LocalDateTime fechaUltimoMensaje,
             long noLeidos) {
+    }
+
+    /**
+     * Página del directorio de contactos. Solo devuelve los registros de la
+     * página solicitada; `hayMas` permite al frontend cargar al acercarse al
+     * final del scroll sin descargar todo el directorio.
+     */
+    public record PaginaContactos(
+            List<Contacto> items,
+            int pagina,
+            int tamano,
+            long total,
+            boolean hayMas) {
     }
 }
