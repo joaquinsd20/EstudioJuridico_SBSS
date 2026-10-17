@@ -3,6 +3,7 @@ package com.sbss.lexia.mensajeria.repository;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Conversacion;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Contacto;
 import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.Mensaje;
+import com.sbss.lexia.mensajeria.dto.MensajeriaDtos.PaginaContactos;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
@@ -14,6 +15,7 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -64,23 +66,14 @@ public class MensajeriaRepositoryJdbc {
      * ultimos, y el front sube el scroll al final, que es donde esta lo nuevo.
      */
     /**
-     * Abre un chat: su cabecera y los ultimos mensajes.
+     * Consulta una conversacion sin modificar el estado de lectura.
      *
-     * Marcar leido va DENTRO y ANTES de leer los mensajes, por dos motivos que
-     * apuntan en la misma direccion:
-     *
-     *  - Si se marcara despues, los mensajes devueltos dirian `leido = false`
-     *    mientras el contador de la bandeja ya dice 0. La misma conversacion
-     *    seria "leida" y "no leida" segun donde se mire.
-     *  - Abrir un chat es la accion que significa "los he visto". Exigir una
-     *    llamada aparte al endpoint /leer dejaria el aviso encendido para
-     *    siempre si el cliente no la hace.
-     *
-     * Va en transaccion con la cabecera porque son una lectura y una escritura
-     * del mismo estado: si la cabecera es de otro usuario, no se debe haber
-     * tocado nada antes de comprobarlo.
+     * Este metodo tambien se usa para refrescar mensajes en segundo plano; por
+     * tanto, un GET no debe marcar mensajes como leidos. La lectura se registra
+     * explicitamente al abrir el hilo, mediante PATCH /leer, o cuando llegan
+     * mensajes nuevos a un hilo que permanece visible.
      */
-    @Transactional
+    @Transactional(readOnly = true)
     public Conversacion conversacion(long conversacionId, int limite) {
         List<Conversacion> cabecera = jdbc.query("""
                 SELECT c.id,
@@ -101,9 +94,6 @@ public class MensajeriaRepositoryJdbc {
         if (cabecera.isEmpty()) {
             throw new RecursoNoEncontradoException("La conversacion no existe o no es tuya");
         }
-
-        // Antes de leer los mensajes, no despues: ver la nota de arriba.
-        marcarLeida(conversacionId);
 
         List<Mensaje> mensajes = jdbc.query("""
                 SELECT m.id, m.conversacion_id, m.emisor_id, u.nombre_completo emisor_nombre,
@@ -148,26 +138,85 @@ public class MensajeriaRepositoryJdbc {
             throw new ParametroInvalidoException("No puedes enviarte un mensaje a ti mismo");
         }
 
-        // El cuerpo se valida ANTES de tocar la base de datos. Si se validara
-        // despues, un mensaje vacio a un contacto nuevo crearia la conversacion
-        // y luego la transaccion la desharia: dos viajes de ida y vuelta para
-        // acabar con un 400, y el `ultimo_mensaje` de la fila de al lado
-        // cambiando mientras tanto.
-        String texto = cuerpo.strip();
-
-        if (texto.isEmpty() || texto.length() > CARRACTERES_MAXIMOS) {
-            throw new ParametroInvalidoException("El mensaje no puede estar vacio ni pasar de "
-                    + CARRACTERES_MAXIMOS + " caracteres");
-        }
+        String texto = validarCuerpo(cuerpo);
+        validarDestinatario(destino);
 
         long conversacionId = buscarConversacionEntre(destino);
-
         if (conversacionId == 0) {
             conversacionId = crearConversacion(destino);
         }
 
-        // El par ordenado es lo que hace que UNIQUE (usuario_a_id, usuario_b_id)
-        // recognize que (3,7) y (7,3) son la misma conversacion.
+        return guardarMensaje(conversacionId, emisor, destino, texto);
+    }
+
+    /**
+     * Nuevo flujo preferido: envía sobre el ID de conversación que el usuario
+     * abrió, no vuelve a resolver el destinatario a partir de un ID ambiguo.
+     * La pertenencia y el estudio se comprueban de nuevo en el servidor antes
+     * de insertar. Si la interfaz intenta enviar con una conversación distinta
+     * a la seleccionada, la API rechaza la operación en lugar de cruzar chats.
+     */
+    @Transactional
+    public Mensaje enviarEnConversacion(long conversacionId, String cuerpo) {
+        long emisor = SesionActual.usuarioId();
+        String texto = validarCuerpo(cuerpo);
+
+        List<Long> destinos = jdbc.query("""
+                SELECT CASE WHEN c.usuario_a_id = :yo
+                            THEN c.usuario_b_id ELSE c.usuario_a_id END destinatario_id
+                  FROM conversaciones c
+                  JOIN usuarios destino
+                    ON destino.id = CASE WHEN c.usuario_a_id = :yo
+                                         THEN c.usuario_b_id ELSE c.usuario_a_id END
+                 WHERE c.id = :conversacion
+                   AND c.activo = 1
+                   AND (c.usuario_a_id = :yo OR c.usuario_b_id = :yo)
+                   AND destino.estudio_id = :estudio
+                   AND destino.tipo_usuario = 'INTERNO'
+                   AND destino.activo = 1
+                   AND destino.estado = 'ACTIVO'
+                """, new MapSqlParameterSource()
+                .addValue("yo", emisor)
+                .addValue("conversacion", conversacionId)
+                .addValue("estudio", SesionActual.estudioId()),
+                (rs, i) -> rs.getLong("destinatario_id"));
+
+        if (destinos.isEmpty()) {
+            throw new RecursoNoEncontradoException(
+                    "La conversación no existe, no te pertenece o el destinatario ya no está disponible");
+        }
+
+        long destino = destinos.get(0);
+        return guardarMensaje(conversacionId, emisor, destino, texto);
+    }
+
+    private String validarCuerpo(String cuerpo) {
+        if (cuerpo == null) {
+            throw new ParametroInvalidoException("El mensaje no puede estar vacío");
+        }
+        String texto = cuerpo.strip();
+        if (texto.isEmpty() || texto.length() > CARRACTERES_MAXIMOS) {
+            throw new ParametroInvalidoException("El mensaje no puede estar vacío ni pasar de "
+                    + CARRACTERES_MAXIMOS + " caracteres");
+        }
+        return texto;
+    }
+
+    private void validarDestinatario(long destino) {
+        Long existe = jdbc.queryForObject("""
+                SELECT COUNT(*) FROM usuarios
+                 WHERE id = :id
+                   AND estudio_id = :estudio
+                   AND tipo_usuario = 'INTERNO'
+                   AND activo = 1
+                   AND estado = 'ACTIVO'
+                """, Map.of("id", destino, "estudio", SesionActual.estudioId()), Long.class);
+        if (existe == null || existe == 0L) {
+            throw new ParametroInvalidoException("El destinatario no existe o no pertenece al estudio");
+        }
+    }
+
+    private Mensaje guardarMensaje(long conversacionId, long emisor, long destino, String texto) {
         long menor = Math.min(emisor, destino);
 
         KeyHolder kh = new GeneratedKeyHolder();
@@ -181,14 +230,9 @@ public class MensajeriaRepositoryJdbc {
 
         long mensajeId = kh.getKey() == null ? 0 : kh.getKey().longValue();
 
-        // Se actualiza el ultimo mensaje y se marca como leido por el emisor.
-        // `GREATEST` para el puntero de lectura: si el emisor ya habia leido mas
-        // alla (porque el otro le respondio), bajarlo dejaria sus propios
-        // mensajes como no leidos.
+        // El puntero de lectura solo avanza para el emisor actual. La columna
+        // procede de comparar su ID con el extremo menor del par validado.
         String columna = emisor == menor ? "leido_a_por_id" : "leido_b_por_id";
-        // String normal y no text block: aqui hay que intercalar `columna` a
-        // mitad de la sentencia, y un text block exige un salto de linea
-        // justo despues de las tres comillas, con lo que no se puede cortar.
         jdbc.update("UPDATE conversaciones"
                         + " SET ultimo_mensaje_id = :mensaje,"
                         + "     ultimo_mensaje_texto = :texto,"
@@ -200,10 +244,6 @@ public class MensajeriaRepositoryJdbc {
                         .addValue("texto", recorte(texto))
                         .addValue("conversacion", conversacionId));
 
-        // El emisor es el usuario de la sesion: `propio = true` por definicion,
-        // y no ha visto nada todavia, asi que `leido = false`. El nombre se
-        // consulta porque SesionActual no lo expone y el mensaje recien creado
-        // tiene que llegar al front con la misma forma que los que relee.
         String nombreEmisor = jdbc.queryForObject(
                 "SELECT nombre_completo FROM usuarios WHERE id = :id",
                 Map.of("id", emisor), String.class);
@@ -310,7 +350,7 @@ public class MensajeriaRepositoryJdbc {
         long yo = SesionActual.usuarioId();
 
         return jdbc.query("""
-                SELECT u.id, u.nombre_completo, u.cargo, u.foto_url,
+                SELECT u.id, c.id conversacion_id, u.nombre_completo, u.cargo, u.foto_url,
                        c.ultimo_mensaje_texto, c.fecha_ultimo_mensaje,
                        COALESCE((SELECT COUNT(*) FROM mensajes m
                                   WHERE m.conversacion_id = c.id
@@ -335,6 +375,7 @@ public class MensajeriaRepositoryJdbc {
                         .addValue("estudio", SesionActual.estudioId()),
                 (rs, i) -> new Contacto(
                         rs.getLong("id"),
+                        rs.getObject("conversacion_id", Long.class),
                         rs.getString("nombre_completo"),
                         rs.getString("cargo"),
                         rs.getString("foto_url"),
@@ -342,6 +383,121 @@ public class MensajeriaRepositoryJdbc {
                         rs.getTimestamp("fecha_ultimo_mensaje") == null
                                 ? null : rs.getTimestamp("fecha_ultimo_mensaje").toLocalDateTime(),
                         rs.getLong("no_leidos")));
+    }
+
+    /**
+     * Directorio paginado de contactos. Solo consulta una ventana de usuarios;
+     * la búsqueda se filtra en MySQL y nunca descarga el directorio completo al
+     * navegador. El ID de usuario y el ID de conversación se devuelven separados
+     * para evitar confundir destinatarios con conversaciones.
+     */
+    public PaginaContactos contactos(int pagina, int tamano, String busqueda) {
+        long yo = SesionActual.usuarioId();
+        int page = Math.max(0, pagina);
+        int size = Math.min(Math.max(tamano, 10), 50);
+        long offset = (long) page * size;
+        String termino = busqueda == null ? "" : busqueda.strip().toLowerCase();
+        String patron = termino.isEmpty() ? "" : "%" + termino + "%";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("yo", yo)
+                .addValue("estudio", SesionActual.estudioId())
+                .addValue("buscar", patron)
+                .addValue("limite", size)
+                .addValue("offset", offset);
+
+        List<Contacto> items = jdbc.query("""
+                SELECT pagina.id,
+                       pagina.conversacion_id,
+                       pagina.nombre_completo,
+                       pagina.cargo,
+                       pagina.foto_url,
+                       pagina.ultimo_mensaje_texto,
+                       pagina.fecha_ultimo_mensaje,
+                       COALESCE((
+                           SELECT COUNT(*)
+                             FROM mensajes m
+                            WHERE m.conversacion_id = pagina.conversacion_id
+                              AND m.emisor_id <> :yo
+                              AND m.leido_por_id IS NULL
+                       ), 0) no_leidos
+                  FROM (
+                       SELECT u.id,
+                              c.id conversacion_id,
+                              u.nombre_completo,
+                              u.cargo,
+                              u.foto_url,
+                              c.ultimo_mensaje_texto,
+                              c.fecha_ultimo_mensaje
+                         FROM usuarios u
+                         LEFT JOIN conversaciones c
+                           ON c.activo = 1
+                          AND c.usuario_a_id = LEAST(:yo, u.id)
+                          AND c.usuario_b_id = GREATEST(:yo, u.id)
+                        WHERE u.estudio_id = :estudio
+                          AND u.tipo_usuario = 'INTERNO'
+                          AND u.activo = 1
+                          AND u.estado = 'ACTIVO'
+                          AND u.id <> :yo
+                          AND (:buscar = ''
+                               OR LOWER(u.nombre_completo) LIKE :buscar
+                               OR LOWER(COALESCE(u.email, '')) LIKE :buscar
+                               OR LOWER(COALESCE(u.cargo, '')) LIKE :buscar)
+                        ORDER BY (c.fecha_ultimo_mensaje IS NULL),
+                                 c.fecha_ultimo_mensaje DESC,
+                                 u.nombre_completo,
+                                 u.id
+                        LIMIT :limite OFFSET :offset
+                  ) pagina
+                 ORDER BY (pagina.fecha_ultimo_mensaje IS NULL),
+                          pagina.fecha_ultimo_mensaje DESC,
+                          pagina.nombre_completo,
+                          pagina.id
+                """, params, (rs, i) -> new Contacto(
+                rs.getLong("id"),
+                rs.getObject("conversacion_id", Long.class),
+                rs.getString("nombre_completo"),
+                rs.getString("cargo"),
+                rs.getString("foto_url"),
+                rs.getString("ultimo_mensaje_texto"),
+                rs.getTimestamp("fecha_ultimo_mensaje") == null
+                        ? null : rs.getTimestamp("fecha_ultimo_mensaje").toLocalDateTime(),
+                rs.getLong("no_leidos")));
+
+        Long total = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                  FROM usuarios u
+                 WHERE u.estudio_id = :estudio
+                   AND u.tipo_usuario = 'INTERNO'
+                   AND u.activo = 1
+                   AND u.estado = 'ACTIVO'
+                   AND u.id <> :yo
+                   AND (:buscar = ''
+                        OR LOWER(u.nombre_completo) LIKE :buscar
+                        OR LOWER(COALESCE(u.email, '')) LIKE :buscar
+                        OR LOWER(COALESCE(u.cargo, '')) LIKE :buscar)
+                """, new MapSqlParameterSource()
+                .addValue("estudio", SesionActual.estudioId())
+                .addValue("yo", yo)
+                .addValue("buscar", patron), Long.class);
+
+        long cantidad = total == null ? 0L : total;
+        boolean hayMas = ((long) page + 1L) * size < cantidad;
+        return new PaginaContactos(items, page, size, cantidad, hayMas);
+    }
+
+    /** Contador global de no leídos sin tener que descargar todos los contactos. */
+    public long contarNoLeidos() {
+        Long total = jdbc.queryForObject("""
+                SELECT COUNT(*)
+                  FROM mensajes m
+                  JOIN conversaciones c ON c.id = m.conversacion_id
+                 WHERE c.activo = 1
+                   AND (c.usuario_a_id = :yo OR c.usuario_b_id = :yo)
+                   AND m.emisor_id <> :yo
+                   AND m.leido_por_id IS NULL
+                """, Map.of("yo", SesionActual.usuarioId()), Long.class);
+        return total == null ? 0L : total;
     }
 
     /**
@@ -378,13 +534,29 @@ public class MensajeriaRepositoryJdbc {
             throw new ParametroInvalidoException("El destinatario no existe o no pertenece al estudio");
         }
 
-        jdbc.update("""
-                INSERT INTO conversaciones (usuario_a_id, usuario_b_id, fecha_ultimo_mensaje)
-                VALUES (:menor, :mayor, NOW(3))
-                """, Map.of("menor", Math.min(emisor, otroUsuarioId),
-                        "mayor", Math.max(emisor, otroUsuarioId)));
+        try {
+            // Un hilo vacío no debe parecer una conversación reciente: la fecha
+            // del último mensaje queda NULL hasta que realmente se envíe algo.
+            jdbc.update("""
+                    INSERT INTO conversaciones (usuario_a_id, usuario_b_id)
+                    VALUES (:menor, :mayor)
+                    """, Map.of("menor", Math.min(emisor, otroUsuarioId),
+                            "mayor", Math.max(emisor, otroUsuarioId)));
+        } catch (DuplicateKeyException carrera) {
+            // Si ambos participantes abren el primer chat simultáneamente, el
+            // UNIQUE del par deja una sola conversación. Recuperamos esa fila
+            // en vez de mostrar un error o crear un hilo gemelo.
+            long existente = buscarConversacionEntre(otroUsuarioId);
+            if (existente > 0) return existente;
+            throw new ParametroInvalidoException(
+                    "No se pudo abrir la conversación. Comprueba que el contacto siga activo.");
+        }
 
-        return buscarConversacionEntre(otroUsuarioId);
+        long creada = buscarConversacionEntre(otroUsuarioId);
+        if (creada == 0) {
+            throw new RecursoNoEncontradoException("No se pudo recuperar la conversación recién creada");
+        }
+        return creada;
     }
 
     /**
