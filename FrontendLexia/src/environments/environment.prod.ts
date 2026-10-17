@@ -9,4 +9,5 @@
 export const environment = {
   produccion: true,
   apiUrl: '/api/v1',
+  mensajeriaEventos: false, /*AGREGADOOOO */
 };

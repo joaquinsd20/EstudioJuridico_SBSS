@@ -15,6 +15,7 @@ import {
 } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from './auth.service';
+import { MensajeriaTiempoRealService } from './mensajeria-tiempo-real.service';
 
 export interface MensajeChat {
   id: number;
@@ -99,6 +100,7 @@ export class MensajesService {
   private readonly http = inject(HttpClient);
   private readonly destroyRef = inject(DestroyRef);
   private readonly auth = inject(AuthService);
+  private readonly tiempoReal = inject(MensajeriaTiempoRealService);
   private readonly base = environment.apiUrl;
   private readonly busqueda$ = new Subject<{ texto: string; forzar: boolean }>();
 
@@ -216,6 +218,7 @@ export class MensajesService {
   }
 
   private reiniciarEstadoPorCambioDeSesion(): void {
+    this.tiempoReal.detener();
     this.revisionSesion++;
     this.revisionLectura++;
     this.secuenciaNoLeidos++;
@@ -276,6 +279,14 @@ export class MensajesService {
   /** Se llama al abrir el panel: primera página (10) y contador independiente. */
   abrir(): void {
     this.panelAbierto = true;
+    this.tiempoReal.iniciar(() => {
+      if (!this.panelAbierto || !this.auth.usuario()) return;
+      this.actualizarTotalNoLeidos();
+      if (this._paginaContactos() >= 0) {
+        this.refrescarContactosEnSegundoPlano();
+        this.refrescarConversacionEnSegundoPlano();
+      }
+    });
     this._errorContactos.set(null);
     this._contactos.set([]);
     this._paginaContactos.set(-1);
@@ -292,6 +303,7 @@ export class MensajesService {
   }
 
   cerrarPanel(): void {
+    this.tiempoReal.detener();
     // Es importante apagar el sondeo: no se debe consultar/leer un hilo oculto.
     this.panelAbierto = false;
   }

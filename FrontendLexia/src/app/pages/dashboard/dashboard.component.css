@@ -3218,3 +3218,25 @@ button.contact-item {
   background: rgba(99, 102, 241, .16);
   color: #c7d2fe;
 }
+
+/* Estado de entrega/lectura de cada mensaje propio (sin afectar el chat recibido). */
+.chat-message-meta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 7px;
+  margin-top: 4px;
+}
+.chat-message-meta .chat-time { margin-top: 0; }
+.chat-read-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: rgba(255,255,255,.85);
+  white-space: nowrap;
+}
+.chat-read-status.is-read { color: #ffffff; font-weight: 600; }
+.chat-read-icon { font-size: 12px; font-weight: 700; letter-spacing: -2px; padding-right: 2px; }

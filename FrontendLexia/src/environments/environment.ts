@@ -18,4 +18,5 @@
 export const environment = {
   produccion: false,
   apiUrl: '/api/v1',
+  mensajeriaEventos: false,
 };
