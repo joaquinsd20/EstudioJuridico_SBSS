@@ -17,25 +17,25 @@ Monorepo con dos aplicaciones y una capa de datos:
 
 ## 1. Estado actual
 
-Verificado en local el **28/09/2026** contra MySQL 9.7.1.
+La verificación vive en el **CI** (`.github/workflows/verificacion.yml`), que
+corre en cada PR y en cada push a `main` contra un MySQL 8.0 real. Estado al
+**17/10/2026**:
 
 | Item | Estado |
 |---|---|
-| Compilación del backend (123 clases) | OK |
-| Arranque de Spring Boot | OK — ~11 s |
-| Migraciones Flyway | OK — 22 migraciones aplicadas, esquema en `v22` |
-| Login JWT y RBAC | OK — 37 permisos sobre el rol `ADMINISTRADOR` |
-| 12 módulos REST (~90 endpoints) | OK — los 13 endpoints de cabecera devuelven `200` |
-| CORS `4200 → 8080` | OK |
-| Compilación de Angular (18 chunks lazy) | OK — 7.5 s |
-| Arranque del dev-server en `:4200` | OK |
-| Tests unitarios del backend | OK |
-| Tests de integración | Requieren `LEXIA_TEST_DB` (ver §10) |
-| `npm test` | **1 de 2 tests falla** (ver §12) |
+| CI de cada PR | Verde en todos los PR desde que existe (10/10/2026) |
+| Migraciones Flyway | V1–V28, esquema en `v28`; cada una con su huella en `migraciones.sha256` |
+| Backend | 17 controllers · 140 endpoints, todos con `@PreAuthorize` salvo `auth` |
+| Login JWT y RBAC | 8 roles · 39 permisos · 159 pares rol-permiso |
+| Pruebas del backend | 40 sin base de datos (guardias incluidas) · 113 contra MySQL |
+| `verificar-bd.sh` | 39/39 |
+| Pruebas del frontend | 10/10 (`npx ng test --watch=false`) |
+| Build de producción de Angular | OK |
 
-Contenido sembrado en desarrollo: **45 tablas**, 8 roles, 37 permisos, 145 pares
+Contenido sembrado en desarrollo: **46 tablas**, 8 roles, 39 permisos, 159 pares
 rol-permiso, 4 funciones SQL; 11 usuarios, 8 clientes, 10 expedientes, 14
-actuaciones, 9 plazos, 10 tareas, 9 documentos, 8 eventos de agenda.
+actuaciones, 9 plazos, 10 tareas, 9 documentos, 8 eventos de agenda, 12
+honorarios y 15 recursos de biblioteca.
 
 ---
 
@@ -105,9 +105,9 @@ EstudioJuridico_SBSS/
 │       │   ├── application-prod.yml     todo obligatorio, sin valores por defecto
 │       │   └── db/
 │       │       ├── bootstrap/            catálogo inicial del estudio
-│       │       ├── migration/            V1..V22 + LEEME.md (léelo antes de migrar)
+│       │       ├── migration/            V1..V28 + LEEME.md (léelo antes de migrar)
 │       │       └── seed/                 R__seed_desarrollo.sql (solo dev)
-│       └── test/java/com/sbss/lexia/     13 clases: unitarios + 9 *IT.java
+│       └── test/java/com/sbss/lexia/     17 clases: 5 unitarias + 12 *IT.java
 ├── FrontendLexia/
 │   ├── package.json, angular.json, tsconfig*.json
 │   └── src/app/
@@ -165,10 +165,10 @@ El perfil por defecto es `dev`; no hace falta `SPRING_PROFILES_ACTIVE`.
 `0 migrations` o si falta, el esquema está incompleto (ver §8):
 
 ```
-Successfully applied N migrations to schema `lexia_db_sbss`, now at version v22
+Successfully applied N migrations to schema `lexia_db_sbss`, now at version v28
 ```
 
-> ⚠️ `db/seed/R__seed_desarrollo.sql` hace `TRUNCATE` de 33 tablas y las vuelve a
+> ⚠️ `db/seed/R__seed_desarrollo.sql` hace `TRUNCATE` de 34 tablas y las vuelve a
 > llenar en **cada** arranque de desarrollo. Los datos locales de `lexia_db_sbss`
 > se borran. Es el comportamiento previsto (fechas relativas a `CURRENT_DATE`),
 > pero no apuntes ahí datos que quieras conservar.
@@ -302,14 +302,16 @@ cambie. Sirve para validar ese flujo.
 | Monitor judicial | `/monitor-judicial` | `/api/v1/monitor-judicial` | Completo |
 | Facturación | `/facturacion` | `/api/v1/facturacion` | Completo (honorarios, pagos, comprobantes) |
 | Usuarios | `/usuarios` | `/api/v1/usuarios` | Completo (reasignación de carga) |
-| **Dashboard** | `/dashboard` | — | **Placeholder** — HTML estático |
-| **Reportes** | `/reportes` | — | **Placeholder** — sin servicio |
-| **Escritos con IA** | `/escritos-ia` | — | **Placeholder** — sin servicio |
-| **Configuración** | `/configuracion` | — | **Placeholder** — sin servicio |
+| Dashboard | `/dashboard` | `/api/v1/dashboard` | Completo (indicadores, gráficos; el dinero solo con `FACTURACION_LEER`) |
+| Reportes | `/reportes` | `/api/v1/reportes` | Completo (Excel y PDF) |
+| Búsqueda global | barra superior | `/api/v1/busqueda` | Completo (respeta RF-02 y el permiso de cada módulo) |
+| Mensajería | panel | `/api/v1/mensajeria` | Completo (chat interno 1 a 1) |
+| **Escritos con IA** | `/escritos-ia` | — | **Maqueta** — sin servicio |
+| **Configuración** | `/configuracion` | — | **Maqueta** — sin servicio |
 
-Las cuatro pantallas de placeholder importan `PanelComponent` y nada más.
-`dashboard.component.html:13` además tiene el saludo
-`"Buenos días, Carlos Mendoza Rojas 👋"` escrito a mano.
+Pendientes de construir (el esquema y la lógica SQL ya existen): **calendario
+judicial** con su flujo de aprobación (RF-14), **entrega de alertas** antes del
+vencimiento (RF-10), **portal del cliente** (RF-16) y **plantillas** (RF-18).
 
 Todas las rutas del router pasan por `authGuard`, salvo `login` y el wildcard
 `**` (que redirige a `login`).
@@ -318,8 +320,9 @@ Todas las rutas del router pasan por `authGuard`, salvo `login` y el wildcard
 
 ## 8. Base de datos
 
-- **44–45 tablas** InnoDB, una sola collation: `utf8mb4_0900_ai_ci`.
-- **22 migraciones** `V1..V22` en `db/migration/`, aplicadas por Flyway.
+- **46 tablas** InnoDB, una sola collation: `utf8mb4_0900_ai_ci`; 4 funciones SQL, 92 `CHECK`, 136 claves foráneas.
+- **28 migraciones** `V1..V28` en `db/migration/`, aplicadas por Flyway. Cada una tiene su huella en
+  `src/test/resources/migraciones.sha256`: se congela en el mismo PR (`bash scripts/congelar-migraciones.sh`).
 - `ddl-auto: validate`: Hibernate **solo verifica** que las entidades cuadren con
   las tablas. El esquema es de Flyway, nunca `update`.
 - Zona horaria fijada a `America/Lima` en Hibernate y en Jackson. El esquema usa
@@ -346,8 +349,8 @@ archivo es la causa de todos ellos:
 4. **Una migración ya aplicada no se edita nunca** — cambia su checksum y rompe el
    arranque de quien ya la tenía.
 
-> `verificar-bd.sh` sigue esperando 44 tablas y el esquema ya tiene 45: el script
-> está desactualizado y hay que corregirlo en el mismo PR que añada la tabla.
+> `verificar-bd.sh` comprueba 46 tablas, 39 permisos y 159 pares: si una migración
+> añade una tabla o un permiso, se actualiza en el mismo PR o el CI falla.
 
 ---
 
@@ -357,7 +360,7 @@ archivo es la causa de todos ellos:
   El secreto debe tener 32 bytes o `JwtService` lanza `IllegalStateException`.
   Un claim `pv` de versión de contraseña invalida los tokens al cambiarla.
 - **BCrypt cost 12.**
-- **RBAC**: 8 roles × 37 permisos (145 asignaciones). `@PreAuthorize` compara
+- **RBAC**: 8 roles × 39 permisos (159 asignaciones). `@PreAuthorize` compara
   siempre contra `permisos.codigo` / `roles.codigo`, nunca contra la etiqueta
   visible.
 - **CSRF desactivado** (API stateless), `SecurityManager` stateless.
@@ -403,8 +406,9 @@ Unitarios puros, sin base de datos:
 | `CalculadoraPlazosTest` | Días hábiles, ámbito, vencimiento, suspensiones (6 grupos `@Nested`) |
 | `PoliticaPasswordTest` | Longitud ≥ 12, ≤ 72 bytes, tildes, repetidos, email incluido |
 | `HashSemillaTest` | Que el hash BCrypt de la semilla sea el de `Lexia.Dev.2026` |
+| `GuardiasDelRepositorioTest` | Migraciones (nombre, versión, sin `USE`, huella), credenciales en `.yml`, `@PreAuthorize` en todo endpoint, visibilidad escrita a mano |
 
-Tests de integración (`*IT.java`, 9 clases) — llevan la guarda
+Tests de integración (`*IT.java`, 12 clases) — llevan la guarda
 `@EnabledIfEnvironmentVariable(named = "LEXIA_TEST_DB")`, así que **no corren**
 por defecto:
 
@@ -415,16 +419,15 @@ $env:LEXIA_TEST_DB = "1"
 ```
 
 Cubren: visibilidad de expedientes, aislamiento por estudio, permisos
-documentales, visibilidad de documentos, buscador de expedientes, cambio de
+documentales, visibilidad de documentos, buscador de expedientes, búsqueda
+global, dashboard, paridad Java/SQL del cómputo de plazos, cambio de
 contraseña, visibilidad de tareas, reasignación de trabajo y gestión de
-usuarios.
+usuarios. El CI las corre todas en cada PR.
 
 > ⚠️ **No hay `src/test/resources/`, ni perfil `test`, ni Testcontainers.** Los
 > tests corren contra el perfil `dev` real, es decir contra `lexia_db_sbss`, y
-> la semilla borra sus tablas en cada ejecución. Además
-> `BackendLexiaApplicationTests.contextLoads()` y
-> `CalculadoraPlazosParidadIT` **siempre** exigen MySQL: sin base de datos
-> levantada, `./mvnw test` falla aunque solo quieras los unitarios.
+> la semilla borra sus tablas en cada ejecución. Sin `LEXIA_TEST_DB`,
+> `./mvnw test` corre solo lo que no necesita base y pasa sin MySQL.
 
 ### Frontend
 
@@ -481,17 +484,15 @@ en `fecha_hora`.
 | # | Problema | Dónde |
 |---|---|---|
 | 1 | **El build falla con JDK ≥ 24** por Lombok (§3) | `pom.xml` |
-| 2 | **`npm test` falla 1 de 2**: espera un `<h1>Hello, FrontedLexia</h1>` que no existe | `app.spec.ts:17` |
-| 3 | **`@Scheduled` sin `@EnableScheduling`**: el cron de limpieza de papelera nunca se ejecuta | `PapeleraDocumentoScheduler.java:18` |
-| 4 | 4 pantallas placeholder sin backend: dashboard, reportes, escritos-ia, configuracion | `src/app/pages/` |
-| 5 | Los tests corren destructivos contra la BD de desarrollo | falta `src/test/resources/` |
-| 6 | `verificar-bd.sh` espera 44 tablas; el esquema tiene 45 | `verificar-bd.sh:43` |
-| 7 | El proyecto Angular se llama `FrontedLexia` (falta la `n`) | `angular.json:10` |
-| 8 | Proxy de desarrollo añadido (`proxy.conf.js`, ver §5.5). En prod sigue haciendo falta un reverse proxy no documentado | `environment.prod.ts:11` |
-| 9 | `biblioteca` y `facturacion` llaman `HttpClient` desde el componente, no desde `core/services` | `biblioteca-juridica.component.ts:77`, `facturacion.component.ts:254` |
-| 10 | Sin CI, sin Docker, sin ESLint | raíz |
-| 11 | `CLAUDE.md` y `docs/` están en `.gitignore` pero el código los cita ~10 veces | `.gitignore:78-79` |
-| 12 | El comentario de la semilla describe el aislamiento de `prod` con `ignore-migration-patterns`, pero `prod` ya lo hace con `locations` | `R__seed_desarrollo.sql:6-8` |
+| 2 | **`@Scheduled` sin `@EnableScheduling`**: el cron de limpieza de papelera nunca se ejecuta, y sin él tampoco se entregan las alertas | `PapeleraDocumentoScheduler.java:18` |
+| 3 | 2 pantallas maqueta sin backend: escritos-ia y configuracion | `src/app/pages/` |
+| 4 | Los tests corren destructivos contra la BD de desarrollo | falta `src/test/resources/` |
+| 5 | El proyecto Angular se llama `FrontedLexia` (falta la `n`) | `angular.json:10` |
+| 6 | Proxy de desarrollo añadido (`proxy.conf.js`, ver §5.5). En prod sigue haciendo falta un reverse proxy no documentado | `environment.prod.ts:11` |
+| 7 | `biblioteca` y `facturacion` llaman `HttpClient` desde el componente, no desde `core/services` | `biblioteca-juridica.component.ts:77`, `facturacion.component.ts:254` |
+| 8 | Sin Docker ni ESLint. El CI existe, pero `main` no está protegida: un PR en rojo se puede mergear | raíz |
+| 9 | `CLAUDE.md` y `docs/` están en `.gitignore` pero el código los cita ~10 veces | `.gitignore:87-88` |
+| 10 | El comentario de la semilla describe el aislamiento de `prod` con `ignore-migration-patterns`, pero `prod` ya lo hace con `locations` | `R__seed_desarrollo.sql:6-8` |
 
 ---
 
