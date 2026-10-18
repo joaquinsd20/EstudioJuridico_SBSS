@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject, timer } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { PanelComponent } from '../panel/panel.component';
@@ -404,10 +404,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
    * unica pista de que hay algo pendiente.
    */
   private cargarNotificaciones(): void {
-    this.notifSvc
-      .listar()
+    // Cada minuto, para que un aviso nuevo (plazo por vencer, resolucion, tarea
+    // asignada) llegue sin recargar la pagina. Con la pestaña oculta no se
+    // consulta: al volver, la siguiente vuelta lo pone al dia.
+    timer(0, 60_000)
       .pipe(takeUntil(this.destruido))
-      .subscribe(b => this.notificaciones.set(b.items));
+      .subscribe(() => {
+        if (typeof document !== 'undefined' && document.hidden) {
+          return;
+        }
+        this.notifSvc
+          .listar()
+          .pipe(takeUntil(this.destruido))
+          .subscribe(b => this.notificaciones.set(b.items));
+      });
   }
 
   alternarNotif(): void {

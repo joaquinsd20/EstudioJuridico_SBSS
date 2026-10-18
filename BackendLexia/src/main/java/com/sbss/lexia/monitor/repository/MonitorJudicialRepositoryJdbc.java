@@ -556,11 +556,14 @@ public class MonitorJudicialRepositoryJdbc {
                 .addValue("verificador", "VERIFICADA".equals(estadoVerificacion) ? SesionActual.usuarioId() : null, Types.BIGINT)
                 .addValue("creador", SesionActual.usuarioId());
         jdbc.update("""
-                INSERT INTO resoluciones(expediente_id, numero_resolucion, tipo_resolucion,
+                INSERT INTO resoluciones(expediente_id, numero_orden, numero_resolucion, tipo_resolucion,
                     fecha_resolucion, fecha_notificacion, sumilla, fuente, origen,
                     estado_verificacion, usuario_verificacion_id, fecha_verificacion,
                     usuario_creacion_id)
-                SELECT :expedienteId,:numero,:tipo,:fechaResolucion,:fechaNotificacion,NULL,
+                SELECT :expedienteId,
+                       (SELECT COALESCE(MAX(o.numero_orden), 0) + 1 FROM resoluciones o
+                         WHERE o.expediente_id = :expedienteId),
+                       :numero,:tipo,:fechaResolucion,:fechaNotificacion,NULL,
                        :fuente,'MONITOR_JUDICIAL',:estadoVerificacion,:verificador,
                        CASE WHEN :estadoVerificacion='VERIFICADA' THEN CURRENT_TIMESTAMP(3) ELSE NULL END,
                        :creador

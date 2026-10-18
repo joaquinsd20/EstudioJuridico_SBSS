@@ -1,5 +1,6 @@
 package com.sbss.lexia.tareas.service;
 
+import com.sbss.lexia.notificaciones.service.GeneradorNotificaciones;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
 import com.sbss.lexia.shared.security.SesionActual;
@@ -20,6 +21,7 @@ public class TareaService {
     private static final int MAX_PAGE_SIZE = 100;
     private static final int MAX_EXPORT = 5000;
     private final TareaRepositoryJdbc repository;
+    private final GeneradorNotificaciones notificaciones;
 
     @Transactional
     public Pagina<TareaLista> listar(String texto,String estado,String prioridad,Long responsableId,Long expedienteId,
@@ -59,12 +61,18 @@ public class TareaService {
         Long id=repository.insertar(normalizar(r));
         repository.reemplazarSubtareas(id,r.subtareas());
         repository.cambiarFlujo(id,"PENDIENTE","ELABORAR","Tarea creada");
+        notificaciones.tareaAsignada(id,r.responsableId(),SesionActual.usuarioId());
         return detalle(repository.uuidPorId(id));
     }
 
     @Transactional
     public TareaDetalle actualizar(String uuid,GuardarRequest r){
-        Long id=id(uuid);validar(r);repository.actualizar(id,normalizar(r));repository.reemplazarSubtareas(id,r.subtareas());return detalle(uuid);
+        Long id=id(uuid);validar(r);
+        Long anterior=notificaciones.responsableDe(id);
+        repository.actualizar(id,normalizar(r));repository.reemplazarSubtareas(id,r.subtareas());
+        // Solo avisa si la tarea CAMBIO de manos: editar el titulo no es una asignacion nueva.
+        if(anterior==null||!anterior.equals(r.responsableId()))notificaciones.tareaAsignada(id,r.responsableId(),SesionActual.usuarioId());
+        return detalle(uuid);
     }
 
     @Transactional

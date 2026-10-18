@@ -8,6 +8,8 @@ import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.RegistrarConsultaRequest;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.Resumen;
 import com.sbss.lexia.monitor.dto.MonitorJudicialDtos.VerificarRequest;
 import com.sbss.lexia.monitor.repository.MonitorJudicialRepositoryJdbc;
+import com.sbss.lexia.notificaciones.service.GeneradorNotificaciones;
+import com.sbss.lexia.shared.security.SesionActual;
 import com.sbss.lexia.shared.dto.PaginaDto;
 import com.sbss.lexia.shared.exception.ParametroInvalidoException;
 import com.sbss.lexia.shared.exception.RecursoNoEncontradoException;
@@ -31,6 +33,7 @@ public class MonitorJudicialService {
             "AUTO", "SENTENCIA", "DECRETO", "PROVIDENCIA", "CASACION", "ACUERDO", "RESOLUCION_ADMIN");
 
     private final MonitorJudicialRepositoryJdbc repository;
+    private final GeneradorNotificaciones notificaciones;
 
     public List<ExpedienteMonitor> listar(String expediente, String cliente, String abogado,
             String organo, String estadoProcesal, LocalDate desde, LocalDate hasta,
@@ -116,7 +119,13 @@ public class MonitorJudicialService {
                 && !request.nuevaResolucion()) {
             throw new ParametroInvalidoException("Indica el tipo de movimiento detectado");
         }
-        return repository.registrarConsulta(request, origen, verificacion);
+        String uuid = repository.registrarConsulta(request, origen, verificacion);
+        if (request.nuevaResolucion()) {
+            // En la misma transaccion: si el registro se deshace, el aviso tambien.
+            notificaciones.resolucionNueva(request.expedienteId(), request.numeroResolucion().trim(),
+                    SesionActual.usuarioId());
+        }
+        return uuid;
     }
 
     @Transactional
