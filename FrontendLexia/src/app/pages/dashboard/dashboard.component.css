@@ -1823,10 +1823,6 @@ familia de color que ya usaba cada badge, no los mismos tonos, porque un
   line-height: 1;
 }
 
-.btn-menu {
-  appearance: none;
-}
-
 .perfil-divider {
   height: 1px;
   margin: 4px 3px;

@@ -1,0 +1,92 @@
+<div class="layout-wrapper">
+  <app-panel></app-panel>
+  <main class="main-content">
+    <header class="page-header">
+      <div>
+        <span class="eyebrow">Preferencias personales</span>
+        <h1>Mi configuración</h1>
+        <p>Personaliza tu espacio de trabajo sin modificar la configuración general del estudio.</p>
+      </div>
+      @if (!cargando && !cargaFallida) {
+        <span class="save-state" [class.pending-state]="hayCambiosPendientes">
+          <span class="save-state-dot" aria-hidden="true"></span>
+          {{ hayCambiosPendientes ? 'Cambios sin guardar' : 'Preferencias guardadas' }}
+        </span>
+      }
+    </header>
+
+    @if (mensajeExito) { <div class="message success" role="status">✓ {{ mensajeExito }}</div> }
+    @if (mensajeError) { <div class="message error" role="alert">! {{ mensajeError }}</div> }
+
+    @if (cargando) {
+      <section class="settings-card loading" aria-live="polite"><span class="loading-spinner" aria-hidden="true"></span>Cargando tus preferencias…</section>
+    } @else {
+      <section class="settings-card">
+        <div class="section-heading">
+          <div class="section-icon">◐</div>
+          <div>
+            <h2>Apariencia</h2>
+            <p>Selecciona un tema para previsualizarlo en toda la interfaz antes de guardar.</p>
+          </div>
+        </div>
+
+        <div class="choice-grid" role="group" aria-label="Seleccionar tema de la interfaz">
+          <button type="button" class="theme-choice"
+            [class.selected]="preferencias.tema === 'CLARO'"
+            [class.pulse]="temaConPulso === 'CLARO'"
+            [attr.aria-pressed]="preferencias.tema === 'CLARO'"
+            (click)="seleccionarTema('CLARO')">
+            <span class="choice-topline">
+              <span class="choice-status" [class.status-pending]="temaPendiente && preferencias.tema === 'CLARO'">
+                <span class="choice-status-icon" aria-hidden="true">{{ preferencias.tema === 'CLARO' ? '✓' : '+' }}</span>
+                {{ preferencias.tema === 'CLARO' ? (temaPendiente ? 'VISTA PREVIA ACTIVA' : 'TEMA ACTIVO') : 'ELEGIR TEMA' }}
+              </span>
+              @if (preferencias.tema === 'CLARO') { <span class="selected-check" aria-hidden="true">✓ Seleccionado</span> }
+            </span>
+            <span class="preview light-preview" aria-hidden="true"><span></span><span></span><span></span></span>
+            <strong>Tema claro</strong>
+            <small>Fondo claro y contraste suave</small>
+          </button>
+
+          <button type="button" class="theme-choice"
+            [class.selected]="preferencias.tema === 'OSCURO'"
+            [class.pulse]="temaConPulso === 'OSCURO'"
+            [attr.aria-pressed]="preferencias.tema === 'OSCURO'"
+            (click)="seleccionarTema('OSCURO')">
+            <span class="choice-topline">
+              <span class="choice-status" [class.status-pending]="temaPendiente && preferencias.tema === 'OSCURO'">
+                <span class="choice-status-icon" aria-hidden="true">{{ preferencias.tema === 'OSCURO' ? '✓' : '+' }}</span>
+                {{ preferencias.tema === 'OSCURO' ? (temaPendiente ? 'VISTA PREVIA ACTIVA' : 'TEMA ACTIVO') : 'ELEGIR TEMA' }}
+              </span>
+              @if (preferencias.tema === 'OSCURO') { <span class="selected-check" aria-hidden="true">✓ Seleccionado</span> }
+            </span>
+            <span class="preview dark-preview" aria-hidden="true"><span></span><span></span><span></span></span>
+            <strong>Tema oscuro</strong>
+            <small>Interfaz oscura para ambientes con poca luz</small>
+          </button>
+        </div>
+
+      </section>
+
+      <section class="settings-card">
+        <div class="section-heading"><div class="section-icon">☷</div><div><h2>Menú lateral</h2><p>Recuerda si prefieres el menú expandido o compacto en tu sesión.</p></div></div>
+        <label class="checkbox-row"><input type="checkbox" name="sidebarColapsado" [(ngModel)]="preferencias.sidebarColapsado" [disabled]="cargaFallida"><span><strong>Iniciar con el menú compacto</strong><small>Deja más espacio horizontal para expedientes y formularios.</small></span></label>
+      </section>
+
+      <section class="settings-card security-card">
+        <div class="section-heading"><div class="section-icon">⌑</div><div><h2>Seguridad de la cuenta</h2><p>Administra tus credenciales personales desde este espacio.</p></div></div>
+        <div class="security-row"><div><strong>Cambiar contraseña</strong><small>Actualiza la contraseña que utilizas para iniciar sesión en LEXIA.</small></div><a class="btn-secondary" routerLink="/cambiar-password">Cambiar contraseña <span aria-hidden="true">→</span></a></div>
+      </section>
+
+      @if (cargaFallida) {
+        <div class="message error" role="alert">No se pueden guardar cambios hasta que se carguen las preferencias actuales. Recarga la página cuando el backend esté disponible.</div>
+      }
+      <div class="form-actions">
+        <span class="unsaved-hint" [class.visible]="hayCambiosPendientes && !cargaFallida">Tienes cambios pendientes de guardar.</span>
+        <button class="btn-primary" type="button" (click)="guardar()" [disabled]="guardando || !hayCambiosPendientes || cargaFallida">
+          {{ guardando ? 'Guardando…' : (hayCambiosPendientes ? 'Guardar preferencias' : 'Todo guardado') }}
+        </button>
+      </div>
+    }
+  </main>
+</div>

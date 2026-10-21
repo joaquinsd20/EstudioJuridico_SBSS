@@ -89,7 +89,9 @@ export class CambiarPasswordComponent {
   }
 
   cancelar(): void {
-    this.router.navigate(['/dashboard']);
+    // Cancelar no modifica la contrasena ni la sesion: vuelve al espacio
+    // desde el que se gestiona esta preferencia personal.
+    this.router.navigate(['/mi-configuracion']);
   }
 
   cerrarSesion(): void {
