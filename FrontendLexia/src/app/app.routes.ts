@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { permissionGuard } from './core/guards/permission.guard';
 
 export const routes: Routes = [
 
@@ -224,7 +225,19 @@ export const routes: Routes = [
 
 
   /* =======================================================
-     CONFIGURACIÓN
+     MI CONFIGURACIÓN — preferencia propia por usuario
+  ======================================================= */
+
+  {
+    path: 'mi-configuracion',
+    loadComponent: () =>
+      import('./pages/mi-configuracion/mi-configuracion.component')
+        .then(m => m.MiConfiguracionComponent),
+    canActivate: [authGuard]
+  },
+
+  /* =======================================================
+     CONFIGURACIÓN DEL ESTUDIO — permiso administrativo
   ======================================================= */
 
   {
@@ -232,7 +245,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/configuracion/configuracion.component')
         .then(m => m.ConfiguracionComponent),
-    canActivate: [authGuard]
+    canActivate: [authGuard, permissionGuard],
+    data: { permission: 'CONFIGURACION_EDITAR' }
   },
 
 

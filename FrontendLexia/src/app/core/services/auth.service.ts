@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Observable, catchError, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { CambiarPasswordRequest, LoginRequest, LoginResponse, UsuarioAutenticado } from '../models/auth.models';
+import { PreferenciasUsuarioService } from './preferencias-usuario.service';
 
 /**
  * Sesion del usuario: iniciar sesion, guardarla y cerrarla.
@@ -23,6 +24,7 @@ import { CambiarPasswordRequest, LoginRequest, LoginResponse, UsuarioAutenticado
 export class AuthService {
 
   private readonly http = inject(HttpClient);
+  private readonly preferencias = inject(PreferenciasUsuarioService);
 
   private readonly CLAVE_TOKEN = 'lexia.token';
   private readonly CLAVE_USUARIO = 'lexia.usuario';
@@ -39,7 +41,12 @@ export class AuthService {
   login(credenciales: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credenciales)
-      .pipe(tap(respuesta => this.guardarSesion(respuesta)));
+      .pipe(
+        tap(respuesta => this.guardarSesion(respuesta)),
+        switchMap(respuesta => respuesta.usuario.debeCambiarPassword
+          ? of(respuesta)
+          : this.cargarPreferencias().pipe(map(() => respuesta))),
+      );
   }
 
   /**
@@ -53,7 +60,10 @@ export class AuthService {
   cambiarPassword(peticion: CambiarPasswordRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/cambiar-password`, peticion)
-      .pipe(tap(respuesta => this.guardarSesion(respuesta)));
+      .pipe(
+        tap(respuesta => this.guardarSesion(respuesta)),
+        switchMap(respuesta => this.cargarPreferencias().pipe(map(() => respuesta))),
+      );
   }
 
   /**
@@ -77,6 +87,9 @@ export class AuthService {
         this._usuario.set(usuario);
         localStorage.setItem(this.CLAVE_USUARIO, JSON.stringify(usuario));
       }),
+      switchMap(usuario => usuario.debeCambiarPassword
+        ? of(usuario)
+        : this.cargarPreferencias().pipe(map(() => usuario))),
       catchError((error: HttpErrorResponse) => {
         // Solo se cierra la sesion si el servidor dice que el token no sirve.
         // Un fallo de red (status 0, backend apagado) no significa que la sesion
@@ -94,6 +107,7 @@ export class AuthService {
     localStorage.removeItem(this.CLAVE_TOKEN);
     localStorage.removeItem(this.CLAVE_USUARIO);
     this._usuario.set(null);
+    this.preferencias.restablecer();
   }
 
   get token(): string | null {
@@ -119,7 +133,15 @@ export class AuthService {
     return this._usuario()?.roles.includes(codigo) ?? false;
   }
 
+  private cargarPreferencias(): Observable<unknown> {
+    // Un fallo de preferencias no debe impedir entrar en LEXIA; el backend sigue
+    // aplicando sus permisos independientemente de la personalización visual.
+    return this.preferencias.cargar().pipe(catchError(() => of(null)));
+  }
+
   private guardarSesion(respuesta: LoginResponse): void {
+    // No reutilizar tema/menú de la cuenta anterior en una sesión diferente.
+    this.preferencias.restablecer();
     localStorage.setItem(this.CLAVE_TOKEN, respuesta.token);
     localStorage.setItem(this.CLAVE_USUARIO, JSON.stringify(respuesta.usuario));
     this._usuario.set(respuesta.usuario);

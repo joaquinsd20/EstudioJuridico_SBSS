@@ -35,7 +35,6 @@ import {
 } from '../../core/services/graficos-dashboard.service';
 import { NotificacionService, Notificacion } from '../../core/services/notificacion.service';
 import { MensajesService, ContactoChat } from '../../core/services/mensajes.service';
-import { TemaService } from '../../core/services/tema.service';
 import { BusquedaRespuesta, ResultadoBusqueda } from '../../core/models/busqueda.models';
 
 interface SegmentoDonut {
@@ -81,7 +80,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private readonly busquedaSvc  = inject(BusquedaService);
   private readonly graficosSvc  = inject(GraficosDashboardService);
   private readonly notifSvc     = inject(NotificacionService);
-  private readonly temaSvc      = inject(TemaService);
   readonly mensajesSvc          = inject(MensajesService);
   private readonly auth         = inject(AuthService);
   private readonly router       = inject(Router);
@@ -509,13 +507,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.cerrarMensajes();
     this.auth.cerrarSesion();
     this.router.navigate(['/login']);
-  }
-
-  // ─── Tema Claro / Oscuro ──────────────────────────────────────────────────
-  readonly temaOscuro = this.temaSvc.oscuro;
-
-  alternarTema(): void {
-    this.temaSvc.alternar();
   }
 
   // ─── Helpers ──────────────────────────────────────────────────────────────

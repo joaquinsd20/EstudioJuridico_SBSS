@@ -1,740 +1,234 @@
 <div class="layout-wrapper">
-
-  <!-- PANEL REUTILIZABLE -->
   <app-panel></app-panel>
 
-  <!-- CONTENIDO PRINCIPAL -->
   <main class="main-content">
-
-    <!-- ENCABEZADO -->
     <header class="config-header">
-
       <div>
-        <span class="eyebrow">
-          Administración
-        </span>
-
-        <h1>
-          Configuración del Sistema
-        </h1>
-
-        <p>
-          Parametrización general del estudio jurídico, seguridad,
-          roles y automatizaciones.
-        </p>
+        <span class="eyebrow">Administración del estudio</span>
+        <h1>Configuración</h1>
+        <p>Administra la información institucional y las reglas que se aplican al equipo completo.</p>
       </div>
-
-      <button
-        class="btn-primary-action"
-        type="button"
-      >
-        Guardar Cambios
-      </button>
-
+      <div class="header-actions">
+        <button class="btn-secondary-action" type="button" (click)="recargar()" [disabled]="cargando || guardando">Recargar</button>
+        @if (seccion === 'estudio' || seccion === 'parametros') {
+          <button class="btn-primary-action" type="button" (click)="guardarSeccion()" [disabled]="guardando || (seccion === 'estudio' && (cargandoEstudio || !estudioDisponible)) || (seccion === 'parametros' && (cargandoParametros || !parametrosDisponibles))">
+            {{ guardando ? 'Guardando…' : 'Guardar cambios' }}
+          </button>
+        }
+      </div>
     </header>
 
+    @if (mensajeExito) {
+      <div class="message success" role="status"><span aria-hidden="true">✓</span>{{ mensajeExito }}</div>
+    }
+    @if (mensajeError) {
+      <div class="message error" role="alert"><span aria-hidden="true">!</span>{{ mensajeError }}</div>
+    }
 
-    <!-- NAVEGACIÓN VISUAL -->
-    <nav class="tabs-navigation">
-
-      <button
-        class="tab-item active"
-        type="button"
-      >
-        Estudio Jurídico
-      </button>
-
-      <button
-        class="tab-item"
-        type="button"
-      >
-        Roles y Permisos
-      </button>
-
-      <button
-        class="tab-item"
-        type="button"
-      >
-        Seguridad y Backups
-      </button>
-
-      <button
-        class="tab-item"
-        type="button"
-      >
-        IA y Alertas
-      </button>
-
+    <nav class="tabs-navigation" aria-label="Secciones de configuración">
+      @for (item of secciones; track item.id) {
+        <button class="tab-item" type="button" [class.active]="seccion === item.id"
+          [attr.aria-selected]="seccion === item.id" (click)="seleccionarSeccion(item.id)">
+          {{ item.titulo }}
+        </button>
+      }
     </nav>
 
-
-    <!-- RESUMEN SUPERIOR -->
-    <section class="config-stats-grid">
-
-      <article class="config-stat-card">
-        <span class="stat-label">
-          Firma
-        </span>
-
-        <strong>
-          LEXIA
-        </strong>
-
-        <small>
-          Configuración general
-        </small>
-      </article>
-
-      <article class="config-stat-card">
-        <span class="stat-label">
-          Roles
-        </span>
-
-        <strong>
-          5
-        </strong>
-
-        <small>
-          Perfiles registrados
-        </small>
-      </article>
-
-      <article class="config-stat-card">
-        <span class="stat-label">
-          Seguridad
-        </span>
-
-        <strong>
-          2FA
-        </strong>
-
-        <small>
-          Protección de acceso
-        </small>
-      </article>
-
-      <article class="config-stat-card">
-        <span class="stat-label">
-          Moneda
-        </span>
-
-        <strong class="stat-accent">
-          PEN
-        </strong>
-
-        <small>
-          Soles peruanos
-        </small>
-      </article>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- ESTUDIO JURÍDICO -->
-    <!-- =================================================== -->
-
-    <section class="card-panel">
-
-      <div class="panel-heading">
-
-        <div>
-          <span class="panel-kicker">
-            Datos generales
-          </span>
-
-          <h2>
-            Información del Estudio Jurídico
-          </h2>
-
-          <p>
-            Datos institucionales y parámetros principales de LEXIA.
-          </p>
-        </div>
-
-        <span class="panel-number">
-          01
-        </span>
-
-      </div>
-
-
-      <div class="form-grid">
-
-        <div class="form-group col-span-2">
-          <label>
-            Razón Social / Nombre del Estudio
-          </label>
-
-          <input
-            type="text"
-            class="custom-input"
-            value="LEXIA - Estudio Jurídico"
-            placeholder="Ingrese la razón social o nombre comercial"
-          >
-        </div>
-
-
-        <div class="form-group">
-          <label>
-            RUC
-          </label>
-
-          <input
-            type="text"
-            class="custom-input"
-            value="20601234567"
-            placeholder="Número de RUC (11 dígitos)"
-          >
-        </div>
-
-
-        <div class="form-group">
-          <label>
-            Teléfono Principal
-          </label>
-
-          <input
-            type="text"
-            class="custom-input"
-            value="+51 900 000 000"
-            placeholder="+51 900 000 000"
-          >
-        </div>
-
-
-        <div class="form-group col-span-2">
-          <label>
-            Dirección Fiscal
-          </label>
-
-          <input
-            type="text"
-            class="custom-input"
-            value="Av. España 1450, Of. 402, Trujillo"
-            placeholder="Ej. Av. España 1450, Of. 402, Trujillo"
-          >
-        </div>
-
-
-        <div class="form-group">
-          <label>
-            Correo Institucional
-          </label>
-
-          <input
-            type="email"
-            class="custom-input"
-            value="contacto@lexia.com"
-            placeholder="contacto@estudio.pe"
-          >
-        </div>
-
-
-        <div class="form-group">
-          <label>
-            Moneda por Defecto
-          </label>
-
-          <select class="custom-select">
-            <option selected>
-              Soles (PEN S/.)
-            </option>
-
-            <option>
-              Dólares (USD $)
-            </option>
-          </select>
-        </div>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- ROLES Y PERMISOS -->
-    <!-- =================================================== -->
-
-    <section class="card-panel">
-
-      <div class="panel-heading panel-heading-row">
-
-        <div>
-          <span class="panel-kicker">
-            Control de acceso
-          </span>
-
-          <h2>
-            Roles y Permisos
-          </h2>
-
-          <p>
-            Perfiles definidos para la administración interna del sistema.
-          </p>
-        </div>
-
-        <div class="panel-actions">
-
-          <span class="panel-number">
-            02
-          </span>
-
-          <button
-            class="btn-secondary-action"
-            type="button"
-          >
-            + Nuevo Rol
-          </button>
-
-        </div>
-
-      </div>
-
-
-      <div class="table-container">
-
-        <table class="custom-table">
-
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Rol</th>
-              <th>Descripción</th>
-              <th>Estado</th>
-              <th class="text-right">Acciones</th>
-            </tr>
-          </thead>
-
-
-          <tbody>
-
-            <tr>
-              <td>01</td>
-
-              <td>
-                <span class="role-pill admin">
-                  Administrador
-                </span>
-              </td>
-
-              <td>
-                Acceso total y configuración del sistema
-              </td>
-
-              <td>
-                <span class="status active">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Permisos
-                </button>
-
-                <button class="btn-icon" type="button">
-                  Editar
-                </button>
-              </td>
-            </tr>
-
-
-            <tr>
-              <td>02</td>
-
-              <td>
-                <span class="role-pill director">
-                  Socio / Director
-                </span>
-              </td>
-
-              <td>
-                Supervisión general, expedientes y finanzas
-              </td>
-
-              <td>
-                <span class="status active">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Permisos
-                </button>
-
-                <button class="btn-icon" type="button">
-                  Editar
-                </button>
-              </td>
-            </tr>
-
-
-            <tr>
-              <td>03</td>
-
-              <td>
-                <span class="role-pill lawyer">
-                  Abogado
-                </span>
-              </td>
-
-              <td>
-                Gestión de expedientes asignados, actuaciones y tareas
-              </td>
-
-              <td>
-                <span class="status active">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Permisos
-                </button>
-
-                <button class="btn-icon" type="button">
-                  Editar
-                </button>
-              </td>
-            </tr>
-
-
-            <tr>
-              <td>04</td>
-
-              <td>
-                <span class="role-pill assistant">
-                  Asistente Legal
-                </span>
-              </td>
-
-              <td>
-                Soporte en documentos, notificaciones y agenda
-              </td>
-
-              <td>
-                <span class="status active">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Permisos
-                </button>
-
-                <button class="btn-icon" type="button">
-                  Editar
-                </button>
-              </td>
-            </tr>
-
-
-            <tr>
-              <td>05</td>
-
-              <td>
-                <span class="role-pill accounting">
-                  Contabilidad
-                </span>
-              </td>
-
-              <td>
-                Gestión de honorarios y facturación
-              </td>
-
-              <td>
-                <span class="status active">
-                  <i></i>
-                  Activo
-                </span>
-              </td>
-
-              <td class="text-right">
-                <button class="btn-icon" type="button">
-                  Permisos
-                </button>
-
-                <button class="btn-icon" type="button">
-                  Editar
-                </button>
-              </td>
-            </tr>
-
-          </tbody>
-
-        </table>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- SEGURIDAD Y BACKUPS -->
-    <!-- =================================================== -->
-
-    <section class="card-panel">
-
-      <div class="panel-heading">
-
-        <div>
-          <span class="panel-kicker">
-            Protección del sistema
-          </span>
-
-          <h2>
-            Seguridad y Copias de Seguridad
-          </h2>
-
-          <p>
-            Parámetros visuales de autenticación, sesiones y respaldos.
-          </p>
-        </div>
-
-        <span class="panel-number">
-          03
-        </span>
-
-      </div>
-
-
-      <div class="security-grid">
-
-        <article class="setting-card">
-
-          <div class="setting-icon">
-            2FA
+    @if (seccion === 'estudio') {
+      @if (cargandoEstudio) {
+        <section class="card-panel loading-panel" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <strong>Cargando información institucional…</strong>
+        </section>
+      } @else if (!estudioDisponible) {
+        <section class="card-panel load-error-panel" role="status">
+          <h2>Información institucional no disponible</h2>
+          <p>No se pudo recuperar la información del estudio. Revisa el mensaje de error que aparece arriba y vuelve a intentarlo.</p>
+          <button class="btn-secondary-action" type="button" (click)="recargar()" [disabled]="cargando">Reintentar carga</button>
+        </section>
+      } @else {
+        <section class="card-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Identidad institucional</span>
+              <h2>Información del estudio jurídico</h2>
+              <p>Estos datos son institucionales y no se modifican desde el perfil de un trabajador.</p>
+            </div>
+            <span class="panel-number">01</span>
           </div>
 
-          <div class="setting-copy">
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="razonSocial">Razón social <span class="required">*</span></label>
+              <input id="razonSocial" name="razonSocial" class="custom-input" type="text" maxlength="200"
+                required [(ngModel)]="estudio.razonSocial" placeholder="Razón social legal del estudio">
+            </div>
+            <div class="form-group col-span-2">
+              <label for="nombreComercial">Nombre comercial</label>
+              <input id="nombreComercial" name="nombreComercial" class="custom-input" type="text" maxlength="150"
+                [(ngModel)]="estudio.nombreComercial" placeholder="Nombre que se muestra en LEXIA">
+            </div>
+            <div class="form-group">
+              <label for="ruc">RUC <span class="required">*</span></label>
+              <input id="ruc" name="ruc" class="custom-input" type="text" inputmode="numeric" maxlength="11"
+                pattern="[0-9]{11}" required [(ngModel)]="estudio.ruc" placeholder="11 dígitos">
+              <small>Debe contener exactamente 11 dígitos.</small>
+            </div>
+            <div class="form-group">
+              <label for="telefono">Teléfono institucional</label>
+              <input id="telefono" name="telefono" class="custom-input" type="tel" maxlength="30"
+                [(ngModel)]="estudio.telefono" placeholder="Teléfono de contacto">
+            </div>
+            <div class="form-group col-span-2">
+              <label for="direccion">Dirección fiscal</label>
+              <input id="direccion" name="direccion" class="custom-input" type="text" maxlength="250"
+                [(ngModel)]="estudio.direccion" placeholder="Dirección fiscal del estudio">
+            </div>
+            <div class="form-group">
+              <label for="email">Correo institucional</label>
+              <input id="email" name="email" class="custom-input" type="email" maxlength="150"
+                [(ngModel)]="estudio.email" placeholder="contacto@estudio.pe">
+            </div>
+            <div class="form-group">
+              <label for="monedaBase">Moneda base</label>
+              <select id="monedaBase" name="monedaBase" class="custom-select" [(ngModel)]="estudio.monedaBase">
+                <option value="PEN">Soles peruanos (PEN)</option>
+                <option value="USD">Dólares estadounidenses (USD)</option>
+                <option value="EUR">Euros (EUR)</option>
+              </select>
+            </div>
+            <div class="form-group col-span-2">
+              <label for="zonaHoraria">Zona horaria <span class="required">*</span></label>
+              <input id="zonaHoraria" name="zonaHoraria" class="custom-input" type="text" maxlength="50" required
+                [(ngModel)]="estudio.zonaHoraria" placeholder="America/Lima">
+              <small>Usa un identificador IANA, por ejemplo America/Lima. Afecta la interpretación de fechas y horas.</small>
+            </div>
+          </div>
+          <div class="section-footer">
+            <p>Los cambios se guardan en el registro del estudio y quedan auditados.</p>
+            <button class="btn-primary-action" type="button" (click)="guardarEstudio()" [disabled]="guardando || !estudioDisponible">{{ guardando ? 'Guardando…' : 'Guardar información' }}</button>
+          </div>
+        </section>
+      }
+    }
 
-            <strong>
-              Autenticación en Dos Pasos
-            </strong>
-
-            <span>
-              Solicita un segundo factor al iniciar sesión.
-            </span>
-
+    @if (seccion === 'parametros') {
+      @if (cargandoParametros) {
+        <section class="card-panel loading-panel" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <strong>Cargando reglas operativas…</strong>
+        </section>
+      } @else if (!parametrosDisponibles) {
+        <section class="card-panel load-error-panel" role="status">
+          <h2>Reglas operativas no disponibles</h2>
+          <p>No se pudieron recuperar los parámetros del estudio. Revisa el mensaje de error que aparece arriba y vuelve a intentarlo.</p>
+          <button class="btn-secondary-action" type="button" (click)="recargar()" [disabled]="cargando">Reintentar carga</button>
+        </section>
+      } @else {
+        <section class="card-panel">
+          <div class="panel-heading">
+            <div>
+              <span class="panel-kicker">Reglas operativas</span>
+              <h2>Parámetros generales del estudio</h2>
+              <p>Solo se muestran parámetros conectados a lógica existente del backend.</p>
+            </div>
+            <span class="panel-number">02</span>
           </div>
 
-          <label class="switch-control">
-
-            <input
-              type="checkbox"
-              checked
-            >
-
-            <span class="switch-slider"></span>
-
-          </label>
-
-        </article>
-
-
-        <article class="setting-card">
-
-          <div class="setting-icon">
-            ◷
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label for="dominio">Dominio permitido para usuarios internos</label>
+              <input id="dominio" name="dominioCorreoInterno" class="custom-input" type="text" maxlength="253"
+                required [(ngModel)]="parametros.dominioCorreoInterno" placeholder="estudio.pe">
+              <small>Se usa al validar la creación de cuentas internas. No escribas una dirección de correo completa.</small>
+            </div>
+            <div class="form-group">
+              <label for="intentos">Intentos fallidos antes del bloqueo</label>
+              <input id="intentos" name="intentosLoginMaximos" class="custom-input" type="number" min="3" max="10" required
+                [(ngModel)]="parametros.intentosLoginMaximos">
+              <small>Valor permitido: de 3 a 10 intentos.</small>
+            </div>
+            <div class="form-group">
+              <label for="colchon">Días de anticipación para revisión interna</label>
+              <input id="colchon" name="plazoColchonInternoDias" class="custom-input" type="number" min="0" max="30" required
+                [(ngModel)]="parametros.plazoColchonInternoDias">
+              <small>Separado del vencimiento oficial; requiere criterio profesional.</small>
+            </div>
+            <div class="form-group col-span-2">
+              <label for="alertas">Días de alerta previa</label>
+              <input id="alertas" name="alertasDiasPrevios" class="custom-input" type="text"
+                [(ngModel)]="alertasDiasTexto" placeholder="15, 10, 7, 5, 3, 1, 0">
+              <small>Escribe valores únicos separados por comas. 0 representa el mismo día del vencimiento.</small>
+            </div>
           </div>
-
-          <div class="setting-copy">
-
-            <strong>
-              Tiempo de Inactividad
-            </strong>
-
-            <span>
-              Cierre preventivo de sesión.
-            </span>
-
+          <div class="info-notice"><strong>Importante para el estudio</strong><p>Modificar los días de alerta cambia la regla general hacia adelante; no sustituye la revisión profesional de cada plazo ni resuelve automáticamente excepciones procesales.</p></div>
+          <div class="section-footer">
+            <p>Los valores se guardan por estudio y se aplican en los servicios que los consumen.</p>
+            <button class="btn-primary-action" type="button" (click)="guardarParametros()" [disabled]="guardando || !parametrosDisponibles">{{ guardando ? 'Guardando…' : 'Guardar parámetros' }}</button>
           </div>
+        </section>
+      }
+    }
 
-          <div class="setting-value">
-            30 min
+    @if (seccion === 'roles') {
+        <section class="card-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">Control de acceso</span><h2>Roles disponibles</h2><p>Catálogo real de roles asignables. Los permisos efectivos se resuelven en el backend.</p></div>
+            <span class="panel-number">03</span>
           </div>
+          @if (rolesCargando) { <div class="loading-inline">Consultando roles…</div> }
+          @if (rolesError) { <div class="message error" role="alert">{{ rolesError }}</div> }
+          @if (!rolesCargando && !rolesError) {
+            <div class="table-container">
+              <table class="custom-table">
+                <thead><tr><th>Rol</th><th>Código interno</th><th>Nivel de acceso</th><th>Tipo de cuenta</th></tr></thead>
+                <tbody>
+                  @for (rol of roles; track rol.codigo) {
+                    <tr>
+                      <td><strong>{{ rol.nombre }}</strong></td><td><code>{{ rol.codigo }}</code></td>
+                      <td><span class="level-pill">{{ rol.nivelAcceso }}</span></td>
+                      <td>{{ rol.esPortalCliente ? 'Portal del cliente' : 'Personal del estudio' }}</td>
+                    </tr>
+                  } @empty {
+                    <tr><td colspan="4" class="empty-cell">No hay roles disponibles para mostrar.</td></tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+          <div class="info-notice"><strong>Edición de permisos</strong><p>Esta versión muestra los roles que el backend ofrece para asignación. No se presentan botones de editar permisos porque todavía no hay un flujo completo de edición y auditoría de la matriz rol–permiso.</p></div>
+        </section>
+      }
 
-        </article>
-
-
-        <article class="setting-card">
-
-          <div class="setting-icon">
-            ↻
+      @if (seccion === 'seguridad') {
+        <section class="card-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">Protección institucional</span><h2>Seguridad y copias de respaldo</h2><p>Estado veraz de las funciones que aún requieren implementación operativa.</p></div>
+            <span class="panel-number">04</span>
           </div>
-
-          <div class="setting-copy">
-
-            <strong>
-              Respaldos Automáticos
-            </strong>
-
-            <span>
-              Frecuencia programada del sistema.
-            </span>
-
+          <div class="status-list">
+            <article class="status-card"><span class="status-mark available">✓</span><div><strong>Control de acceso por permisos</strong><p>Las operaciones administrativas de esta pantalla se validan también en el backend.</p></div><span class="state-label available-label">Activo</span></article>
+            <article class="status-card"><span class="status-mark pending">!</span><div><strong>Autenticación en dos factores (2FA)</strong><p>Las columnas de base de datos existen, pero el flujo completo de enrolamiento y verificación no está habilitado.</p></div><span class="state-label pending-label">Pendiente</span></article>
+            <article class="status-card"><span class="status-mark pending">!</span><div><strong>Cierre de sesión por inactividad</strong><p>El valor configurado no equivale a una aplicación efectiva de la política en frontend y backend.</p></div><span class="state-label pending-label">Pendiente</span></article>
+            <article class="status-card"><span class="status-mark pending">!</span><div><strong>Respaldos automáticos y restauración</strong><p>No se habilita un interruptor ni un botón de respaldo hasta que exista un proceso real, verificable y probado de restauración.</p></div><span class="state-label pending-label">Pendiente</span></article>
           </div>
+        </section>
+      }
 
-          <div class="setting-value">
-            Diaria
+      @if (seccion === 'integraciones') {
+        <section class="card-panel">
+          <div class="panel-heading">
+            <div><span class="panel-kicker">Servicios conectados</span><h2>Integraciones externas</h2><p>Panel de estado; no modifica credenciales ni conexiones hasta implementar el flujo de administración.</p></div>
+            <span class="panel-number">05</span>
           </div>
-
-        </article>
-
-      </div>
-
-
-      <div class="backup-box">
-
-        <div>
-          <strong>
-            Copia de seguridad manual
-          </strong>
-
-          <span>
-            Genera un respaldo completo de la información registrada.
-          </span>
-        </div>
-
-        <button
-          class="btn-secondary-action"
-          type="button"
-        >
-          Generar Copia Ahora
-        </button>
-
-      </div>
-
-    </section>
-
-
-    <!-- =================================================== -->
-    <!-- IA Y ALERTAS -->
-    <!-- =================================================== -->
-
-    <section class="card-panel">
-
-      <div class="panel-heading">
-
-        <div>
-          <span class="panel-kicker">
-            Automatización
-          </span>
-
-          <h2>
-            IA y Alertas Preventivas
-          </h2>
-
-          <p>
-            Preferencias visuales para asistencia inteligente y notificaciones.
-          </p>
-        </div>
-
-        <span class="panel-number">
-          04
-        </span>
-
-      </div>
-
-
-      <div class="automation-list">
-
-        <article class="automation-item">
-
-          <div class="automation-icon">
-            IA
+          <div class="integration-grid">
+            <article class="integration-card"><span class="integration-icon">✉</span><div><strong>Correo institucional</strong><p>No existe aún una pantalla para administrar de forma segura las credenciales del proveedor.</p></div><span class="state-label pending-label">No configurado aquí</span></article>
+            <article class="integration-card"><span class="integration-icon">↔</span><div><strong>Calendarios externos</strong><p>La sincronización requiere autorización del proveedor, almacenamiento seguro de tokens y control de conflictos.</p></div><span class="state-label pending-label">Pendiente</span></article>
+            <article class="integration-card"><span class="integration-icon">⚖</span><div><strong>Monitor judicial automático</strong><p>Las consultas y novedades deben depender de una fuente autorizada y quedar verificadas por un profesional.</p></div><span class="state-label pending-label">Pendiente</span></article>
           </div>
+        </section>
+      }
 
-          <div class="automation-content">
-
-            <strong>
-              Resumen automático de resoluciones judiciales
-            </strong>
-
-            <p>
-              Extrae partes clave, fechas y plazos sugeridos mediante el módulo
-              de Inteligencia Artificial.
-            </p>
-
-          </div>
-
-          <label class="switch-control">
-
-            <input
-              type="checkbox"
-              checked
-            >
-
-            <span class="switch-slider"></span>
-
-          </label>
-
-        </article>
-
-
-        <article class="automation-item">
-
-          <div class="automation-icon alert-icon">
-            !
-          </div>
-
-          <div class="automation-content">
-
-            <strong>
-              Cálculo de alertas preventivas de vencimiento
-            </strong>
-
-            <p>
-              Presenta avisos visuales a los 15, 10, 5 y 1 día antes del
-              vencimiento procesal.
-            </p>
-
-          </div>
-
-          <label class="switch-control">
-
-            <input
-              type="checkbox"
-              checked
-            >
-
-            <span class="switch-slider"></span>
-
-          </label>
-
-        </article>
-
-      </div>
-
-
-      <div class="alert-preview">
-
-        <div class="alert-preview-icon">
-          !
-        </div>
-
-        <div>
-          <strong>
-            Alertas críticas configuradas
-          </strong>
-
-          <span>
-            15 días · 10 días · 5 días · 1 día antes del vencimiento
-          </span>
-        </div>
-
-      </div>
-
-    </section>
-
+    <footer class="config-footer">LEXIA · Los cambios institucionales se aplican al estudio activo, no solo al usuario que los realiza.</footer>
   </main>
-
 </div>

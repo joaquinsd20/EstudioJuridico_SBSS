@@ -1,4 +1,4 @@
-import { Component, HostBinding, computed, inject, signal } from '@angular/core';
+import { Component, HostBinding, computed, effect, inject, signal } from '@angular/core';
 import {
   Router,
   RouterLink,
@@ -6,7 +6,7 @@ import {
 } from '@angular/router';
 
 import { AuthService } from '../../core/services/auth.service';
-import { TemaService } from '../../core/services/tema.service';
+import { PreferenciasUsuarioService } from '../../core/services/preferencias-usuario.service';
 import { FotoUsuarioComponent } from '../../core/components/foto-usuario.component';
 
 @Component({
@@ -33,16 +33,7 @@ export class PanelComponent {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
 
-  /**
-   * Público porque se utiliza directamente desde panel.component.html.
-   * Se declara una sola vez.
-   */
-  readonly tema = inject(TemaService);
-
-  /**
-   * Signal reutilizado para el botón de tema.
-   */
-  readonly temaOscuro = this.tema.oscuro;
+  private readonly preferencias = inject(PreferenciasUsuarioService);
 
   constructor() {
     try {
@@ -50,6 +41,8 @@ export class PanelComponent {
     } catch {
       // Si el almacenamiento está bloqueado, el menú sigue funcionando en memoria.
     }
+    // Si la preferencia del servidor llega tras un inicio de sesión, el panel se sincroniza.
+    effect(() => this.colapsado.set(this.preferencias.preferencias().sidebarColapsado));
   }
 
   alternarSidebar(): void {
@@ -58,8 +51,11 @@ export class PanelComponent {
     try {
       localStorage.setItem('lexia-sidebar-collapsed', String(siguiente));
     } catch {
-      // La preferencia no se persiste, pero el cambio visual se aplica.
+      // La preferencia local no se persiste, pero el cambio visual se aplica en memoria.
     }
+    this.preferencias.actualizarSidebar(siguiente).subscribe({
+      error: () => { /* el cambio visual local no depende de la API */ }
+    });
   }
 
   /**
@@ -70,9 +66,12 @@ export class PanelComponent {
    * Controla si el usuario puede acceder al módulo Usuarios.
    */
   readonly puedeGestionarUsuarios = computed(
-    () =>
-      this.usuario()?.permisos.includes('USUARIO_GESTIONAR')
-      ?? false
+    () => this.usuario()?.permisos.includes('USUARIO_GESTIONAR') ?? false
+  );
+
+  /** La configuración institucional solo aparece con el permiso administrativo. */
+  readonly puedeGestionarConfiguracion = computed(
+    () => this.usuario()?.permisos.includes('CONFIGURACION_EDITAR') ?? false
   );
 
   /**
@@ -101,13 +100,6 @@ export class PanelComponent {
       inicial1 + inicial2
     ).toUpperCase();
   });
-
-  /**
-   * Cambia entre tema claro y oscuro.
-   */
-  alternarTema(): void {
-    this.tema.alternar();
-  }
 
   /**
    * Cierra la sesión actual.
