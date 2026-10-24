@@ -3854,3 +3854,48 @@ button:disabled {
 :host-context(.tema-oscuro-global) .no-access-card p {
   color: #94a3b8;
 }
+
+/* Responsividad adicional de Documentos: solo presentación, sin alterar lógica. */
+:host { display: block; min-width: 0; }
+.layout-wrapper, .main-content, .documentos-layout, .documentos-left,
+.card, .table-card { min-width: 0; }
+.table-wrapper { max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.documents-table { width: 100%; }
+.document-information, .document-cell, .client-cell { min-width: 0; }
+.document-information strong, .document-information span { overflow-wrap: anywhere; }
+img, video, iframe { max-width: 100%; }
+input, select, textarea { max-width: 100%; box-sizing: border-box; }
+@media (max-width: 1180px) {
+  .documentos-layout { grid-template-columns: minmax(0, 1fr); }
+  .stats-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .advanced-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 768px) {
+  .main-content { padding: 20px 14px 30px; }
+  .documentos-header { flex-wrap: wrap; align-items: stretch; gap: 14px; }
+  .documentos-header > div { min-width: 0; }
+  .documentos-header h1 { font-size: clamp(22px, 5vw, 29px); overflow-wrap: anywhere; }
+  .documentos-header .btn-primary { max-width: 100%; }
+  .filters-card { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+  .filters-card .search-control { grid-column: 1 / -1; min-width: 0; }
+  .filters-card .filter-control { min-width: 0; }
+  .filters-card select, .filters-card input { width: 100%; min-width: 0; }
+  .advanced-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .table-header { flex-wrap: wrap; gap: 12px; }
+  .table-tools { flex-wrap: wrap; }
+  .paginacion-documentos { justify-content: center; gap: 8px; }
+  .paginacion-documentos label { width: 100%; justify-content: center; margin-right: 0; }
+  .no-access-card { margin: 50px auto 0; padding: 30px 20px; }
+}
+@media (max-width: 480px) {
+  .main-content { padding: 16px 10px 26px; }
+  .stats-grid { grid-template-columns: minmax(0, 1fr); }
+  .filters-card, .advanced-filters { grid-template-columns: minmax(0, 1fr); }
+  .filters-card .search-control { grid-column: auto; }
+  .filters-card .clear-button { justify-self: end; }
+  .documentos-header .btn-primary { width: 100%; justify-content: center; }
+  .advanced-filter-bar { flex-wrap: wrap; gap: 8px; }
+  .paginacion-documentos > span { min-width: 0; }
+  .paginacion-documentos button { flex: 1 1 auto; }
+  .no-access-card { margin-top: 28px; }
+}
