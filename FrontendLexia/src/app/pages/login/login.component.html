@@ -81,6 +81,12 @@
         </div>
       }
 
+      @if (servidorLento()) {
+        <div class="login-aviso" role="status">
+          Activando el servidor tras un periodo sin uso. Puede tardar hasta un minuto; no cierres la página.
+        </div>
+      }
+
 
       <button
         type="submit"

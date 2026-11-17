@@ -166,6 +166,17 @@
 
 /* Error devuelto por el servidor: credenciales incorrectas, cuenta bloqueada,
    backend caido. */
+.login-aviso {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #c7d2fe;
+  background: #eef2ff;
+  color: #3730a3;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .login-error {
   margin-bottom: 14px;
   padding: 10px 12px;

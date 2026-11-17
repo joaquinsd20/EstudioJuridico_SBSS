@@ -5,8 +5,12 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
+// @Lazy(false): con spring.main.lazy-initialization (Dockerfile) un bean
+// perezoso nunca registraria su @Scheduled y la tarea no correria jamas.
+@Lazy(false)
 @Component
 @RequiredArgsConstructor
 public class PapeleraDocumentoScheduler {

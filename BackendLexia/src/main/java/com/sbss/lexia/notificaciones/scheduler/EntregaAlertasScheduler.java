@@ -3,6 +3,7 @@ package com.sbss.lexia.notificaciones.scheduler;
 import com.sbss.lexia.notificaciones.service.GeneradorNotificaciones;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,6 +13,9 @@ import org.springframework.stereotype.Component;
  * La frecuencia se cambia con `lexia.alertas.entrega-cron` (por defecto cada
  * 5 minutos, en hora de Lima).
  */
+// @Lazy(false): con spring.main.lazy-initialization (Dockerfile) un bean
+// perezoso nunca registraria su @Scheduled y la tarea no correria jamas.
+@Lazy(false)
 @Component
 @RequiredArgsConstructor
 public class EntregaAlertasScheduler {
