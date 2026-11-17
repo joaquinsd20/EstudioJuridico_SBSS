@@ -58,3 +58,9 @@ lexia:
     # 8 horas: cubre una jornada de trabajo sin obligar a reautenticarse a media
     # audiencia. El secreto se define por perfil.
     expiracion-segundos: 28800
+  ia:
+    # Proveedor de IA para "Escritos con IA". Si la clave queda vacia, el
+    # modulo genera un borrador local con plantilla en lugar de llamar al modelo.
+    openai-api-key: ${LEXIA_IA_OPENAI_API_KEY:}
+    openai-model: ${LEXIA_IA_OPENAI_MODEL:gpt-4o-mini}
+    openai-base-url: ${LEXIA_IA_OPENAI_BASE_URL:https://api.openai.com/v1}

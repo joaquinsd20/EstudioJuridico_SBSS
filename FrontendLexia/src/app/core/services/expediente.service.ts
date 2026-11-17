@@ -46,6 +46,13 @@ export class ExpedienteService {
     return this.http.get<ExpedienteDetalle>(`${this.base}/${uuid}`);
   }
 
+  buscar(texto: string, limite = 20): Observable<Array<{ uuid: string; codigoInterno: string; numeroExpediente: string; cliente: string; responsable: string; esConfidencial: boolean }>> {
+    let params = new HttpParams();
+    if (texto) params = params.set('texto', texto);
+    params = params.set('limite', String(limite));
+    return this.http.get<Array<{ uuid: string; codigoInterno: string; numeroExpediente: string; cliente: string; responsable: string; esConfidencial: boolean }>>(`${this.base}/buscar`, { params });
+  }
+
   lineaTiempo(uuid: string): Observable<EventoLineaTiempo[]> {
     return this.http.get<EventoLineaTiempo[]>(`${this.base}/${uuid}/linea-tiempo`);
   }
