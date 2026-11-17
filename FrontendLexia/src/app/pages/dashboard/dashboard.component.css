@@ -970,8 +970,21 @@
   border-color: #374151;
 }
 
+/* Al enfocar el buscador, la regla clara ".abierto" lo pintaba blanco y el
+   texto (claro en este tema) desaparecia. */
+:host-context(.tema-oscuro-global) .buscador-container.abierto .buscador-bar {
+  background: #111827;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+}
+
 :host-context(.tema-oscuro-global) .input-busq {
   color: #f9fafb;
+  caret-color: #a5b4fc;
+}
+
+:host-context(.tema-oscuro-global) .input-busq::placeholder {
+  color: #94a3b8;
 }
 
 :host-context(.tema-oscuro-global) .kbd-badge {
