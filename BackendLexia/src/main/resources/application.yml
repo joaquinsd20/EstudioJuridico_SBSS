@@ -64,6 +64,12 @@ lexia:
       bucket: ${LEXIA_S3_BUCKET:}
       access-key: ${LEXIA_S3_ACCESS_KEY:}
       secret-key: ${LEXIA_S3_SECRET_KEY:}
+  consulta-documentos:
+    # Autocompletar clientes por DNI (RENIEC) o RUC (SUNAT) via Decolecta
+    # (100 consultas gratis al mes). Sin token, el boton "Buscar" avisa que no
+    # esta configurado y el formulario se llena a mano.
+    token: ${LEXIA_DECOLECTA_TOKEN:}
+    base-url: ${LEXIA_DECOLECTA_URL:https://api.decolecta.com/v1}
   jwt:
     # 8 horas: cubre una jornada de trabajo sin obligar a reautenticarse a media
     # audiencia. El secreto se define por perfil.

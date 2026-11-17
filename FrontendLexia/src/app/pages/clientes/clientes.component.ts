@@ -5,7 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 
 import {
-  AbogadoOpcion, ClienteGuardar, ClienteResumen, ClientesResumen, CoincidenciaConflicto,
+  AbogadoOpcion, ClienteGuardar, DatosDocumento, ClienteResumen, ClientesResumen, CoincidenciaConflicto,
   ContactoCliente, FichaCliente, RegistrarComunicacion, TipoPersona, VerificarConflictoResponse,
   VinculoCliente
 } from '../../core/models/cliente.models';
@@ -38,6 +38,7 @@ export class ClientesComponent implements OnInit {
   cargando = false;
   cargandoFicha = false;
   guardando = false;
+  consultandoDocumento = false;
   error = '';
   exito = '';
 
@@ -193,6 +194,68 @@ export class ClientesComponent implements OnInit {
   cerrarCliente(): void {
     if (this.guardando) return;
     this.modalCliente = false;
+  }
+
+  /** El botón "Buscar" solo aplica a DNI y RUC, los que tienen fuente pública. */
+  puedeConsultarDocumento(): boolean {
+    return this.form.tipoDocumento === 'DNI' || this.form.tipoDocumento === 'RUC';
+  }
+
+  /** Autocompleta la ficha con los datos de RENIEC (DNI) o SUNAT (RUC). */
+  buscarDocumento(): void {
+    if (this.consultandoDocumento || !this.puedeConsultarDocumento()) return;
+    const tipo = this.form.tipoDocumento;
+    const numero = (this.form.numeroDocumento ?? '').replace(/\D/g, '');
+    if (tipo === 'DNI' && numero.length !== 8) { this.mostrarError('El DNI debe tener 8 dígitos.'); return; }
+    if (tipo === 'RUC' && numero.length !== 11) { this.mostrarError('El RUC debe tener 11 dígitos.'); return; }
+    this.form.numeroDocumento = numero;
+    this.consultandoDocumento = true;
+    this.actualizarVista();
+    this.service.consultarDocumento(tipo, numero).subscribe({
+      next: datos => {
+        this.consultandoDocumento = false;
+        this.aplicarDatosDocumento(datos);
+        this.actualizarVista();
+      },
+      error: e => { this.consultandoDocumento = false; this.mostrarError(this.mensajeError(e)); this.actualizarVista(); }
+    });
+  }
+
+  private aplicarDatosDocumento(d: DatosDocumento): void {
+    const f = this.form;
+    if (d.tipoDocumento === 'DNI') {
+      f.tipoPersona = 'NATURAL';
+      f.nombres = this.formatoNombre(d.nombres) ?? f.nombres;
+      f.apellidoPaterno = this.formatoNombre(d.apellidoPaterno) ?? f.apellidoPaterno;
+      f.apellidoMaterno = this.formatoNombre(d.apellidoMaterno) ?? f.apellidoMaterno;
+      this.mostrarExito('Datos completados desde RENIEC. Revísalos antes de guardar.');
+      return;
+    }
+    // RUC 20 = empresa. RUC 10 = persona natural con negocio: se deja el tipo
+    // que eligió el usuario y solo se completa la razón social y el domicilio.
+    if (numeroEmpresa(d.numeroDocumento) && f.tipoPersona === 'NATURAL') f.tipoPersona = 'JURIDICA';
+    f.razonSocial = d.razonSocial ?? f.razonSocial;
+    f.direccion = d.direccion ?? f.direccion;
+    f.distrito = this.formatoNombre(d.distrito) ?? f.distrito;
+    f.provincia = this.formatoNombre(d.provincia) ?? f.provincia;
+    f.departamento = this.formatoNombre(d.departamento) ?? f.departamento;
+    const alertas = [
+      d.estadoContribuyente && d.estadoContribuyente !== 'ACTIVO' ? `estado ${d.estadoContribuyente}` : '',
+      d.condicionContribuyente && d.condicionContribuyente !== 'HABIDO' ? `condición ${d.condicionContribuyente}` : ''
+    ].filter(Boolean);
+    if (alertas.length) {
+      this.mostrarError(`Datos completados desde SUNAT, pero el contribuyente figura con ${alertas.join(' y ')}.`);
+    } else {
+      this.mostrarExito('Datos completados desde SUNAT. Revísalos antes de guardar.');
+    }
+
+    function numeroEmpresa(ruc: string): boolean { return ruc.startsWith('20'); }
+  }
+
+  /** "DELGADO HUAMANI" -> "Delgado Huamani", como el resto de fichas. */
+  private formatoNombre(valor: string | null): string | null {
+    if (!valor) return null;
+    return valor.toLocaleLowerCase('es-PE').replace(/(^|[\s-])(\p{L})/gu, (_, sep, l) => sep + l.toLocaleUpperCase('es-PE'));
   }
 
   agregarContacto(): void {

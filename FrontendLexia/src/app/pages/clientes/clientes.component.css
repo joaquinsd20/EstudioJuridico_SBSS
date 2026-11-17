@@ -855,3 +855,4 @@
 .acceso-restringido p { margin: 0; color: #94a3b8; font-size: 14px; line-height: 1.5; }
 :host-context(.tema-oscuro-global) .acceso-restringido, .tema-oscuro .acceso-restringido { background: #111827; border-color: #334155; color: #e5e7eb; }
 :host-context(.tema-oscuro-global) .acceso-restringido h1, .tema-oscuro .acceso-restringido h1 { color: #e5e7eb; }
+.doc-input{display:flex;gap:6px;align-items:center}.doc-input input{flex:1;min-width:0}.doc-input .btn{height:38px;white-space:nowrap}

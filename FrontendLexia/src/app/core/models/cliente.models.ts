@@ -177,3 +177,19 @@ export interface RegistrarComunicacion {
   canal: string;
   fecha: string | null;
 }
+
+/** Datos de un DNI (RENIEC) o RUC (SUNAT) para autocompletar la ficha. */
+export interface DatosDocumento {
+  tipoDocumento: 'DNI' | 'RUC';
+  numeroDocumento: string;
+  nombres: string | null;
+  apellidoPaterno: string | null;
+  apellidoMaterno: string | null;
+  razonSocial: string | null;
+  direccion: string | null;
+  distrito: string | null;
+  provincia: string | null;
+  departamento: string | null;
+  estadoContribuyente: string | null;
+  condicionContribuyente: string | null;
+}

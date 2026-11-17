@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
-  CatalogosCliente, ClienteGuardar, ClienteResumen, ClientesResumen,
+  CatalogosCliente, ClienteGuardar, DatosDocumento, ClienteResumen, ClientesResumen,
   FichaCliente, Pagina, RegistrarComunicacion, VerificarConflictoRequest,
   VerificarConflictoResponse
 } from '../models/cliente.models';
@@ -21,6 +21,10 @@ export class ClienteService {
 
   resumen(): Observable<ClientesResumen> { return this.http.get<ClientesResumen>(`${this.base}/resumen`); }
   catalogos(): Observable<CatalogosCliente> { return this.http.get<CatalogosCliente>(`${this.base}/catalogos`); }
+  consultarDocumento(tipo: string, numero: string): Observable<DatosDocumento> {
+    const params = new HttpParams().set('tipo', tipo).set('numero', numero);
+    return this.http.get<DatosDocumento>(`${this.base}/consulta-documento`, { params });
+  }
   ficha(uuid: string): Observable<FichaCliente> { return this.http.get<FichaCliente>(`${this.base}/${uuid}/ficha`); }
   crear(datos: ClienteGuardar): Observable<{ uuid: string }> { return this.http.post<{ uuid: string }>(this.base, datos); }
   actualizar(uuid: string, datos: ClienteGuardar): Observable<void> { return this.http.put<void>(`${this.base}/${uuid}`, datos); }

@@ -152,4 +152,20 @@ public final class ClienteGestionDtos {
             int totalCoincidencias,
             List<CoincidenciaConflicto> coincidencias) {
     }
+
+    /** Datos de un DNI (RENIEC) o RUC (SUNAT) para autocompletar la ficha. */
+    public record DatosDocumento(
+            String tipoDocumento,
+            String numeroDocumento,
+            String nombres,
+            String apellidoPaterno,
+            String apellidoMaterno,
+            String razonSocial,
+            String direccion,
+            String distrito,
+            String provincia,
+            String departamento,
+            String estadoContribuyente,
+            String condicionContribuyente) {
+    }
 }

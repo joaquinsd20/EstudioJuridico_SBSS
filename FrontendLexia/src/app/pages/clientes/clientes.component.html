@@ -150,7 +150,12 @@
       <div class="form-section"><h3>1. Identificación</h3><div class="form-grid cols-3">
         <label><span>Tipo de persona *</span><select [(ngModel)]="form.tipoPersona"><option value="NATURAL">Persona Natural</option><option value="JURIDICA">Persona Jurídica</option><option value="ENTIDAD_PUBLICA">Entidad Pública</option></select></label>
         <label><span>Tipo documento *</span><select [(ngModel)]="form.tipoDocumento"><option>DNI</option><option>RUC</option><option>CE</option><option>PASAPORTE</option><option>PARTIDA_REGISTRAL</option></select></label>
-        <label><span>Número *</span><input [(ngModel)]="form.numeroDocumento"></label>
+        <label><span>Número *</span>
+          <div class="doc-input">
+            <input [(ngModel)]="form.numeroDocumento" (keydown.enter)="buscarDocumento()" [attr.inputmode]="puedeConsultarDocumento() ? 'numeric' : null">
+            <button type="button" class="btn tiny secondary" *ngIf="puedeConsultarDocumento()" [disabled]="consultandoDocumento" (click)="buscarDocumento()" [title]="form.tipoDocumento === 'DNI' ? 'Completar con datos de RENIEC' : 'Completar con datos de SUNAT'">{{ consultandoDocumento ? 'Buscando…' : 'Buscar' }}</button>
+          </div>
+        </label>
       </div>
       <div class="form-grid cols-3" *ngIf="form.tipoPersona === 'NATURAL'"><label><span>Nombres *</span><input [(ngModel)]="form.nombres"></label><label><span>Apellido paterno *</span><input [(ngModel)]="form.apellidoPaterno"></label><label><span>Apellido materno</span><input [(ngModel)]="form.apellidoMaterno"></label></div>
       <div class="form-grid cols-2" *ngIf="form.tipoPersona !== 'NATURAL'"><label><span>Razón social *</span><input [(ngModel)]="form.razonSocial"></label><label><span>Nombre comercial</span><input [(ngModel)]="form.nombreComercial"></label></div></div>
