@@ -2,7 +2,9 @@
 
 Gestión integral de un estudio de abogados: expedientes, clientes, agenda,
 actuaciones, plazos procesales, tareas, documentos, biblioteca jurídica, monitor
-judicial y facturación.
+judicial, facturación y escritos con IA.
+
+**En línea:** https://lexia-sbss.vercel.app (datos de demostración; ver §13).
 
 Monorepo con dos aplicaciones y una capa de datos:
 
@@ -11,6 +13,7 @@ Monorepo con dos aplicaciones y una capa de datos:
 | API REST | `BackendLexia/` | Spring Boot 4.1.1 · Java 21 · Maven · Spring Security (JWT) · Spring Data JPA + JdbcTemplate · Flyway · JJWT · Apache POI · PDFBox |
 | Interfaz web | `FrontendLexia/` | Angular 21.2 (standalone, signals, zone-less) · TypeScript 5.9 · Vitest · ExcelJS |
 | Base de datos | — | MySQL 8.0.16+ / 9.x · InnoDB · `utf8mb4_0900_ai_ci` |
+| Archivos | — | Disco local en desarrollo · Supabase Storage (API S3) en producción |
 | Utilidades | `scripts/` | Bash: verificación de esquema y benchmark de rendimiento |
 
 ---
@@ -19,21 +22,18 @@ Monorepo con dos aplicaciones y una capa de datos:
 
 La verificación vive en el **CI** (`.github/workflows/verificacion.yml`), que
 corre en cada PR y en cada push a `main` contra un MySQL 8.0 real. Estado al
-**17/10/2026**:
+**17/11/2026**:
 
 | Item | Estado |
 |---|---|
-| CI de cada PR | Verde en todos los PR desde que existe (10/10/2026) |
-| Migraciones Flyway | V1–V28, esquema en `v28`; cada una con su huella en `migraciones.sha256` |
-| Backend | 17 controllers · 140 endpoints, todos con `@PreAuthorize` salvo `auth` |
-| Login JWT y RBAC | 8 roles · 39 permisos · 159 pares rol-permiso |
-| Pruebas del backend | 40 sin base de datos (guardias incluidas) · 113 contra MySQL |
-| `verificar-bd.sh` | 39/39 |
-| Pruebas del frontend | 10/10 (`npx ng test --watch=false`) |
+| Publicado | Frontend en Vercel · API en Render · MySQL en Aiven · archivos en Supabase (§13) |
+| Migraciones Flyway | V1–V30; cada una con su huella en `migraciones.sha256` |
+| Backend | 24 controllers · ~157 endpoints, todos con `@PreAuthorize` salvo los públicos de `auth` |
+| Login JWT y RBAC | 8 roles · 39 permisos |
+| Pruebas | Unitarias sin base de datos + integración contra MySQL (`*IT.java`) |
 | Build de producción de Angular | OK |
 
-Contenido sembrado en desarrollo: **46 tablas**, 8 roles, 39 permisos, 159 pares
-rol-permiso, 4 funciones SQL; 11 usuarios, 8 clientes, 10 expedientes, 14
+Contenido sembrado en desarrollo: 11 usuarios, 8 clientes, 10 expedientes, 14
 actuaciones, 9 plazos, 10 tareas, 9 documentos, 8 eventos de agenda, 12
 honorarios y 15 recursos de biblioteca.
 
@@ -53,35 +53,18 @@ honorarios y 15 recursos de biblioteca.
 
 ---
 
-## 3. ⚠️ JDK 25 rompe la compilación
+## 3. Usa JDK 21
 
-Este es el primer obstáculo real al levantar el proyecto en una máquina nueva.
-
-El `pom.xml` fija `<java.version>21</java.version>`, pero si el JDK por defecto de
-la máquina es 24 o superior, la compilación **falla con ~200 errores**:
-
-```
-cannot find symbol: method getUuidPublico()
-  location: variable cliente of type com.sbss.lexia.clientes.entity.Cliente
-cannot find symbol: method builder()
-  location: class com.sbss.lexia.biblioteca.dto.BibliotecaEstadisticasResponse
-variable service not initialized in the default constructor
-```
-
-**Causa:** desde JDK 24, `javac` ya no ejecuta automáticamente los annotation
-processors que encuentra en el classpath. Lombok no es invocado, así que `@Getter`
-y `@Setter` no generan nada y todas las entidades quedan sin sus accesores.
-
-**Solución inmediata** — apuntar `JAVA_HOME` al JDK 21 antes de arrancar:
+Desde JDK 23–24, `javac` ya no ejecuta solo los annotation processors del
+classpath, así que Lombok no generaría getters/setters (~200 errores
+`cannot find symbol`). El `pom.xml` lo resuelve pasando `-proc:full` al
+compilador, pero el proyecto se compila y prueba con **JDK 21** (también la
+imagen Docker de producción). Si algo falla con un JDK más nuevo, apunta
+`JAVA_HOME` al 21:
 
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Java\jdk-21.0.12"
 ```
-
-**Solución permanente pendiente** — declarar Lombok explícitamente en el
-`maven-compiler-plugin` (`annotationProcessorPaths`), o fijar el *toolchain* a 21.
-Mientras no se haga, cualquiera que tenga JDK 25 como `java` por defecto no podrá
-arrancar el backend.
 
 ---
 
@@ -105,14 +88,14 @@ EstudioJuridico_SBSS/
 │       │   ├── application-prod.yml     todo obligatorio, sin valores por defecto
 │       │   └── db/
 │       │       ├── bootstrap/            catálogo inicial del estudio
-│       │       ├── migration/            V1..V28 + LEEME.md (léelo antes de migrar)
+│       │       ├── migration/            V1..V30 + LEEME.md (léelo antes de migrar)
 │       │       └── seed/                 R__seed_desarrollo.sql (solo dev)
 │       └── test/java/com/sbss/lexia/     17 clases: 5 unitarias + 12 *IT.java
 ├── FrontendLexia/
 │   ├── package.json, angular.json, tsconfig*.json
 │   └── src/app/
 │       ├── core/          guards, interceptors, models, services
-│       └── pages/         18 pantallas (login, panel, expedientes, …)
+│       └── pages/         20 pantallas (login, recuperar-password, panel, expedientes, …)
 └── scripts/
     ├── verificar-bd.sh        gate de calidad de las migraciones
     └── medir-rendimiento.sh   benchmark con volumen realista
@@ -165,7 +148,7 @@ El perfil por defecto es `dev`; no hace falta `SPRING_PROFILES_ACTIVE`.
 `0 migrations` o si falta, el esquema está incompleto (ver §8):
 
 ```
-Successfully applied N migrations to schema `lexia_db_sbss`, now at version v28
+Successfully applied N migrations to schema `lexia_db_sbss`, now at version v30
 ```
 
 > ⚠️ `db/seed/R__seed_desarrollo.sql` hace `TRUNCATE` de 34 tablas y las vuelve a
@@ -212,6 +195,11 @@ Alternativa con archivo (ignorado por git, ver §8): crear
 | `LEXIA_ESTUDIO_RUC` | ambos | — | Idem |
 | `DB_URL` / `DB_USERNAME` / `DB_PASSWORD` | prod | — | **Sin default: la app no arranca** |
 | `JWT_SECRETO` / `CORS_ORIGENES` | prod | — | **Sin default** |
+| `LEXIA_S3_*` | ambos | — | Copia permanente de archivos (§13). Sin ellas, solo disco local |
+| `LEXIA_DECOLECTA_TOKEN` | ambos | — | Autocompletar clientes por DNI/RUC (§7.1) |
+| `LEXIA_BREVO_API_KEY` / `LEXIA_CORREO_REMITENTE` | ambos | — | Correos de recuperar contraseña (§9) |
+| `LEXIA_FRONTEND_URL` | ambos | 1.er origen de CORS | Base de los enlaces en los correos |
+| `LEXIA_IA_OPENAI_API_KEY` | ambos | — | Escritos con IA reales; sin ella usa plantillas |
 
 ### 5.5 Verlo en el celular (o desde cualquier lugar)
 
@@ -290,9 +278,9 @@ cambie. Sirve para validar ese flujo.
 
 | Módulo | Ruta web | Endpoint | Estado |
 |---|---|---|---|
-| Autenticación | `/login`, `/cambiar-password` | `/api/v1/auth` | Completo |
+| Autenticación | `/login`, `/cambiar-password`, `/recuperar-password`, `/restablecer-password` | `/api/v1/auth` | Completo (incluye «¿Olvidaste tu contraseña?» por correo) |
 | Expedientes | `/expedientes` | `/api/v1/expedientes` | Completo |
-| Clientes | `/clientes` | `/api/v1/clientes` | Completo (incluye conflicto de intereses) |
+| Clientes | `/clientes` | `/api/v1/clientes` | Completo (conflicto de intereses y autocompletado por DNI/RUC) |
 | Agenda | `/agenda` | `/api/v1/agenda` | Completo |
 | Actuaciones | `/actuaciones` | `/api/v1/actuaciones` | Completo (con costos) |
 | Plazos | `/plazos` | `/api/v1/plazos` | Completo |
@@ -302,26 +290,46 @@ cambie. Sirve para validar ese flujo.
 | Monitor judicial | `/monitor-judicial` | `/api/v1/monitor-judicial` | Completo |
 | Facturación | `/facturacion` | `/api/v1/facturacion` | Completo (honorarios, pagos, comprobantes) |
 | Usuarios | `/usuarios` | `/api/v1/usuarios` | Completo (reasignación de carga) |
-| Dashboard | `/dashboard` | `/api/v1/dashboard` | Completo (indicadores, gráficos; el dinero solo con `FACTURACION_LEER`) |
+| Dashboard | `/dashboard` | `/api/v1/dashboard` | Completo (todo en una sola petición `GET /dashboard/inicio`; el dinero solo con `FACTURACION_LEER`) |
 | Reportes | `/reportes` | `/api/v1/reportes` | Completo (Excel y PDF) |
 | Búsqueda global | barra superior | `/api/v1/busqueda` | Completo (respeta RF-02 y el permiso de cada módulo) |
 | Mensajería | panel | `/api/v1/mensajeria` | Completo (chat interno 1 a 1) |
-| **Escritos con IA** | `/escritos-ia` | — | **Maqueta** — sin servicio |
-| **Configuración** | `/configuracion` | — | **Maqueta** — sin servicio |
+| Escritos con IA | `/escritos-ia` | `/api/v1/escritos-ia` | Completo (plantillas locales; con `LEXIA_IA_OPENAI_API_KEY` redacta un modelo de lenguaje) |
+| Configuración | `/configuracion`, `/mi-configuracion` | `/api/v1/configuracion`, `/api/v1/mi-configuracion` | Completo (datos del estudio, parámetros, tema claro/oscuro) |
 
 Pendientes de construir (el esquema y la lógica SQL ya existen): **calendario
-judicial** con su flujo de aprobación (RF-14), **entrega de alertas** antes del
-vencimiento (RF-10), **portal del cliente** (RF-16) y **plantillas** (RF-18).
+judicial** con su flujo de aprobación (RF-14), **portal del cliente** (RF-16) y
+**plantillas** (RF-18).
 
-Todas las rutas del router pasan por `authGuard`, salvo `login` y el wildcard
-`**` (que redirige a `login`).
+Todas las rutas del router pasan por `authGuard`, salvo `login`,
+`recuperar-password`, `restablecer-password` y el wildcard `**` (que redirige
+a `login`).
+
+### 7.1 Autocompletar clientes por DNI o RUC
+
+En el formulario de cliente, el botón **Buscar** junto al número de documento
+completa nombres (RENIEC) o razón social y domicilio (SUNAT) usando
+[Decolecta](https://decolecta.com) (100 consultas gratis al mes). El token
+(`LEXIA_DECOLECTA_TOKEN`) vive solo en el backend; sin él, el botón avisa y el
+formulario se llena a mano. Endpoint: `GET /api/v1/clientes/consulta-documento`.
+
+### 7.2 Experiencia de uso y rendimiento
+
+- **Login** en tarjeta de vidrio sobre fondo animado (`core/components/fondo-lexia.component.ts`), con mostrar contraseña, aviso de Bloq Mayús y recordar correo.
+- **Tema claro y oscuro** con contraste revisado en las 16 pantallas (texto ≥ 4,5:1 en claro).
+- **Responsivo**: indicadores en 2 columnas, formularios a una columna y modales a pantalla completa en celular.
+- **Barra de carga** superior, foco visible con teclado y transiciones suaves (respeta «reducir movimiento»).
+- **Dashboard en una sola petición** (`GET /dashboard/inicio`, antes 14).
+- **Caché de catálogos** 5 min y peticiones GET idénticas compartidas (`cache.interceptor.ts`).
+- **Precarga** en segundo plano del código de todos los módulos.
+- En producción: respuestas comprimidas, pool de conexiones vivo y `default_batch_fetch_size: 50` (`application-prod.yml`).
 
 ---
 
 ## 8. Base de datos
 
-- **46 tablas** InnoDB, una sola collation: `utf8mb4_0900_ai_ci`; 4 funciones SQL, 92 `CHECK`, 136 claves foráneas.
-- **28 migraciones** `V1..V28` en `db/migration/`, aplicadas por Flyway. Cada una tiene su huella en
+- **48 tablas** InnoDB, una sola collation: `utf8mb4_0900_ai_ci`; 4 funciones SQL.
+- **30 migraciones** `V1..V30` en `db/migration/`, aplicadas por Flyway. Cada una tiene su huella en
   `src/test/resources/migraciones.sha256`: se congela en el mismo PR (`bash scripts/congelar-migraciones.sh`).
 - `ddl-auto: validate`: Hibernate **solo verifica** que las entidades cuadren con
   las tablas. El esquema es de Flyway, nunca `update`.
@@ -349,7 +357,7 @@ archivo es la causa de todos ellos:
 4. **Una migración ya aplicada no se edita nunca** — cambia su checksum y rompe el
    arranque de quien ya la tenía.
 
-> `verificar-bd.sh` comprueba 46 tablas, 39 permisos y 159 pares: si una migración
+> `verificar-bd.sh` comprueba las tablas, 39 permisos y 159 pares: si una migración
 > añade una tabla o un permiso, se actualiza en el mismo PR o el CI falla.
 
 ---
@@ -364,7 +372,7 @@ archivo es la causa de todos ellos:
   siempre contra `permisos.codigo` / `roles.codigo`, nunca contra la etiqueta
   visible.
 - **CSRF desactivado** (API stateless), `SecurityManager` stateless.
-  Públicos: `OPTIONS`, `POST /api/v1/auth/login`, `/error`.
+  Públicos: `OPTIONS`, `POST /api/v1/auth/login`, los tres de recuperar contraseña y `/error`.
 - **Aislamiento por estudio**: todas las consultas filtran por `estudio_id`,
   tomado de la sesión, no del cliente.
 - **Visibilidad de expedientes** (`shared/security/VisibilidadExpedientes.java`):
@@ -373,6 +381,20 @@ archivo es la causa de todos ellos:
 - **Auditoría JPA** en toda entidad que hereda `EntidadAuditable` (5 columnas).
 - El token vive en `localStorage` (`lexia.token`, `lexia.usuario`). Es una
   debilidad conocida de XSS, documentada en `auth.service.ts:10-20`.
+- **Bloqueo** de la cuenta tras 5 intentos fallidos (`IntentosFallidosService`).
+
+### Recuperar contraseña
+
+`POST /auth/recuperar-password` → correo con un enlace a
+`/restablecer-password?token=…` → `POST /auth/restablecer-password`.
+
+- Respuesta **idéntica** exista o no la cuenta (no permite averiguar correos registrados).
+- Token aleatorio de 256 bits; en la base solo su **hash SHA-256** (tabla `recuperaciones_password`, V30).
+- Vence a los **30 minutos**, sirve **una vez**, máximo **3 solicitudes por hora** por cuenta.
+- Al usarlo: misma política de contraseña, se **cierran todas las sesiones** y se desbloquea la cuenta.
+- El correo sale por la **API HTTP de Brevo** (el plan gratis de Render bloquea SMTP).
+  Sin `LEXIA_BREVO_API_KEY` se avisa a los administradores dentro de LEXIA para
+  que la restablezcan desde Usuarios.
 
 ### Roles
 
@@ -483,20 +505,58 @@ en `fecha_hora`.
 
 | # | Problema | Dónde |
 |---|---|---|
-| 1 | **El build falla con JDK ≥ 24** por Lombok (§3) | `pom.xml` |
-| 2 | **`@Scheduled` sin `@EnableScheduling`**: el cron de limpieza de papelera nunca se ejecuta, y sin él tampoco se entregan las alertas | `PapeleraDocumentoScheduler.java:18` |
-| 3 | 2 pantallas maqueta sin backend: escritos-ia y configuracion | `src/app/pages/` |
-| 4 | Los tests corren destructivos contra la BD de desarrollo | falta `src/test/resources/` |
-| 5 | El proyecto Angular se llama `FrontedLexia` (falta la `n`) | `angular.json:10` |
-| 6 | Proxy de desarrollo añadido (`proxy.conf.js`, ver §5.5). En prod sigue haciendo falta un reverse proxy no documentado | `environment.prod.ts:11` |
-| 7 | `biblioteca` y `facturacion` llaman `HttpClient` desde el componente, no desde `core/services` | `biblioteca-juridica.component.ts:77`, `facturacion.component.ts:254` |
-| 8 | Sin Docker ni ESLint. El CI existe, pero `main` no está protegida: un PR en rojo se puede mergear | raíz |
-| 9 | `CLAUDE.md` y `docs/` están en `.gitignore` pero el código los cita ~10 veces | `.gitignore:87-88` |
-| 10 | El comentario de la semilla describe el aislamiento de `prod` con `ignore-migration-patterns`, pero `prod` ya lo hace con `locations` | `R__seed_desarrollo.sql:6-8` |
+| 1 | Los créditos de prueba de **Aiven** (base de producción) vencen ~**1/12/2026**: hay que decidir la base definitiva | §13 |
+| 2 | Render gratis **se duerme** tras 15 min sin uso (despierta en ~50 s); un ping desde Supabase lo mantiene activo lun–sáb 7:00–21:00 | §13 |
+| 3 | El envío de correos (recuperar contraseña) necesita configurar Brevo en Render | §9 |
+| 4 | El token JWT vive en `localStorage` (riesgo XSS); falta moverlo a cookie `HttpOnly` | `auth.service.ts` |
+| 5 | Los tests de integración corren destructivos contra la BD de desarrollo | falta `src/test/resources/` |
+| 6 | El proyecto Angular se llama `FrontedLexia` (falta la `n`) | `angular.json:10` |
+| 7 | `biblioteca` y `facturacion` llaman `HttpClient` desde el componente, no desde `core/services` | componentes |
+| 8 | `main` no está protegida: un PR en rojo se puede mergear | GitHub |
 
 ---
 
 ## 13. Producción
+
+### 13.1 Dónde está publicado
+
+| Pieza | Servicio | Detalle |
+|---|---|---|
+| Frontend | **Vercel** (`lexia-sbss`) | Root `FrontendLexia`; `vercel.json` reenvía `/api/*` al backend (mismo origen, sin CORS en el navegador) |
+| API | **Render** (`lexia-backend`, plan free) | Docker desde `BackendLexia/Dockerfile`, perfil `prod` |
+| Base de datos | **Aiven** MySQL 8.4 | Plan Developer con créditos de prueba (vencen ~1/12/2026) |
+| Archivos | **Supabase Storage** (bucket `lexia-archivos`) | Copia permanente de Documentos y Biblioteca vía API S3 |
+
+El despliegue es automático con cada push a `main` del fork.
+
+### 13.2 Variables de entorno (Render)
+
+Obligatorias (sin ellas **no arranca**): `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`,
+`JWT_SECRETO`, `CORS_ORIGENES`.
+
+Solo el primer arranque sobre una base vacía: `LEXIA_ESTUDIO_RUC`,
+`LEXIA_ADMIN_EMAIL`, `LEXIA_ADMIN_PASSWORD` (mínimo 12 caracteres). Después
+conviene borrar la contraseña del entorno.
+
+Opcionales: `LEXIA_S3_ENDPOINT`, `LEXIA_S3_REGION`, `LEXIA_S3_BUCKET`,
+`LEXIA_S3_ACCESS_KEY`, `LEXIA_S3_SECRET_KEY` (archivos permanentes) ·
+`LEXIA_DECOLECTA_TOKEN` (DNI/RUC) · `LEXIA_BREVO_API_KEY`,
+`LEXIA_CORREO_REMITENTE` (correos) · `LEXIA_IA_OPENAI_API_KEY` (IA).
+
+### 13.3 Arranque rápido en el plan gratuito
+
+El contenedor de Render tiene muy poca CPU y se apaga a los 15 minutos sin uso.
+Para que despierte rápido (~50 s en vez de ~3 min):
+
+- **AppCDS**: la imagen Docker entrena un archivo de clases durante el build (`app.jsa`).
+- JIT C1 (`-XX:TieredStopAtLevel=1`) y `SPRING_MAIN_LAZY_INITIALIZATION=true`
+  (los `@Scheduled` llevan `@Lazy(false)` para seguir activos).
+- El login hace un `GET /auth/yo` al abrirse para despertar el backend mientras
+  se escribe, y avisa si tarda.
+- Un **cron en Supabase** (`pg_cron` + `pg_net`) llama a la API cada 10 min de
+  lunes a sábado, 7:00–21:00 hora de Lima.
+
+### 13.4 Compilar a mano
 
 ```bash
 cd BackendLexia
@@ -504,21 +564,8 @@ cd BackendLexia
 SPRING_PROFILES_ACTIVE=prod java -jar target/BackendLexia-0.0.1-SNAPSHOT.jar
 ```
 
-Sin valores por defecto: si falta `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`,
-`JWT_SECRETO` o `CORS_ORIGENES`, **la aplicación no arranca**. En el primer
-arranque sobre una base vacía hace falta además `LEXIA_ESTUDIO_RUC`,
-`LEXIA_ADMIN_EMAIL` y `LEXIA_ADMIN_PASSWORD` (mínimo 12 caracteres):
-`shared/bootstrap/InicializadorEstudio.java` crea el estudio y su administrador
-solo si la tabla `estudios` está vacía.
-
-Diferencias con `dev`:
-
-- `flyway.locations` = solo `db/migration`. **La semilla de desarrollo no se carga.**
-- `baseline-on-migrate: false`.
-
-El frontend de producción compila contra `/api/v1` (mismo origen), así que necesita
-un reverse proxy delante que sirva los estáticos de `dist/` y reenvíe `/api` al
-backend.
+Diferencias con `dev`: `flyway.locations` = solo `db/migration` (**la semilla
+de desarrollo no se carga**) y `baseline-on-migrate: false`.
 
 ---
 
