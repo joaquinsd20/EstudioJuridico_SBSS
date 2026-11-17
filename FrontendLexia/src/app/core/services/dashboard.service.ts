@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, forkJoin, map, of } from 'rxjs';
+import { Observable, catchError, forkJoin, map, of, shareReplay } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 import { ActuacionResumen } from '../models/actuacion.models';
@@ -11,6 +11,7 @@ import { ExpedienteResumen } from '../models/expediente.models';
 import { MonitorResumen } from '../models/monitor-judicial.models';
 import { PlazoResumen } from '../models/plazo.models';
 import { TareaPagina, TareaResumen } from '../models/tarea.models';
+import { GraficosDashboard } from './graficos-dashboard.service';
 
 export interface FacturacionResumen {
   totalFacturado: number;
@@ -101,6 +102,8 @@ export interface ResultadoLectura {
   cargaEquipo: CargaEquipo[];
   expedientesClave: ExpedienteClave[];
   nuevasResoluciones: NuevaResolucionItem[];
+  /** Graficos del panel; null si el rol no puede verlos o fallo su lectura. */
+  graficos: GraficosDashboard | null;
   parcialError: boolean;
   totalError: boolean;
   fecha: Date;
@@ -149,6 +152,12 @@ export interface Sugerencia {
   routerLink: string;
 }
 
+/** Una parte de GET /dashboard/inicio: 200 con datos, 403 sin permiso, 500 si fallo. */
+interface ParteInicio {
+  estado: number;
+  datos: unknown;
+}
+
 /** Envoltura interna: distingue "no hay permiso" de "no se pudo leer". */
 interface Lectura<T> {
   valor: T | null;
@@ -168,20 +177,36 @@ export class DashboardService {
    * minutos es peor que uno que no existe.
    */
   lectura(): Observable<ResultadoLectura> {
+    // UNA peticion HTTP (GET /dashboard/inicio) trae todas las partes; antes
+    // eran 14. Cada parte llega con su propio estado (200, 403 o 500), asi que
+    // se sigue distinguiendo "sin permiso" de "fallo" igual que antes.
+    const inicio$ = this.http.get<Record<string, ParteInicio>>(`${this.base}/dashboard/inicio`)
+      .pipe(shareReplay({ bufferSize: 1, refCount: false }));
+    const parte = <T>(clave: string): Observable<T> => inicio$.pipe(
+      map(r => {
+        const p = r?.[clave];
+        if (!p || p.estado !== 200) {
+          throw { status: p?.estado ?? 500 };
+        }
+        return p.datos as T;
+      })
+    );
+
     return forkJoin({
-      expedientes: this.leer<ExpedienteResumen>('expedientes/resumen'),
-      agenda: this.leer<AgendaResumen>('agenda/resumen'),
-      plazos: this.leer<PlazoResumen>('plazos/resumen'),
-      tareas: this.leer<TareaResumen>('tareas/resumen'),
-      clientes: this.leer<ClientesResumen>('clientes/resumen'),
-      actuaciones: this.leer<ActuacionResumen>('actuaciones/resumen'),
-      documentos: this.leer<DocumentoEstadisticas>('documentos/estadisticas'),
-      monitor: this.leer<MonitorResumen>('monitor-judicial/resumen'),
-      facturacion: this.leer<FacturacionResumen>('facturacion/resumen'),
-      agendaHoy: this.agendaDeHoy(),
-      cargaEquipo: this.cargaDelEquipo(),
-      expedientesClave: this.expedientesQueRequierenAtencion(),
-      nuevasResoluciones: this.nuevasResoluciones()
+      expedientes: this.leer<ExpedienteResumen>(parte('expedientes')),
+      agenda: this.leer<AgendaResumen>(parte('agenda')),
+      plazos: this.leer<PlazoResumen>(parte('plazos')),
+      tareas: this.leer<TareaResumen>(parte('tareas')),
+      clientes: this.leer<ClientesResumen>(parte('clientes')),
+      actuaciones: this.leer<ActuacionResumen>(parte('actuaciones')),
+      documentos: this.leer<DocumentoEstadisticas>(parte('documentos')),
+      monitor: this.leer<MonitorResumen>(parte('monitor')),
+      facturacion: this.leer<FacturacionResumen>(parte('facturacion')),
+      agendaHoy: this.agendaDeHoy(parte<AgendaPagina>('agendaHoy')),
+      cargaEquipo: this.cargaDelEquipo(parte<TareaPagina>('tareasEquipo')),
+      expedientesClave: this.expedientesQueRequierenAtencion(parte<ExpedienteAtencion[]>('expedientesAtencion')),
+      nuevasResoluciones: this.nuevasResoluciones(parte<ConsultaMonitor[]>('consultasMonitor')),
+      graficos: this.leer<GraficosDashboard>(parte('graficos'))
     }).pipe(
       map(d => {
         const lecturas = [
@@ -208,6 +233,7 @@ export class DashboardService {
           cargaEquipo: d.cargaEquipo.valor ?? [],
           expedientesClave: d.expedientesClave.valor ?? [],
           nuevasResoluciones: d.nuevasResoluciones.valor ?? [],
+          graficos: d.graficos.valor,
           parcialError: fallidas > 0 && respondieron > 0,
           totalError: respondieron === 0,
           fecha: new Date()
@@ -223,18 +249,11 @@ export class DashboardService {
    * huso horario "hoy" se correria y se pediria el dia que viene. `en-CA`
    * devuelve el formato ISO `AAAA-MM-DD`, que es el que espera la API.
    */
-  private agendaDeHoy(): Observable<Lectura<AgendaHoy>> {
-    const dia = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' }).format(new Date());
-
-    const params = new HttpParams()
-      .set('desde', `${dia}T00:00:00`)
-      .set('hasta', `${dia}T23:59:59`)
-      .set('tamano', '100');
-
+  private agendaDeHoy(fuente: Observable<AgendaPagina>): Observable<Lectura<AgendaHoy>> {
     // GET /agenda es paginado desde #57: las filas vienen en `contenido`, y
     // `tamano` admite 10, 20, 40 o 100. Leerlo como array dejaba la tarjeta
     // vacia sin avisar.
-    return this.http.get<AgendaPagina>(`${this.base}/agenda`, { params }).pipe(
+    return fuente.pipe(
       map(pagina => {
         const deHoy = [...(pagina?.contenido ?? [])].sort((a, b) =>
           a.fechaInicio.localeCompare(b.fechaInicio)
@@ -260,10 +279,8 @@ export class DashboardService {
    * pendientes el reparto saldra incompleto: cuando el estudio crezca, esto
    * tiene que pasar a ser un GROUP BY en el backend, no un recorte aqui.
    */
-  private cargaDelEquipo(): Observable<Lectura<CargaEquipo[]>> {
-    const params = new HttpParams().set('size', '100');
-
-    return this.http.get<TareaPagina>(`${this.base}/tareas`, { params }).pipe(
+  private cargaDelEquipo(fuente: Observable<TareaPagina>): Observable<Lectura<CargaEquipo[]>> {
+    return fuente.pipe(
       map(pagina => {
         const porPersona = new Map<string, CargaEquipo>();
 
@@ -319,8 +336,8 @@ export class DashboardService {
    * "Plazo vence hoy" y uno parado como "Vencido", sin mirar ningun plazo: en
    * un sistema cuyo trabajo es avisar de plazos, eso es un aviso falso.
    */
-  private expedientesQueRequierenAtencion(): Observable<Lectura<ExpedienteClave[]>> {
-    return this.http.get<ExpedienteAtencion[]>(`${this.base}/dashboard/expedientes-atencion`).pipe(
+  private expedientesQueRequierenAtencion(fuente: Observable<ExpedienteAtencion[]>): Observable<Lectura<ExpedienteClave[]>> {
+    return fuente.pipe(
       map(lista => {
         const valor: ExpedienteClave[] = lista.map(e => {
           const dias = e.fechaUltimaActuacion
@@ -362,12 +379,9 @@ export class DashboardService {
    * ventana de 30 dias con tope 100 evita que una nueva quede fuera por haber
    * diez consultas mas recientes sin novedad.
    */
-  private nuevasResoluciones(): Observable<Lectura<NuevaResolucionItem[]>> {
-    const desde = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Lima' })
-      .format(new Date(Date.now() - 30 * 86_400_000));
-    const params = new HttpParams().set('desde', desde).set('limite', '100');
-
-    return this.http.get<ConsultaMonitor[]>(`${this.base}/monitor-judicial/consultas`, { params }).pipe(
+  private nuevasResoluciones(fuente: Observable<ConsultaMonitor[]>): Observable<Lectura<NuevaResolucionItem[]>> {
+    // La ventana de 30 dias y el tope de 100 los aplica el backend en /dashboard/inicio.
+    return fuente.pipe(
       map(consultas => {
         // La misma resolucion puede venir en dos consultas (se reviso dos
         // veces): se muestra una vez, la mas reciente, que es la primera.
@@ -417,9 +431,8 @@ export class DashboardService {
     }
   }
 
-  private leer<T>(ruta: string): Observable<Lectura<T | null>> {
-    return this.http
-      .get<T>(`${this.base}/${ruta}`)
+  private leer<T>(fuente: Observable<T>): Observable<Lectura<T | null>> {
+    return fuente
       .pipe(map(valor => ({ valor, error: false })), catchError(e => this.aFallo<T | null>(e, null)));
   }
 

@@ -28,7 +28,6 @@ import {
 } from '../../core/services/dashboard.service';
 import { BusquedaService } from '../../core/services/busqueda.service';
 import {
-  GraficosDashboardService,
   GraficosDashboard,
   BarraGrafico,
   EstadoCobranza
@@ -78,7 +77,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ─── Servicios ────────────────────────────────────────────────────────────
   private readonly dashboardSvc = inject(DashboardService);
   private readonly busquedaSvc  = inject(BusquedaService);
-  private readonly graficosSvc  = inject(GraficosDashboardService);
   private readonly notifSvc     = inject(NotificacionService);
   readonly mensajesSvc          = inject(MensajesService);
   private readonly auth         = inject(AuthService);
@@ -555,8 +553,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   // ─── Ciclo de Vida ────────────────────────────────────────────────────────
   ngOnInit(): void {
+    // Indicadores, listas y graficos llegan juntos en GET /dashboard/inicio.
     this.refrescar();
-    this.cargarGraficos();
     this.cargarNotificaciones();
   }
 
@@ -579,6 +577,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.nuevasResoluciones.set(r.nuevasResoluciones);
           this.agendaHoy.set(r.agendaHoy);
           this.cargaEquipo.set(r.cargaEquipo);
+          this.aplicarGraficos(r.graficos);
           this.cargando.set(false);
           this.actualizando.set(false);
         },
@@ -589,14 +588,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  cargarGraficos(): void {
-    this.graficosSvc
-      .graficos()
-      .pipe(takeUntil(this.destruido))
-      .subscribe(g => {
-        if (g && (g.expedientesPorEstado.length > 0 || g.expedientesPorEspecialidad.length > 0)) {
-          this.graficos.set(g);
-        }
-      });
+  /** Solo reemplaza los graficos si llegaron con datos (mismo criterio de antes). */
+  private aplicarGraficos(g: GraficosDashboard | null): void {
+    if (g && (g.expedientesPorEstado?.length > 0 || g.expedientesPorEspecialidad?.length > 0)) {
+      this.graficos.set(g);
+    }
   }
 }
