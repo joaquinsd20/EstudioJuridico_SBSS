@@ -9,6 +9,9 @@ import { environment } from '../../../environments/environment';
 /** Tras este tiempo sin respuesta se avisa que el servidor se esta activando. */
 const AVISO_SERVIDOR_LENTO_MS = 6000;
 
+/** Solo se guarda el correo (nunca la contrasena) y solo si la persona lo pide. */
+const CLAVE_CORREO = 'lexia.correoRecordado';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -25,6 +28,10 @@ export class LoginComponent {
   readonly cargando = signal(false);
   readonly error = signal<string | null>(null);
   readonly servidorLento = signal(false);
+  readonly verPassword = signal(false);
+  readonly mayusculas = signal(false);
+  readonly recordarCorreo = signal(false);
+  readonly anio = new Date().getFullYear();
 
   private temporizadorAviso: ReturnType<typeof setTimeout> | null = null;
 
@@ -40,6 +47,35 @@ export class LoginComponent {
     // fetch para no pasar por el interceptor, que reaccionaria a ese 401.
     fetch(`${environment.apiUrl}/auth/yo`, { method: 'GET' }).catch(() => undefined);
     inject(DestroyRef).onDestroy(() => this.limpiarAviso());
+
+    const recordado = this.leerCorreoRecordado();
+    if (recordado) {
+      this.formulario.controls.email.setValue(recordado);
+      this.recordarCorreo.set(true);
+    }
+  }
+
+  /** Avisa si Bloq Mayús está activo mientras se escribe la contraseña. */
+  revisarMayusculas(evento: KeyboardEvent): void {
+    if (typeof evento.getModifierState === 'function') {
+      this.mayusculas.set(evento.getModifierState('CapsLock'));
+    }
+  }
+
+  private leerCorreoRecordado(): string | null {
+    try { return localStorage.getItem(CLAVE_CORREO); } catch { return null; }
+  }
+
+  private guardarCorreoRecordado(): void {
+    try {
+      if (this.recordarCorreo()) {
+        localStorage.setItem(CLAVE_CORREO, this.formulario.controls.email.value.trim());
+      } else {
+        localStorage.removeItem(CLAVE_CORREO);
+      }
+    } catch {
+      // Almacenamiento bloqueado: simplemente no se recuerda.
+    }
   }
 
   entrar(): void {
@@ -59,6 +95,7 @@ export class LoginComponent {
       // cambiarla: el backend no deja hacer nada mas hasta entonces.
       next: respuesta => {
         this.limpiarAviso();
+        this.guardarCorreoRecordado();
         this.router.navigate(
           [respuesta.usuario.debeCambiarPassword ? '/cambiar-password' : '/dashboard']);
       },

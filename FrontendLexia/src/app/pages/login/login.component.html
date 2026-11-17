@@ -1,108 +1,185 @@
 <div class="login-wrapper">
 
-  <!-- Ondas decorativas arriba -->
-  <div class="wave wave-top"></div>
-  <div class="wave wave-top2"></div>
+  <!-- ===================== PANEL DE MARCA ===================== -->
+  <aside class="brand-panel" aria-hidden="true">
+    <div class="brand-glow glow-1"></div>
+    <div class="brand-glow glow-2"></div>
+    <div class="brand-grid"></div>
+
+    <div class="brand-top">
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3v18M7 21h10M5 7h14M5 7l-3 6a3 3 0 0 0 6 0L5 7zM19 7l-3 6a3 3 0 0 0 6 0l-3-6zM12 3l-1.5 1.5M12 3l1.5 1.5"/>
+        </svg>
+      </span>
+      <span class="brand-name">LEXIA</span>
+    </div>
+
+    <div class="brand-copy">
+      <p class="brand-kicker">Estudio Jurídico SBSS</p>
+      <h1>Cada plazo,<br><em>bajo control.</em></h1>
+      <p class="brand-lead">
+        Expedientes, audiencias, documentos y honorarios del estudio en un solo lugar,
+        con vencimientos calculados en días hábiles.
+      </p>
+
+      <ul class="brand-features">
+        <li>
+          <span class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 15l2.5 2.5L16 13"/></svg>
+          </span>
+          <span><strong>Plazos procesales</strong> con alertas antes de que venzan</span>
+        </li>
+        <li>
+          <span class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>
+          </span>
+          <span><strong>Expedientes y escritos</strong> con historial de versiones</span>
+        </li>
+        <li>
+          <span class="feat-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></svg>
+          </span>
+          <span><strong>Acceso por rol</strong> y expedientes confidenciales protegidos</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Tarjetas flotantes: una muestra de lo que se ve dentro. -->
+    <div class="float-card card-plazo">
+      <span class="float-dot rojo"></span>
+      <div>
+        <strong>Vence mañana</strong>
+        <small>Absolución de traslado · EXP-0142</small>
+      </div>
+    </div>
+    <div class="float-card card-audiencia">
+      <span class="float-dot verde"></span>
+      <div>
+        <strong>Audiencia 10:30 a. m.</strong>
+        <small>3er Juzgado de Familia</small>
+      </div>
+    </div>
+
+    <p class="brand-foot">Sistema Integral de Gestión Jurídica</p>
+  </aside>
 
 
-  <!-- Tarjeta de login -->
-  <div class="login-card">
+  <!-- ===================== FORMULARIO ===================== -->
+  <main class="form-panel">
+    <div class="form-box">
 
-    <img
-      src="Logo.png"
-      alt="Logo LEXIA"
-      class="brand-logo"
-    >
+      <img src="Logo.png" alt="LEXIA" class="form-logo">
 
-    <p class="brand-subtitle">
-      Sistema Integral de Gestión Jurídica
-    </p>
+      <h2 class="form-title">Bienvenido de nuevo</h2>
+      <p class="form-subtitle">Ingresa con tu correo del estudio para continuar.</p>
 
+      <form [formGroup]="formulario" (ngSubmit)="entrar()" autocomplete="on" novalidate>
 
-    <form [formGroup]="formulario" (ngSubmit)="entrar()" autocomplete="on">
+        <div class="form-group" [class.invalido]="formulario.controls.email.touched && formulario.controls.email.invalid">
+          <label for="email">Correo</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>
+            <input
+              type="email"
+              id="email"
+              class="input-field"
+              placeholder="tucorreo@lexia.com"
+              formControlName="email"
+              name="username"
+              autocomplete="username"
+              inputmode="email"
+            >
+          </div>
+          @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
+            <span class="campo-error">
+              @if (formulario.controls.email.hasError('required')) {
+                El correo es obligatorio
+              } @else {
+                El correo no tiene un formato válido
+              }
+            </span>
+          }
+        </div>
 
-      <div class="form-group">
+        <div class="form-group" [class.invalido]="formulario.controls.password.touched && formulario.controls.password.invalid">
+          <label for="password">Contraseña</label>
+          <div class="input-wrap">
+            <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <input
+              [type]="verPassword() ? 'text' : 'password'"
+              id="password"
+              class="input-field con-boton"
+              placeholder="••••••••"
+              formControlName="password"
+              name="password"
+              autocomplete="current-password"
+              (keydown)="revisarMayusculas($event)"
+              (keyup)="revisarMayusculas($event)"
+              (blur)="mayusculas.set(false)"
+            >
+            <button
+              type="button"
+              class="toggle-pass"
+              (click)="verPassword.set(!verPassword())"
+              [attr.aria-label]="verPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+              [attr.aria-pressed]="verPassword()"
+            >
+              @if (verPassword()) {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A9.8 9.8 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-3.1 4.2M6.6 6.6C4.4 8 2.8 10.1 2 12c1 2.5 5 7 10 7a9.6 9.6 0 0 0 5.4-1.6"/></svg>
+              } @else {
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12c1-2.5 5-7 10-7s9 4.5 10 7c-1 2.5-5 7-10 7S3 14.5 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+              }
+            </button>
+          </div>
+          @if (mayusculas()) {
+            <span class="campo-aviso">Bloq Mayús está activado</span>
+          }
+          @if (formulario.controls.password.touched && formulario.controls.password.invalid) {
+            <span class="campo-error">La contraseña es obligatoria</span>
+          }
+        </div>
 
-        <label for="email">
-          Correo
+        <label class="recordar">
+          <input type="checkbox" [checked]="recordarCorreo()" (change)="recordarCorreo.set($any($event.target).checked)">
+          <span>Recordar mi correo en este equipo</span>
         </label>
 
-        <input
-          type="email"
-          id="email"
-          class="input-field"
-          placeholder="tucorreo@lexia.com"
-          formControlName="email"
-          name="username"
-          autocomplete="username"
-        >
-
-        @if (formulario.controls.email.touched && formulario.controls.email.invalid) {
-          <span class="campo-error">
-            @if (formulario.controls.email.hasError('required')) {
-              El correo es obligatorio
-            } @else {
-              El correo no tiene un formato válido
-            }
-          </span>
+        @if (error()) {
+          <div class="login-error" role="alert">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+            <span>{{ error() }}</span>
+          </div>
         }
 
-      </div>
-
-
-      <div class="form-group">
-
-        <label for="password">
-          Contraseña
-        </label>
-
-        <input
-          type="password"
-          id="password"
-          class="input-field"
-          placeholder="••••••••"
-          formControlName="password"
-          name="password"
-          autocomplete="current-password"
-        >
-
-        @if (formulario.controls.password.touched && formulario.controls.password.invalid) {
-          <span class="campo-error">
-            La contraseña es obligatoria
-          </span>
+        @if (servidorLento()) {
+          <div class="login-aviso" role="status">
+            <span class="aviso-spinner" aria-hidden="true"></span>
+            <span>Activando el servidor tras un periodo sin uso. Puede tardar hasta un minuto; no cierres la página.</span>
+          </div>
         }
 
-      </div>
+        <button type="submit" class="btn-login" [disabled]="cargando()">
+          @if (cargando()) {
+            <span class="btn-spinner" aria-hidden="true"></span>
+            Ingresando…
+          } @else {
+            Iniciar sesión
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          }
+        </button>
 
+      </form>
 
-      @if (error()) {
-        <div class="login-error" role="alert">
-          {{ error() }}
-        </div>
-      }
+      <p class="form-help">
+        ¿Olvidaste tu contraseña? Pide al administrador del estudio que la restablezca.
+      </p>
 
-      @if (servidorLento()) {
-        <div class="login-aviso" role="status">
-          Activando el servidor tras un periodo sin uso. Puede tardar hasta un minuto; no cierres la página.
-        </div>
-      }
-
-
-      <button
-        type="submit"
-        class="btn-login"
-        [disabled]="cargando()"
-      >
-        {{ cargando() ? 'Ingresando…' : 'Iniciar sesión' }}
-      </button>
-
-    </form>
-
-  </div>
-
-
-  <!-- Ondas decorativas abajo -->
-  <div class="wave wave-bottom"></div>
-  <div class="wave wave-bottom2"></div>
+      <footer class="form-foot">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        Conexión cifrada · © {{ anio }} Estudio Jurídico SBSS
+      </footer>
+    </div>
+  </main>
 
 </div>
