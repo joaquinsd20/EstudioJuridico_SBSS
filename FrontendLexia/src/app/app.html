@@ -1,3 +1,5 @@
+<div class="barra-carga" [class.activa]="carga.activa()" role="progressbar" aria-label="Cargando" [attr.aria-hidden]="!carga.activa()"></div>
+
 @if (barraVisible()) {
 
   <header class="topbar-movil">

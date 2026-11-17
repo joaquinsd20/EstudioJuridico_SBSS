@@ -79,7 +79,7 @@
     0
     0;
 
-  color: #88909f;
+  color: #666f7f;
 
   font-size: 13.5px;
 }
@@ -195,14 +195,14 @@
 .stat-icon.green {
   background: #e5f6e9;
 
-  color: #36934f;
+  color: #2e7d43;
 }
 
 
 .stat-icon.red {
   background: #fde8e8;
 
-  color: #cf4141;
+  color: #cd3939;
 }
 
 
@@ -236,7 +236,7 @@
 .stat-information small {
   overflow: hidden;
 
-  color: #9ca2ad;
+  color: #676e7c;
 
   font-size: 10.5px;
 
@@ -289,7 +289,7 @@
 
 
 .search-icon {
-  color: #69717e;
+  color: #676f7b;
 
   font-size: 17px;
 }
@@ -410,7 +410,7 @@
 
   margin-top: 3px;
 
-  color: #9299a6;
+  color: #68707f;
 
   font-size: 11px;
 }
@@ -584,7 +584,7 @@
 
   overflow: hidden;
 
-  color: #9299a5;
+  color: #68707e;
 
   font-size: 10.5px;
 
@@ -666,7 +666,7 @@
 
 
 .client-cell span {
-  color: #969da8;
+  color: #666f7c;
 
   font-size: 10.5px;
 }
@@ -708,7 +708,7 @@
 .matter-badge.labor {
   background: #e6f4e9;
 
-  color: #478158;
+  color: #437a54;
 }
 
 
@@ -748,7 +748,7 @@
 
 
 .court-cell span {
-  color: #9198a5;
+  color: #676f7e;
 
   font-size: 10.5px;
 }
@@ -847,7 +847,7 @@
 .status.suspended {
   background: #faecd3;
 
-  color: #9f691d;
+  color: #96631b;
 }
 
 
@@ -1015,7 +1015,7 @@
 
 
 .donut-center span {
-  color: #8e95a1;
+  color: #676f7c;
 
   font-size: 11px;
 }
@@ -1039,7 +1039,7 @@
 
   gap: 17px;
 
-  color: #6d7583;
+  color: #68707d;
 
   font-size: 11px;
 }
@@ -1169,7 +1169,7 @@
 
 
 .bar-item span {
-  color: #747c89;
+  color: #68707b;
 
   font-size: 11px;
 }
@@ -1267,7 +1267,7 @@
 
 
 .detail-title span {
-  color: #939aa6;
+  color: #69717f;
 
   font-size: 10.5px;
 }
@@ -1291,7 +1291,7 @@
 
 
 .detail-status-row > span {
-  color: #808895;
+  color: #676f7b;
 
   font-size: 11px;
 }
@@ -1393,7 +1393,7 @@
 
 .detail-client span,
 .lawyer-detail span {
-  color: #979da7;
+  color: #686f7b;
 
   font-size: 10px;
 }
@@ -1419,7 +1419,7 @@
 
 
 .information-row span {
-  color: #878e9a;
+  color: #686f7c;
 
   font-size: 11px;
 }
@@ -1516,14 +1516,14 @@
 .orange-event {
   background: #fff1dc;
 
-  color: #bd7828;
+  color: #9b6321;
 }
 
 
 .red-event {
   background: #fde7e7;
 
-  color: #c84242;
+  color: #c73e3e;
 }
 
 
@@ -1544,7 +1544,7 @@
 
 
 .event-item span {
-  color: #969da8;
+  color: #666f7c;
 
   font-size: 10.5px;
 }
@@ -1622,7 +1622,7 @@
 
 
 .document-item span {
-  color: #979da8;
+  color: #676f7c;
 
   font-size: 10px;
 }
@@ -1756,7 +1756,7 @@
 
 .stat-icon.blue {
   background: #e7f0fb;
-  color: #3977bb;
+  color: #3772b3;
 }
 
 .table-wrapper {
@@ -1766,7 +1766,7 @@
 .table-secondary {
   display: block;
   margin-top: 4px;
-  color: #969da8;
+  color: #666f7c;
   font-size: 10px;
 }
 
@@ -1826,8 +1826,8 @@
 }
 
 .risk-low { background: #ecfdf3; color: #15803d; }
-.risk-medium { background: #fff7ed; color: #c2670b; }
-.risk-high { background: #fff1f2; color: #d04949; }
+.risk-medium { background: #fff7ed; color: #aa5a0a; }
+.risk-high { background: #fff1f2; color: #cc3939; }
 .risk-critical { background: #7f1d1d; color: #ffffff; }
 
 .empty-state {
@@ -1837,7 +1837,7 @@
   align-items: center;
   justify-content: center;
   gap: 6px;
-  color: #7d8490;
+  color: #69707b;
   text-align: center;
 }
 
@@ -1893,7 +1893,7 @@
 
 .requirement-content p {
   margin: 0;
-  color: #777f8c;
+  color: #69707c;
   font-size: 11px;
   line-height: 1.7;
 }
@@ -1906,7 +1906,7 @@
   align-items: center;
   justify-content: center;
   gap: 7px;
-  color: #89909b;
+  color: #686f7a;
   text-align: center;
   font-size: 11px;
 }
@@ -1921,7 +1921,7 @@
 }
 
 .muted-text {
-  color: #969da8;
+  color: #666f7c;
   font-size: 11px;
 }
 
@@ -1988,7 +1988,7 @@
 
 .modal-header p {
   margin: 4px 0 0;
-  color: #87909e;
+  color: #656f7d;
   font-size: 11.5px;
 }
 
@@ -2060,7 +2060,7 @@
 }
 
 .block-title > span:not(.status-large) {
-  color: #9299a4;
+  color: #68707c;
   font-size: 11px;
 }
 
@@ -2091,7 +2091,7 @@
 
 .data-grid span,
 .case-summary > span {
-  color: #8a929e;
+  color: #68717e;
   font-size: 10.5px;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -2104,7 +2104,7 @@
 }
 
 .data-grid small {
-  color: #9299a4;
+  color: #68707c;
   font-size: 10.5px;
 }
 
@@ -2188,7 +2188,7 @@
 }
 
 .timeline-entry time {
-  color: #8b929d;
+  color: #69717d;
   font-size: 10.5px;
   white-space: nowrap;
 }
@@ -2205,7 +2205,7 @@
   flex-wrap: wrap;
   gap: 7px;
   margin-top: 8px;
-  color: #9299a3;
+  color: #68707b;
   font-size: 10.5px;
 }
 
@@ -2258,7 +2258,7 @@
 }
 
 .person-row small {
-  color: #9299a4;
+  color: #68707c;
   font-size: 10.5px;
 }
 
@@ -2283,7 +2283,7 @@
 }
 
 .quick-info span {
-  color: #8a929e;
+  color: #68717e;
   font-size: 10.5px;
 }
 
@@ -2456,7 +2456,7 @@
 }
 
 .confidential-toggle small {
-  color: #88799c;
+  color: #79698e;
   font-size: 10.5px;
 }
 
@@ -2547,7 +2547,7 @@ button:disabled {
 
 .detail-load-error span {
   max-width: 280px;
-  color: #64748b;
+  color: #606f85;
   line-height: 1.45;
 }
 
@@ -2571,7 +2571,7 @@ button:disabled {
   margin: 0 0 10px;
   border-radius: 10.5px;
   background: #f8fafc;
-  color: #64748b;
+  color: #606f85;
   font-size: 14.5px;
   text-align: left;
 }
@@ -2595,7 +2595,7 @@ button:disabled {
 
 .modal-state-message span {
   max-width: 460px;
-  color: #64748b;
+  color: #606f85;
   line-height: 1.5;
 }
 
@@ -4572,7 +4572,7 @@ button:disabled {
 .acceso-restringido p {
   margin: 0;
 
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 14px;
   line-height: 1.5;

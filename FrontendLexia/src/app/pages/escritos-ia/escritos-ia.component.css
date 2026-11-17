@@ -1,6 +1,6 @@
 .escritos-page { padding: 1.5rem; }
 .page-header h1 { margin: 0; font-size: 1.6rem; }
-.subtitle { color: #6b7280; margin-top: .25rem; }
+.subtitle { color: #69707d; margin-top: .25rem; }
 
 .layout { display: grid; grid-template-columns: 1fr 1.4fr; gap: 1.5rem; margin-top: 1.5rem; }
 .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 1.25rem; box-shadow: 0 2px 6px rgba(0,0,0,.04); }
@@ -18,11 +18,11 @@
 .dropdown-item { display: flex; flex-direction: column; width: 100%; text-align: left; padding: .6rem .75rem; border: none; background: transparent; cursor: pointer; border-bottom: 1px solid #f3f4f6; }
 .dropdown-item:hover { background: #f3f4f6; }
 .dropdown-item .code { font-weight: 600; font-size: .9rem; }
-.dropdown-item .meta { font-size: .8rem; color: #6b7280; }
+.dropdown-item .meta { font-size: .8rem; color: #69707d; }
 
 .expediente-seleccionado { display: flex; justify-content: space-between; align-items: center; padding: .75rem; background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; margin-bottom: 1rem; }
 .exp-info { display: flex; flex-direction: column; gap: .15rem; }
-.exp-info .muted { font-size: .8rem; color: #6b7280; }
+.exp-info .muted { font-size: .8rem; color: #69707d; }
 
 .resultado-texto { width: 100%; font-family: 'Consolas', monospace; font-size: .9rem; line-height: 1.45; }
 
@@ -39,9 +39,9 @@
 .badge { padding: .2rem .6rem; border-radius: 999px; font-size: .75rem; font-weight: 700; background: #e5e7eb; color: #374151; }
 .badge.ia { background: #dbeafe; color: #1d4ed8; }
 
-.hint { font-size: .8rem; color: #6b7280; margin-top: .75rem; }
-.error { color: #dc2626; font-size: .85rem; margin-top: .5rem; }
-.muted { color: #6b7280; font-size: .8rem; }
+.hint { font-size: .8rem; color: #69707d; margin-top: .75rem; }
+.error { color: #da2323; font-size: .85rem; margin-top: .5rem; }
+.muted { color: #69707d; font-size: .8rem; }
 
 /* Dark mode */
 .escritos-page.oscuro .card { background: #1f2937; border-color: #374151; color: #f9fafb; }

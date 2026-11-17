@@ -101,7 +101,7 @@ select {
     0
     0;
 
-  color: #88909f;
+  color: #666f7f;
 
   font-size: 13.5px;
 }
@@ -389,7 +389,7 @@ select {
 
   justify-content: space-between;
 
-  color: #777f8c;
+  color: #69707c;
 
   font-size: 10.5px;
 
@@ -511,7 +511,7 @@ select {
 
   margin-top: 3px;
 
-  color: #9299a6;
+  color: #68707f;
 
   font-size: 11px;
 }
@@ -663,11 +663,11 @@ select {
 }
 
 .days-left.warning {
-  color: #a66d18;
+  color: #996416;
 }
 
 .days-left.normal {
-  color: #35804a;
+  color: #347c48;
 }
 
 
@@ -707,7 +707,7 @@ select {
 }
 
 .court-info span {
-  color: #868d99;
+  color: #676e7b;
 
   font-size: 10.5px;
 }
@@ -889,7 +889,7 @@ select {
 
   justify-content: space-between;
 
-  color: #8d95a2;
+  color: #666f7d;
 
   font-size: 10px;
 }
@@ -941,7 +941,7 @@ select {
 
   justify-content: space-between;
 
-  color: #737b88;
+  color: #676f7a;
 
   font-size: 10px;
 }
@@ -989,7 +989,7 @@ select {
 
   margin-bottom: 8px;
 
-  color: #3d844f;
+  color: #3a7d4b;
 
   font-size: 12.5px;
 
@@ -997,7 +997,7 @@ select {
 }
 
 .kpi-card small {
-  color: #939aa6;
+  color: #69717f;
 
   font-size: 10.5px;
 }
@@ -1095,7 +1095,7 @@ select {
 }
 
 .detail-title span {
-  color: #858c98;
+  color: #69707c;
 
   font-size: 11px;
 }
@@ -1149,7 +1149,7 @@ select {
 }
 
 .detail-info-row small {
-  color: #8b929f;
+  color: #69717f;
 
   font-size: 10.5px;
 }
@@ -1238,7 +1238,7 @@ select {
 }
 
 .participant span {
-  color: #9198a4;
+  color: #676f7c;
 
   font-size: 10.5px;
 }
@@ -1523,7 +1523,7 @@ select {
 .empty-table {
   height: 72px;
   text-align: center !important;
-  color: #8b929f !important;
+  color: #69717f !important;
   font-size: 11.5px !important;
 }
 
@@ -1548,7 +1548,7 @@ select {
   display: flex;
   gap: 16px;
   padding: 0 16px 12px 44px;
-  color: #6f7784;
+  color: #68707c;
   font-size: 11px;
 }
 
@@ -1607,7 +1607,7 @@ select {
 }
 
 .compact-row span {
-  color: #8a919d;
+  color: #68707c;
   font-size: 10.5px;
 }
 
@@ -1628,7 +1628,7 @@ select {
 
 .detail-empty {
   padding: 7px 0;
-  color: #9aa1ab;
+  color: #68707d;
   font-size: 11px;
 }
 
@@ -1661,7 +1661,7 @@ select {
 .quiet-action {
   border: 0;
   background: #f4f5f7;
-  color: #6b7280;
+  color: #69707d;
 }
 
 .detail-placeholder {
@@ -1717,7 +1717,7 @@ select {
 .plazo-modal-header small {
   display: block;
   margin-bottom: 3px;
-  color: #6769e7;
+  color: #5a5ce5;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -1731,7 +1731,7 @@ select {
 
 .plazo-modal-header p {
   margin: 5px 0 0;
-  color: #8b929f;
+  color: #69717f;
   font-size: 11.5px;
 }
 
@@ -1814,7 +1814,7 @@ select {
 }
 
 .plazo-field small {
-  color: #989faa;
+  color: #68717e;
   font-size: 10.5px;
 }
 
@@ -1857,7 +1857,7 @@ select {
 }
 
 .calculation-result span {
-  color: #8d94a0;
+  color: #68707d;
   font-size: 10.5px;
 }
 
@@ -1894,7 +1894,7 @@ select {
 
 .professional-check span {
   margin-top: 3px;
-  color: #9d6a32;
+  color: #956530;
   font-size: 11px;
   line-height: 1.4;
 }
@@ -1993,7 +1993,7 @@ select {
 }
 
 .no-access-card p {
-  color: #7b838f;
+  color: #676f7a;
   font-size: 13px;
 }
 
@@ -2538,7 +2538,7 @@ select {
 
 .no-access-card p {
   margin: 0;
-  color: #94a3b8;
+  color: #5e728d;
   font-size: 16px;
 }
 

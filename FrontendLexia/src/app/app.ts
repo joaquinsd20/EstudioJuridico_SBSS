@@ -13,6 +13,7 @@ import {
 } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
+import { CargaGlobalService } from './core/services/carga-global.service';
 
 /**
  * Rutas que se pintan a pantalla completa, sin barra superior ni sidebar.
@@ -36,6 +37,9 @@ const RUTAS_SIN_BARRA = [
 export class App {
 
   private readonly router = inject(Router);
+
+  /** Barra fina de progreso mientras hay peticiones al backend en curso. */
+  readonly carga = inject(CargaGlobalService);
 
   /**
    * Estado del cajon lateral en pantallas estrechas (ver styles.css).

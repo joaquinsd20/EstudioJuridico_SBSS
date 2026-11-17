@@ -90,7 +90,7 @@ select {
     0
     0;
 
-  color: #88909f;
+  color: #666f7f;
 
   font-size: 13.5px;
 }
@@ -218,21 +218,21 @@ select {
 .stat-icon.blue {
   background: #e7effd;
 
-  color: #4471c5;
+  color: #406ec4;
 }
 
 
 .stat-icon.orange {
   background: #fff0dd;
 
-  color: #d68b2e;
+  color: #99621e;
 }
 
 
 .stat-icon.gray {
   background: #eeeeef;
 
-  color: #707782;
+  color: #696f7a;
 }
 
 
@@ -264,7 +264,7 @@ select {
 
 
 .stat-information small {
-  color: #9ca2ad;
+  color: #676e7c;
 
   font-size: 10.5px;
 }
@@ -330,7 +330,7 @@ select {
 
 
 .search-icon {
-  color: #69717e;
+  color: #676f7b;
 
   font-size: 17px;
 }
@@ -460,7 +460,7 @@ select {
 
   margin-top: 3px;
 
-  color: #9299a6;
+  color: #68707f;
 
   font-size: 11px;
 }
@@ -662,7 +662,7 @@ select {
 
   overflow: hidden;
 
-  color: #959ca7;
+  color: #68707d;
 
   font-size: 10.5px;
 
@@ -752,7 +752,7 @@ select {
 .category.resolution {
   background: #e9f3ec;
 
-  color: #45815a;
+  color: #417a55;
 }
 
 
@@ -766,7 +766,7 @@ select {
 .category.evidence {
   background: #fff0da;
 
-  color: #af7124;
+  color: #9a6320;
 }
 
 
@@ -806,7 +806,7 @@ select {
 .status.draft {
   background: #faecd0;
 
-  color: #99661c;
+  color: #95631b;
 }
 
 
@@ -897,7 +897,7 @@ select {
 
   overflow: hidden;
 
-  color: #969da8;
+  color: #666f7c;
 
   font-size: 10.5px;
 
@@ -1103,7 +1103,7 @@ select {
 }
 
 .loading-text {
-  color: #8b93a1;
+  color: #666f7e;
   font-size: 13px;
 }
 
@@ -1118,7 +1118,7 @@ select {
 .empty-detail {
   padding: 32px;
   text-align: center;
-  color: #89919f;
+  color: #67707f;
   font-size: 13.5px;
 }
 .action-menu-list .danger-link { color: #b42318 !important; }
@@ -1152,7 +1152,7 @@ select {
 }
 .recent-main, .recent-meta { display: flex; flex-direction: column; gap: 3.5px; }
 .recent-main strong { color: #303746; font-size: 13px; }
-.recent-main small, .recent-meta small { color: #9299a5; font-size: 11.5px; }
+.recent-main small, .recent-meta small { color: #68707e; font-size: 11.5px; }
 .recent-meta { align-items: flex-end; }
 .recent-meta strong { color: #606876; font-size: 11.5px; font-weight: 650; }
 
@@ -1183,9 +1183,9 @@ select {
 
 .detail-list { display: grid; gap: 9px; margin: 0; }
 .detail-list div { display: flex; justify-content: space-between; gap: 11.5px; }
-.detail-list dt { color: #9299a5; font-size: 11.5px; }
+.detail-list dt { color: #68707e; font-size: 11.5px; }
 .detail-list dd { margin: 0; color: #444c59; font-size: 11.5px; font-weight: 650; text-align: right; }
-.detail-description { color: #6f7784; font-size: 12.5px; line-height: 1.55; white-space: pre-line; }
+.detail-description { color: #68707c; font-size: 12.5px; line-height: 1.55; white-space: pre-line; }
 
 .modal-backdrop {
   position: fixed;
@@ -1221,7 +1221,7 @@ select {
   background: #fff;
 }
 .modal-header h2 { margin: 0; color: #192132; font-size: 18.5px; }
-.modal-header p { margin: 4px 0 0; color: #8a929f; font-size: 13px; }
+.modal-header p { margin: 4px 0 0; color: #68717f; font-size: 13px; }
 .modal-header > button,
 .header-actions > button:not(.btn-light) {
   width: 32px;
@@ -1257,7 +1257,7 @@ button:disabled { opacity: .58; cursor: not-allowed; }
 .span-2 { grid-column: 1 / -1; }
 .check-field { flex-direction: row !important; align-items: center; gap: 9px !important; }
 .check-field input { width: 16px !important; min-height: 16px !important; }
-.file-field small { color: #9aa1ac; font-size: 12.5px; }
+.file-field small { color: #67707e; font-size: 12.5px; }
 .single-form { display: grid; gap: 16px; padding: 23px; }
 
 .viewer-card { width: min(1100px, 97vw); height: 92vh; display: flex; flex-direction: column; overflow: hidden; }
@@ -1303,7 +1303,7 @@ button:disabled { opacity: .58; cursor: not-allowed; }
 }
 .version-info, .version-meta { display: flex; flex-direction: column; gap: 3.5px; }
 .version-info strong { font-size: 13px; color: #343b48; }
-.version-info span, .version-info small, .version-meta span { font-size: 11.5px; color: #8c94a0; }
+.version-info span, .version-info small, .version-meta span { font-size: 11.5px; color: #67707d; }
 .version-meta { align-items: flex-end; }
 .version-meta strong { font-size: 11.5px; color: #5b21b6; }
 
@@ -1318,10 +1318,10 @@ button:disabled { opacity: .58; cursor: not-allowed; }
 }
 .trash-info { display: flex; flex-direction: column; gap: 3.5px; }
 .trash-info strong { font-size: 13px; color: #343b48; }
-.trash-info span, .trash-info small { font-size: 11.5px; color: #8a929f; }
+.trash-info span, .trash-info small { font-size: 11.5px; color: #68717f; }
 .trash-days { display: flex; flex-direction: column; align-items: center; }
 .trash-days strong { font-size: 18.5px; color: #b45309; }
-.trash-days span { font-size: 11px; color: #9a6b3e; }
+.trash-days span { font-size: 11px; color: #93663b; }
 .trash-actions { display: flex; gap: 7px; }
 .btn-danger {
   min-height: 34px;
@@ -1879,7 +1879,7 @@ button:disabled {
 .detail-panel .detail-title span {
   display: block;
   width: 100%;
-  color: #7f8794;
+  color: #68707d;
   font-size: 13.5px;
   line-height: 1.4;
   text-align: center;
@@ -1956,7 +1956,7 @@ button:disabled {
 }
 
 .detail-panel .detail-list dt {
-  color: #858c98;
+  color: #69707c;
   font-size: 12.5px;
   line-height: 1.4;
   text-align: left;
@@ -2019,7 +2019,7 @@ button:disabled {
   align-items: center;
   justify-content: center;
   padding: 32px;
-  color: #89919f;
+  color: #67707f;
   font-size: 13px;
   line-height: 1.6;
   text-align: center;
@@ -2062,7 +2062,7 @@ button:disabled {
 
 .viewer-loading small {
   font-size: 13px;
-  color: #8b93a1;
+  color: #666f7e;
 }
 
 .viewer-spinner {
@@ -2246,7 +2246,7 @@ button:disabled {
 .restore-version-question {
   margin: 0 auto;
   max-width: 390px;
-  color: #697386;
+  color: #677183;
   font-size: 13.5px;
   line-height: 1.6;
 }
@@ -2293,7 +2293,7 @@ button:disabled {
 }
 
 .restore-version-file span {
-  color: #8a93a3;
+  color: #656f81;
   font-size: 12px;
 }
 
@@ -2704,7 +2704,7 @@ button:disabled {
 .document-confirm-content > p {
   margin: 0 auto;
   max-width: 410px;
-  color: #697386;
+  color: #677183;
   font-size: 13.5px;
   line-height: 1.6;
 }
@@ -2757,7 +2757,7 @@ button:disabled {
 
 .document-confirm-file span {
   overflow: hidden;
-  color: #8a93a3;
+  color: #656f81;
   font-size: 12px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -3837,7 +3837,7 @@ button:disabled {
 
 .no-access-card p {
   margin: 0;
-  color: #94a3b8;
+  color: #5e728d;
   font-size: 16px;
 }
 

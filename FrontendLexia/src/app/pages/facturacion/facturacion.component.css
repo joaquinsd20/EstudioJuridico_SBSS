@@ -64,7 +64,7 @@
 
   margin-bottom: 6px;
 
-  color: #6366f1;
+  color: #5a5df0;
 
   font-size: 13px;
 
@@ -97,7 +97,7 @@
     0
     0;
 
-  color: #88909f;
+  color: #666f7f;
 
   font-size: 13.5px;
 
@@ -181,7 +181,7 @@
 
   margin-bottom: 6px;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11.5px;
 
@@ -199,7 +199,7 @@
 }
 
 .kpi-card small {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 11px;
 }
@@ -217,7 +217,7 @@
 }
 
 .text-warning {
-  color: #c87914;
+  color: #9e6010;
 }
 
 
@@ -280,7 +280,7 @@
     0
     0;
 
-  color: #8b929f;
+  color: #69717f;
 
   font-size: 11.5px;
 }
@@ -389,7 +389,7 @@
 
   background: #f8f9fb;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11px;
 
@@ -482,7 +482,7 @@
 
   margin-top: 3px;
 
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 10.5px;
 }
@@ -580,7 +580,7 @@
 .badge-pending {
   background: #fef3c7;
 
-  color: #a16207;
+  color: #9c5f07;
 }
 
 .badge-danger {
@@ -732,7 +732,7 @@
 .panel-kicker {
   display: block;
   margin-bottom: 4px;
-  color: #6366f1;
+  color: #5a5df0;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -810,7 +810,7 @@
   justify-content: center;
   font-size: 1.1rem;
   cursor: pointer;
-  color: #64748b;
+  color: #606f85;
   transition: all 0.2s ease;
 }
 
@@ -995,7 +995,7 @@ textarea.custom-input {
 /* PAGO PARCIAL - AMARILLO */
 .status-partial {
   background: #fef3c7;
-  color: #a16207;
+  color: #9c5f07;
 }
 
 /* PENDIENTE - ROJO */
@@ -1063,7 +1063,7 @@ textarea.custom-input {
 
   min-height: 150px;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 0.82rem;
   font-weight: 600;
@@ -1143,7 +1143,7 @@ textarea.custom-input {
 
   margin-bottom: 5px;
 
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 0.65rem;
   font-weight: 700;
@@ -1198,7 +1198,7 @@ textarea.custom-input {
 
   margin-bottom: 6px;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 0.66rem;
   font-weight: 700;
@@ -1309,7 +1309,7 @@ textarea.custom-input {
 
   background: #f8fafc;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 0.66rem;
   font-weight: 800;
@@ -1366,7 +1366,7 @@ textarea.custom-input {
 
   background: #f8fafc;
 
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 0.76rem;
   font-weight: 600;
@@ -1926,7 +1926,7 @@ textarea.custom-input {
 
 .no-access-card p {
   margin: 0;
-  color: #94a3b8;
+  color: #5e728d;
   font-size: 16px;
 }
 
@@ -1953,7 +1953,7 @@ textarea.custom-input {
   display: flex;
   align-items: center;
   gap: 9px;
-  color: #64748b;
+  color: #606f85;
   font-size: 15px;
 }
 
@@ -2062,7 +2062,7 @@ textarea.custom-input {
   border: none;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: #64748b;
+  color: #606f85;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -2082,7 +2082,7 @@ textarea.custom-input {
 .tab-item.active,
 .tab-link.active,
 .tab-link.selected {
-  color: #6366f1;
+  color: #5a5df0;
   border-bottom-color: #6366f1;
   font-weight: 700;
 }

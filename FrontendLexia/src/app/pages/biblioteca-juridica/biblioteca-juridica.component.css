@@ -57,7 +57,7 @@
 
   margin-bottom: 6px;
 
-  color: #6366f1;
+  color: #5a5df0;
 
   font-size: 13px;
 
@@ -90,7 +90,7 @@
     0
     0;
 
-  color: #88909f;
+  color: #666f7f;
 
   font-size: 13.5px;
 
@@ -191,7 +191,7 @@
 .stat-label {
   display: block;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11.5px;
 
@@ -212,7 +212,7 @@
 }
 
 .stat-card small {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 11px;
 }
@@ -282,7 +282,7 @@
     0
     0;
 
-  color: #8b929f;
+  color: #69717f;
 
   font-size: 11.5px;
 }
@@ -332,7 +332,7 @@
 }
 
 .search-box span {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 17px;
 }
@@ -418,7 +418,7 @@
 
   background: #ffffff;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11px;
 
@@ -451,7 +451,7 @@
     18px
     13px;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11px;
 }
@@ -495,7 +495,7 @@ th {
 
   background: #f8f9fb;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11px;
 
@@ -554,7 +554,7 @@ tbody tr:hover {
 
   margin-top: 3px;
 
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 10.5px;
 }
@@ -589,7 +589,7 @@ tbody tr:hover {
 .resource-icon.legislacion,
 .card-icon.legislacion {
   background: #e8f7f4;
-  color: #0d9488;
+  color: #0b7d72;
 }
 
 .resource-icon.doctrina,
@@ -613,7 +613,7 @@ tbody tr:hover {
 .resource-icon.libro,
 .card-icon.libro {
   background: #fff4dc;
-  color: #b46d0c;
+  color: #a1610b;
 }
 
 .role-pill {
@@ -647,12 +647,12 @@ tbody tr:hover {
 
 .legislacion-pill {
   background: #e8f7f4;
-  color: #0d7f75;
+  color: #0d7a71;
 }
 
 .doctrina-pill {
   background: #fff3df;
-  color: #9f6417;
+  color: #9b6116;
 }
 
 .contrato-pill {
@@ -667,7 +667,7 @@ tbody tr:hover {
 
 .libro-pill {
   background: #fff4dc;
-  color: #a56412;
+  color: #a06111;
 }
 
 .exp-link,
@@ -846,7 +846,7 @@ tbody tr:hover {
 }
 
 .card-autor {
-  color: #9299a6;
+  color: #68707f;
 
   font-size: 11px;
 }
@@ -982,7 +982,7 @@ tbody tr:hover {
 .panel-kicker {
   display: block;
   margin-bottom: 4px;
-  color: #6366f1;
+  color: #5a5df0;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .08em;
@@ -1057,7 +1057,7 @@ tbody tr:hover {
 
   margin-bottom: 5px;
 
-  color: #6366f1;
+  color: #5a5df0;
 
   font-size: 12.5px;
   font-weight: 800;
@@ -1079,7 +1079,7 @@ tbody tr:hover {
 .modal-header p {
   margin: 6px 0 0;
 
-  color: #8b929f;
+  color: #69717f;
 
   font-size: 12.5px;
 
@@ -1103,7 +1103,7 @@ tbody tr:hover {
 
   background: #f1f5f9;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 20px;
 
@@ -1146,7 +1146,7 @@ tbody tr:hover {
 }
 
 .form-group label span {
-  color: #ef4444;
+  color: #de1313;
 }
 
 .form-group input,
@@ -1296,7 +1296,7 @@ tbody tr:hover {
 }
 
 .upload-info span {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 11px;
 }
@@ -1382,7 +1382,7 @@ tbody tr:hover {
 }
 
 .file-details span {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 11px;
 }
@@ -1399,7 +1399,7 @@ tbody tr:hover {
 
   background: #fee2e2;
 
-  color: #dc2626;
+  color: #da2323;
 
   font-size: 18px;
 
@@ -1434,7 +1434,7 @@ tbody tr:hover {
 }
 
 .upload-hint span {
-  color: #6366f1;
+  color: #5a5df0;
 
   font-size: 15px;
 }
@@ -1442,7 +1442,7 @@ tbody tr:hover {
 .upload-hint p {
   margin: 0;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11px;
 }
@@ -1476,7 +1476,7 @@ tbody tr:hover {
 
   background: #ffffff;
 
-  color: #64748b;
+  color: #606f85;
 
   font-size: 11.5px;
 
@@ -1549,7 +1549,7 @@ tbody tr:hover {
 }
 
 .detail-item span {
-  color: #94a3b8;
+  color: #5e728d;
 
   font-size: 11.5px;
 
@@ -2028,7 +2028,7 @@ tbody tr:hover {
 .biblioteca-estado {
   padding: 16px 18px;
   border-top: 1px solid #eef1f5;
-  color: #64748b;
+  color: #606f85;
   font-size: 13px;
   text-align: center;
 }
@@ -2157,7 +2157,7 @@ tbody tr:hover {
 }
 
 .system-notice-copy span {
-  color: #64748b;
+  color: #606f85;
   font-size: 11.5px;
   line-height: 1.5;
 }
@@ -2169,7 +2169,7 @@ tbody tr:hover {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #94a3b8;
+  color: #5e728d;
   font-size: 18px;
   cursor: pointer;
 }
@@ -2206,7 +2206,7 @@ tbody tr:hover {
 
 .notice-advertencia .system-notice-icon {
   background: #fef3c7;
-  color: #a16207;
+  color: #9c5f07;
 }
 
 .notice-info {
@@ -2267,7 +2267,7 @@ tbody tr:hover {
 
 .confirm-content p {
   margin: 0;
-  color: #64748b;
+  color: #606f85;
   font-size: 12.5px;
   line-height: 1.6;
 }
@@ -2282,7 +2282,7 @@ tbody tr:hover {
   border: 1px solid #e2e8f0;
   border-radius: 10.5px;
   background: #f8fafc;
-  color: #64748b;
+  color: #606f85;
   font-size: 11.5px;
   line-height: 1.5;
 }
@@ -2553,7 +2553,7 @@ tbody tr:hover {
 
 .viewer-title p {
   margin: 5px 0 0;
-  color: #64748b;
+  color: #606f85;
   font-size: 12px;
 }
 
@@ -2599,7 +2599,7 @@ tbody tr:hover {
 
 .viewer-loading small {
   font-size: 10px;
-  color: #8b93a1;
+  color: #666f7e;
 }
 
 .viewer-spinner {
