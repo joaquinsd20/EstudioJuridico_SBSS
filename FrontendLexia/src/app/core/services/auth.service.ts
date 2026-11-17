@@ -39,6 +39,22 @@ export class AuthService {
   /** True mientras la contrasena sea temporal: el backend bloquea todo lo demas. */
   readonly debeCambiarPassword = computed(() => this._usuario()?.debeCambiarPassword ?? false);
 
+  /** "¿Olvidaste tu contraseña?": la respuesta es la misma exista o no la cuenta. */
+  solicitarRecuperacion(email: string): Observable<{ mensaje: string }> {
+    return this.http.post<{ mensaje: string }>(`${environment.apiUrl}/auth/recuperar-password`, { email });
+  }
+
+  /** Comprueba si el enlace del correo sigue vigente. */
+  validarEnlaceRecuperacion(token: string): Observable<{ valido: boolean }> {
+    return this.http.get<{ valido: boolean }>(`${environment.apiUrl}/auth/restablecer-password/validar`,
+      { params: { token } });
+  }
+
+  /** Elige la contraseña nueva con el enlace del correo. Cierra las demás sesiones. */
+  restablecerPassword(token: string, passwordNueva: string): Observable<void> {
+    return this.http.post<void>(`${environment.apiUrl}/auth/restablecer-password`, { token, passwordNueva });
+  }
+
   login(credenciales: LoginRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${environment.apiUrl}/auth/login`, credenciales)

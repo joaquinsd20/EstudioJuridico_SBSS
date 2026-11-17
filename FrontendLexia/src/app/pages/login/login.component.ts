@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+import { FondoLexiaComponent } from '../../core/components/fondo-lexia.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ErrorRespuesta } from '../../core/models/auth.models';
 import { environment } from '../../../environments/environment';
@@ -15,7 +16,7 @@ const CLAVE_CORREO = 'lexia.correoRecordado';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterLink, FondoLexiaComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })

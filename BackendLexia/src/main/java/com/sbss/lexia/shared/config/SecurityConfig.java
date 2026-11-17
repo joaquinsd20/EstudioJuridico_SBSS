@@ -84,6 +84,10 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/login").permitAll()
+                        // Recuperar contrasena: por definicion, quien la usa no tiene sesion.
+                        .requestMatchers("/api/v1/auth/recuperar-password",
+                                "/api/v1/auth/restablecer-password",
+                                "/api/v1/auth/restablecer-password/validar").permitAll()
                         // Spring Boot reenvia internamente a /error para renderizar
                         // cualquier excepcion no manejada (415, 500, etc.). Sin esto,
                         // ese reenvio vuelve a pasar por seguridad, se rechaza por no

@@ -64,6 +64,16 @@ lexia:
       bucket: ${LEXIA_S3_BUCKET:}
       access-key: ${LEXIA_S3_ACCESS_KEY:}
       secret-key: ${LEXIA_S3_SECRET_KEY:}
+  # Direccion publica del frontend, para armar enlaces en correos. Vacia = el
+  # primer origen de lexia.cors.origenes (en produccion, el de Vercel).
+  frontend-url: ${LEXIA_FRONTEND_URL:}
+  correo:
+    # Correos del sistema (recuperar contrasena) por la API HTTP de Brevo: el
+    # plan gratis de Render bloquea SMTP. Sin clave, la solicitud de nueva
+    # contrasena se avisa al administrador dentro de LEXIA.
+    brevo-api-key: ${LEXIA_BREVO_API_KEY:}
+    remitente: ${LEXIA_CORREO_REMITENTE:}
+    nombre-remitente: ${LEXIA_CORREO_NOMBRE:LEXIA - Estudio Juridico SBSS}
   consulta-documentos:
     # Autocompletar clientes por DNI (RENIEC) o RUC (SUNAT) via Decolecta
     # (100 consultas gratis al mes). Sin token, el boton "Buscar" avisa que no

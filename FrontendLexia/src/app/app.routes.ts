@@ -28,6 +28,29 @@ export const routes: Routes = [
 
 
   /* =======================================================
+     ¿OLVIDASTE TU CONTRASEÑA?
+     Publicas: quien las usa no tiene sesion. La misma pantalla
+     pide el correo o, con el enlace del correo, la clave nueva.
+  ======================================================= */
+
+  {
+    path: 'recuperar-password',
+    data: { modo: 'solicitar' },
+    loadComponent: () =>
+      import('./pages/recuperar-password/recuperar-password.component')
+        .then(m => m.RecuperarPasswordComponent)
+  },
+
+  {
+    path: 'restablecer-password',
+    data: { modo: 'restablecer' },
+    loadComponent: () =>
+      import('./pages/recuperar-password/recuperar-password.component')
+        .then(m => m.RecuperarPasswordComponent)
+  },
+
+
+  /* =======================================================
      CAMBIAR CONTRASEÑA
      Obligatoria mientras la contrasena sea temporal; voluntaria
      desde el panel lateral. authGuard deja pasar solo aqui.

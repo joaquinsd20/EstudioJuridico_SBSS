@@ -20,6 +20,8 @@ import { CargaGlobalService } from './core/services/carga-global.service';
  */
 const RUTAS_SIN_BARRA = [
   '/login',
+  '/recuperar-password',
+  '/restablecer-password',
   '/cambiar-password'
 ];
 

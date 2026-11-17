@@ -1,5 +1,13 @@
 package com.sbss.lexia.seguridad.controller;
 
+import com.sbss.lexia.seguridad.service.RecuperacionPasswordService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import java.util.Map;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestParam;
 import com.sbss.lexia.seguridad.dto.ActualizarPerfilRequest;
 import com.sbss.lexia.seguridad.dto.CambiarPasswordRequest;
 import com.sbss.lexia.seguridad.dto.LoginRequest;
@@ -24,6 +32,45 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final RecuperacionPasswordService recuperacion;
+
+    public record SolicitarRecuperacionRequest(@NotBlank @Email @Size(max = 150) String email) {
+    }
+
+    public record RestablecerPasswordRequest(@NotBlank @Size(max = 200) String token,
+                                             @NotBlank @Size(max = 200) String passwordNueva) {
+    }
+
+    /**
+     * "¿Olvidaste tu contrasena?". Responde SIEMPRE lo mismo, exista o no la
+     * cuenta: asi no sirve para averiguar que correos estan registrados.
+     */
+    @PostMapping("/recuperar-password")
+    public ResponseEntity<Map<String, String>> solicitarRecuperacion(
+            @Valid @RequestBody SolicitarRecuperacionRequest peticion, HttpServletRequest request) {
+        try {
+            recuperacion.solicitar(peticion.email(), request.getRemoteAddr());
+        } catch (RuntimeException e) {
+            // Misma respuesta pase lo que pase: un 500 solo para cuentas que
+            // existen permitiria averiguar que correos estan registrados.
+            LoggerFactory.getLogger(AuthController.class)
+                    .warn("Fallo la solicitud de recuperacion de contrasena: {}", e.toString());
+        }
+        return ResponseEntity.ok(Map.of("mensaje",
+                "Si el correo esta registrado, recibiras las instrucciones para restablecer tu contrasena."));
+    }
+
+    /** Para avisar en pantalla si el enlace ya vencio, antes de escribir nada. */
+    @GetMapping("/restablecer-password/validar")
+    public ResponseEntity<Map<String, Boolean>> validarEnlace(@RequestParam String token) {
+        return ResponseEntity.ok(Map.of("valido", recuperacion.tokenValido(token)));
+    }
+
+    @PostMapping("/restablecer-password")
+    public ResponseEntity<Void> restablecer(@Valid @RequestBody RestablecerPasswordRequest peticion) {
+        recuperacion.restablecer(peticion.token(), peticion.passwordNueva());
+        return ResponseEntity.noContent().build();
+    }
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest peticion) {
