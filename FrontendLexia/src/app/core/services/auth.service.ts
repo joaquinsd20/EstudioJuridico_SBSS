@@ -1,3 +1,4 @@
+import { limpiarCacheHttp } from '../interceptors/cache.interceptor';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, catchError, map, of, switchMap, tap } from 'rxjs';
@@ -108,6 +109,7 @@ export class AuthService {
     localStorage.removeItem(this.CLAVE_USUARIO);
     this._usuario.set(null);
     this.preferencias.restablecer();
+    limpiarCacheHttp();
   }
 
   get token(): string | null {
@@ -142,6 +144,7 @@ export class AuthService {
   private guardarSesion(respuesta: LoginResponse): void {
     // No reutilizar tema/menú de la cuenta anterior en una sesión diferente.
     this.preferencias.restablecer();
+    limpiarCacheHttp();
     localStorage.setItem(this.CLAVE_TOKEN, respuesta.token);
     localStorage.setItem(this.CLAVE_USUARIO, JSON.stringify(respuesta.usuario));
     this._usuario.set(respuesta.usuario);

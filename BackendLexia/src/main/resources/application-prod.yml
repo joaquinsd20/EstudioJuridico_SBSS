@@ -24,6 +24,37 @@ spring:
     url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
+    hikari:
+      # La base (Aiven) cobra un saludo TLS por cada conexion nueva. Dejar unas
+      # pocas abiertas y "vivas" evita pagarlo en cada clic tras un rato quieto.
+      minimum-idle: 3
+      maximum-pool-size: 8
+      keepalive-time: 240000      # 4 min: un ping liviano mantiene la conexion
+      max-lifetime: 1500000       # 25 min: se renueva antes de que la corte el servidor
+      connection-timeout: 20000
+      data-source-properties:
+        # Menos idas y vueltas a MySQL por consulta (recomendado por HikariCP).
+        cachePrepStmts: true
+        prepStmtCacheSize: 250
+        prepStmtCacheSqlLimit: 2048
+        useServerPrepStmts: true
+        useLocalSessionState: true
+        rewriteBatchedStatements: true
+        cacheResultSetMetadata: true
+        cacheServerConfiguration: true
+        elideSetAutoCommits: true
+        maintainTimeStats: false
+
+  jpa:
+    properties:
+      hibernate:
+        # Al recorrer una lista y tocar sus relaciones, Hibernate las trae de a
+        # 50 en una sola consulta en vez de una consulta por fila (N+1).
+        default_batch_fetch_size: 50
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
 
   flyway:
     # SOLO el esquema. 'db/seed' no aparece en esta lista, asi que la semilla de
@@ -35,6 +66,14 @@ spring:
     # Si algun dia hay que adoptar una base preexistente, se hace con un
     # baseline explicito y documentado, nunca activando esto por descarte.
     baseline-on-migrate: false
+
+server:
+  # Las respuestas JSON (listados, dashboard) viajan comprimidas: en una
+  # conexion de celular pesan 5-10 veces menos.
+  compression:
+    enabled: true
+    mime-types: application/json,text/plain,text/csv
+    min-response-size: 1024
 
 lexia:
   jwt:

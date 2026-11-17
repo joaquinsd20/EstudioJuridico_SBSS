@@ -5,19 +5,22 @@ import {
   provideAppInitializer,
   provideBrowserGlobalErrorListeners
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { PreloadAllModules, provideRouter, withPreloading } from '@angular/router';
 
 import { authInterceptor } from './core/interceptors/auth.interceptor';
+import { cacheInterceptor } from './core/interceptors/cache.interceptor';
 import { AuthService } from './core/services/auth.service';
 import { routes } from './app.routes';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideRouter(routes),
+    // Descarga en segundo plano el código de los demás módulos tras el primer
+    // pintado: al cambiar de pantalla ya no hay que esperar esa descarga.
+    provideRouter(routes, withPreloading(PreloadAllModules)),
     // El interceptor adjunta el token a cada peticion y devuelve al login
     // cuando el backend responde 401.
-    provideHttpClient(withInterceptors([authInterceptor])),
+    provideHttpClient(withInterceptors([cacheInterceptor, authInterceptor])),
     // Antes de mostrar nada, valida contra el backend que el token guardado
     // siga sirviendo. Evita entrar a la aplicacion con una sesion expirada.
     provideAppInitializer(() => inject(AuthService).restaurarSesion())
