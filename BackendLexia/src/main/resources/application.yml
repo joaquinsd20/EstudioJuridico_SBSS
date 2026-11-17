@@ -54,6 +54,16 @@ lexia:
     admin-nombres: ${LEXIA_ADMIN_NOMBRES:Administrador}
     admin-apellidos: ${LEXIA_ADMIN_APELLIDOS:del sistema}
     estudio-ruc: ${LEXIA_ESTUDIO_RUC:}
+  almacenamiento:
+    # Copia permanente de Documentos y Biblioteca en un servicio compatible con
+    # S3 (produccion: Supabase Storage). Sin estas variables solo se usa el disco
+    # local, como en desarrollo. Ver shared/almacenamiento/AlmacenamientoRemoto.
+    s3:
+      endpoint: ${LEXIA_S3_ENDPOINT:}
+      region: ${LEXIA_S3_REGION:us-east-1}
+      bucket: ${LEXIA_S3_BUCKET:}
+      access-key: ${LEXIA_S3_ACCESS_KEY:}
+      secret-key: ${LEXIA_S3_SECRET_KEY:}
   jwt:
     # 8 horas: cubre una jornada de trabajo sin obligar a reautenticarse a media
     # audiencia. El secreto se define por perfil.

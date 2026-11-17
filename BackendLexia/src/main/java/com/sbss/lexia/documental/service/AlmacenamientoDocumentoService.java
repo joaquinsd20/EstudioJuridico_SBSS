@@ -1,5 +1,6 @@
 package com.sbss.lexia.documental.service;
 
+import com.sbss.lexia.shared.almacenamiento.AlmacenamientoRemoto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -23,10 +24,16 @@ public class AlmacenamientoDocumentoService {
 
     private static final Set<String> EXTENSIONES_PERMITIDAS = Set.of("pdf", "mp3", "wav", "mp4");
 
+    /** Prefijo de las claves de este modulo en el almacenamiento remoto. */
+    private static final String PREFIJO_REMOTO = "documentos/";
+
     private final Path raiz;
+    private final AlmacenamientoRemoto remoto;
 
     public AlmacenamientoDocumentoService(
-            @Value("${lexia.documentos.storage-dir:storage/documentos}") String directorio) {
+            @Value("${lexia.documentos.storage-dir:storage/documentos}") String directorio,
+            AlmacenamientoRemoto remoto) {
+        this.remoto = remoto;
         try {
             this.raiz = Path.of(directorio).toAbsolutePath().normalize();
             Files.createDirectories(this.raiz);
@@ -119,6 +126,14 @@ public class AlmacenamientoDocumentoService {
         }
 
         String relativa = raiz.relativize(destino).toString().replace('\\', '/');
+        try {
+            remoto.subir(PREFIJO_REMOTO + relativa, destino, mime);
+        } catch (RuntimeException e) {
+            // Sin copia permanente el archivo se perderia en el proximo
+            // reinicio: mejor fallar ahora que aparentar que se guardo.
+            Files.deleteIfExists(destino);
+            throw e;
+        }
         return new ArchivoGuardado(
                 nombreOriginal,
                 relativa,
@@ -133,8 +148,13 @@ public class AlmacenamientoDocumentoService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "El documento no tiene archivo asociado");
         }
         Path ruta = raiz.resolve(rutaRelativa).normalize();
-        validarDentroDeRaiz(ruta);
-        if (!Files.isRegularFile(ruta)) {
+        // Una ruta fuera de la carpeta (p.ej. las '/almacen/...' de la semilla
+        // de desarrollo, que nunca tuvieron archivo) no tiene nada que leer.
+        if (!ruta.startsWith(raiz)) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Este documento no tiene un archivo cargado");
+        }
+        if (!remoto.traerSiFalta(PREFIJO_REMOTO + rutaRelativa, ruta)) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "El archivo fisico no existe en el servidor");
         }
@@ -152,6 +172,7 @@ public class AlmacenamientoDocumentoService {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                     "No se pudo eliminar el archivo fisico", e);
         }
+        remoto.eliminar(PREFIJO_REMOTO + rutaRelativa);
     }
 
     private void limpiarCarpetasVacias(Path carpeta) throws IOException {

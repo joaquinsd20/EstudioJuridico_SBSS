@@ -1,5 +1,6 @@
 package com.sbss.lexia.biblioteca.service;
 
+import com.sbss.lexia.shared.almacenamiento.AlmacenamientoRemoto;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -70,7 +71,11 @@ public class AlmacenamientoBibliotecaService {
     private static final long MAX_ENTRADA_OOXML = 100L * 1024L * 1024L;
     private static final long MAX_RATIO_COMPRESION = 200L;
 
+    /** Prefijo de las claves de este modulo en el almacenamiento remoto. */
+    private static final String PREFIJO_REMOTO = "biblioteca/";
+
     private final AlmacenamientoDocumentoService documentos;
+    private final AlmacenamientoRemoto remoto;
     private final Path raiz;
     private final long maxBytes;
 
@@ -78,7 +83,9 @@ public class AlmacenamientoBibliotecaService {
             @Value("${lexia.biblioteca.storage-dir:storage/biblioteca}") String directorio,
             @Value("${lexia.documentos.storage-dir:storage/documentos}") String directorioDocumentos,
             @Value("${lexia.biblioteca.max-file-size-bytes:52428800}") long maxBytes,
-            AlmacenamientoDocumentoService documentos) {
+            AlmacenamientoDocumentoService documentos,
+            AlmacenamientoRemoto remoto) {
+        this.remoto = remoto;
 
         try {
             this.raiz = Path.of(directorio).toAbsolutePath().normalize();
@@ -175,6 +182,14 @@ public class AlmacenamientoBibliotecaService {
                     .toString()
                     .replace('\\', '/');
 
+            try {
+                remoto.subir(PREFIJO_REMOTO + relativa, destino, MIME_POR_EXTENSION.get(extension));
+            } catch (RuntimeException e) {
+                // Sin copia permanente se perderia en el proximo reinicio.
+                Files.deleteIfExists(destino);
+                throw e;
+            }
+
             return new ArchivoGuardado(
                     nombreOriginal,
                     PREFIJO + relativa,
@@ -257,7 +272,7 @@ public class AlmacenamientoBibliotecaService {
             Path archivo = raiz.resolve(relativa).normalize();
             validarDentroDeRaiz(archivo);
 
-            if (!Files.isRegularFile(archivo)) {
+            if (!remoto.traerSiFalta(PREFIJO_REMOTO + relativa, archivo)) {
                 throw new ResponseStatusException(
                         HttpStatus.NOT_FOUND,
                         "El archivo físico no existe en el servidor");
@@ -310,6 +325,7 @@ public class AlmacenamientoBibliotecaService {
                         "No se pudo eliminar el archivo físico",
                         e);
             }
+            remoto.eliminar(PREFIJO_REMOTO + ruta.substring(PREFIJO.length()));
 
             return;
         }
