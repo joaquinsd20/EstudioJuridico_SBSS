@@ -15,6 +15,11 @@ export interface GenerarEscritoRequest {
   instrucciones?: string;
 }
 
+export interface ExportarEscritoRequest {
+  titulo: string;
+  contenido: string;
+}
+
 export interface EscritoGenerado {
   titulo: string;
   contenido: string;
@@ -32,7 +37,15 @@ export class EscritosIaService {
     return this.http.get<TipoEscrito[]>(`${this.baseUrl}/tipos`).pipe(catchError(() => of([])));
   }
 
-  generar(req: GenerarEscritoRequest): Observable<EscritoGenerado | null> {
-    return this.http.post<EscritoGenerado>(`${this.baseUrl}/generar`, req).pipe(catchError(() => of(null)));
+  generar(req: GenerarEscritoRequest): Observable<EscritoGenerado> {
+    return this.http.post<EscritoGenerado>(`${this.baseUrl}/generar`, req);
+  }
+
+  exportarWord(req: ExportarEscritoRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/exportar/word`, req, { responseType: 'blob' });
+  }
+
+  exportarPdf(req: ExportarEscritoRequest): Observable<Blob> {
+    return this.http.post(`${this.baseUrl}/exportar/pdf`, req, { responseType: 'blob' });
   }
 }

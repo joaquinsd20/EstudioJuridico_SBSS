@@ -1,92 +1,202 @@
 <div class="layout-wrapper">
-
   <app-panel></app-panel>
 
   <main class="main-content">
-    <div class="escritos-page" [class.oscuro]="temaOscuro()">
-
-      <header class="page-header">
+    <header class="page-header escritos-header">
+      <div class="header-copy">
+        <span class="eyebrow">ASISTENTE JURÍDICO</span>
         <h1>Escritos con IA</h1>
-        <p class="subtitle">Genera borradores de escritos procesales a partir de un expediente. Revisa y ajusta antes de presentar.</p>
-      </header>
+        <p>Prepara borradores vinculados a un expediente y expórtalos directamente a Word o PDF.</p>
+      </div>
+      <div class="model-indicator" aria-label="Proveedor de inteligencia artificial">
+        <span class="model-indicator-dot"></span>
+        <span><strong>GroqCloud</strong><small>GPT-OSS 120B</small></span>
+      </div>
+    </header>
 
-      <div class="layout">
-        <!-- ─── Columna izquierda: formulario ─── -->
-        <section class="card form-card">
-          <h2>1. Expediente</h2>
+    <div class="feedback-stack" aria-live="polite">
+      @if (error()) {
+        <div class="alert alert-error" role="alert">
+          <span class="alert-icon">!</span>
+          <span>{{ error() }}</span>
+          <button type="button" aria-label="Cerrar mensaje" (click)="error.set(null)">×</button>
+        </div>
+      }
+      @if (exito()) {
+        <div class="alert alert-success" role="status">
+          <span class="alert-icon">✓</span>
+          <span>{{ exito() }}</span>
+          <button type="button" aria-label="Cerrar mensaje" (click)="exito.set(null)">×</button>
+        </div>
+      }
+    </div>
 
-          <div class="field" *ngIf="!expedienteSeleccionado()">
-            <label>Buscar expediente</label>
-            <input type="text"
-                   [(ngModel)]="textoBusquedaExp"
-                   (ngModelChange)="buscarExpedientes()"
-                   placeholder="Número, cliente o código..." />
-            <div class="dropdown" *ngIf="resultadosExp().length > 0">
-              <button type="button" class="dropdown-item" *ngFor="let e of resultadosExp()" (click)="seleccionarExpediente(e)">
-                <span class="code">{{ e.numeroExpediente || e.codigoInterno }}</span>
-                <span class="meta">{{ e.cliente }} · {{ e.responsable }}</span>
-              </button>
+    <div class="escritos-layout">
+      <aside class="generator-column">
+        <section class="card generator-card">
+          <div class="card-heading">
+            <span class="step-index">01</span>
+            <div>
+              <h2>Datos del escrito</h2>
+              <p>Selecciona el caso y define el documento que necesitas.</p>
             </div>
-            <span class="hint" *ngIf="buscandoExp()">Buscando…</span>
-            <span class="hint" *ngIf="!buscandoExp() && textoBusquedaExp().length > 0 && resultadosExp().length === 0 && textoBusquedaExp().length >= 2">Sin resultados. Prueba con otro término.</span>
-            <span class="hint" *ngIf="textoBusquedaExp().length === 0">Escribe al menos 2 caracteres y selecciona un expediente de la lista para habilitar “Generar”.</span>
           </div>
 
-          <div class="expediente-seleccionado" *ngIf="expedienteSeleccionado() as e">
-            <div class="exp-info">
-              <strong>{{ e.numeroExpediente || e.codigoInterno }}</strong>
-              <span>{{ e.cliente }}</span>
-              <span class="muted">Responsable: {{ e.responsable }}</span>
-            </div>
-            <button type="button" class="btn ghost small" (click)="limpiarExpediente()">Cambiar</button>
+          <div class="form-field">
+            <label for="buscar-expediente">Expediente</label>
+            @if (!expedienteSeleccionado()) {
+              <div class="search-field">
+                <span class="search-symbol" aria-hidden="true">⌕</span>
+                <input
+                  id="buscar-expediente"
+                  type="search"
+                  [ngModel]="textoBusquedaExp()"
+                  (ngModelChange)="cambiarBusquedaExp($event)"
+                  placeholder="Número, cliente o código..."
+                  autocomplete="off"
+                >
+                @if (buscandoExp()) { <span class="field-spinner" aria-label="Buscando"></span> }
+              </div>
+              @if (resultadosExp().length > 0) {
+                <div class="expediente-results">
+                  @for (exp of resultadosExp(); track exp.uuid) {
+                    <button type="button" class="expediente-option" (click)="seleccionarExpediente(exp)">
+                      <span class="expediente-option-main">
+                        <strong>{{ exp.numeroExpediente || exp.codigoInterno }}</strong>
+                        <small>{{ exp.cliente }}</small>
+                      </span>
+                      <span class="option-responsable">{{ exp.responsable }}</span>
+                    </button>
+                  }
+                </div>
+              } @else if (textoBusquedaExp().trim().length >= 2 && !buscandoExp()) {
+                <p class="field-hint">No se encontraron expedientes con ese criterio.</p>
+              } @else {
+                <p class="field-hint">Escribe al menos 2 caracteres para buscar.</p>
+              }
+            } @else {
+              <div class="selected-expediente">
+                <div class="selected-expediente-icon">▤</div>
+                <div class="selected-expediente-info">
+                  <strong>{{ expedienteSeleccionado()!.numeroExpediente || expedienteSeleccionado()!.codigoInterno }}</strong>
+                  <span>{{ expedienteSeleccionado()!.cliente }}</span>
+                  <small>Responsable: {{ expedienteSeleccionado()!.responsable || 'No asignado' }}</small>
+                </div>
+                <button type="button" class="icon-action" title="Cambiar expediente" aria-label="Cambiar expediente" (click)="limpiarExpediente()">×</button>
+              </div>
+            }
           </div>
 
-          <h2>2. Tipo de escrito</h2>
-          <div class="field">
-            <select [(ngModel)]="tipoSeleccionado">
-              <option *ngFor="let t of tipos()" [value]="t.codigo">{{ t.nombre }} — {{ t.descripcion }}</option>
+          <div class="form-field">
+            <label for="tipo-escrito">Tipo de escrito</label>
+            <select id="tipo-escrito" [ngModel]="tipoSeleccionado()" (ngModelChange)="tipoSeleccionado.set($event)">
+              @for (tipo of tipos(); track tipo.codigo) {
+                <option [value]="tipo.codigo">{{ tipo.nombre }} — {{ tipo.descripcion }}</option>
+              }
             </select>
           </div>
 
-          <h2>3. Instrucciones adicionales</h2>
-          <div class="field">
-            <textarea [(ngModel)]="instrucciones" rows="4" placeholder="Ej.: enfatizar la falta de notificación, pedir medida cautelar..."></textarea>
+          <div class="form-field">
+            <label for="instrucciones">Indicaciones específicas del escrito <span class="optional-label">Opcional</span></label>
+            <textarea
+              id="instrucciones"
+              [ngModel]="instrucciones()"
+              (ngModelChange)="instrucciones.set($event)"
+              rows="5"
+              maxlength="2000"
+              aria-describedby="instrucciones-ayuda"
+              placeholder="Ej.: Solicita copias simples de la sentencia y de las resoluciones de ejecución. Indica qué documento, hecho o argumento debe destacarse..."
+            ></textarea>
+            <div class="instructions-policy-hint" id="instrucciones-ayuda">
+              <span aria-hidden="true">✓</span>
+              <p>Las reglas permanentes de LEXIA —no inventar datos ni normas, proteger la confidencialidad y señalar la información faltante— se aplican automáticamente. Aquí escribe solo los detalles concretos de este escrito.</p>
+            </div>
+            <div class="field-footer"><span></span><span>{{ instrucciones().length }}/2000</span></div>
           </div>
 
-          <div class="actions">
-            <button type="button" class="btn primary" [disabled]="!puedeGenerar()" (click)="generar()">
-              {{ generando() ? 'Generando…' : 'Generar borrador' }}
-            </button>
+          <div class="generator-note">
+            <span class="note-icon">i</span>
+            <p>El resultado es un borrador. Verifica los hechos, las normas y las referencias antes de utilizarlo.</p>
           </div>
 
-          <p class="error" *ngIf="error()">{{ error() }}</p>
+          <button type="button" class="btn-generate" [disabled]="!puedeGenerar()" (click)="generar()">
+            @if (generando()) {
+              <span class="button-spinner"></span> Generando borrador...
+            } @else {
+              <span aria-hidden="true">✦</span> Generar borrador con IA
+            }
+          </button>
         </section>
 
-        <!-- ─── Columna derecha: resultado ─── -->
-        <section class="card result-card">
-          <div class="result-header">
-            <h2>Borrador generado</h2>
-            <div class="result-meta" *ngIf="resultado() as r">
-              <span class="badge" [class.ia]="r.generadoConIa">{{ r.generadoConIa ? 'IA' : 'Plantilla local' }}</span>
-              <span class="muted">{{ r.modelo }}</span>
+        <section class="workflow-card">
+          <div class="workflow-icon">↗</div>
+          <div>
+            <strong>Flujo de trabajo</strong>
+            <p>Genera, revisa, edita y descarga. La presentación judicial siempre requiere aprobación profesional.</p>
+          </div>
+        </section>
+      </aside>
+
+      <section class="card workspace-card">
+        <div class="workspace-header">
+          <div class="workspace-title">
+            <span class="eyebrow">DOCUMENTO</span>
+            <h2>Vista previa del escrito</h2>
+            <div class="document-status-row">
+              @if (resultado(); as escrito) {
+                <span class="status-pill" [class.status-ai]="escrito.generadoConIa">
+                  <span class="status-dot"></span>{{ escrito.generadoConIa ? 'Generado con IA' : 'Plantilla local' }}
+                </span>
+                <span class="model-name">{{ escrito.modelo }}</span>
+              } @else {
+                <span class="status-pill status-idle"><span class="status-dot"></span>Esperando generación</span>
+              }
             </div>
           </div>
-
-          <textarea class="resultado-texto" [(ngModel)]="contenidoEditado" rows="22"
-                    placeholder="El borrador aparecerá aquí. Puedes editarlo antes de copiar o descargar."></textarea>
-
-          <div class="actions">
-            <button type="button" class="btn secondary" [disabled]="!contenidoEditado()" (click)="copiar()">
-              {{ copiado() ? 'Copiado ✓' : 'Copiar' }}
+          <div class="export-actions">
+            <button type="button" class="btn-export btn-word" [disabled]="!puedeExportar()" (click)="descargarWord()">
+              @if (exportando() === 'word') { <span class="button-spinner"></span> } @else { <span class="file-mark word-mark">W</span> }
+              Descargar Word
             </button>
-            <button type="button" class="btn secondary" [disabled]="!contenidoEditado()" (click)="descargar()">Descargar .txt</button>
+            <button type="button" class="btn-export btn-pdf" [disabled]="!puedeExportar()" (click)="descargarPdf()">
+              @if (exportando() === 'pdf') { <span class="button-spinner"></span> } @else { <span class="file-mark pdf-mark">P</span> }
+              Descargar PDF
+            </button>
           </div>
+        </div>
 
-          <p class="hint" *ngIf="resultado() && !resultado()!.generadoConIa">
-            Sin clave de IA configurada: se generó una plantilla local. Define <code>LEXIA_IA_OPENAI_API_KEY</code> para usar un modelo.
-          </p>
-        </section>
-      </div>
+        @if (resultado()) {
+          <div class="editor-tip"><span>✎</span> Puedes corregir el contenido aquí. Los archivos se generarán con la versión editada.</div>
+          <div class="paper-viewport">
+            <article class="paper-sheet">
+              <div class="paper-label"><span>LEXIA · BORRADOR JURÍDICO</span><span>DOCUMENTO EDITABLE</span></div>
+              <textarea
+                class="document-editor"
+                aria-label="Contenido editable del escrito"
+                [ngModel]="contenidoEditado()"
+                (ngModelChange)="contenidoEditado.set($event)"
+                spellcheck="true"
+              ></textarea>
+              <div class="paper-footer">Borrador para revisión profesional · No constituye un documento presentado</div>
+            </article>
+          </div>
+        } @else {
+          <div class="empty-workspace">
+            <div class="empty-document-icon"><span></span><span></span><span></span><i>✦</i></div>
+            <h3>Tu documento aparecerá aquí</h3>
+            <p>Selecciona un expediente, define el tipo de escrito y genera un borrador para comenzar a editarlo y exportarlo.</p>
+            <div class="empty-formats"><span><b>W</b> Word</span><span><b>P</b> PDF</span></div>
+          </div>
+        }
+
+        @if (resultado(); as escrito) {
+          @if (!escrito.generadoConIa) {
+            <div class="local-template-warning" role="note">
+              La respuesta mostrada es una plantilla local, no una respuesta de Groq. Comprueba la clave, el modelo y los límites de la API antes de considerar el borrador generado por IA.
+            </div>
+          }
+        }
+      </section>
     </div>
   </main>
 </div>

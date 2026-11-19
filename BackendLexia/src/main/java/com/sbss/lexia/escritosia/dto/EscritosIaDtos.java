@@ -28,4 +28,10 @@ public final class EscritosIaDtos {
             boolean generadoConIa,
             String expedienteUuid) {
     }
+
+    /** Contenido final (posiblemente editado por el abogado) que se exportará. */
+    public record ExportarEscritoRequest(
+            @NotBlank @Size(max = 200) String titulo,
+            @NotBlank @Size(max = 100000) String contenido) {
+    }
 }
