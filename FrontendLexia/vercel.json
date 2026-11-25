@@ -5,7 +5,7 @@
   "buildCommand": "npx ng build",
   "outputDirectory": "dist/FrontedLexia/browser",
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://lexia-backend-fatm.onrender.com/api/:path*" },
+    { "source": "/api/:path*", "destination": "https://lexia-backend-1uvq.onrender.com/api/:path*" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
